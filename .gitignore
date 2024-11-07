@@ -19,6 +19,10 @@ web-build/
 # Metro
 .metro-health-check*
 
+# docker
+.dockerfile
+.dockerignore
+
 # debug
 npm-debug.*
 yarn-debug.*
