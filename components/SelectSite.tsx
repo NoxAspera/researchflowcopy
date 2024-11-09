@@ -15,7 +15,7 @@ export default function App() {
         <Text style={styles.label}>Where are you?</Text>
         <Picker
           selectedValue={selectedValue}
-          onValueChange={(itemValue) => setSelectedValue(itemValue)}
+          onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
           style={styles.picker}
         >
           <Picker.Item label="CSP" value="CSP" />

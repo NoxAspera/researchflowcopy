@@ -22,14 +22,19 @@ export default function App() {
           <Text style={styles.homeButtonText}>Bad Data</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.homeButton, {backgroundColor: 'yellow'}]}
+        style={[styles.homeButton, {backgroundColor: 'blue'}]}
         onPress={() => alert('Tank Tracker')} >
           <Text style={styles.homeButtonText}>Tank Tracker</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.homeButton, {backgroundColor: 'grey'}]}
+        style={[styles.homeButton, {backgroundColor: 'yellow'}]}
         onPress={() => alert('Instrument Maintenence')} >
           <Text style={styles.homeButtonText}>Instrument Maintenence</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.homeButton, {backgroundColor: 'grey'}]}
+        onPress={() => alert('Instrument Maintenence')} >
+          <Text style={styles.homeButtonText}>View Past Notes</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.homeButton, {backgroundColor: 'orange'}]}
