@@ -1,12 +1,13 @@
 import { StyleSheet, Text, View, Alert, Button, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
+import { useRoute } from '@react-navigation/native';
 
-export default function App() {
-  const [selectedValue, setSelectedValue] = useState("option1");
+export default function SelectSite({navigation}) {
+  const [selectedValue, setSelectedValue] = useState("CSP");
 
   const handleConfirm = () => {
-    Alert.alert(`You selected: ${selectedValue}`);
+    navigation.navigate('AddNotes', {site: selectedValue});
   };
 
   return (
@@ -30,7 +31,7 @@ export default function App() {
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleConfirm}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AddNotes', {site: selectedValue})}>
           <Text style={styles.buttonText}>Confirm</Text>
         </TouchableOpacity>
       </View>
