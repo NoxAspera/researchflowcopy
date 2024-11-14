@@ -13,7 +13,7 @@ export default function HomeScreen({ navigation }) {
       {/* Select Site  */}
       <TouchableOpacity
         style={[styles.homeButton, {backgroundColor: 'green'}]}
-        onPress={() => navigation.navigate('SelectSite')} >
+        onPress={() => navigation.navigate('SelectSite', {from: 'AddNotes'})} >
           <Text style={styles.homeButtonText}>Add Notes</Text>
       </TouchableOpacity>
 
@@ -41,7 +41,7 @@ export default function HomeScreen({ navigation }) {
       {/* View Past Notes  */}
       <TouchableOpacity
         style={[styles.homeButton, {backgroundColor: 'grey'}]}
-        onPress={() => navigation.navigate('SelectSite')} >
+        onPress={() => navigation.navigate('SelectSite', {from: 'ViewNotes'})} >
           <Text style={styles.homeButtonText}>View Past Notes</Text>
       </TouchableOpacity>
 

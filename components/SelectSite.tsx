@@ -5,15 +5,22 @@ import { useRoute } from '@react-navigation/native';
 
 export default function SelectSite({navigation}) {
   const [selectedValue, setSelectedValue] = useState("CSP");
+  const route = useRoute();
+  let from = route.params?.from;
 
   const handleConfirm = () => {
-    navigation.navigate('AddNotes', {site: selectedValue});
+    if(from === 'AddNotes'){
+        navigation.navigate('AddNotes', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
+        }
+    else if(from === 'ViewNotes'){
+        navigation.navigate('ViewNotes', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
+        }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.dropdownContainer}>
-        <Text style={styles.label}>Where are you?</Text>
+        <Text style={styles.label}>Where are you?{from}</Text>
         <Picker
           selectedValue={selectedValue}
           onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
@@ -31,7 +38,7 @@ export default function SelectSite({navigation}) {
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AddNotes', {site: selectedValue})}>
+        <TouchableOpacity style={styles.button} onPress={() => handleConfirm()}>
           <Text style={styles.buttonText}>Confirm</Text>
         </TouchableOpacity>
       </View>
