@@ -49,6 +49,12 @@ export default function ViewNotes({ navigation }) {
               <Text style={styles.normal}>Today on site I tested these things, next time will need to bring these tools</Text>
             </SafeAreaView>
           </SafeAreaProvider>
+
+          <TouchableOpacity
+            style={[styles.homeButton, {backgroundColor: 'red'}]}
+            onPress={() => alert("Submit Button Pressed")} >
+            <Text style={[styles.homeButtonText, {color: 'white'}]}>Edit!</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     );
