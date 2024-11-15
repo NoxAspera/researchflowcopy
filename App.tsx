@@ -5,6 +5,7 @@ import SelectSite from './components/SelectSite'
 import HomeScreen from './components/HomeScreen'
 import AddNotes from './components/AddNotes'
 import ViewNotes from './components/ViewNotes'
+import BadData from './components/BadData'
 
 const Stack = createStackNavigator();
 
@@ -16,6 +17,7 @@ export default function App() {
         <Stack.Screen name="SelectSite" component={SelectSite} />
         <Stack.Screen name="AddNotes" component={AddNotes} />
         <Stack.Screen name="ViewNotes" component={ViewNotes} />
+        <Stack.Screen name="BadData" component={BadData} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -15,6 +15,9 @@ export default function SelectSite({navigation}) {
     else if(from === 'ViewNotes'){
         navigation.navigate('ViewNotes', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
         }
+    else if(from === 'BadData'){
+        navigation.navigate('BadData', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
+        }
   };
 
   return (

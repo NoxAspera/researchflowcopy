@@ -20,7 +20,7 @@ export default function HomeScreen({ navigation }) {
       {/* Bad Data  */}
       <TouchableOpacity
         style={[styles.homeButton, {backgroundColor: 'red'}]}
-        onPress={() => alert('Bad Data')} >
+        onPress={() => navigation.navigate('SelectSite', {from: 'BadData'})}>
           <Text style={styles.homeButtonText}>Bad Data</Text>
       </TouchableOpacity>
 
