@@ -5,44 +5,36 @@ import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
 
-export default function AddNotes({ navigation }) {
+export default function InstrumentMaintenance({ navigation }) {
     const route = useRoute();
-    let site = route.params?.site;
+    let instrument = route.params?.instrument;
     const [selectedValue, setSelectedValue] = useState("");
 
-    //alert("found: " + site);
+    //alert("found: " + instrument);
     return (
       <ScrollView style = {styles.scrollContainer}>
         <View style={styles.container}>
           {/* header */}
           <View style={styles.header}>
-            <Text style={styles.headerText}>{site}</Text>
+            <Text style={styles.headerText}>{instrument}</Text>
           </View>
-    
           {/* drop down menu for instruments */}
           <View style={styles.rowContainer}>
-            <Text style={styles.label}>Instrument</Text>
+            <Text style={styles.label}>Location:</Text>
             <Picker
                 selectedValue={selectedValue}
                 onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
                 style={styles.picker}
               >
-                <Picker.Item label="Pump LG-14-0237" value="Pump LG-14-0237" />
-                <Picker.Item label="Teledyne T200" value="Teledyne T200" />
-                <Picker.Item label="Teledyne T300" value="Teledyne T300" />
-                <Picker.Item label="Teledyne T400" value="Teledyne T400" />
+                <Picker.Item label="CSP" value="CSP" />
+                <Picker.Item label="DBK" value="DBK" />
+                <Picker.Item label="FRU" value="FRU" />
+                <Picker.Item label="HDP" value="HDP" />
+                <Picker.Item label="HPL" value="HPL" />
+                <Picker.Item label="RPK" value="RPK" />
+                <Picker.Item label="SUG" value="SUG" />
+                <Picker.Item label="WBB" value="WBB" />
             </Picker>
-          </View>
-          
-          <View style = {styles.rowContainer}>
-            <Text style = {styles.label}>Time Started:</Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-            </SafeAreaProvider>
           </View>
 
           <View style = {styles.rowContainer}>
@@ -56,41 +48,21 @@ export default function AddNotes({ navigation }) {
             </SafeAreaProvider>
           </View>
 
-          <View style ={styles.rowContainer}>
-            <Text style = {styles.label}>Tank 1 (low)</Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-          </SafeAreaProvider>
+          <View>
+            <Text style = {styles.label}>Enter date: </Text>
           </View>
 
-          <View style ={styles.rowContainer}>
-            <Text style = {styles.label}>Tank 2 (mid)</Text>
+          <View style = {styles.rowContainer}>
             <SafeAreaProvider>
               <SafeAreaView>
                 <TextInput
-                  style = {styles.timeInput}>
+                  style = {styles.timeInput2}>
                 </TextInput>
               </SafeAreaView>
             </SafeAreaProvider>
           </View>
 
-          <View style ={styles.rowContainer}>
-            <Text style = {styles.label}>Tank 3 (high)</Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </View>
-
-
-          <Text style= {styles.label}>Site Notes</Text>
+          <Text style= {styles.label}>Notes:</Text>
           <SafeAreaProvider>
             <SafeAreaView>
               <TextInput
@@ -108,7 +80,7 @@ export default function AddNotes({ navigation }) {
       </ScrollView>
     );
   }
-  
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -122,6 +94,7 @@ export default function AddNotes({ navigation }) {
 
     label: {
         margin: 15,
+        marginBottom: 10,
         fontSize: 24,
         alignItems: 'flex-start'
       },
@@ -130,7 +103,7 @@ export default function AddNotes({ navigation }) {
       alignItems: 'flex-start',
       width: '64%',
       marginTop: 0,
-      marginBottom: 0
+      marginBottom: 0,
     },
     dropdownContainer: {
       marginTop: 50,
@@ -142,6 +115,16 @@ export default function AddNotes({ navigation }) {
       width: 200,
       borderWidth: 1,
       padding: 10,
+      marginBottom: 0,
+    },
+    timeInput2: {
+      height: 40,
+      margin: 15,
+      marginTop: 0,
+      marginBottom: 0,
+      width: 200,
+      borderWidth: 1,
+      padding: 10,
     },
     areaInput: {
       height: 200,
@@ -149,8 +132,8 @@ export default function AddNotes({ navigation }) {
       width: 380,
       borderWidth: 1,
       padding: 10,
-      marginTop: 5,
-      marginBottom: 5,
+      marginTop: 0,
+      marginBottom: 0,
     },
 
     rowContainer:
@@ -170,7 +153,8 @@ export default function AddNotes({ navigation }) {
     },
     homeButtonText: {
       flex: 1,
-      fontSize: 30
+      fontSize: 30,
+      margin: 0
     },
     header: {
       margin: 10,

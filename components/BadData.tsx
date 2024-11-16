@@ -98,9 +98,9 @@ export default function BadData({ navigation }) {
           </SafeAreaProvider>
 
           <TouchableOpacity
-            style={[styles.homeButton, {backgroundColor: 'lightred'}]}
+            style={[styles.homeButton, {backgroundColor: 'red'}]}
             onPress={() => alert("Submit Button Pressed")} >
-            <Text style={styles.homeButtonText}>Submit!</Text>
+            <Text style={[styles.homeButtonText, {color: 'white'}]}>Submit!</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

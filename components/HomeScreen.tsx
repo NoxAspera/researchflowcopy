@@ -27,15 +27,15 @@ export default function HomeScreen({ navigation }) {
       {/* Tank Tracker  */}
       <TouchableOpacity
         style={[styles.homeButton, {backgroundColor: 'blue'}]}
-        onPress={() => alert('Tank Tracker')} >
+        onPress={() => navigation.navigate('SelectTank')} >
           <Text style={styles.homeButtonText}>Tank Tracker</Text>
       </TouchableOpacity>
 
-      {/* Instrument Maintenence  */}
+      {/* Instrument Maintenance  */}
       <TouchableOpacity
         style={[styles.homeButton, {backgroundColor: 'yellow'}]}
-        onPress={() => alert('Instrument Maintenence')} >
-          <Text style={styles.homeButtonText}>Instrument Maintenence</Text>
+        onPress={() => navigation.navigate('SelectInstrument')} >
+          <Text style={styles.homeButtonText}>Instrument Maintenance</Text>
       </TouchableOpacity>
 
       {/* View Past Notes  */}

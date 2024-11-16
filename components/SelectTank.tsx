@@ -3,40 +3,27 @@ import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 
-export default function SelectSite({navigation}) {
-  const [selectedValue, setSelectedValue] = useState("CSP");
+export default function SelectTank({navigation}) {
+  const [selectedValue, setSelectedValue] = useState("Tank 1");
   const route = useRoute();
-  let from = route.params?.from;
 
   const handleConfirm = () => {
-    if(from === 'AddNotes'){
-        navigation.navigate('AddNotes', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
-        }
-    else if(from === 'ViewNotes'){
-        navigation.navigate('ViewNotes', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
-        }
-    else if(from === 'BadData'){
-        navigation.navigate('BadData', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
-        }
+    navigation.navigate('TankTracker', {tank: selectedValue});
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.dropdownContainer}>
-        <Text style={styles.label}>Where are you?</Text>
+        <Text style={styles.label}>Select Tank</Text>
         <Picker
           selectedValue={selectedValue}
           onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
           style={styles.picker}
         >
-          <Picker.Item label="CSP" value="CSP" />
-          <Picker.Item label="DBK" value="DBK" />
-          <Picker.Item label="FRU" value="FRU" />
-          <Picker.Item label="HDP" value="HDP" />
-          <Picker.Item label="HPL" value="HPL" />
-          <Picker.Item label="RPK" value="RPK" />
-          <Picker.Item label="SUG" value="SUG" />
-          <Picker.Item label="WBB" value="WBB" />
+          <Picker.Item label="Tank 1" value="Tank 1" />
+          <Picker.Item label="Tank 2" value="Tank 2" />
+          <Picker.Item label="Tank 3" value="Tank 3" />
+          <Picker.Item label="Tank 4" value="Tank 4" />
         </Picker>
       </View>
 
@@ -65,17 +52,17 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 50,
-    width: '50%',
+    width: '57%',
   },
   buttonContainer: {
     marginBottom: 30,
   },
   button: {
-    backgroundColor: '#007AFF', 
-    paddingVertical: 15,       
-    paddingHorizontal: 40,     
-    borderRadius: 8,           
-    alignItems: 'center',      
+    backgroundColor: '#007AFF',
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    alignItems: 'center',
   },
   buttonText: {
     fontSize: 24,
