@@ -9,14 +9,14 @@ export default function SelectSite({navigation}) {
   let from = route.params?.from;
 
   const handleConfirm = () => {
-    if(from === 'AddNotes'){
-        navigation.navigate('AddNotes', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
+    if(from === 'Add Notes'){
+        navigation.navigate('Add Notes', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
         }
-    else if(from === 'ViewNotes'){
-        navigation.navigate('ViewNotes', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
+    else if(from === 'View Notes'){
+        navigation.navigate('View Notes', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
         }
-    else if(from === 'BadData'){
-        navigation.navigate('BadData', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
+    else if(from === 'Bad Data'){
+        navigation.navigate('Bad Data', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
         }
   };
 

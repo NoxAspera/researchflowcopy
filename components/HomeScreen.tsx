@@ -13,35 +13,35 @@ export default function HomeScreen({ navigation }) {
       {/* Select Site  */}
       <TouchableOpacity
         style={[styles.homeButton, {backgroundColor: 'green'}]}
-        onPress={() => navigation.navigate('SelectSite', {from: 'AddNotes'})} >
+        onPress={() => navigation.navigate('Select Site', {from: 'Add Notes'})} >
           <Text style={styles.homeButtonText}>Add Notes</Text>
       </TouchableOpacity>
 
       {/* Bad Data  */}
       <TouchableOpacity
         style={[styles.homeButton, {backgroundColor: 'red'}]}
-        onPress={() => navigation.navigate('SelectSite', {from: 'BadData'})}>
+        onPress={() => navigation.navigate('Select Site', {from: 'Bad Data'})}>
           <Text style={styles.homeButtonText}>Bad Data</Text>
       </TouchableOpacity>
 
       {/* Tank Tracker  */}
       <TouchableOpacity
         style={[styles.homeButton, {backgroundColor: 'blue'}]}
-        onPress={() => navigation.navigate('SelectTank')} >
+        onPress={() => navigation.navigate('Select Tank')} >
           <Text style={styles.homeButtonText}>Tank Tracker</Text>
       </TouchableOpacity>
 
       {/* Instrument Maintenance  */}
       <TouchableOpacity
         style={[styles.homeButton, {backgroundColor: 'yellow'}]}
-        onPress={() => navigation.navigate('SelectInstrument')} >
+        onPress={() => navigation.navigate('Select Instrument')} >
           <Text style={styles.homeButtonText}>Instrument Maintenance</Text>
       </TouchableOpacity>
 
       {/* View Past Notes  */}
       <TouchableOpacity
         style={[styles.homeButton, {backgroundColor: 'grey'}]}
-        onPress={() => navigation.navigate('SelectSite', {from: 'ViewNotes'})} >
+        onPress={() => navigation.navigate('Select Site', {from: 'View Notes'})} >
           <Text style={styles.homeButtonText}>View Past Notes</Text>
       </TouchableOpacity>
 
