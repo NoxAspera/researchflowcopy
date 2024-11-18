@@ -7,7 +7,31 @@ import { ScrollView, TextInput } from 'react-native-gesture-handler';
 
 export default function AddNotes({ navigation }) {
     const route = useRoute();
-    let site = route.params?.site;
+    //let site = route.params?.site;
+    const { site, info } = route.params || {}
+
+    console.log("Info parameter:", info);
+
+    const entry = info?.entries[0] || {};
+    const instrument = entry.instrument || 'No instrument associated with this site. Please provide instrument type and serial number.';
+    const n2 = entry.n2_pressure || '';
+    let low_tank = '';
+    let mid_tank = '';
+    let high_tank = '';
+    let lts = '';
+    if (entry.low_cal) {
+      low_tank = entry.low_cal.id || '';
+    }
+    if (entry.mid_cal) {
+      mid_tank = entry.mid_cal.id || '';
+    }
+    if (entry.high_cal) {
+      high_tank = entry.high_cal.id || '';
+    }
+    if (entry.lts) {
+      lts = entry.lts.id || '';
+    }
+
     const [selectedValue, setSelectedValue] = useState("");
 
     //alert("found: " + site);
@@ -21,16 +45,13 @@ export default function AddNotes({ navigation }) {
     
           {/* drop down menu for instruments */}
           <View style={styles.rowContainer}>
-            <Text style={styles.label}>Instrument</Text>
+            <Text style={styles.label}>instrument</Text>
             <Picker
                 selectedValue={selectedValue}
                 onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
                 style={styles.picker}
               >
-                <Picker.Item label="Pump LG-14-0237" value="Pump LG-14-0237" />
-                <Picker.Item label="Teledyne T200" value="Teledyne T200" />
-                <Picker.Item label="Teledyne T300" value="Teledyne T300" />
-                <Picker.Item label="Teledyne T400" value="Teledyne T400" />
+                <Picker.Item label={instrument} value={instrument} />
             </Picker>
           </View>
           
@@ -45,49 +66,71 @@ export default function AddNotes({ navigation }) {
             </SafeAreaProvider>
           </View>
 
-          <View style = {styles.rowContainer}>
-            <Text style = {styles.label}>Name: </Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </View>
+          {n2 !== '' && (
+            <View style={styles.rowContainer}>
+              <Text style={styles.label}>N2:</Text>
+              <SafeAreaProvider>
+                <SafeAreaView>
+                  <TextInput
+                    style={styles.timeInput}>
+                  </TextInput>
+                </SafeAreaView>
+              </SafeAreaProvider>
+            </View>
+          )}
 
-          <View style ={styles.rowContainer}>
-            <Text style = {styles.label}>Tank 1 (low)</Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-          </SafeAreaProvider>
-          </View>
+          {low_tank !== '' && (
+            <View style={styles.rowContainer}>
+              <Text style={styles.label}>Low: {low_tank}</Text>
+              <SafeAreaProvider>
+                <SafeAreaView>
+                  <TextInput
+                    style={styles.timeInput}>
+                  </TextInput>
+                </SafeAreaView>
+              </SafeAreaProvider>
+            </View>
+          )}
 
-          <View style ={styles.rowContainer}>
-            <Text style = {styles.label}>Tank 2 (mid)</Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </View>
+          {mid_tank !== '' && (
+            <View style={styles.rowContainer}>
+              <Text style={styles.label}>Mid: {mid_tank}</Text>
+              <SafeAreaProvider>
+                <SafeAreaView>
+                  <TextInput
+                    style={styles.timeInput}>
+                  </TextInput>
+                </SafeAreaView>
+              </SafeAreaProvider>
+            </View>
+          )}
 
-          <View style ={styles.rowContainer}>
-            <Text style = {styles.label}>Tank 3 (high)</Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </View>
+          {high_tank !== '' && (
+            <View style={styles.rowContainer}>
+              <Text style={styles.label}>High: {high_tank}</Text>
+              <SafeAreaProvider>
+                <SafeAreaView>
+                  <TextInput
+                    style={styles.timeInput}>
+                  </TextInput>
+                </SafeAreaView>
+              </SafeAreaProvider>
+            </View>
+          )}
+
+          {lts !== '' && (
+            <View style={styles.rowContainer}>
+              <Text style={styles.label}>LTS: {lts}</Text>
+              <SafeAreaProvider>
+                <SafeAreaView>
+                  <TextInput
+                    style={styles.timeInput}>
+                  </TextInput>
+                </SafeAreaView>
+              </SafeAreaProvider>
+            </View>
+          )}
+
 
 
           <Text style= {styles.label}>Site Notes</Text>
