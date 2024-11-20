@@ -5,20 +5,20 @@ import { useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 // Define the type for the stack's navigation parameters
-// type RootStackParamList = {
-//   SelectSite: undefined; // Add any other screens with their params here
-//   AddNotes: undefined;
-//   // OtherScreen: { paramName: string }; // Example with params
-// };
+type RootStackParamList = {
+  SelectSite: undefined; // Add any other screens with their params here
+  AddNotes: { site: string };
+  // OtherScreen: { paramName: string }; // Example with params
+};
 
-// // Type for the navigation prop for this screen
-// type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SelectSite', 'AddNotes'>;
+// Type for the navigation prop for this screen
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SelectSite'>;
 
-// interface HomeScreenProps {
-//   navigation: HomeScreenNavigationProp;
-// }
+interface HomeScreenProps {
+  navigation: HomeScreenNavigationProp;
+}
 
-export default function SelectSite({navigation}) {
+export default function SelectSite({navigation}: HomeScreenProps) {
   const [selectedValue, setSelectedValue] = useState("CSP");
 
   const handleConfirm = () => {
