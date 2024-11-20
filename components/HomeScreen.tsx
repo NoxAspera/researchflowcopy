@@ -1,6 +1,22 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import HomeButtonProp from './HomeButtonProp';
 
-export default function HomeScreen({ navigation }) {
+// Define the type for the stack's navigation parameters
+type RootStackParamList = {
+  SelectSite: undefined; // Add any other screens with their params here
+  // OtherScreen: { paramName: string }; // Example with params
+};
+
+// Type for the navigation prop for this screen
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SelectSite'>;
+
+interface HomeScreenProps {
+  navigation: HomeScreenNavigationProp;
+}
+
+
+export default function HomeScreen({navigation}: HomeScreenProps) {
   return (
     <View style={styles.container}>
       {/* header */}
@@ -11,46 +27,52 @@ export default function HomeScreen({ navigation }) {
       {/* buttons */}
       
       {/* Select Site  */}
-      <TouchableOpacity
+      <HomeButtonProp color='green' text='Add Notes' onPress={() => navigation.navigate('SelectSite')} />
+      {/* <TouchableOpacity
         style={[styles.homeButton, {backgroundColor: 'green'}]}
         onPress={() => navigation.navigate('SelectSite')} >
           <Text style={styles.homeButtonText}>Add Notes</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* Bad Data  */}
-      <TouchableOpacity
+      <HomeButtonProp color='red' text='test' onPress={() => alert("bad data")} />
+      {/* <TouchableOpacity
         style={[styles.homeButton, {backgroundColor: 'red'}]}
         onPress={() => alert('Bad Data')} >
           <Text style={styles.homeButtonText}>Bad Data</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* Tank Tracker  */}
-      <TouchableOpacity
+      <HomeButtonProp color='blue' text='Tank Tracker' onPress={() => alert('tank tracker')} />
+      {/* <TouchableOpacity
         style={[styles.homeButton, {backgroundColor: 'blue'}]}
         onPress={() => alert('Tank Tracker')} >
           <Text style={styles.homeButtonText}>Tank Tracker</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* Instrument Maintenence  */}
-      <TouchableOpacity
+      <HomeButtonProp color='yellow' text='Instrument Maintenence' onPress={() => alert('instrument maintenence')} />
+      {/* <TouchableOpacity
         style={[styles.homeButton, {backgroundColor: 'yellow'}]}
         onPress={() => alert('Instrument Maintenence')} >
           <Text style={styles.homeButtonText}>Instrument Maintenence</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* View Past Notes  */}
-      <TouchableOpacity
+      <HomeButtonProp color='grey' text='View Past Notes' onPress={() => navigation.navigate('SelectSite')} />
+      {/* <TouchableOpacity
         style={[styles.homeButton, {backgroundColor: 'grey'}]}
         onPress={() => navigation.navigate('SelectSite')} >
           <Text style={styles.homeButtonText}>View Past Notes</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* Plan a visit  */}
-      <TouchableOpacity
+      <HomeButtonProp color='orange' text='Plan a Visit' onPress={() => alert('plan a visit')} />
+      {/* <TouchableOpacity
         style={[styles.homeButton, {backgroundColor: 'orange'}]}
         onPress={() => alert('Plan a visit')} >
           <Text style={styles.homeButtonText}>Plan a Visit</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 }
@@ -62,17 +84,17 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',        // has button fill space horizontally
     justifyContent: 'space-evenly',
   },
-  homeButton: {
-    flex: 1,                      // has button fill space vertically
-    borderRadius: 10,
-    justifyContent: 'center',     // this and alignItems places text in center of button
-    alignItems: "center",
-    margin: 10
-  },
-  homeButtonText: {
-    flex: 1,
-    fontSize: 30
-  },
+  // homeButton: {
+  //   flex: 1,                      // has button fill space vertically
+  //   borderRadius: 10,
+  //   justifyContent: 'center',     // this and alignItems places text in center of button
+  //   alignItems: "center",
+  //   margin: 10
+  // },
+  // homeButtonText: {
+  //   flex: 1,
+  //   fontSize: 30
+  // },
   header: {
     width: '100%', // Ensure the header takes full width
     alignItems: 'center', // Center the text horizontally

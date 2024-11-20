@@ -2,6 +2,21 @@ import { StyleSheet, Text, View, Alert, Button, TouchableOpacity } from 'react-n
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+
+// Define the type for the stack's navigation parameters
+// type RootStackParamList = {
+//   SelectSite: undefined; // Add any other screens with their params here
+//   AddNotes: undefined;
+//   // OtherScreen: { paramName: string }; // Example with params
+// };
+
+// // Type for the navigation prop for this screen
+// type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SelectSite', 'AddNotes'>;
+
+// interface HomeScreenProps {
+//   navigation: HomeScreenNavigationProp;
+// }
 
 export default function SelectSite({navigation}) {
   const [selectedValue, setSelectedValue] = useState("CSP");
