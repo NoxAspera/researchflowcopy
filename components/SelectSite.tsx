@@ -3,8 +3,23 @@ import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { parseDocument } from '../parsers/AddNotesParser';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-export default function SelectSite({navigation}) {
+// Define the type for the stack's navigation parameters
+type RootStackParamList = {
+  SelectSite: undefined; // Add any other screens with their params here
+  AddNotes: { site: string };
+  // OtherScreen: { paramName: string }; // Example with params
+};
+
+// Type for the navigation prop for this screen
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SelectSite'>;
+
+interface HomeScreenProps {
+  navigation: HomeScreenNavigationProp;
+}
+
+export default function SelectSite({navigation}: HomeScreenProps) {
   const [selectedValue, setSelectedValue] = useState("CSP");
   const route = useRoute();
   let from = route.params?.from;

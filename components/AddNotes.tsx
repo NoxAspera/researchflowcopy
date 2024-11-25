@@ -1,11 +1,25 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
-import { ScrollView, TextInput } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
+import { StackNavigationProp } from '@react-navigation/stack';
+import AddNotesTextInput from './AddNotesTextInput';
 
-export default function AddNotes({ navigation }) {
+// Define the type for the stack's navigation parameters
+type RootStackParamList = {
+  SelectSite: undefined; // Add any other screens with their params here
+  // OtherScreen: { paramName: string }; // Example with params
+};
+
+// Type for the navigation prop for this screen
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SelectSite'>;
+
+interface HomeScreenProps {
+  navigation: HomeScreenNavigationProp;
+}
+
+export default function AddNotes({ navigation }: HomeScreenProps) {
     const route = useRoute();
     //let site = route.params?.site;
     const { site, info } = route.params || {}
@@ -162,12 +176,11 @@ export default function AddNotes({ navigation }) {
     scrollContainer: {
       backgroundColor: '#fff'
     },
-
     label: {
         margin: 15,
         fontSize: 24,
         alignItems: 'flex-start'
-      },
+    },
     picker: {
       height: 65,
       alignItems: 'flex-start',
