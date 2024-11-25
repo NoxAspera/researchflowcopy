@@ -5,58 +5,40 @@ import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
 
-export default function AddNotes({ navigation }) {
+export default function TankTracker({ navigation }) {
     const route = useRoute();
-    //let site = route.params?.site;
-    const { site, info } = route.params || {}
-
-    console.log("Info parameter:", info);
-
-    const entry = info?.entries[0] || {};
-    const instrument = entry.instrument || 'No instrument associated with this site. Please provide instrument type and serial number.';
-    const n2 = entry.n2_pressure || '';
-    let low_tank = '';
-    let mid_tank = '';
-    let high_tank = '';
-    let lts = '';
-    if (entry.low_cal) {
-      low_tank = entry.low_cal.id || '';
-    }
-    if (entry.mid_cal) {
-      mid_tank = entry.mid_cal.id || '';
-    }
-    if (entry.high_cal) {
-      high_tank = entry.high_cal.id || '';
-    }
-    if (entry.lts) {
-      lts = entry.lts.id || '';
-    }
-
+    let tank = route.params?.tank;
     const [selectedValue, setSelectedValue] = useState("");
 
-    //alert("found: " + site);
+    //alert("found: " + instrument);
     return (
       <ScrollView style = {styles.scrollContainer}>
         <View style={styles.container}>
           {/* header */}
           <View style={styles.header}>
-            <Text style={styles.headerText}>{site}</Text>
+            <Text style={styles.headerText}>{tank}</Text>
           </View>
-    
           {/* drop down menu for instruments */}
           <View style={styles.rowContainer}>
-            <Text style={styles.label}>instrument</Text>
+            <Text style={styles.label}>Location:</Text>
             <Picker
                 selectedValue={selectedValue}
                 onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
                 style={styles.picker}
               >
-                <Picker.Item label={instrument} value={instrument} />
+                <Picker.Item label="CSP" value="CSP" />
+                <Picker.Item label="DBK" value="DBK" />
+                <Picker.Item label="FRU" value="FRU" />
+                <Picker.Item label="HDP" value="HDP" />
+                <Picker.Item label="HPL" value="HPL" />
+                <Picker.Item label="RPK" value="RPK" />
+                <Picker.Item label="SUG" value="SUG" />
+                <Picker.Item label="WBB" value="WBB" />
             </Picker>
           </View>
-          
+
           <View style = {styles.rowContainer}>
-            <Text style = {styles.label}>Time Started:</Text>
+            <Text style = {styles.label}>Name: </Text>
             <SafeAreaProvider>
               <SafeAreaView>
                 <TextInput
@@ -66,74 +48,58 @@ export default function AddNotes({ navigation }) {
             </SafeAreaProvider>
           </View>
 
-          {n2 !== '' && (
-            <View style={styles.rowContainer}>
-              <Text style={styles.label}>N2:</Text>
-              <SafeAreaProvider>
-                <SafeAreaView>
-                  <TextInput
-                    style={styles.timeInput}>
-                  </TextInput>
-                </SafeAreaView>
-              </SafeAreaProvider>
-            </View>
-          )}
+          <View>
+            <Text style = {styles.label}>Enter date: </Text>
+          </View>
 
-          {low_tank !== '' && (
-            <View style={styles.rowContainer}>
-              <Text style={styles.label}>Low: {low_tank}</Text>
-              <SafeAreaProvider>
-                <SafeAreaView>
-                  <TextInput
-                    style={styles.timeInput}>
-                  </TextInput>
-                </SafeAreaView>
-              </SafeAreaProvider>
-            </View>
-          )}
+          <View style = {styles.rowContainer}>
+            <SafeAreaProvider>
+              <SafeAreaView>
+                <TextInput
+                  style = {styles.timeInput2}>
+                </TextInput>
+              </SafeAreaView>
+            </SafeAreaProvider>
+          </View>
 
-          {mid_tank !== '' && (
-            <View style={styles.rowContainer}>
-              <Text style={styles.label}>Mid: {mid_tank}</Text>
-              <SafeAreaProvider>
-                <SafeAreaView>
-                  <TextInput
-                    style={styles.timeInput}>
-                  </TextInput>
-                </SafeAreaView>
-              </SafeAreaProvider>
-            </View>
-          )}
+          <View>
+            <Text style = {styles.label}>Tank Measurements: </Text>
+          </View>
 
-          {high_tank !== '' && (
-            <View style={styles.rowContainer}>
-              <Text style={styles.label}>High: {high_tank}</Text>
-              <SafeAreaProvider>
-                <SafeAreaView>
-                  <TextInput
-                    style={styles.timeInput}>
-                  </TextInput>
-                </SafeAreaView>
-              </SafeAreaProvider>
-            </View>
-          )}
+          <View style ={styles.rowContainer}>
+            <Text style = {styles.label}>Psi:  </Text>
+            <SafeAreaProvider>
+              <SafeAreaView>
+                <TextInput
+                  style = {styles.timeInput}>
+                </TextInput>
+              </SafeAreaView>
+          </SafeAreaProvider>
+          </View>
 
-          {lts !== '' && (
-            <View style={styles.rowContainer}>
-              <Text style={styles.label}>LTS: {lts}</Text>
-              <SafeAreaProvider>
-                <SafeAreaView>
-                  <TextInput
-                    style={styles.timeInput}>
-                  </TextInput>
-                </SafeAreaView>
-              </SafeAreaProvider>
-            </View>
-          )}
+          <View style ={styles.rowContainer}>
+            <Text style = {styles.label}>CO2:</Text>
+            <SafeAreaProvider>
+              <SafeAreaView>
+                <TextInput
+                  style = {styles.timeInput}>
+                </TextInput>
+              </SafeAreaView>
+          </SafeAreaProvider>
+          </View>
 
+          <View style ={styles.rowContainer}>
+            <Text style = {styles.label}>CH4:</Text>
+            <SafeAreaProvider>
+              <SafeAreaView>
+                <TextInput
+                  style = {styles.timeInput}>
+                </TextInput>
+              </SafeAreaView>
+          </SafeAreaProvider>
+          </View>
 
-
-          <Text style= {styles.label}>Site Notes</Text>
+          <Text style= {styles.label}>Notes:</Text>
           <SafeAreaProvider>
             <SafeAreaView>
               <TextInput
@@ -151,7 +117,7 @@ export default function AddNotes({ navigation }) {
       </ScrollView>
     );
   }
-  
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -165,6 +131,7 @@ export default function AddNotes({ navigation }) {
 
     label: {
         margin: 15,
+        marginBottom: 10,
         fontSize: 24,
         alignItems: 'flex-start'
       },
@@ -185,15 +152,25 @@ export default function AddNotes({ navigation }) {
       width: 200,
       borderWidth: 1,
       padding: 10,
+      marginBottom: 0,
+    },
+    timeInput2: {
+      height: 40,
+      margin: 15,
+      marginTop: 0,
+      marginBottom: 0,
+      width: 200,
+      borderWidth: 1,
+      padding: 10,
     },
     areaInput: {
-      height: 200,
+      height: 150,
       margin: 15,
       width: 380,
       borderWidth: 1,
       padding: 10,
-      marginTop: 5,
-      marginBottom: 5,
+      marginTop: 0,
+      marginBottom: 0,
     },
 
     rowContainer:
@@ -213,7 +190,8 @@ export default function AddNotes({ navigation }) {
     },
     homeButtonText: {
       flex: 1,
-      fontSize: 30
+      fontSize: 30,
+      margin: 0
     },
     header: {
       margin: 10,

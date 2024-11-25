@@ -1,0 +1,14 @@
+{
+  "name": "npmpackage",
+  "version": "0.0.0",
+  "description": "npmpackagestuff",
+  "main": "src/index",
+  "author": " <> ()",
+  "license": "UNLICENSED",
+  "homepage": "#readme",
+  "create-react-native-library": {
+    "type": "module-legacy",
+    "languages": "kotlin-objc",
+    "version": "0.43.0"
+  }
+}

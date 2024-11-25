@@ -2,12 +2,44 @@ import { StyleSheet, Text, View, Alert, Button, TouchableOpacity } from 'react-n
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
+import { parseDocument } from '../parsers/AddNotesParser';
 
 export default function SelectSite({navigation}) {
   const [selectedValue, setSelectedValue] = useState("CSP");
+  const route = useRoute();
+  let from = route.params?.from;
 
   const handleConfirm = () => {
-    navigation.navigate('AddNotes', {site: selectedValue});
+    if(from === 'AddNotes'){
+        const textDocument = `
+        # Site id: **sug**
+        ---
+        - Time in: 2024-08-20 15:15Z
+        - Time out: 2024-08-20 16:15Z
+        - Name: Megan, Maria
+        - Instrument: Li-7000 serial # 0280
+        - N2: 2000 psi
+        - LTS: 210816_M1 value 524.29 ppm 1650 psi
+        - Low cal: 230829_J05 value 403.65 ppm 1850 psi
+        - Mid cal: 240122_56 value 450.31 ppm 1350 psi
+        - High cal: 240301_37 value 498.54 ppm 2050 psi
+        - Swapped high tank. Old tank was 230509_J40 value 492.56 ppm 490 psi
+        - Removed Li-7000 serial # 1261. Installed Li-7000 serial # 0280. Instrument initially showed incorrect output from Datalogger. Reseated seial connection from instrument, this seemed to fix the issue. Instrument is reading about 10 ppm lower than expected, but this is consistent for all cal tanks so calibrated data should be good.
+        - Inlet filter is very dirty. Should replace filter next visit.
+        ---
+            `;
+
+            // Parse the document
+            const parsedData = parseDocument(textDocument);
+
+        navigation.navigate('AddNotes', {site: selectedValue, info: parsedData}); //{site: selectValue} tells the AddNotes what the selected value is
+        }
+    else if(from === 'ViewNotes'){
+        navigation.navigate('ViewNotes', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
+        }
+    else if(from === 'BadData'){
+        navigation.navigate('BadData', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
+        }
   };
 
   return (
@@ -31,7 +63,7 @@ export default function SelectSite({navigation}) {
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AddNotes', {site: selectedValue})}>
+        <TouchableOpacity style={styles.button} onPress={() => handleConfirm()}>
           <Text style={styles.buttonText}>Confirm</Text>
         </TouchableOpacity>
       </View>
@@ -61,11 +93,11 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   button: {
-    backgroundColor: '#007AFF', 
-    paddingVertical: 15,       
-    paddingHorizontal: 40,     
-    borderRadius: 8,           
-    alignItems: 'center',      
+    backgroundColor: '#007AFF',
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    alignItems: 'center',
   },
   buttonText: {
     fontSize: 24,
