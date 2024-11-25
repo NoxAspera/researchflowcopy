@@ -4,14 +4,15 @@ import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 
 interface ANTIProp{
     inputText: string;
+    inputTextVar?: string;
     inputTextStyle: ViewStyle;
     ViewStyle: ViewStyle; 
 }
 
-const AddNotesTextInput: React.FC<ANTIProp> = ({ inputText, inputTextStyle, ViewStyle }) => {
+const AddNotesTextInput: React.FC<ANTIProp> = ({ inputText, inputTextStyle, ViewStyle, inputTextVar }) => {
     return (
         <View style = {ViewStyle}>
-            <Text style = {styles.label}>{inputText}</Text>
+            <Text style = {styles.label}>{inputText}{inputTextVar}</Text>
             <SafeAreaProvider>
               <SafeAreaView>
                 <TextInput

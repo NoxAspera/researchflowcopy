@@ -1,26 +1,20 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
-import { useRoute } from '@react-navigation/native';
+import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { StackNavigationProp } from '@react-navigation/stack';
 import AddNotesTextInput from './AddNotesTextInput';
+import { NaviProp } from './types';
 
-// Define the type for the stack's navigation parameters
-type RootStackParamList = {
-  SelectSite: undefined; // Add any other screens with their params here
-  // OtherScreen: { paramName: string }; // Example with params
+type RouteParams = {
+  site: string; 
+  info: string; 
 };
 
-// Type for the navigation prop for this screen
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SelectSite'>;
-
-interface HomeScreenProps {
-  navigation: HomeScreenNavigationProp;
-}
-
-export default function AddNotes({ navigation }: HomeScreenProps) {
-    const route = useRoute();
+export default function AddNotes({ navigation }: NaviProp) {
+    type routeProp = RouteProp<{params: RouteParams}, 'params'>;
+    const route = useRoute<routeProp>();
     //let site = route.params?.site;
     const { site, info } = route.params || {}
 
@@ -69,7 +63,7 @@ export default function AddNotes({ navigation }: HomeScreenProps) {
             </Picker>
           </View>
           
-          <View style = {styles.rowContainer}>
+          {/* <View style = {styles.rowContainer}>
             <Text style = {styles.label}>Time Started:</Text>
             <SafeAreaProvider>
               <SafeAreaView>
@@ -78,83 +72,90 @@ export default function AddNotes({ navigation }: HomeScreenProps) {
                 </TextInput>
               </SafeAreaView>
             </SafeAreaProvider>
-          </View>
+          </View> */}
+          <AddNotesTextInput inputText='Time Started:' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} />
 
           {n2 !== '' && (
-            <View style={styles.rowContainer}>
-              <Text style={styles.label}>N2:</Text>
-              <SafeAreaProvider>
-                <SafeAreaView>
-                  <TextInput
-                    style={styles.timeInput}>
-                  </TextInput>
-                </SafeAreaView>
-              </SafeAreaProvider>
-            </View>
+            // <View style={styles.rowContainer}>
+            //   <Text style={styles.label}>N2:</Text>
+            //   <SafeAreaProvider>
+            //     <SafeAreaView>
+            //       <TextInput
+            //         style={styles.timeInput}>
+            //       </TextInput>
+            //     </SafeAreaView>
+            //   </SafeAreaProvider>
+            // </View>
+            <AddNotesTextInput inputText='N2:' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} />
           )}
 
           {low_tank !== '' && (
-            <View style={styles.rowContainer}>
-              <Text style={styles.label}>Low: {low_tank}</Text>
-              <SafeAreaProvider>
-                <SafeAreaView>
-                  <TextInput
-                    style={styles.timeInput}>
-                  </TextInput>
-                </SafeAreaView>
-              </SafeAreaProvider>
-            </View>
+            // <View style={styles.rowContainer}>
+            //   <Text style={styles.label}>Low: {low_tank}</Text>
+            //   <SafeAreaProvider>
+            //     <SafeAreaView>
+            //       <TextInput
+            //         style={styles.timeInput}>
+            //       </TextInput>
+            //     </SafeAreaView>
+            //   </SafeAreaProvider>
+            // </View>
+            <AddNotesTextInput inputText='Low: ' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} inputTextVar={low_tank} />
           )}
 
           {mid_tank !== '' && (
-            <View style={styles.rowContainer}>
-              <Text style={styles.label}>Mid: {mid_tank}</Text>
-              <SafeAreaProvider>
-                <SafeAreaView>
-                  <TextInput
-                    style={styles.timeInput}>
-                  </TextInput>
-                </SafeAreaView>
-              </SafeAreaProvider>
-            </View>
+            // <View style={styles.rowContainer}>
+            //   <Text style={styles.label}>Mid: {mid_tank}</Text>
+            //   <SafeAreaProvider>
+            //     <SafeAreaView>
+            //       <TextInput
+            //         style={styles.timeInput}>
+            //       </TextInput>
+            //     </SafeAreaView>
+            //   </SafeAreaProvider>
+            // </View>
+            <AddNotesTextInput inputText='Mid: ' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} inputTextVar={mid_tank} />
           )}
 
           {high_tank !== '' && (
-            <View style={styles.rowContainer}>
-              <Text style={styles.label}>High: {high_tank}</Text>
-              <SafeAreaProvider>
-                <SafeAreaView>
-                  <TextInput
-                    style={styles.timeInput}>
-                  </TextInput>
-                </SafeAreaView>
-              </SafeAreaProvider>
-            </View>
+            // <View style={styles.rowContainer}>
+            //   <Text style={styles.label}>High: {high_tank}</Text>
+            //   <SafeAreaProvider>
+            //     <SafeAreaView>
+            //       <TextInput
+            //         style={styles.timeInput}>
+            //       </TextInput>
+            //     </SafeAreaView>
+            //   </SafeAreaProvider>
+            // </View>
+            <AddNotesTextInput inputText='High: ' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} inputTextVar={high_tank} />
           )}
 
           {lts !== '' && (
-            <View style={styles.rowContainer}>
-              <Text style={styles.label}>LTS: {lts}</Text>
-              <SafeAreaProvider>
-                <SafeAreaView>
-                  <TextInput
-                    style={styles.timeInput}>
-                  </TextInput>
-                </SafeAreaView>
-              </SafeAreaProvider>
-            </View>
+            // <View style={styles.rowContainer}>
+            //   <Text style={styles.label}>LTS: {lts}</Text>
+            //   <SafeAreaProvider>
+            //     <SafeAreaView>
+            //       <TextInput
+            //         style={styles.timeInput}>
+            //       </TextInput>
+            //     </SafeAreaView>
+            //   </SafeAreaProvider>
+            // </View>
+            <AddNotesTextInput inputText='LTS: ' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} inputTextVar={lts} />
           )}
 
 
 
-          <Text style= {styles.label}>Site Notes</Text>
+          {/* <Text style= {styles.label}>Site Notes</Text>
           <SafeAreaProvider>
             <SafeAreaView>
               <TextInput
                 style = {styles.areaInput}>
               </TextInput>
             </SafeAreaView>
-          </SafeAreaProvider>
+          </SafeAreaProvider> */}
+          <AddNotesTextInput inputText='Site Notes' inputTextStyle={styles.areaInput} ViewStyle={styles.rowContainer} />
 
           <TouchableOpacity
             style={[styles.homeButton, {backgroundColor: 'red'}]}

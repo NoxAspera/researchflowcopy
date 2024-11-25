@@ -1,22 +1,10 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import HomeButtonProp from './HomeButtonProp';
-
-// Define the type for the stack's navigation parameters
-type RootStackParamList = {
-  SelectSite: undefined; // Add any other screens with their params here
-  // OtherScreen: { paramName: string }; // Example with params
-};
-
-// Type for the navigation prop for this screen
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SelectSite'>;
-
-interface HomeScreenProps {
-  navigation: HomeScreenNavigationProp;
-}
+import { NaviProp } from './types';
 
 
-export default function HomeScreen({navigation}: HomeScreenProps) {
+export default function HomeScreen({navigation}: NaviProp) {
   return (
     <View style={styles.container}>
       {/* header */}
@@ -30,7 +18,7 @@ export default function HomeScreen({navigation}: HomeScreenProps) {
       <HomeButtonProp color='green' text='Add Notes' onPress={() => navigation.navigate('SelectSite', {from: 'AddNotes'})} />
 
       {/* Bad Data  */}
-      <HomeButtonProp color='red' text='Bad Data' onPress={() => navigation.navigate('SelectSite', {from: "baddata"})}/>
+      <HomeButtonProp color='red' text='Bad Data' onPress={() => navigation.navigate('SelectSite', {from: "BadData"})}/>
 
       {/* Tank Tracker  */}
       <HomeButtonProp color='blue' text='Tank Tracker' onPress={() => navigation.navigate('SelectTank')} />
