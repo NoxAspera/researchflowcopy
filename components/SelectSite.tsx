@@ -69,7 +69,15 @@ export default function SelectSite({navigation}: HomeScreenProps) {
           onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
           style={styles.picker}
         >
-         
+          <Picker.Item label="CSP" value="CSP" />
+          <Picker.Item label="DBK" value="DBK" />
+          <Picker.Item label="FRU" value="FRU" />
+          <Picker.Item label="HDP" value="HDP" />
+          <Picker.Item label="HPL" value="HPL" />
+          <Picker.Item label="RPK" value="RPK" />
+          <Picker.Item label="SUG" value="SUG" />
+          <Picker.Item label="WBB" value="WBB" />
+
         </Picker>
       </View>
 
