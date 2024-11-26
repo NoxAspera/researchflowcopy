@@ -8,7 +8,7 @@ export default function SelectInstrument({navigation}) {
   const route = useRoute();
 
   const handleConfirm = () => {
-    navigation.navigate('InstrumentMaintenance', {instrument: selectedValue});
+    navigation.navigate('Instrument Maintenance', {instrument: selectedValue});
   };
 
   return (

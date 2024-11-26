@@ -49,14 +49,13 @@ export default function SelectSite({navigation}: HomeScreenProps) {
 
         navigation.navigate('AddNotes', {site: selectedValue, info: parsedData}); //{site: selectValue} tells the AddNotes what the selected value is
         }
-    else if(from === 'ViewNotes'){
-        navigation.navigate('ViewNotes', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
+    else if(from === 'View Notes'){
+        navigation.navigate('View Notes', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
         }
-    else if(from === 'BadData'){
-        navigation.navigate('BadData', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
+    else if(from === 'Bad Data'){
+        navigation.navigate('Bad Data', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
         }
   };
-
   return (
     <View style={styles.container}>
       <View style={styles.dropdownContainer}>
@@ -74,6 +73,7 @@ export default function SelectSite({navigation}: HomeScreenProps) {
           <Picker.Item label="RPK" value="RPK" />
           <Picker.Item label="SUG" value="SUG" />
           <Picker.Item label="WBB" value="WBB" />
+
         </Picker>
       </View>
 

@@ -8,7 +8,7 @@ export default function SelectTank({navigation}) {
   const route = useRoute();
 
   const handleConfirm = () => {
-    navigation.navigate('TankTracker', {tank: selectedValue});
+    navigation.navigate('Tank Tracker', {tank: selectedValue});
   };
 
   return (
