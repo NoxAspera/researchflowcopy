@@ -1,11 +1,10 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { getSites, getFileContents, setFile} from './APIRequests';
+import { StackNavigationProp } from '@react-navigation/stack';
+import HomeButtonProp from './HomeButtonProp';
+import { NaviProp } from './types';
 
-export default function HomeScreen({ navigation }) {
 
-  getFileContents("csp");
-  setFile("test"," and a hehehe", "brand new commit message");
-  getSites();
+export default function HomeScreen({navigation}: NaviProp) {
   return (
     <View style={styles.container}>
       {/* header */}
@@ -16,46 +15,22 @@ export default function HomeScreen({ navigation }) {
       {/* buttons */}
       
       {/* Select Site  */}
-      <TouchableOpacity
-        style={[styles.homeButton, {backgroundColor: 'green'}]}
-        onPress={() => navigation.navigate('Select Site', {from: 'Add Notes'})} >
-          <Text style={styles.homeButtonText}>Add Notes</Text>
-      </TouchableOpacity>
+      <HomeButtonProp color='green' text='Add Notes' onPress={() => navigation.navigate('SelectSite', {from: 'AddNotes'})} />
 
       {/* Bad Data  */}
-      <TouchableOpacity
-        style={[styles.homeButton, {backgroundColor: 'red'}]}
-        onPress={() => navigation.navigate('Select Site', {from: 'Bad Data'})}>
-          <Text style={styles.homeButtonText}>Bad Data</Text>
-      </TouchableOpacity>
+      <HomeButtonProp color='red' text='Bad Data' onPress={() => navigation.navigate('SelectSite', {from: "BadData"})}/>
 
       {/* Tank Tracker  */}
-      <TouchableOpacity
-        style={[styles.homeButton, {backgroundColor: 'blue'}]}
-        onPress={() => navigation.navigate('Select Tank')} >
-          <Text style={styles.homeButtonText}>Tank Tracker</Text>
-      </TouchableOpacity>
+      <HomeButtonProp color='blue' text='Tank Tracker' onPress={() => navigation.navigate('SelectTank')} />
 
-      {/* Instrument Maintenance  */}
-      <TouchableOpacity
-        style={[styles.homeButton, {backgroundColor: 'yellow'}]}
-        onPress={() => navigation.navigate('Select Instrument')} >
-          <Text style={styles.homeButtonText}>Instrument Maintenance</Text>
-      </TouchableOpacity>
+      {/* Instrument Maintenence  */}
+      <HomeButtonProp color='yellow' text='Instrument Maintenence' onPress={() => navigation.navigate('SelectInstrument')} />
 
       {/* View Past Notes  */}
-      <TouchableOpacity
-        style={[styles.homeButton, {backgroundColor: 'grey'}]}
-        onPress={() => navigation.navigate('Select Site', {from: 'View Notes'})} >
-          <Text style={styles.homeButtonText}>View Past Notes</Text>
-      </TouchableOpacity>
+      <HomeButtonProp color='grey' text='View Past Notes' onPress={() => navigation.navigate('SelectSite', {from: 'ViewNotes'})} />
 
       {/* Plan a visit  */}
-      <TouchableOpacity
-        style={[styles.homeButton, {backgroundColor: 'orange'}]}
-        onPress={() => alert('Plan a visit')} >
-          <Text style={styles.homeButtonText}>Plan a Visit</Text>
-      </TouchableOpacity>
+      <HomeButtonProp color='orange' text='Plan a Visit' onPress={() => alert('plan a visit')} />
     </View>
   );
 }
@@ -66,17 +41,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'stretch',        // has button fill space horizontally
     justifyContent: 'space-evenly',
-  },
-  homeButton: {
-    flex: 1,                      // has button fill space vertically
-    borderRadius: 10,
-    justifyContent: 'center',     // this and alignItems places text in center of button
-    alignItems: "center",
-    margin: 10
-  },
-  homeButtonText: {
-    flex: 1,
-    fontSize: 30
   },
   header: {
     width: '100%', // Ensure the header takes full width

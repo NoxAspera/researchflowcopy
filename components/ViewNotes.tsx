@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
+import { NaviProp } from './types';
 
-export default function ViewNotes({ navigation }) {
+export default function ViewNotes({ navigation }: NaviProp) {
     const route = useRoute();
     let site = route.params?.site;
     const [selectedValue, setSelectedValue] = useState("");
