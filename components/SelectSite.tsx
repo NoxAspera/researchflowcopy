@@ -56,10 +56,6 @@ export default function SelectSite({navigation}: HomeScreenProps) {
         navigation.navigate('Bad Data', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
         }
   };
-
-  let siteNames: siteResponse[];
-  const sitesPromise: Promise<siteResponse[]> = getSites();
-    sitesPromise.then(result => {result.forEach(function (value) {siteNames.push(value)})})
   return (
     <View style={styles.container}>
       <View style={styles.dropdownContainer}>
