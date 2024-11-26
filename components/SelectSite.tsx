@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, Alert, Button, TouchableOpacity } from 'react-n
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
+import { getSites, siteResponse } from './APIRequests';
 
 export default function SelectSite({navigation}) {
   const [selectedValue, setSelectedValue] = useState("CSP");
@@ -20,6 +21,9 @@ export default function SelectSite({navigation}) {
         }
   };
 
+  let siteNames: siteResponse[];
+  const sitesPromise: Promise<siteResponse[]> = getSites();
+    sitesPromise.then(result => {result.forEach(function (value) {siteNames.push(value)})})
   return (
     <View style={styles.container}>
       <View style={styles.dropdownContainer}>
@@ -29,14 +33,7 @@ export default function SelectSite({navigation}) {
           onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
           style={styles.picker}
         >
-          <Picker.Item label="CSP" value="CSP" />
-          <Picker.Item label="DBK" value="DBK" />
-          <Picker.Item label="FRU" value="FRU" />
-          <Picker.Item label="HDP" value="HDP" />
-          <Picker.Item label="HPL" value="HPL" />
-          <Picker.Item label="RPK" value="RPK" />
-          <Picker.Item label="SUG" value="SUG" />
-          <Picker.Item label="WBB" value="WBB" />
+         
         </Picker>
       </View>
 

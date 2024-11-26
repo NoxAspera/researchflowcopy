@@ -1,6 +1,11 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { getSites, getFileContents, setFile} from './APIRequests';
 
 export default function HomeScreen({ navigation }) {
+
+  getFileContents("csp");
+  setFile("test"," and a hehehe", "brand new commit message");
+  getSites();
   return (
     <View style={styles.container}>
       {/* header */}
