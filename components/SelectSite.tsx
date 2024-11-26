@@ -109,7 +109,7 @@ export default function SelectSite({navigation}: HomeScreenProps) {
     //       <Text style={styles.buttonText}>Confirm</Text>
     //     </TouchableOpacity>
     //   </View>
-    // </View>
+    // </View
   );
 }
 

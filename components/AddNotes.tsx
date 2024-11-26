@@ -6,6 +6,9 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { StackNavigationProp } from '@react-navigation/stack';
 import AddNotesTextInput from './AddNotesTextInput';
 import { NaviProp } from './types';
+import { ApplicationProvider, IndexPath, Input, Layout, Select, SelectItem, Button } from '@ui-kitten/components';
+import * as eva from '@eva-design/eva';
+import { default as theme } from '../custom-theme.json'
 
 type RouteParams = {
   site: string; 
@@ -18,7 +21,7 @@ export default function AddNotes({ navigation }: NaviProp) {
     //let site = route.params?.site;
     const { site, info } = route.params || {}
 
-    console.log("Info parameter:", info);
+    //console.log("Info parameter:", info);
 
     const entry = info?.entries[0] || {};
     const instrument = entry.instrument || 'No instrument associated with this site. Please provide instrument type and serial number.';
@@ -41,129 +44,214 @@ export default function AddNotes({ navigation }: NaviProp) {
     }
 
     const [selectedValue, setSelectedValue] = useState("");
+    // Use IndexPath for selected index
+    const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
+    const instruments = ['Instrument 1', 'Instrument 2', 'Instrument 3']
 
     //alert("found: " + site);
     return (
-      <ScrollView style = {styles.scrollContainer}>
-        <View style={styles.container}>
-          {/* header */}
-          <View style={styles.header}>
-            <Text style={styles.headerText}>{site}</Text>
-          </View>
-    
+      <ApplicationProvider {...eva} theme={theme}>
+        <Layout style={styles.container} level='1'>
+
           {/* drop down menu for instruments */}
-          <View style={styles.rowContainer}>
-            <Text style={styles.label}>instrument</Text>
-            <Picker
-                selectedValue={selectedValue}
-                onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
-                style={styles.picker}
-              >
-                <Picker.Item label={instrument} value={instrument} />
-            </Picker>
-          </View>
+          <Select label='Instrument'
+            selectedIndex={selectedIndex}
+            onSelect={(index) => setSelectedIndex(index as IndexPath)}
+            value={instruments[selectedIndex.row]}>
+            <SelectItem 
+              title='Instrument 1'
+            />
+            <SelectItem 
+              title='Instrument 2'
+            />
+            <SelectItem 
+              title='Instrument 3'
+            />
+          </Select>
+
+          {/* text inputs */}
+          {/* Time input */}
+          <Input
+            label='Time'
+            placeholder='12:00 PM'
+            value={selectedValue}
+            onChangeText={selectedValue => setSelectedValue(selectedValue)}
+            style={styles.label}
+          />
+          {/* N2 */}
+          <Input
+            label='N2'
+            placeholder='Level'
+            value={selectedValue}
+            onChangeText={selectedValue => setSelectedValue(selectedValue)} 
+            style={styles.label}
+          />
+          {/* Low input */}
+          <Input
+            label='Low'
+            placeholder='Level'
+            caption=''
+            value={selectedValue}
+            onChangeText={selectedValue => setSelectedValue(selectedValue)} 
+            style={styles.label}
+          />
+          {/* mid input */}
+          <Input
+            label='Mid'
+            placeholder='Level'
+            caption=''
+            value={selectedValue}
+            onChangeText={selectedValue => setSelectedValue(selectedValue)} 
+            style={styles.label}
+          />
+          {/* high input */}
+          <Input
+            label='High'
+            placeholder='Level'
+            caption=''
+            value={selectedValue}
+            onChangeText={selectedValue => setSelectedValue(selectedValue)} 
+            style={styles.label}
+          />
+          {/* notes entry */}
+          <Input
+            label='Notes'
+            placeholder='All Good.'
+            value={selectedValue}
+            size='large'
+            multiline={true}
+            onChangeText={selectedValue => setSelectedValue(selectedValue)} 
+            style={styles.label}
+          />
+          {/* submit button */}
+          <Button
+            onPress={() => alert('submitted notes!')}
+            appearance='filled'
+            status='primary'>
+            Submit
+          </Button>
+        </Layout>
+      </ApplicationProvider>
+      // <ScrollView style = {styles.scrollContainer}>
+      //   <View style={styles.container}>
+      //     {/* header */}
+      //     <View style={styles.header}>
+      //       <Text style={styles.headerText}>{site}</Text>
+      //     </View>
+    
+      //     {/* drop down menu for instruments */}
+      //     <View style={styles.rowContainer}>
+      //       <Text style={styles.label}>instrument</Text>
+      //       <Picker
+      //           selectedValue={selectedValue}
+      //           onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
+      //           style={styles.picker}
+      //         >
+      //           <Picker.Item label={instrument} value={instrument} />
+      //       </Picker>
+      //     </View>
           
-          {/* <View style = {styles.rowContainer}>
-            <Text style = {styles.label}>Time Started:</Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </View> */}
-          <AddNotesTextInput inputText='Time Started:' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} />
+      //     {/* <View style = {styles.rowContainer}>
+      //       <Text style = {styles.label}>Time Started:</Text>
+      //       <SafeAreaProvider>
+      //         <SafeAreaView>
+      //           <TextInput
+      //             style = {styles.timeInput}>
+      //           </TextInput>
+      //         </SafeAreaView>
+      //       </SafeAreaProvider>
+      //     </View> */}
+      //     <AddNotesTextInput inputText='Time Started:' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} />
 
-          {n2 !== '' && (
-            // <View style={styles.rowContainer}>
-            //   <Text style={styles.label}>N2:</Text>
-            //   <SafeAreaProvider>
-            //     <SafeAreaView>
-            //       <TextInput
-            //         style={styles.timeInput}>
-            //       </TextInput>
-            //     </SafeAreaView>
-            //   </SafeAreaProvider>
-            // </View>
-            <AddNotesTextInput inputText='N2:' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} />
-          )}
+      //     {n2 !== '' && (
+      //       // <View style={styles.rowContainer}>
+      //       //   <Text style={styles.label}>N2:</Text>
+      //       //   <SafeAreaProvider>
+      //       //     <SafeAreaView>
+      //       //       <TextInput
+      //       //         style={styles.timeInput}>
+      //       //       </TextInput>
+      //       //     </SafeAreaView>
+      //       //   </SafeAreaProvider>
+      //       // </View>
+      //       <AddNotesTextInput inputText='N2:' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} />
+      //     )}
 
-          {low_tank !== '' && (
-            // <View style={styles.rowContainer}>
-            //   <Text style={styles.label}>Low: {low_tank}</Text>
-            //   <SafeAreaProvider>
-            //     <SafeAreaView>
-            //       <TextInput
-            //         style={styles.timeInput}>
-            //       </TextInput>
-            //     </SafeAreaView>
-            //   </SafeAreaProvider>
-            // </View>
-            <AddNotesTextInput inputText='Low: ' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} inputTextVar={low_tank} />
-          )}
+      //     {low_tank !== '' && (
+      //       // <View style={styles.rowContainer}>
+      //       //   <Text style={styles.label}>Low: {low_tank}</Text>
+      //       //   <SafeAreaProvider>
+      //       //     <SafeAreaView>
+      //       //       <TextInput
+      //       //         style={styles.timeInput}>
+      //       //       </TextInput>
+      //       //     </SafeAreaView>
+      //       //   </SafeAreaProvider>
+      //       // </View>
+      //       <AddNotesTextInput inputText='Low: ' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} inputTextVar={low_tank} />
+      //     )}
 
-          {mid_tank !== '' && (
-            // <View style={styles.rowContainer}>
-            //   <Text style={styles.label}>Mid: {mid_tank}</Text>
-            //   <SafeAreaProvider>
-            //     <SafeAreaView>
-            //       <TextInput
-            //         style={styles.timeInput}>
-            //       </TextInput>
-            //     </SafeAreaView>
-            //   </SafeAreaProvider>
-            // </View>
-            <AddNotesTextInput inputText='Mid: ' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} inputTextVar={mid_tank} />
-          )}
+      //     {mid_tank !== '' && (
+      //       // <View style={styles.rowContainer}>
+      //       //   <Text style={styles.label}>Mid: {mid_tank}</Text>
+      //       //   <SafeAreaProvider>
+      //       //     <SafeAreaView>
+      //       //       <TextInput
+      //       //         style={styles.timeInput}>
+      //       //       </TextInput>
+      //       //     </SafeAreaView>
+      //       //   </SafeAreaProvider>
+      //       // </View>
+      //       <AddNotesTextInput inputText='Mid: ' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} inputTextVar={mid_tank} />
+      //     )}
 
-          {high_tank !== '' && (
-            // <View style={styles.rowContainer}>
-            //   <Text style={styles.label}>High: {high_tank}</Text>
-            //   <SafeAreaProvider>
-            //     <SafeAreaView>
-            //       <TextInput
-            //         style={styles.timeInput}>
-            //       </TextInput>
-            //     </SafeAreaView>
-            //   </SafeAreaProvider>
-            // </View>
-            <AddNotesTextInput inputText='High: ' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} inputTextVar={high_tank} />
-          )}
+      //     {high_tank !== '' && (
+      //       // <View style={styles.rowContainer}>
+      //       //   <Text style={styles.label}>High: {high_tank}</Text>
+      //       //   <SafeAreaProvider>
+      //       //     <SafeAreaView>
+      //       //       <TextInput
+      //       //         style={styles.timeInput}>
+      //       //       </TextInput>
+      //       //     </SafeAreaView>
+      //       //   </SafeAreaProvider>
+      //       // </View>
+      //       <AddNotesTextInput inputText='High: ' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} inputTextVar={high_tank} />
+      //     )}
 
-          {lts !== '' && (
-            // <View style={styles.rowContainer}>
-            //   <Text style={styles.label}>LTS: {lts}</Text>
-            //   <SafeAreaProvider>
-            //     <SafeAreaView>
-            //       <TextInput
-            //         style={styles.timeInput}>
-            //       </TextInput>
-            //     </SafeAreaView>
-            //   </SafeAreaProvider>
-            // </View>
-            <AddNotesTextInput inputText='LTS: ' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} inputTextVar={lts} />
-          )}
+      //     {lts !== '' && (
+      //       // <View style={styles.rowContainer}>
+      //       //   <Text style={styles.label}>LTS: {lts}</Text>
+      //       //   <SafeAreaProvider>
+      //       //     <SafeAreaView>
+      //       //       <TextInput
+      //       //         style={styles.timeInput}>
+      //       //       </TextInput>
+      //       //     </SafeAreaView>
+      //       //   </SafeAreaProvider>
+      //       // </View>
+      //       <AddNotesTextInput inputText='LTS: ' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} inputTextVar={lts} />
+      //     )}
 
 
 
-          {/* <Text style= {styles.label}>Site Notes</Text>
-          <SafeAreaProvider>
-            <SafeAreaView>
-              <TextInput
-                style = {styles.areaInput}>
-              </TextInput>
-            </SafeAreaView>
-          </SafeAreaProvider> */}
-          <AddNotesTextInput inputText='Site Notes' inputTextStyle={styles.areaInput} ViewStyle={styles.rowContainer} />
+      //     {/* <Text style= {styles.label}>Site Notes</Text>
+      //     <SafeAreaProvider>
+      //       <SafeAreaView>
+      //         <TextInput
+      //           style = {styles.areaInput}>
+      //         </TextInput>
+      //       </SafeAreaView>
+      //     </SafeAreaProvider> */}
+      //     <AddNotesTextInput inputText='Site Notes' inputTextStyle={styles.areaInput} ViewStyle={styles.rowContainer} />
 
-          <TouchableOpacity
-            style={[styles.homeButton, {backgroundColor: 'red'}]}
-            onPress={() => alert("Submit Button Pressed")} >
-            <Text style={[styles.homeButtonText, {color: 'white'}]}>Submit!</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+      //     <TouchableOpacity
+      //       style={[styles.homeButton, {backgroundColor: 'red'}]}
+      //       onPress={() => alert("Submit Button Pressed")} >
+      //       <Text style={[styles.homeButtonText, {color: 'white'}]}>Submit!</Text>
+      //     </TouchableOpacity>
+      //   </View>
+      // </ScrollView>
     );
   }
   
@@ -218,12 +306,10 @@ export default function AddNotes({ navigation }: NaviProp) {
       alignItems: 'flex-start',        // has button fill space horizontally
       justifyContent: 'space-evenly',
     },
-    homeButton: {
-      flex: 1,                      // has button fill space vertically
-      borderRadius: 10,
+    submitButton: {
+      paddingLeft: 10,
       justifyContent: 'center',     // this and alignItems places text in center of button
-      alignItems: "center",
-      margin: 10
+      alignItems: "center"
     },
     homeButtonText: {
       flex: 1,

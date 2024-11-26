@@ -1,3 +1,11 @@
+/**
+ * Home Screen
+ * By Blake Stambaugh
+ * 11/26/2024
+ * 
+ * The follow code represents the home page the user sees when they first launch our app.
+ * It has a button for each section of the app that will take them to the next page.
+**/ 
 import { StyleSheet, View, TouchableOpacity, ScrollView, TouchableWithoutFeedback, ImageBackground, Image } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import HomeButtonProp from './HomeButtonProp';
