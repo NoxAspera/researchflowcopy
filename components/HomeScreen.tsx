@@ -43,13 +43,13 @@ export default function HomeScreen({navigation}: NaviProp) {
                 </Layout>
             </TouchableWithoutFeedback>
             {/* INSTRUMENT MAINTENENCE */}
-            <TouchableWithoutFeedback onPress={() => navigation.navigate('SelectInstrument')}>
+            <TouchableWithoutFeedback onPress={() => navigation.navigate('SelectSite', {from: "InstrumentMaintenance"})}>
                 <Layout style={styles.tab} level="2">
                     <Text category="h5">INSTRUMENT MAINTENENCE</Text>
                 </Layout>
             </TouchableWithoutFeedback>
             {/* TANK TRACKER */}
-            <TouchableWithoutFeedback onPress={() => navigation.navigate('SelectTank')}>
+            <TouchableWithoutFeedback onPress={() => navigation.navigate('SelectSite', {from: "TankTracker"})}>
                 <Layout style={styles.tab} level="2">
                     <Text category="h5">TANK TRACKER</Text>
                 </Layout>

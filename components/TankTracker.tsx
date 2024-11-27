@@ -1,120 +1,187 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
-import { ScrollView, TextInput } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
+import { ApplicationProvider, Button, IndexPath, Input, Layout, Select, SelectItem, Text } from '@ui-kitten/components';
+import * as eva from '@eva-design/eva';
+import TextInput from './TextInput'
+import { default as theme } from '../custom-theme.json'
 
 export default function TankTracker({ navigation }) {
     const route = useRoute();
-    let tank = route.params?.tank;
-    const [selectedValue, setSelectedValue] = useState("");
+    let site = route.params?.site;
+
+    // used for setting and remembering the input values
+    const [nameValue, setNameValue] = useState("");
+    const [dateValue, setDateValue] = useState("");
+    const [PSIValue, setPSIValue] = useState("");
+    const [CO2Value, setCO2Value] = useState("");
+    const [CH4Value, setCH4Value] = useState("");
+    const [notesValue, setNotesValue] = useState("");
+
+    // Use IndexPath for selected index for drop down menu
+    const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
+    const tanks = ['Tank 1', 'Tank 2', 'Tank 3']
 
     //alert("found: " + instrument);
     return (
-      <ScrollView style = {styles.scrollContainer}>
-        <View style={styles.container}>
+      <ApplicationProvider {...eva} theme={theme}>
+        <Layout style={styles.container} level='1'>
           {/* header */}
-          <View style={styles.header}>
-            <Text style={styles.headerText}>{tank}</Text>
-          </View>
+          <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
+          
           {/* drop down menu for instruments */}
-          <View style={styles.rowContainer}>
-            <Text style={styles.label}>Location:</Text>
-            <Picker
-                selectedValue={selectedValue}
-                onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
-                style={styles.picker}
-              >
-                <Picker.Item label="CSP" value="CSP" />
-                <Picker.Item label="DBK" value="DBK" />
-                <Picker.Item label="FRU" value="FRU" />
-                <Picker.Item label="HDP" value="HDP" />
-                <Picker.Item label="HPL" value="HPL" />
-                <Picker.Item label="RPK" value="RPK" />
-                <Picker.Item label="SUG" value="SUG" />
-                <Picker.Item label="WBB" value="WBB" />
-            </Picker>
-          </View>
+          <Select label='Tanks'
+            selectedIndex={selectedIndex}
+            onSelect={(index) => setSelectedIndex(index as IndexPath)}
+            value={tanks[selectedIndex.row]}>
+            <SelectItem 
+              title='Tank 1'
+            />
+            <SelectItem 
+              title='Tank 2'
+            />
+            <SelectItem 
+              title='Tank 3'
+            />
+          </Select>
 
-          <View style = {styles.rowContainer}>
-            <Text style = {styles.label}>Name: </Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </View>
+          {/* text inputs */}
+          {/* Time input */}
+          <TextInput labelText='Time' labelValue={dateValue} onTextChange={setDateValue} placeholder='12:00 PM' />
 
-          <View>
-            <Text style = {styles.label}>Enter date: </Text>
-          </View>
+          {/* Name input */}
+          <TextInput labelText='Name' labelValue={nameValue} onTextChange={setNameValue} placeholder='Jane Doe' />
 
-          <View style = {styles.rowContainer}>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput2}>
-                </TextInput>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </View>
+          {/* tank measurements */}
+          <Text category='h3' style={{textAlign: 'center'}}>Tank Measurements</Text>
 
-          <View>
-            <Text style = {styles.label}>Tank Measurements: </Text>
-          </View>
+          {/* PSI input */}
+          <TextInput labelText='PSI' labelValue={PSIValue} onTextChange={setPSIValue} placeholder='100' />
 
-          <View style ={styles.rowContainer}>
-            <Text style = {styles.label}>Psi:  </Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-          </SafeAreaProvider>
-          </View>
+          {/* C02 entry */}
+          <TextInput labelText='CO2' labelValue={CO2Value} onTextChange={setCO2Value} placeholder='100' />
 
-          <View style ={styles.rowContainer}>
-            <Text style = {styles.label}>CO2:</Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-          </SafeAreaProvider>
-          </View>
+          {/* CH4 entry */}
+          <TextInput labelText='CH4' labelValue={CH4Value} onTextChange={setCH4Value} placeholder='100' />
 
-          <View style ={styles.rowContainer}>
-            <Text style = {styles.label}>CH4:</Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-          </SafeAreaProvider>
-          </View>
+          {/* notes entry */}
+          <TextInput labelText='Notes' labelValue={notesValue} onTextChange={setNotesValue} placeholder='Tank draining at normal rate.' />
+          
+          {/* submit button */}
+          <Button
+            onPress={() => alert('submitted request!')}
+            appearance='filled'
+            status='primary'>
+            Submit
+          </Button>
+        </Layout>
+      </ApplicationProvider>
+      // <ScrollView style = {styles.scrollContainer}>
+      //   <View style={styles.container}>
+      //     {/* header */}
+      //     <View style={styles.header}>
+      //       <Text style={styles.headerText}>{site}</Text>
+      //     </View>
+      //     {/* drop down menu for instruments */}
+      //     <View style={styles.rowContainer}>
+      //       <Text style={styles.label}>Location:</Text>
+      //       <Picker
+      //           selectedValue={selectedValue}
+      //           onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
+      //           style={styles.picker}
+      //         >
+      //           <Picker.Item label="CSP" value="CSP" />
+      //           <Picker.Item label="DBK" value="DBK" />
+      //           <Picker.Item label="FRU" value="FRU" />
+      //           <Picker.Item label="HDP" value="HDP" />
+      //           <Picker.Item label="HPL" value="HPL" />
+      //           <Picker.Item label="RPK" value="RPK" />
+      //           <Picker.Item label="SUG" value="SUG" />
+      //           <Picker.Item label="WBB" value="WBB" />
+      //       </Picker>
+      //     </View>
 
-          <Text style= {styles.label}>Notes:</Text>
-          <SafeAreaProvider>
-            <SafeAreaView>
-              <TextInput
-                style = {styles.areaInput}>
-              </TextInput>
-            </SafeAreaView>
-          </SafeAreaProvider>
+      //     <View style = {styles.rowContainer}>
+      //       <Text style = {styles.label}>Name: </Text>
+      //       <SafeAreaProvider>
+      //         <SafeAreaView>
+      //           <TextInput
+      //             style = {styles.timeInput}>
+      //           </TextInput>
+      //         </SafeAreaView>
+      //       </SafeAreaProvider>
+      //     </View>
 
-          <TouchableOpacity
-            style={[styles.homeButton, {backgroundColor: 'red'}]}
-            onPress={() => alert("Submit Button Pressed")} >
-            <Text style={[styles.homeButtonText, {color: 'white'}]}>Submit!</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+      //     <View>
+      //       <Text style = {styles.label}>Enter date: </Text>
+      //     </View>
+
+      //     <View style = {styles.rowContainer}>
+      //       <SafeAreaProvider>
+      //         <SafeAreaView>
+      //           <TextInput
+      //             style = {styles.timeInput2}>
+      //           </TextInput>
+      //         </SafeAreaView>
+      //       </SafeAreaProvider>
+      //     </View>
+
+      //     <View>
+      //       <Text style = {styles.label}>Tank Measurements: </Text>
+      //     </View>
+
+      //     <View style ={styles.rowContainer}>
+      //       <Text style = {styles.label}>Psi:  </Text>
+      //       <SafeAreaProvider>
+      //         <SafeAreaView>
+      //           <TextInput
+      //             style = {styles.timeInput}>
+      //           </TextInput>
+      //         </SafeAreaView>
+      //     </SafeAreaProvider>
+      //     </View>
+
+      //     <View style ={styles.rowContainer}>
+      //       <Text style = {styles.label}>CO2:</Text>
+      //       <SafeAreaProvider>
+      //         <SafeAreaView>
+      //           <TextInput
+      //             style = {styles.timeInput}>
+      //           </TextInput>
+      //         </SafeAreaView>
+      //     </SafeAreaProvider>
+      //     </View>
+
+      //     <View style ={styles.rowContainer}>
+      //       <Text style = {styles.label}>CH4:</Text>
+      //       <SafeAreaProvider>
+      //         <SafeAreaView>
+      //           <TextInput
+      //             style = {styles.timeInput}>
+      //           </TextInput>
+      //         </SafeAreaView>
+      //     </SafeAreaProvider>
+      //     </View>
+
+      //     <Text style= {styles.label}>Notes:</Text>
+      //     <SafeAreaProvider>
+      //       <SafeAreaView>
+      //         <TextInput
+      //           style = {styles.areaInput}>
+      //         </TextInput>
+      //       </SafeAreaView>
+      //     </SafeAreaProvider>
+
+      //     <TouchableOpacity
+      //       style={[styles.homeButton, {backgroundColor: 'red'}]}
+      //       onPress={() => alert("Submit Button Pressed")} >
+      //       <Text style={[styles.homeButtonText, {color: 'white'}]}>Submit!</Text>
+      //     </TouchableOpacity>
+      //   </View>
+      // </ScrollView>
     );
   }
 

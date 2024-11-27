@@ -1,83 +1,135 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
-import { ScrollView, TextInput } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
+import { ApplicationProvider, Button, IndexPath, Input, Layout, Select, SelectItem, Text } from '@ui-kitten/components';
+import TextInput from './TextInput'
+import * as eva from '@eva-design/eva';
+import { default as theme } from '../custom-theme.json'
 
 export default function InstrumentMaintenance({ navigation }) {
     const route = useRoute();
-    let instrument = route.params?.instrument;
-    const [selectedValue, setSelectedValue] = useState("");
+    let site = route.params?.site;
+
+    // used for setting and remembering the input values
+    const [nameValue, setNameValue] = useState("");
+    const [dateValue, setDateValue] = useState("");
+    const [notesValue, setNotesValue] = useState("");
+
+    // Use IndexPath for selected index for drop down menu
+    const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
+    const instruments = ['Instrument 1', 'Instrument 2', 'Instrument 3']
 
     //alert("found: " + instrument);
     return (
-      <ScrollView style = {styles.scrollContainer}>
-        <View style={styles.container}>
+      <ApplicationProvider {...eva} theme={theme}>
+        <Layout style={styles.container} level='1'>
           {/* header */}
-          <View style={styles.header}>
-            <Text style={styles.headerText}>{instrument}</Text>
-          </View>
+          <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
+          
           {/* drop down menu for instruments */}
-          <View style={styles.rowContainer}>
-            <Text style={styles.label}>Location:</Text>
-            <Picker
-                selectedValue={selectedValue}
-                onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
-                style={styles.picker}
-              >
-                <Picker.Item label="CSP" value="CSP" />
-                <Picker.Item label="DBK" value="DBK" />
-                <Picker.Item label="FRU" value="FRU" />
-                <Picker.Item label="HDP" value="HDP" />
-                <Picker.Item label="HPL" value="HPL" />
-                <Picker.Item label="RPK" value="RPK" />
-                <Picker.Item label="SUG" value="SUG" />
-                <Picker.Item label="WBB" value="WBB" />
-            </Picker>
-          </View>
+          <Select label='Instrument'
+            selectedIndex={selectedIndex}
+            onSelect={(index) => setSelectedIndex(index as IndexPath)}
+            value={instruments[selectedIndex.row]}>
+            <SelectItem 
+              title='Instrument 1'
+            />
+            <SelectItem 
+              title='Instrument 2'
+            />
+            <SelectItem 
+              title='Instrument 3'
+            />
+          </Select>
 
-          <View style = {styles.rowContainer}>
-            <Text style = {styles.label}>Name: </Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </View>
+          {/* text inputs */}
+          {/* Time input */}
+          <TextInput labelText='Time' labelValue={dateValue} onTextChange={setDateValue} placeholder='12:00 PM' />
 
-          <View>
-            <Text style = {styles.label}>Enter date: </Text>
-          </View>
+          {/* Name input */}
+          <TextInput labelText='Name' labelValue={nameValue} onTextChange={setNameValue} placeholder='Jane Doe' />
 
-          <View style = {styles.rowContainer}>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput2}>
-                </TextInput>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </View>
+          {/* notes entry */}
+          <TextInput labelText='Request' labelValue={notesValue} onTextChange={setNotesValue} placeholder='Giving bad reading.' multiplelines={true}/>
+          
+          {/* submit button */}
+          <Button
+            onPress={() => alert('submitted request!')}
+            appearance='filled'
+            status='primary'>
+            Submit
+          </Button>
+        </Layout>
+      </ApplicationProvider>
+      // <ScrollView style = {styles.scrollContainer}>
+      //   <View style={styles.container}>
+      //     {/* header */}
+      //     <View style={styles.header}>
+      //       <Text style={styles.headerText}>{instrument}</Text>
+      //     </View>
+      //     {/* drop down menu for instruments */}
+      //     <View style={styles.rowContainer}>
+      //       <Text style={styles.label}>Location:</Text>
+      //       <Picker
+      //           selectedValue={selectedValue}
+      //           onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
+      //           style={styles.picker}
+      //         >
+      //           <Picker.Item label="CSP" value="CSP" />
+      //           <Picker.Item label="DBK" value="DBK" />
+      //           <Picker.Item label="FRU" value="FRU" />
+      //           <Picker.Item label="HDP" value="HDP" />
+      //           <Picker.Item label="HPL" value="HPL" />
+      //           <Picker.Item label="RPK" value="RPK" />
+      //           <Picker.Item label="SUG" value="SUG" />
+      //           <Picker.Item label="WBB" value="WBB" />
+      //       </Picker>
+      //     </View>
 
-          <Text style= {styles.label}>Notes:</Text>
-          <SafeAreaProvider>
-            <SafeAreaView>
-              <TextInput
-                style = {styles.areaInput}>
-              </TextInput>
-            </SafeAreaView>
-          </SafeAreaProvider>
+      //     <View style = {styles.rowContainer}>
+      //       <Text style = {styles.label}>Name: </Text>
+      //       <SafeAreaProvider>
+      //         <SafeAreaView>
+      //           <TextInput
+      //             style = {styles.timeInput}>
+      //           </TextInput>
+      //         </SafeAreaView>
+      //       </SafeAreaProvider>
+      //     </View>
 
-          <TouchableOpacity
-            style={[styles.homeButton, {backgroundColor: 'red'}]}
-            onPress={() => alert("Submit Button Pressed")} >
-            <Text style={[styles.homeButtonText, {color: 'white'}]}>Submit!</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+      //     <View>
+      //       <Text style = {styles.label}>Enter date: </Text>
+      //     </View>
+
+      //     <View style = {styles.rowContainer}>
+      //       <SafeAreaProvider>
+      //         <SafeAreaView>
+      //           <TextInput
+      //             style = {styles.timeInput2}>
+      //           </TextInput>
+      //         </SafeAreaView>
+      //       </SafeAreaProvider>
+      //     </View>
+
+      //     <Text style= {styles.label}>Notes:</Text>
+      //     <SafeAreaProvider>
+      //       <SafeAreaView>
+      //         <TextInput
+      //           style = {styles.areaInput}>
+      //         </TextInput>
+      //       </SafeAreaView>
+      //     </SafeAreaProvider>
+
+      //     <TouchableOpacity
+      //       style={[styles.homeButton, {backgroundColor: 'red'}]}
+      //       onPress={() => alert("Submit Button Pressed")} >
+      //       <Text style={[styles.homeButtonText, {color: 'white'}]}>Submit!</Text>
+      //     </TouchableOpacity>
+      //   </View>
+      // </ScrollView>
     );
   }
 

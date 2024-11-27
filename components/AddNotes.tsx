@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { StackNavigationProp } from '@react-navigation/stack';
-import AddNotesTextInput from './AddNotesTextInput';
+import AddNotesTextInput from './TextInput';
 import { NaviProp } from './types';
+import TextInput from './TextInput'
 import { ApplicationProvider, IndexPath, Input, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { default as theme } from '../custom-theme.json'
@@ -50,6 +51,7 @@ export default function AddNotes({ navigation }: NaviProp) {
     const [highValue, setHighValue] = useState("");
     const [n2Value, setN2Value] = useState("");
     const [notesValue, setNotesValue] = useState("");
+    
     // Use IndexPath for selected index for drop down menu
     const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
     const instruments = ['Instrument 1', 'Instrument 2', 'Instrument 3']
@@ -79,57 +81,23 @@ export default function AddNotes({ navigation }: NaviProp) {
 
           {/* text inputs */}
           {/* Time input */}
-          <Input
-            label='Time'
-            placeholder='12:00 PM'
-            value={timeValue}
-            onChangeText={timeValue => setTimeValue(timeValue)}
-            style={styles.label}
-          />
+          <TextInput labelText='Time' labelValue={timeValue} onTextChange={setTimeValue} placeholder='12:00 PM' />
+
           {/* N2 */}
-          <Input
-            label='N2'
-            placeholder='Level'
-            value={n2Value}
-            onChangeText={n2Value => setN2Value(n2Value)} 
-            style={styles.label}
-          />
+          <TextInput labelText='N2' labelValue={n2Value} onTextChange={setN2Value} placeholder='Level' />
+
           {/* Low input */}
-          <Input
-            label='Low'
-            placeholder='Level'
-            caption=''
-            value={lowValue}
-            onChangeText={lowValue => setLowValue(lowValue)} 
-            style={styles.label}
-          />
+          <TextInput labelText='Low' labelValue={lowValue} onTextChange={setLowValue} placeholder='Level' />
+
           {/* mid input */}
-          <Input
-            label='Mid'
-            placeholder='Level'
-            caption=''
-            value={medValue}
-            onChangeText={medValue => setMedValue(medValue)} 
-            style={styles.label}
-          />
+          <TextInput labelText='Mid' labelValue={medValue} onTextChange={setMedValue} placeholder='Level' />
+
           {/* high input */}
-          <Input
-            label='High'
-            placeholder='Level'
-            caption=''
-            value={highValue}
-            onChangeText={highValue => setHighValue(highValue)} 
-            style={styles.label}
-          />
+          <TextInput labelText='High' labelValue={highValue} onTextChange={setHighValue} placeholder='Level' />
+
           {/* notes entry */}
-          <Input
-            label='Notes'
-            placeholder='All Good.'
-            value={notesValue}
-            size='large'
-            multiline={true}
-            onChangeText={notesValue => setNotesValue(notesValue)} 
-          />
+          <TextInput labelText='Notes' labelValue={notesValue} onTextChange={setNotesValue} placeholder='All Good.' multiplelines={true}/>
+
           {/* submit button */}
           <Button
             onPress={() => alert('submitted notes!')}

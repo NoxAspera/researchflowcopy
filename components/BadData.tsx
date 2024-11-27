@@ -1,110 +1,159 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
-import { ScrollView, TextInput } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler';
 import { NaviProp } from './types';
+import TextInput from './TextInput'
+import { ApplicationProvider, Button, Input, Layout, Text } from '@ui-kitten/components';
+import * as eva from '@eva-design/eva';
+import { default as theme } from '../custom-theme.json'
 
 export default function BadData({ navigation }: NaviProp) {
     const route = useRoute();
     let site = route.params?.site;
     const [selectedValue, setSelectedValue] = useState("");
 
+    // these use states to set and store values in the text inputs
+    const [oldIDValue, setOldIDValue] = useState("");
+    const [newIDValue, setNewIDValue] = useState("");
+    const [startTimeValue, setStartTimeValue] = useState("");
+    const [endTimeValue, setEndTimeValue] = useState("");
+    const [nameValue, setNameValue] = useState("");
+    const [entryTimeValue, setEntryTimeValue] = useState("");
+    const [reasonValue, setReasonValue] = useState("");
+
     //alert("found: " + site);
     return (
-      <ScrollView style = {styles.scrollContainer}>
-        <View style={styles.container}>
+      <ApplicationProvider {...eva} theme={theme}>
+        <Layout style={styles.container} level='1'>
           {/* header */}
-          <View style={styles.header}>
-            <Text style={styles.headerText}>{site}</Text>
-          </View>
+          <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
+          
+          {/* text inputs */}
+          {/* old id input */}
+          <TextInput labelText='Old ID' labelValue={oldIDValue} onTextChange={setOldIDValue} placeholder='123456' />
+          
+          {/* new id input */}
+          <TextInput labelText='New ID' labelValue={newIDValue} onTextChange={setNewIDValue} placeholder='67890' />
 
-          <View style = {styles.rowContainer}>
-            <Text style = {styles.label}>ID Old:</Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </View>
+          {/* start time input */}
+          <TextInput labelText='Start Time' labelValue={startTimeValue} onTextChange={setStartTimeValue} placeholder='12:00 PM' />
 
-          <View style = {styles.rowContainer}>
-            <Text style = {styles.label}>ID New:  </Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </View>
+          {/* end time input */}
+          <TextInput labelText='End Time' labelValue={endTimeValue} onTextChange={setEndTimeValue} placeholder='12:00 AM' />
 
-          <View style = {styles.rowContainer}>
-            <Text style = {styles.label}>Time Start:</Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </View>
+          {/* Name input */}
+          <TextInput labelText='Name' labelValue={nameValue} onTextChange={setNameValue} placeholder='John Doe' />
 
-          <View style = {styles.rowContainer}>
-            <Text style = {styles.label}>Time End:  </Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </View>
+          {/* time entry input */}
+          <TextInput labelText='Time Entry' labelValue={entryTimeValue} onTextChange={setEntryTimeValue} placeholder='12 hours' />
 
-          <View style = {styles.rowContainer}>
-            <Text style = {styles.label}>Name: </Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput}>
-                </TextInput>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </View>
+          {/* reason entry */}
+          <TextInput labelText='Reason for Bad Data' labelValue={reasonValue} onTextChange={setReasonValue} placeholder='Its wack.' multiplelines={true}/>
 
-          <View>
-            <Text style = {styles.label}>Time entry added: </Text>
-          </View>
+          {/* submit button */}
+          <Button
+            onPress={() => alert('submitted bad data!')}
+            appearance='filled'
+            status='primary'>
+            Submit
+          </Button>
+        </Layout>
+      </ApplicationProvider>
+      // <ScrollView style = {styles.scrollContainer}>
+      //   <View style={styles.container}>
+      //     {/* header */}
+      //     <View style={styles.header}>
+      //       <Text style={styles.headerText}>{site}</Text>
+      //     </View>
 
-          <View style = {styles.rowContainer}>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <TextInput
-                  style = {styles.timeInput2}>
-                </TextInput>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </View>
+      //     <View style = {styles.rowContainer}>
+      //       <Text style = {styles.label}>ID Old:</Text>
+      //       <SafeAreaProvider>
+      //         <SafeAreaView>
+      //           <TextInput
+      //             style = {styles.timeInput}>
+      //           </TextInput>
+      //         </SafeAreaView>
+      //       </SafeAreaProvider>
+      //     </View>
 
-          <Text style= {styles.label}>Why is the data bad:</Text>
-          <SafeAreaProvider>
-            <SafeAreaView>
-              <TextInput
-                style = {styles.areaInput}>
-              </TextInput>
-            </SafeAreaView>
-          </SafeAreaProvider>
+      //     <View style = {styles.rowContainer}>
+      //       <Text style = {styles.label}>ID New:  </Text>
+      //       <SafeAreaProvider>
+      //         <SafeAreaView>
+      //           <TextInput
+      //             style = {styles.timeInput}>
+      //           </TextInput>
+      //         </SafeAreaView>
+      //       </SafeAreaProvider>
+      //     </View>
 
-          <TouchableOpacity
-            style={[styles.homeButton, {backgroundColor: 'red'}]}
-            onPress={() => alert("Submit Button Pressed")} >
-            <Text style={[styles.homeButtonText, {color: 'white'}]}>Submit!</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+      //     <View style = {styles.rowContainer}>
+      //       <Text style = {styles.label}>Time Start:</Text>
+      //       <SafeAreaProvider>
+      //         <SafeAreaView>
+      //           <TextInput
+      //             style = {styles.timeInput}>
+      //           </TextInput>
+      //         </SafeAreaView>
+      //       </SafeAreaProvider>
+      //     </View>
+
+      //     <View style = {styles.rowContainer}>
+      //       <Text style = {styles.label}>Time End:  </Text>
+      //       <SafeAreaProvider>
+      //         <SafeAreaView>
+      //           <TextInput
+      //             style = {styles.timeInput}>
+      //           </TextInput>
+      //         </SafeAreaView>
+      //       </SafeAreaProvider>
+      //     </View>
+
+      //     <View style = {styles.rowContainer}>
+      //       <Text style = {styles.label}>Name: </Text>
+      //       <SafeAreaProvider>
+      //         <SafeAreaView>
+      //           <TextInput
+      //             style = {styles.timeInput}>
+      //           </TextInput>
+      //         </SafeAreaView>
+      //       </SafeAreaProvider>
+      //     </View>
+
+      //     <View>
+      //       <Text style = {styles.label}>Time entry added: </Text>
+      //     </View>
+
+      //     <View style = {styles.rowContainer}>
+      //       <SafeAreaProvider>
+      //         <SafeAreaView>
+      //           <TextInput
+      //             style = {styles.timeInput2}>
+      //           </TextInput>
+      //         </SafeAreaView>
+      //       </SafeAreaProvider>
+      //     </View>
+
+      //     <Text style= {styles.label}>Why is the data bad:</Text>
+      //     <SafeAreaProvider>
+      //       <SafeAreaView>
+      //         <TextInput
+      //           style = {styles.areaInput}>
+      //         </TextInput>
+      //       </SafeAreaView>
+      //     </SafeAreaProvider>
+
+      //     <TouchableOpacity
+      //       style={[styles.homeButton, {backgroundColor: 'red'}]}
+      //       onPress={() => alert("Submit Button Pressed")} >
+      //       <Text style={[styles.homeButtonText, {color: 'white'}]}>Submit!</Text>
+      //     </TouchableOpacity>
+      //   </View>
+      // </ScrollView>
     );
   }
 
