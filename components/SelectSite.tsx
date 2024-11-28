@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, Alert, Button, TouchableOpacity } from 'react-n
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
-import { parseDocument } from '../parsers/AddNotesParser';
+import { parseDocument, buildDocument } from '../scripts/Parsers';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 // Define the type for the stack's navigation parameters
@@ -27,9 +27,9 @@ export default function SelectSite({navigation}: HomeScreenProps) {
   const handleConfirm = () => {
     if(from === 'AddNotes'){
         const textDocument = `
-        # Site id: **sug**
+        # Site id: **sug**\n
         ---
-        - Time in: 2024-08-20 15:15Z
+        - Time in: 2024-08-20 15:15Z\n
         - Time out: 2024-08-20 16:15Z
         - Name: Megan, Maria
         - Instrument: Li-7000 serial # 0280
@@ -46,6 +46,8 @@ export default function SelectSite({navigation}: HomeScreenProps) {
 
             // Parse the document
             const parsedData = parseDocument(textDocument);
+            console.log(buildDocument(parsedData.entries[0]));
+
 
         navigation.navigate('AddNotes', {site: selectedValue, info: parsedData}); //{site: selectValue} tells the AddNotes what the selected value is
         }

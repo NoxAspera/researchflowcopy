@@ -18,14 +18,14 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Select Site" component={SelectSite} />
-        <Stack.Screen name="Add Notes" component={AddNotes} />
-        <Stack.Screen name="View Notes" component={ViewNotes} />
-        <Stack.Screen name="Bad Data" component={BadData} />
-        <Stack.Screen name="Select Instrument" component={SelectInstrument} />
-        <Stack.Screen name="Instrument Maintenance" component={InstrumentMaintenance} />
-        <Stack.Screen name="Select Tank" component={SelectTank} />
-        <Stack.Screen name="Tank Tracker" component={TankTracker} />
+        <Stack.Screen name="SelectSite" component={SelectSite} />
+        <Stack.Screen name="AddNotes" component={AddNotes} />
+        <Stack.Screen name="ViewNotes" component={ViewNotes} />
+        <Stack.Screen name="BadData" component={BadData} />
+        <Stack.Screen name="SelectInstrument" component={SelectInstrument} />
+        <Stack.Screen name="InstrumentMaintenance" component={InstrumentMaintenance} />
+        <Stack.Screen name="SelectTank" component={SelectTank} />
+        <Stack.Screen name="TankTracker" component={TankTracker} />
       </Stack.Navigator>
     </NavigationContainer>
   );
