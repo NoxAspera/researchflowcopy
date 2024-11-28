@@ -7,7 +7,7 @@ import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import { NaviProp } from './types';
 import { ApplicationProvider, Card, Layout, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
-import { default as theme } from '../custom-theme.json'
+import { customTheme } from './CustomTheme'
 
 export default function ViewNotes({ navigation }: NaviProp) {
     const route = useRoute();
@@ -30,7 +30,7 @@ export default function ViewNotes({ navigation }: NaviProp) {
 
     //alert("found: " + site);
     return (
-      <ApplicationProvider {...eva} theme={theme}>
+      <ApplicationProvider {...eva} theme={customTheme}>
         <Layout style={styles.container} level='1'>
           {/* header */}
           <Text category='h1'
@@ -39,7 +39,7 @@ export default function ViewNotes({ navigation }: NaviProp) {
           {/* Card 1 */}
           <Card
             header={(props) => <Header {...props} />}
-            style={{flex: 1, margin: 20}}>
+            style={{flex: 1, margin: 20, backgroundColor: customTheme['color-primary-700']}}>
             <Text>
               Here is where the notes about previous sites will go. 
             </Text>
@@ -48,7 +48,7 @@ export default function ViewNotes({ navigation }: NaviProp) {
           {/* card 2 */}
           <Card
             header={(props) => <Header {...props} />}
-            style={{flex: 1, margin: 20}}>
+            style={{flex: 1, margin: 20, backgroundColor: customTheme['color-primary-700']}}>
             <Text>
               We can have other sections of notes below it up to a certain point.  
             </Text>
@@ -106,7 +106,6 @@ export default function ViewNotes({ navigation }: NaviProp) {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#fff',
       alignItems: 'stretch',        // has button fill space horizontally
       justifyContent: 'space-evenly',
     },

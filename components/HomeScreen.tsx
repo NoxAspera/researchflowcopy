@@ -12,12 +12,12 @@ import HomeButtonProp from './HomeButtonProp';
 import { NaviProp } from './types';
 import { ApplicationProvider, Layout, Text } from '@ui-kitten/components'
 import * as eva from '@eva-design/eva';
-import { default as theme } from '../custom-theme.json'
+import { customTheme } from './CustomTheme'
 
 
 export default function HomeScreen({navigation}: NaviProp) {
   return (
-    <ApplicationProvider {...eva} theme={theme}>
+    <ApplicationProvider {...eva} theme={customTheme}>
       <Layout style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
             {/* Add Notes */}
@@ -36,24 +36,28 @@ export default function HomeScreen({navigation}: NaviProp) {
                     <Text category="h5">VIEW PAST NOTES</Text>
                 </Layout>
             </TouchableWithoutFeedback>
+
             {/* BAD DATA */}
             <TouchableWithoutFeedback onPress={() => navigation.navigate('SelectSite', {from: "BadData"})}>
                 <Layout style={styles.tab} level="2">
                     <Text category="h5">BAD DATA</Text>
                 </Layout>
             </TouchableWithoutFeedback>
+
             {/* INSTRUMENT MAINTENENCE */}
             <TouchableWithoutFeedback onPress={() => navigation.navigate('SelectSite', {from: "InstrumentMaintenance"})}>
                 <Layout style={styles.tab} level="2">
                     <Text category="h5">INSTRUMENT MAINTENENCE</Text>
                 </Layout>
             </TouchableWithoutFeedback>
+
             {/* TANK TRACKER */}
             <TouchableWithoutFeedback onPress={() => navigation.navigate('SelectSite', {from: "TankTracker"})}>
                 <Layout style={styles.tab} level="2">
                     <Text category="h5">TANK TRACKER</Text>
                 </Layout>
             </TouchableWithoutFeedback>
+            
             {/* PLAN A VISIT */}
             <TouchableWithoutFeedback onPress={() => alert('PLAN A VISIT')}>
                 <Layout style={styles.tab} level="2">
@@ -95,7 +99,6 @@ export default function HomeScreen({navigation}: NaviProp) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     alignItems: 'stretch',        // has button fill space horizontally
     justifyContent: 'space-evenly',
   },

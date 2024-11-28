@@ -2,6 +2,7 @@ import { Input } from "@ui-kitten/components";
 import { View, Text, StyleSheet, ViewStyle } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
+import { customTheme } from './CustomTheme'
 
 interface TIProp{
     labelText: string;
@@ -9,9 +10,10 @@ interface TIProp{
     onTextChange: (arg0: string) => void;
     placeholder?: string; 
     multiplelines?: boolean;
+    style?: ViewStyle;
 }
 
-const AddNotesTextInput: React.FC<TIProp> = ({ labelText, labelValue, onTextChange, placeholder, multiplelines }) => {
+const AddNotesTextInput: React.FC<TIProp> = ({ labelText, labelValue, onTextChange, placeholder, multiplelines, style }) => {
     return (
       <Input
         label={labelText}
@@ -19,7 +21,7 @@ const AddNotesTextInput: React.FC<TIProp> = ({ labelText, labelValue, onTextChan
         value={labelValue}
         multiline={multiplelines ? true : false}
         onChangeText={(arg0) => onTextChange(arg0)}
-        // style={styles.label}
+        style={style}
       />
     );
 };

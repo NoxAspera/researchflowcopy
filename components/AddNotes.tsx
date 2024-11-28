@@ -9,7 +9,7 @@ import { NaviProp } from './types';
 import TextInput from './TextInput'
 import { ApplicationProvider, IndexPath, Input, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
-import { default as theme } from '../custom-theme.json'
+import { customTheme } from './CustomTheme'
 
 type RouteParams = {
   site: string; 
@@ -51,15 +51,15 @@ export default function AddNotes({ navigation }: NaviProp) {
     const [highValue, setHighValue] = useState("");
     const [n2Value, setN2Value] = useState("");
     const [notesValue, setNotesValue] = useState("");
-    
+
     // Use IndexPath for selected index for drop down menu
     const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
     const instruments = ['Instrument 1', 'Instrument 2', 'Instrument 3']
 
     //alert("found: " + site);
     return (
-      <ApplicationProvider {...eva} theme={theme}>
-        <Layout style={styles.container} level='1'>
+      <ApplicationProvider {...eva} theme={customTheme}>
+        <Layout style={styles.container}>
           {/* header */}
           <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
           
@@ -67,7 +67,8 @@ export default function AddNotes({ navigation }: NaviProp) {
           <Select label='Instrument'
             selectedIndex={selectedIndex}
             onSelect={(index) => setSelectedIndex(index as IndexPath)}
-            value={instruments[selectedIndex.row]}>
+            value={instruments[selectedIndex.row]}
+            style={{margin: 15, flex: 1}}>
             <SelectItem 
               title='Instrument 1'
             />
@@ -81,28 +82,29 @@ export default function AddNotes({ navigation }: NaviProp) {
 
           {/* text inputs */}
           {/* Time input */}
-          <TextInput labelText='Time' labelValue={timeValue} onTextChange={setTimeValue} placeholder='12:00 PM' />
+          <TextInput labelText='Time' labelValue={timeValue} onTextChange={setTimeValue} placeholder='12:00 PM' style={styles.inputText} />
 
           {/* N2 */}
-          <TextInput labelText='N2' labelValue={n2Value} onTextChange={setN2Value} placeholder='Level' />
+          <TextInput labelText='N2' labelValue={n2Value} onTextChange={setN2Value} placeholder='Level' style={styles.inputText} />
 
           {/* Low input */}
-          <TextInput labelText='Low' labelValue={lowValue} onTextChange={setLowValue} placeholder='Level' />
+          <TextInput labelText='Low' labelValue={lowValue} onTextChange={setLowValue} placeholder='Level' style={styles.inputText} />
 
           {/* mid input */}
-          <TextInput labelText='Mid' labelValue={medValue} onTextChange={setMedValue} placeholder='Level' />
+          <TextInput labelText='Mid' labelValue={medValue} onTextChange={setMedValue} placeholder='Level' style={styles.inputText} />
 
           {/* high input */}
-          <TextInput labelText='High' labelValue={highValue} onTextChange={setHighValue} placeholder='Level' />
+          <TextInput labelText='High' labelValue={highValue} onTextChange={setHighValue} placeholder='Level' style={styles.inputText} />
 
           {/* notes entry */}
-          <TextInput labelText='Notes' labelValue={notesValue} onTextChange={setNotesValue} placeholder='All Good.' multiplelines={true}/>
+          <TextInput labelText='Notes' labelValue={notesValue} onTextChange={setNotesValue} placeholder='All Good.' multiplelines={true} style={styles.notesInput}/>
 
           {/* submit button */}
           <Button
             onPress={() => alert('submitted notes!')}
             appearance='filled'
-            status='primary'>
+            status='primary'
+            style={{margin: 15}}>
             Submit
           </Button>
         </Layout>
@@ -233,71 +235,78 @@ export default function AddNotes({ navigation }: NaviProp) {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#fff',
       alignItems: 'stretch',        // has button fill space horizontally
       justifyContent: 'space-evenly',
     },
-    scrollContainer: {
-      backgroundColor: '#fff'
-    },
-    label: {
-        margin: 15,
-        fontSize: 24,
-        alignItems: 'flex-start'
-    },
-    picker: {
-      height: 65,
-      alignItems: 'flex-start',
-      width: '64%',
-      marginTop: 0,
-      marginBottom: 0
-    },
-    dropdownContainer: {
-      marginTop: 50,
-      alignItems: 'flex-start',
-    },
-    timeInput: {
-      height: 40,
-      margin: 10,
-      width: 200,
-      borderWidth: 1,
-      padding: 10,
-    },
-    areaInput: {
-      height: 200,
-      margin: 15,
-      width: 380,
-      borderWidth: 1,
-      padding: 10,
-      marginTop: 5,
-      marginBottom: 5,
-    },
-
-    rowContainer:
-    {
+    inputText: {
       flex: 1,
-      backgroundColor: '#fff',
-      flexDirection: 'row',
-      alignItems: 'flex-start',        // has button fill space horizontally
-      justifyContent: 'space-evenly',
+      margin: 15
     },
-    submitButton: {
-      paddingLeft: 10,
-      justifyContent: 'center',     // this and alignItems places text in center of button
-      alignItems: "center"
-    },
-    homeButtonText: {
-      flex: 1,
-      fontSize: 30
-    },
-    header: {
-      margin: 10,
-      width: '100%', // Ensure the header takes full width
-      alignItems: 'flex-start', // Center the text on the left
-      marginBottom: 0, // Add space between the header and the buttons
-    },
-    headerText: {
-      fontSize: 48,
-      marginTop: 0,
+    notesInput: {
+      flex: 4,
+      margin: 15
     }
+    // scrollContainer: {
+    //   backgroundColor: '#fff'
+    // },
+    // label: {
+    //     margin: 15,
+    //     fontSize: 24,
+    //     alignItems: 'flex-start'
+    // },
+    // picker: {
+    //   height: 65,
+    //   alignItems: 'flex-start',
+    //   width: '64%',
+    //   marginTop: 0,
+    //   marginBottom: 0
+    // },
+    // dropdownContainer: {
+    //   marginTop: 50,
+    //   alignItems: 'flex-start',
+    // },
+    // timeInput: {
+    //   height: 40,
+    //   margin: 10,
+    //   width: 200,
+    //   borderWidth: 1,
+    //   padding: 10,
+    // },
+    // areaInput: {
+    //   height: 200,
+    //   margin: 15,
+    //   width: 380,
+    //   borderWidth: 1,
+    //   padding: 10,
+    //   marginTop: 5,
+    //   marginBottom: 5,
+    // },
+
+    // rowContainer:
+    // {
+    //   flex: 1,
+    //   backgroundColor: '#fff',
+    //   flexDirection: 'row',
+    //   alignItems: 'flex-start',        // has button fill space horizontally
+    //   justifyContent: 'space-evenly',
+    // },
+    // submitButton: {
+    //   paddingLeft: 10,
+    //   justifyContent: 'center',     // this and alignItems places text in center of button
+    //   alignItems: "center"
+    // },
+    // homeButtonText: {
+    //   flex: 1,
+    //   fontSize: 30
+    // },
+    // header: {
+    //   margin: 10,
+    //   width: '100%', // Ensure the header takes full width
+    //   alignItems: 'flex-start', // Center the text on the left
+    //   marginBottom: 0, // Add space between the header and the buttons
+    // },
+    // headerText: {
+    //   fontSize: 48,
+    //   marginTop: 0,
+    // }
 });

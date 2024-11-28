@@ -8,7 +8,8 @@ import { NaviProp } from './types';
 import TextInput from './TextInput'
 import { ApplicationProvider, Button, Input, Layout, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
-import { default as theme } from '../custom-theme.json'
+import { customTheme } from './CustomTheme'
+
 
 export default function BadData({ navigation }: NaviProp) {
     const route = useRoute();
@@ -26,38 +27,39 @@ export default function BadData({ navigation }: NaviProp) {
 
     //alert("found: " + site);
     return (
-      <ApplicationProvider {...eva} theme={theme}>
+      <ApplicationProvider {...eva} theme={customTheme}>
         <Layout style={styles.container} level='1'>
           {/* header */}
           <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
           
           {/* text inputs */}
           {/* old id input */}
-          <TextInput labelText='Old ID' labelValue={oldIDValue} onTextChange={setOldIDValue} placeholder='123456' />
+          <TextInput labelText='Old ID' labelValue={oldIDValue} onTextChange={setOldIDValue} placeholder='123456' style={styles.textInput}/>
           
           {/* new id input */}
-          <TextInput labelText='New ID' labelValue={newIDValue} onTextChange={setNewIDValue} placeholder='67890' />
+          <TextInput labelText='New ID' labelValue={newIDValue} onTextChange={setNewIDValue} placeholder='67890' style={styles.textInput}/>
 
           {/* start time input */}
-          <TextInput labelText='Start Time' labelValue={startTimeValue} onTextChange={setStartTimeValue} placeholder='12:00 PM' />
+          <TextInput labelText='Start Time' labelValue={startTimeValue} onTextChange={setStartTimeValue} placeholder='12:00 PM' style={styles.textInput}/>
 
           {/* end time input */}
-          <TextInput labelText='End Time' labelValue={endTimeValue} onTextChange={setEndTimeValue} placeholder='12:00 AM' />
+          <TextInput labelText='End Time' labelValue={endTimeValue} onTextChange={setEndTimeValue} placeholder='12:00 AM' style={styles.textInput}/>
 
           {/* Name input */}
-          <TextInput labelText='Name' labelValue={nameValue} onTextChange={setNameValue} placeholder='John Doe' />
+          <TextInput labelText='Name' labelValue={nameValue} onTextChange={setNameValue} placeholder='John Doe' style={styles.textInput}/>
 
           {/* time entry input */}
-          <TextInput labelText='Time Entry' labelValue={entryTimeValue} onTextChange={setEntryTimeValue} placeholder='12 hours' />
+          <TextInput labelText='Time Entry' labelValue={entryTimeValue} onTextChange={setEntryTimeValue} placeholder='12 hours' style={styles.textInput}/>
 
           {/* reason entry */}
-          <TextInput labelText='Reason for Bad Data' labelValue={reasonValue} onTextChange={setReasonValue} placeholder='Its wack.' multiplelines={true}/>
+          <TextInput labelText='Reason for Bad Data' labelValue={reasonValue} onTextChange={setReasonValue} placeholder='Its wack.' multiplelines={true} style={styles.reasonText}/>
 
           {/* submit button */}
           <Button
             onPress={() => alert('submitted bad data!')}
             appearance='filled'
-            status='primary'>
+            status='primary'
+            style={{margin: 15}}>
             Submit
           </Button>
         </Layout>
@@ -160,86 +162,93 @@ export default function BadData({ navigation }: NaviProp) {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#fff',
       alignItems: 'stretch',        // has button fill space horizontally
-      justifyContent: 'space-evenly',
+      justifyContent: 'flex-start',
     },
-    scrollContainer: {
-      backgroundColor: '#fff'
-    },
-
-    label: {
-        margin: 15,
-        marginBottom: 10,
-        fontSize: 24,
-        alignItems: 'flex-start'
-      },
-    picker: {
-      height: 65,
-      alignItems: 'flex-start',
-      width: '64%',
-      marginTop: 0,
-      marginBottom: 0
-    },
-    dropdownContainer: {
-      marginTop: 50,
-      alignItems: 'flex-start',
-    },
-    timeInput: {
-      height: 40,
-      margin: 10,
-      width: 200,
-      borderWidth: 1,
-      padding: 10,
-      marginBottom: 0,
-    },
-    timeInput2: {
-      height: 40,
+    reasonText: {
+      flex: 4,
       margin: 15,
-      marginTop: 0,
-      marginBottom: 0,
-      width: 200,
-      borderWidth: 1,
-      padding: 10,
     },
-    areaInput: {
-      height: 200,
+    textInput: {
       margin: 15,
-      width: 380,
-      borderWidth: 1,
-      padding: 10,
-      marginTop: 0,
-      marginBottom: 0,
-    },
-
-    rowContainer:
-    {
-      flex: 1,
-      backgroundColor: '#fff',
-      flexDirection: 'row',
-      alignItems: 'flex-start',        // has button fill space horizontally
-      justifyContent: 'space-evenly',
-    },
-    homeButton: {
-      flex: 1,                      // has button fill space vertically
-      borderRadius: 10,
-      justifyContent: 'center',     // this and alignItems places text in center of button
-      alignItems: "center",
-      margin: 10
-    },
-    homeButtonText: {
-      flex: 1,
-      fontSize: 30,
-      margin: 0
-    },
-    header: {
-      margin: 10,
-      width: '100%', // Ensure the header takes full width
-      alignItems: 'flex-start', // Center the text on the left
-      marginBottom: 0, // Add space between the header and the buttons
-    },
-    headerText: {
-      fontSize: 48,
-      marginTop: 0,
+      flex: 1
     }
+    // scrollContainer: {
+    //   backgroundColor: '#fff'
+    // },
+
+    // label: {
+    //     margin: 15,
+    //     marginBottom: 10,
+    //     fontSize: 24,
+    //     alignItems: 'flex-start'
+    //   },
+    // picker: {
+    //   height: 65,
+    //   alignItems: 'flex-start',
+    //   width: '64%',
+    //   marginTop: 0,
+    //   marginBottom: 0
+    // },
+    // dropdownContainer: {
+    //   marginTop: 50,
+    //   alignItems: 'flex-start',
+    // },
+    // timeInput: {
+    //   height: 40,
+    //   margin: 10,
+    //   width: 200,
+    //   borderWidth: 1,
+    //   padding: 10,
+    //   marginBottom: 0,
+    // },
+    // timeInput2: {
+    //   height: 40,
+    //   margin: 15,
+    //   marginTop: 0,
+    //   marginBottom: 0,
+    //   width: 200,
+    //   borderWidth: 1,
+    //   padding: 10,
+    // },
+    // areaInput: {
+    //   height: 200,
+    //   margin: 15,
+    //   width: 380,
+    //   borderWidth: 1,
+    //   padding: 10,
+    //   marginTop: 0,
+    //   marginBottom: 0,
+    // },
+
+    // rowContainer:
+    // {
+    //   flex: 1,
+    //   backgroundColor: '#fff',
+    //   flexDirection: 'row',
+    //   alignItems: 'flex-start',        // has button fill space horizontally
+    //   justifyContent: 'space-evenly',
+    // },
+    // homeButton: {
+    //   flex: 1,                      // has button fill space vertically
+    //   borderRadius: 10,
+    //   justifyContent: 'center',     // this and alignItems places text in center of button
+    //   alignItems: "center",
+    //   margin: 10
+    // },
+    // homeButtonText: {
+    //   flex: 1,
+    //   fontSize: 30,
+    //   margin: 0
+    // },
+    // header: {
+    //   margin: 10,
+    //   width: '100%', // Ensure the header takes full width
+    //   alignItems: 'flex-start', // Center the text on the left
+    //   marginBottom: 0, // Add space between the header and the buttons
+    // },
+    // headerText: {
+    //   fontSize: 48,
+    //   marginTop: 0,
+    // }
 });

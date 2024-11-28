@@ -6,7 +6,7 @@ import { parseDocument } from '../parsers/AddNotesParser';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ApplicationProvider, Layout, Button } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
-import { default as theme } from '../custom-theme.json'
+import { customTheme } from './CustomTheme'
 
 // Define the type for the stack's navigation parameters
 type RootStackParamList = {
@@ -78,7 +78,7 @@ export default function SelectSite({navigation}: HomeScreenProps) {
   ]
 
   return (
-    <ApplicationProvider {...eva} theme={theme}>
+    <ApplicationProvider {...eva} theme={customTheme}>
       <Layout style={styles.container}>
         {buttonData.map((button) => (
           <Button
@@ -141,7 +141,6 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   button: {
-    backgroundColor: '#007AFF',
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 8,

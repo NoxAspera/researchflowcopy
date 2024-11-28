@@ -7,7 +7,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { ApplicationProvider, Button, IndexPath, Input, Layout, Select, SelectItem, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
 import * as eva from '@eva-design/eva';
-import { default as theme } from '../custom-theme.json'
+import { customTheme } from './CustomTheme'
 
 export default function InstrumentMaintenance({ navigation }) {
     const route = useRoute();
@@ -24,7 +24,7 @@ export default function InstrumentMaintenance({ navigation }) {
 
     //alert("found: " + instrument);
     return (
-      <ApplicationProvider {...eva} theme={theme}>
+      <ApplicationProvider {...eva} theme={customTheme}>
         <Layout style={styles.container} level='1'>
           {/* header */}
           <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
@@ -33,7 +33,8 @@ export default function InstrumentMaintenance({ navigation }) {
           <Select label='Instrument'
             selectedIndex={selectedIndex}
             onSelect={(index) => setSelectedIndex(index as IndexPath)}
-            value={instruments[selectedIndex.row]}>
+            value={instruments[selectedIndex.row]}
+            style={{margin: 15, flex: 1}}>
             <SelectItem 
               title='Instrument 1'
             />
@@ -47,19 +48,20 @@ export default function InstrumentMaintenance({ navigation }) {
 
           {/* text inputs */}
           {/* Time input */}
-          <TextInput labelText='Time' labelValue={dateValue} onTextChange={setDateValue} placeholder='12:00 PM' />
+          <TextInput labelText='Time' labelValue={dateValue} onTextChange={setDateValue} placeholder='12:00 PM' style={styles.textInput}/>
 
           {/* Name input */}
-          <TextInput labelText='Name' labelValue={nameValue} onTextChange={setNameValue} placeholder='Jane Doe' />
+          <TextInput labelText='Name' labelValue={nameValue} onTextChange={setNameValue} placeholder='Jane Doe' style={styles.textInput}/>
 
           {/* notes entry */}
-          <TextInput labelText='Request' labelValue={notesValue} onTextChange={setNotesValue} placeholder='Giving bad reading.' multiplelines={true}/>
+          <TextInput labelText='Request' labelValue={notesValue} onTextChange={setNotesValue} placeholder='Giving bad reading.' multiplelines={true} style={styles.requestText}/>
           
           {/* submit button */}
           <Button
             onPress={() => alert('submitted request!')}
             appearance='filled'
-            status='primary'>
+            status='primary'
+            style={{margin: 15}}>
             Submit
           </Button>
         </Layout>
@@ -136,86 +138,93 @@ export default function InstrumentMaintenance({ navigation }) {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#fff',
       alignItems: 'stretch',        // has button fill space horizontally
-      justifyContent: 'space-evenly',
+      justifyContent: 'flex-start',
     },
-    scrollContainer: {
-      backgroundColor: '#fff'
+    requestText: {
+      flex: 6,
+      margin: 15
     },
-
-    label: {
-        margin: 15,
-        marginBottom: 10,
-        fontSize: 24,
-        alignItems: 'flex-start'
-      },
-    picker: {
-      height: 65,
-      alignItems: 'flex-start',
-      width: '64%',
-      marginTop: 0,
-      marginBottom: 0,
-    },
-    dropdownContainer: {
-      marginTop: 50,
-      alignItems: 'flex-start',
-    },
-    timeInput: {
-      height: 40,
-      margin: 10,
-      width: 200,
-      borderWidth: 1,
-      padding: 10,
-      marginBottom: 0,
-    },
-    timeInput2: {
-      height: 40,
-      margin: 15,
-      marginTop: 0,
-      marginBottom: 0,
-      width: 200,
-      borderWidth: 1,
-      padding: 10,
-    },
-    areaInput: {
-      height: 200,
-      margin: 15,
-      width: 380,
-      borderWidth: 1,
-      padding: 10,
-      marginTop: 0,
-      marginBottom: 0,
-    },
-
-    rowContainer:
-    {
+    textInput: {
       flex: 1,
-      backgroundColor: '#fff',
-      flexDirection: 'row',
-      alignItems: 'flex-start',        // has button fill space horizontally
-      justifyContent: 'space-evenly',
-    },
-    homeButton: {
-      flex: 1,                      // has button fill space vertically
-      borderRadius: 10,
-      justifyContent: 'center',     // this and alignItems places text in center of button
-      alignItems: "center",
-      margin: 10
-    },
-    homeButtonText: {
-      flex: 1,
-      fontSize: 30,
-      margin: 0
-    },
-    header: {
-      margin: 10,
-      width: '100%', // Ensure the header takes full width
-      alignItems: 'flex-start', // Center the text on the left
-      marginBottom: 0, // Add space between the header and the buttons
-    },
-    headerText: {
-      fontSize: 48,
-      marginTop: 0,
+      margin: 15
     }
+    // scrollContainer: {
+    //   backgroundColor: '#fff'
+    // },
+
+    // label: {
+    //     margin: 15,
+    //     marginBottom: 10,
+    //     fontSize: 24,
+    //     alignItems: 'flex-start'
+    //   },
+    // picker: {
+    //   height: 65,
+    //   alignItems: 'flex-start',
+    //   width: '64%',
+    //   marginTop: 0,
+    //   marginBottom: 0,
+    // },
+    // dropdownContainer: {
+    //   marginTop: 50,
+    //   alignItems: 'flex-start',
+    // },
+    // timeInput: {
+    //   height: 40,
+    //   margin: 10,
+    //   width: 200,
+    //   borderWidth: 1,
+    //   padding: 10,
+    //   marginBottom: 0,
+    // },
+    // timeInput2: {
+    //   height: 40,
+    //   margin: 15,
+    //   marginTop: 0,
+    //   marginBottom: 0,
+    //   width: 200,
+    //   borderWidth: 1,
+    //   padding: 10,
+    // },
+    // areaInput: {
+    //   height: 200,
+    //   margin: 15,
+    //   width: 380,
+    //   borderWidth: 1,
+    //   padding: 10,
+    //   marginTop: 0,
+    //   marginBottom: 0,
+    // },
+
+    // rowContainer:
+    // {
+    //   flex: 1,
+    //   backgroundColor: '#fff',
+    //   flexDirection: 'row',
+    //   alignItems: 'flex-start',        // has button fill space horizontally
+    //   justifyContent: 'space-evenly',
+    // },
+    // homeButton: {
+    //   flex: 1,                      // has button fill space vertically
+    //   borderRadius: 10,
+    //   justifyContent: 'center',     // this and alignItems places text in center of button
+    //   alignItems: "center",
+    //   margin: 10
+    // },
+    // homeButtonText: {
+    //   flex: 1,
+    //   fontSize: 30,
+    //   margin: 0
+    // },
+    // header: {
+    //   margin: 10,
+    //   width: '100%', // Ensure the header takes full width
+    //   alignItems: 'flex-start', // Center the text on the left
+    //   marginBottom: 0, // Add space between the header and the buttons
+    // },
+    // headerText: {
+    //   fontSize: 48,
+    //   marginTop: 0,
+    // }
 });

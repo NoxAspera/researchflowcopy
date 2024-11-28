@@ -7,7 +7,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { ApplicationProvider, Button, IndexPath, Input, Layout, Select, SelectItem, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import TextInput from './TextInput'
-import { default as theme } from '../custom-theme.json'
+import { customTheme } from './CustomTheme'
 
 export default function TankTracker({ navigation }) {
     const route = useRoute();
@@ -27,7 +27,7 @@ export default function TankTracker({ navigation }) {
 
     //alert("found: " + instrument);
     return (
-      <ApplicationProvider {...eva} theme={theme}>
+      <ApplicationProvider {...eva} theme={customTheme}>
         <Layout style={styles.container} level='1'>
           {/* header */}
           <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
@@ -36,7 +36,8 @@ export default function TankTracker({ navigation }) {
           <Select label='Tanks'
             selectedIndex={selectedIndex}
             onSelect={(index) => setSelectedIndex(index as IndexPath)}
-            value={tanks[selectedIndex.row]}>
+            value={tanks[selectedIndex.row]}
+            style={{margin: 15}}>
             <SelectItem 
               title='Tank 1'
             />
@@ -50,31 +51,32 @@ export default function TankTracker({ navigation }) {
 
           {/* text inputs */}
           {/* Time input */}
-          <TextInput labelText='Time' labelValue={dateValue} onTextChange={setDateValue} placeholder='12:00 PM' />
+          <TextInput labelText='Time' labelValue={dateValue} onTextChange={setDateValue} placeholder='12:00 PM' style={styles.textInput}/>
 
           {/* Name input */}
-          <TextInput labelText='Name' labelValue={nameValue} onTextChange={setNameValue} placeholder='Jane Doe' />
+          <TextInput labelText='Name' labelValue={nameValue} onTextChange={setNameValue} placeholder='Jane Doe' style={styles.textInput}/>
 
           {/* tank measurements */}
-          <Text category='h3' style={{textAlign: 'center'}}>Tank Measurements</Text>
+          <Text category='h3' style={{textAlign: 'center', paddingTop: 25}}>Tank Measurements</Text>
 
           {/* PSI input */}
-          <TextInput labelText='PSI' labelValue={PSIValue} onTextChange={setPSIValue} placeholder='100' />
+          <TextInput labelText='PSI' labelValue={PSIValue} onTextChange={setPSIValue} placeholder='100' style={styles.textInput}/>
 
           {/* C02 entry */}
-          <TextInput labelText='CO2' labelValue={CO2Value} onTextChange={setCO2Value} placeholder='100' />
+          <TextInput labelText='CO2' labelValue={CO2Value} onTextChange={setCO2Value} placeholder='100' style={styles.textInput}/>
 
           {/* CH4 entry */}
-          <TextInput labelText='CH4' labelValue={CH4Value} onTextChange={setCH4Value} placeholder='100' />
+          <TextInput labelText='CH4' labelValue={CH4Value} onTextChange={setCH4Value} placeholder='100' style={styles.textInput}/>
 
           {/* notes entry */}
-          <TextInput labelText='Notes' labelValue={notesValue} onTextChange={setNotesValue} placeholder='Tank draining at normal rate.' />
+          <TextInput labelText='Notes' labelValue={notesValue} onTextChange={setNotesValue} placeholder='Tank draining at normal rate.' style={styles.reasonText}/>
           
           {/* submit button */}
           <Button
             onPress={() => alert('submitted request!')}
             appearance='filled'
-            status='primary'>
+            status='primary'
+            style={{margin: 15}}>
             Submit
           </Button>
         </Layout>
@@ -188,86 +190,92 @@ export default function TankTracker({ navigation }) {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#fff',
       alignItems: 'stretch',        // has button fill space horizontally
       justifyContent: 'space-evenly',
     },
-    scrollContainer: {
-      backgroundColor: '#fff'
+    reasonText: {
+      flex: 4,
+      margin: 15
     },
-
-    label: {
-        margin: 15,
-        marginBottom: 10,
-        fontSize: 24,
-        alignItems: 'flex-start'
-      },
-    picker: {
-      height: 65,
-      alignItems: 'flex-start',
-      width: '64%',
-      marginTop: 0,
-      marginBottom: 0
-    },
-    dropdownContainer: {
-      marginTop: 50,
-      alignItems: 'flex-start',
-    },
-    timeInput: {
-      height: 40,
-      margin: 10,
-      width: 200,
-      borderWidth: 1,
-      padding: 10,
-      marginBottom: 0,
-    },
-    timeInput2: {
-      height: 40,
-      margin: 15,
-      marginTop: 0,
-      marginBottom: 0,
-      width: 200,
-      borderWidth: 1,
-      padding: 10,
-    },
-    areaInput: {
-      height: 150,
-      margin: 15,
-      width: 380,
-      borderWidth: 1,
-      padding: 10,
-      marginTop: 0,
-      marginBottom: 0,
-    },
-
-    rowContainer:
-    {
+    textInput: {
       flex: 1,
-      backgroundColor: '#fff',
-      flexDirection: 'row',
-      alignItems: 'flex-start',        // has button fill space horizontally
-      justifyContent: 'space-evenly',
-    },
-    homeButton: {
-      flex: 1,                      // has button fill space vertically
-      borderRadius: 10,
-      justifyContent: 'center',     // this and alignItems places text in center of button
-      alignItems: "center",
-      margin: 10
-    },
-    homeButtonText: {
-      flex: 1,
-      fontSize: 30,
-      margin: 0
-    },
-    header: {
-      margin: 10,
-      width: '100%', // Ensure the header takes full width
-      alignItems: 'flex-start', // Center the text on the left
-      marginBottom: 0, // Add space between the header and the buttons
-    },
-    headerText: {
-      fontSize: 48,
-      marginTop: 0,
+      margin: 15
     }
+    // scrollContainer: {
+    //   backgroundColor: '#fff'
+    // },
+    // label: {
+    //     margin: 15,
+    //     marginBottom: 10,
+    //     fontSize: 24,
+    //     alignItems: 'flex-start'
+    //   },
+    // picker: {
+    //   height: 65,
+    //   alignItems: 'flex-start',
+    //   width: '64%',
+    //   marginTop: 0,
+    //   marginBottom: 0
+    // },
+    // dropdownContainer: {
+    //   marginTop: 50,
+    //   alignItems: 'flex-start',
+    // },
+    // timeInput: {
+    //   height: 40,
+    //   margin: 10,
+    //   width: 200,
+    //   borderWidth: 1,
+    //   padding: 10,
+    //   marginBottom: 0,
+    // },
+    // timeInput2: {
+    //   height: 40,
+    //   margin: 15,
+    //   marginTop: 0,
+    //   marginBottom: 0,
+    //   width: 200,
+    //   borderWidth: 1,
+    //   padding: 10,
+    // },
+    // areaInput: {
+    //   height: 150,
+    //   margin: 15,
+    //   width: 380,
+    //   borderWidth: 1,
+    //   padding: 10,
+    //   marginTop: 0,
+    //   marginBottom: 0,
+    // },
+
+    // rowContainer:
+    // {
+    //   flex: 1,
+    //   backgroundColor: '#fff',
+    //   flexDirection: 'row',
+    //   alignItems: 'flex-start',        // has button fill space horizontally
+    //   justifyContent: 'space-evenly',
+    // },
+    // homeButton: {
+    //   flex: 1,                      // has button fill space vertically
+    //   borderRadius: 10,
+    //   justifyContent: 'center',     // this and alignItems places text in center of button
+    //   alignItems: "center",
+    //   margin: 10
+    // },
+    // homeButtonText: {
+    //   flex: 1,
+    //   fontSize: 30,
+    //   margin: 0
+    // },
+    // header: {
+    //   margin: 10,
+    //   width: '100%', // Ensure the header takes full width
+    //   alignItems: 'flex-start', // Center the text on the left
+    //   marginBottom: 0, // Add space between the header and the buttons
+    // },
+    // headerText: {
+    //   fontSize: 48,
+    //   marginTop: 0,
+    // }
 });
