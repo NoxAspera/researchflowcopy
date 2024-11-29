@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-=======
 /**
  * Home Screen
  * By Blake Stambaugh
@@ -16,7 +13,6 @@ import { NaviProp } from './types';
 import { ApplicationProvider, Layout, Text } from '@ui-kitten/components'
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
->>>>>>> kitten-ui-update
 
 export default function HomeScreen({ navigation }) {
   return (
@@ -78,50 +74,6 @@ export default function HomeScreen({ navigation }) {
 
     //   {/* buttons */}
       
-<<<<<<< HEAD
-      {/* Select Site  */}
-      <TouchableOpacity
-        style={[styles.homeButton, {backgroundColor: 'green'}]}
-        onPress={() => navigation.navigate('SelectSite', {from: 'AddNotes'})} >
-          <Text style={styles.homeButtonText}>Add Notes</Text>
-      </TouchableOpacity>
-
-      {/* Bad Data  */}
-      <TouchableOpacity
-        style={[styles.homeButton, {backgroundColor: 'red'}]}
-        onPress={() => navigation.navigate('SelectSite', {from: 'BadData'})}>
-          <Text style={styles.homeButtonText}>Bad Data</Text>
-      </TouchableOpacity>
-
-      {/* Tank Tracker  */}
-      <TouchableOpacity
-        style={[styles.homeButton, {backgroundColor: 'blue'}]}
-        onPress={() => navigation.navigate('SelectTank')} >
-          <Text style={styles.homeButtonText}>Tank Tracker</Text>
-      </TouchableOpacity>
-
-      {/* Instrument Maintenance  */}
-      <TouchableOpacity
-        style={[styles.homeButton, {backgroundColor: 'yellow'}]}
-        onPress={() => navigation.navigate('SelectInstrument')} >
-          <Text style={styles.homeButtonText}>Instrument Maintenance</Text>
-      </TouchableOpacity>
-
-      {/* View Past Notes  */}
-      <TouchableOpacity
-        style={[styles.homeButton, {backgroundColor: 'grey'}]}
-        onPress={() => navigation.navigate('SelectSite', {from: 'ViewNotes'})} >
-          <Text style={styles.homeButtonText}>View Past Notes</Text>
-      </TouchableOpacity>
-
-      {/* Plan a visit  */}
-      <TouchableOpacity
-        style={[styles.homeButton, {backgroundColor: 'orange'}]}
-        onPress={() => alert('Plan a visit')} >
-          <Text style={styles.homeButtonText}>Plan a Visit</Text>
-      </TouchableOpacity>
-    </View>
-=======
     //   {/* Select Site  */}
     //   <HomeButtonProp color='green' text='Add Notes' onPress={() => navigation.navigate('SelectSite', {from: 'AddNotes'})} />
 
@@ -140,7 +92,6 @@ export default function HomeScreen({ navigation }) {
     //   {/* Plan a visit  */}
     //   <HomeButtonProp color='orange' text='Plan a Visit' onPress={() => alert('plan a visit')} />
     // </View>
->>>>>>> kitten-ui-update
   );
 }
 

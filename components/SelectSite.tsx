@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, Alert, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
-import { parseDocument, buildDocument } from '../scripts/Parsers';
+import { parseDocument } from '../parsers/AddNotesParser';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ApplicationProvider, Layout, Button } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
@@ -27,42 +27,6 @@ export default function SelectSite({navigation}: HomeScreenProps) {
   const route = useRoute();
   let from = route.params?.from;
 
-<<<<<<< HEAD
-  const handleConfirm = () => {
-    if(from === 'AddNotes')
-    {
-      navigation.navigate('AddNotes', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
-    }
-    else if(from === 'View Notes')
-    {
-      navigation.navigate('View Notes', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
-    }
-    else if(from === 'Bad Data')
-    {
-      navigation.navigate('Bad Data', {site: selectedValue}); //{site: selectValue} tells the AddNotes what the selected value is
-    }
-  };
-  return (
-    <View style={styles.container}>
-      <View style={styles.dropdownContainer}>
-        <Text style={styles.label}>Where are you?</Text>
-        <Picker
-          selectedValue={selectedValue}
-          onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="CSP" value="CSP" />
-          <Picker.Item label="DBK" value="DBK" />
-          <Picker.Item label="FRU" value="FRU" />
-          <Picker.Item label="HDP" value="HDP" />
-          <Picker.Item label="HPL" value="HPL" />
-          <Picker.Item label="RPK" value="RPK" />
-          <Picker.Item label="SUG" value="SUG" />
-          <Picker.Item label="WBB" value="WBB" />
-
-        </Picker>
-      </View>
-=======
   const handleConfirm = (selectedSite: string) => {
     if(from === 'AddNotes'){
       const textDocument = `
@@ -112,7 +76,6 @@ export default function SelectSite({navigation}: HomeScreenProps) {
     { id: 7, label: 'SUG', onPress: () => handleConfirm('SUG')},
     { id: 8, label: 'WBB', onPress: () => handleConfirm('WBB')}
   ]
->>>>>>> kitten-ui-update
 
   return (
     <ApplicationProvider {...eva} theme={customTheme}>
