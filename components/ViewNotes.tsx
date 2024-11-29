@@ -1,70 +1,111 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, ViewProps } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import { NaviProp } from './types';
+import { ApplicationProvider, Card, Layout, Text } from '@ui-kitten/components';
+import * as eva from '@eva-design/eva';
+import { customTheme } from './CustomTheme'
 
 export default function ViewNotes({ navigation }: NaviProp) {
     const route = useRoute();
     let site = route.params?.site;
     const [selectedValue, setSelectedValue] = useState("");
 
+    const Header = (props: ViewProps): React.ReactElement => (
+      <View {...props}>
+        <Text category='h6'>
+          Site Name
+        </Text>
+        <Text category='s1'>
+          Instrument Name
+        </Text>
+        <Text category='s2'>
+          Time Stamp of When it was submitted
+        </Text>
+      </View>
+    );
+
     //alert("found: " + site);
     return (
-      <ScrollView style = {styles.scrollContainer}>
-        <View style={styles.container}>
+      <ApplicationProvider {...eva} theme={customTheme}>
+        <Layout style={styles.container} level='1'>
           {/* header */}
-          <View style={styles.header}>
-            <Text style={styles.headerText}>{site}</Text>
-          </View>
+          <Text category='h1'
+            style={{textAlign: 'center'}}>{site}</Text>
 
-          {/* drop down menu for instruments */}
-          <View style={styles.rowContainer}>
-            <Text style={styles.label}>Instrument</Text>
-            <Text style={styles.label}>Instrument name</Text>
-          </View>
+          {/* Card 1 */}
+          <Card
+            header={(props) => <Header {...props} />}
+            style={{flex: 1, margin: 20, backgroundColor: customTheme['color-primary-700']}}>
+            <Text>
+              Here is where the notes about previous sites will go. 
+            </Text>
+          </Card>
 
-          <View style = {styles.rowContainer}>
-            <Text style = {styles.label}>Time Started</Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <Text style={styles.label}>8:30 am</Text>
-              </SafeAreaView>
-            </SafeAreaProvider>
-          </View>
+          {/* card 2 */}
+          <Card
+            header={(props) => <Header {...props} />}
+            style={{flex: 1, margin: 20, backgroundColor: customTheme['color-primary-700']}}>
+            <Text>
+              We can have other sections of notes below it up to a certain point.  
+            </Text>
+          </Card>
+        </Layout>
+      </ApplicationProvider>
+      // <ScrollView style = {styles.scrollContainer}>
+      //   <View style={styles.container}>
+      //     {/* header */}
+      //     <View style={styles.header}>
+      //       <Text style={styles.headerText}>{site}</Text>
+      //     </View>
 
-          <View style ={styles.rowContainer}>
-            <Text style = {styles.label}>Tank 1</Text>
-            <SafeAreaProvider>
-              <SafeAreaView>
-                <Text style={styles.label}>1800 psi</Text>
-              </SafeAreaView>
-          </SafeAreaProvider>
-          </View>
+      //     {/* drop down menu for instruments */}
+      //     <View style={styles.rowContainer}>
+      //       <Text style={styles.label}>Instrument</Text>
+      //       <Text style={styles.label}>Instrument name</Text>
+      //     </View>
 
-          <Text style= {styles.label}>Site Notes</Text>
-          <SafeAreaProvider>
-            <SafeAreaView>
-              <Text style={styles.normal}>Today on site I tested these things, next time will need to bring these tools</Text>
-            </SafeAreaView>
-          </SafeAreaProvider>
+      //     <View style = {styles.rowContainer}>
+      //       <Text style = {styles.label}>Time Started</Text>
+      //       <SafeAreaProvider>
+      //         <SafeAreaView>
+      //           <Text style={styles.label}>8:30 am</Text>
+      //         </SafeAreaView>
+      //       </SafeAreaProvider>
+      //     </View>
 
-          <TouchableOpacity
-            style={[styles.homeButton, {backgroundColor: 'red'}]}
-            onPress={() => alert("Submit Button Pressed")} >
-            <Text style={[styles.homeButtonText, {color: 'white'}]}>Edit!</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+      //     <View style ={styles.rowContainer}>
+      //       <Text style = {styles.label}>Tank 1</Text>
+      //       <SafeAreaProvider>
+      //         <SafeAreaView>
+      //           <Text style={styles.label}>1800 psi</Text>
+      //         </SafeAreaView>
+      //     </SafeAreaProvider>
+      //     </View>
+
+      //     <Text style= {styles.label}>Site Notes</Text>
+      //     <SafeAreaProvider>
+      //       <SafeAreaView>
+      //         <Text style={styles.normal}>Today on site I tested these things, next time will need to bring these tools</Text>
+      //       </SafeAreaView>
+      //     </SafeAreaProvider>
+
+      //     <TouchableOpacity
+      //       style={[styles.homeButton, {backgroundColor: 'red'}]}
+      //       onPress={() => alert("Submit Button Pressed")} >
+      //       <Text style={[styles.homeButtonText, {color: 'white'}]}>Edit!</Text>
+      //     </TouchableOpacity>
+      //   </View>
+      // </ScrollView>
     );
   }
 
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#fff',
       alignItems: 'stretch',        // has button fill space horizontally
       justifyContent: 'space-evenly',
     },

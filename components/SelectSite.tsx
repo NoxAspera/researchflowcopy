@@ -1,9 +1,12 @@
-import { StyleSheet, Text, View, Alert, Button, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Alert, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { parseDocument, buildDocument } from '../scripts/Parsers';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { ApplicationProvider, Layout, Button } from '@ui-kitten/components';
+import * as eva from '@eva-design/eva';
+import { customTheme } from './CustomTheme'
 
 // Define the type for the stack's navigation parameters
 type RootStackParamList = {
@@ -24,6 +27,7 @@ export default function SelectSite({navigation}: HomeScreenProps) {
   const route = useRoute();
   let from = route.params?.from;
 
+<<<<<<< HEAD
   const handleConfirm = () => {
     if(from === 'AddNotes')
     {
@@ -58,13 +62,97 @@ export default function SelectSite({navigation}: HomeScreenProps) {
 
         </Picker>
       </View>
+=======
+  const handleConfirm = (selectedSite: string) => {
+    if(from === 'AddNotes'){
+      const textDocument = `
+      # Site id: **sug**
+      ---
+      - Time in: 2024-08-20 15:15Z
+      - Time out: 2024-08-20 16:15Z
+      - Name: Megan, Maria
+      - Instrument: Li-7000 serial # 0280
+      - N2: 2000 psi
+      - LTS: 210816_M1 value 524.29 ppm 1650 psi
+      - Low cal: 230829_J05 value 403.65 ppm 1850 psi
+      - Mid cal: 240122_56 value 450.31 ppm 1350 psi
+      - High cal: 240301_37 value 498.54 ppm 2050 psi
+      - Swapped high tank. Old tank was 230509_J40 value 492.56 ppm 490 psi
+      - Removed Li-7000 serial # 1261. Installed Li-7000 serial # 0280. Instrument initially showed incorrect output from Datalogger. Reseated seial connection from instrument, this seemed to fix the issue. Instrument is reading about 10 ppm lower than expected, but this is consistent for all cal tanks so calibrated data should be good.
+      - Inlet filter is very dirty. Should replace filter next visit.
+      ---
+          `;
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => handleConfirm()}>
-          <Text style={styles.buttonText}>Confirm</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      // Parse the document
+      const parsedData = parseDocument(textDocument);
+
+      navigation.navigate('AddNotes', {site: selectedSite, info: parsedData}); //{site: selectValue} tells the AddNotes what the selected value is
+    }
+    else if(from === 'ViewNotes'){
+      navigation.navigate('ViewNotes', {site: selectedSite}); //{site: selectValue} tells the AddNotes what the selected value is
+    }
+    else if(from === 'BadData'){
+      navigation.navigate('BadData', {site: selectedSite}); //{site: selectValue} tells the AddNotes what the selected value is
+    }
+    else if (from === 'InstrumentMaintenance'){
+      navigation.navigate('InstrumentMaintenance', {site: selectedSite});
+    }
+    else if (from === 'TankTracker'){
+      navigation.navigate('TankTracker', {site: selectedSite});
+    }
+  };
+
+  const buttonData = [
+    { id: 1, label: 'CSP', onPress: () => handleConfirm('CSP')},
+    { id: 2, label: 'DBK', onPress: () => handleConfirm('DBK')},
+    { id: 3, label: 'FRU', onPress: () => handleConfirm('FRU')},
+    { id: 4, label: 'HDP', onPress: () => handleConfirm('HDP')},
+    { id: 5, label: 'HPL', onPress: () => handleConfirm('HPL')},
+    { id: 6, label: 'RPK', onPress: () => handleConfirm('RPK')},
+    { id: 7, label: 'SUG', onPress: () => handleConfirm('SUG')},
+    { id: 8, label: 'WBB', onPress: () => handleConfirm('WBB')}
+  ]
+>>>>>>> kitten-ui-update
+
+  return (
+    <ApplicationProvider {...eva} theme={customTheme}>
+      <Layout style={styles.container}>
+        {buttonData.map((button) => (
+          <Button
+            key={button.id}
+            style={styles.button}
+            onPress={button.onPress}
+          >
+            {button.label}
+          </Button>
+        ))}
+      </Layout>
+    </ApplicationProvider>
+    // <View style={styles.container}>
+    //   <View style={styles.dropdownContainer}>
+    //     <Text style={styles.label}>Where are you?</Text>
+    //     <Picker
+    //       selectedValue={selectedValue}
+    //       onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
+    //       style={styles.picker}
+    //     >
+    //       <Picker.Item label="CSP" value="CSP" />
+    //       <Picker.Item label="DBK" value="DBK" />
+    //       <Picker.Item label="FRU" value="FRU" />
+    //       <Picker.Item label="HDP" value="HDP" />
+    //       <Picker.Item label="HPL" value="HPL" />
+    //       <Picker.Item label="RPK" value="RPK" />
+    //       <Picker.Item label="SUG" value="SUG" />
+    //       <Picker.Item label="WBB" value="WBB" />
+    //     </Picker>
+    //   </View>
+
+    //   <View style={styles.buttonContainer}>
+    //     <TouchableOpacity style={styles.button} onPress={() => handleConfirm()}>
+    //       <Text style={styles.buttonText}>Confirm</Text>
+    //     </TouchableOpacity>
+    //   </View>
+    // </View
   );
 }
 
@@ -90,7 +178,6 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   button: {
-    backgroundColor: '#007AFF',
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 8,
