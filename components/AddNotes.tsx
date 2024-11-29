@@ -5,11 +5,13 @@ import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { StackNavigationProp } from '@react-navigation/stack';
 import AddNotesTextInput from './TextInput';
+import { buildNotes, Entry } from '../scripts/Parsers';
 import { NaviProp } from './types';
 import TextInput from './TextInput'
 import { ApplicationProvider, IndexPath, Input, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
+import { setFile } from '../scripts/APIRequests';
 
 type RouteParams = {
   site: string; 
@@ -22,33 +24,21 @@ export default function AddNotes({ navigation }: NaviProp) {
     //let site = route.params?.site;
     const { site, info } = route.params || {}
 
-    //console.log("Info parameter:", info);
-
-    const entry = info?.entries[0] || {};
-    const instrument = entry.instrument || 'No instrument associated with this site. Please provide instrument type and serial number.';
-    const n2 = entry.n2_pressure || '';
-    let low_tank = '';
-    let mid_tank = '';
-    let high_tank = '';
-    let lts = '';
-    if (entry.low_cal) {
-      low_tank = entry.low_cal.id || '';
-    }
-    if (entry.mid_cal) {
-      mid_tank = entry.mid_cal.id || '';
-    }
-    if (entry.high_cal) {
-      high_tank = entry.high_cal.id || '';
-    }
-    if (entry.lts) {
-      lts = entry.lts.id || '';
-    }
-
     // these use states to set and store values in the text inputs
     const [timeValue, setTimeValue] = useState("");
+    const [nameValue, setNameValue] = useState("");
+    const [ltsId, setLTSId] = useState("");
+    const [ltsValue, setLTSValue] = useState("");
+    const [ltsPressure, setLTSPressure] = useState("");
+    const [lowId, setLowId] = useState("");
     const [lowValue, setLowValue] = useState("");
+    const [lowPressure, setLowPressure] = useState("");
+    const [medId, setMedId] = useState("");
     const [medValue, setMedValue] = useState("");
+    const [medPressure, setMedPressure] = useState("");
+    const [highId, setHighId] = useState("");
     const [highValue, setHighValue] = useState("");
+    const [highPressure, setHighPressure] = useState("");
     const [n2Value, setN2Value] = useState("");
     const [notesValue, setNotesValue] = useState("");
 
@@ -59,55 +49,121 @@ export default function AddNotes({ navigation }: NaviProp) {
     //alert("found: " + site);
     return (
       <ApplicationProvider {...eva} theme={customTheme}>
-        <Layout style={styles.container}>
-          {/* header */}
-          <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
-          
-          {/* drop down menu for instruments */}
-          <Select label='Instrument'
-            selectedIndex={selectedIndex}
-            onSelect={(index) => setSelectedIndex(index as IndexPath)}
-            value={instruments[selectedIndex.row]}
-            style={{margin: 15, flex: 1}}>
-            <SelectItem 
-              title='Instrument 1'
-            />
-            <SelectItem 
-              title='Instrument 2'
-            />
-            <SelectItem 
-              title='Instrument 3'
-            />
-          </Select>
+        <ScrollView>
+          <Layout style={styles.container}>
+            {/* header */}
+            <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
+            
+            {/* drop down menu for instruments */}
+            <Select label='Instrument'
+              selectedIndex={selectedIndex}
+              onSelect={(index) => setSelectedIndex(index as IndexPath)}
+              value={instruments[selectedIndex.row]}
+              style={{margin: 15, flex: 1}}>
+              <SelectItem 
+                title='Instrument 1'
+              />
+              <SelectItem 
+                title='Instrument 2'
+              />
+              <SelectItem 
+                title='Instrument 3'
+              />
+            </Select>
 
-          {/* text inputs */}
-          {/* Time input */}
-          <TextInput labelText='Time' labelValue={timeValue} onTextChange={setTimeValue} placeholder='12:00 PM' style={styles.inputText} />
+            {/* text inputs */}
+            {/* Time input */}
+            <TextInput labelText='Name' labelValue={nameValue} onTextChange={setNameValue} placeholder='ResearchFlow' style={styles.inputText} />
+            <TextInput labelText='Time' labelValue={timeValue} onTextChange={setTimeValue} placeholder='15:00' style={styles.inputText} />
 
-          {/* N2 */}
-          <TextInput labelText='N2' labelValue={n2Value} onTextChange={setN2Value} placeholder='Level' style={styles.inputText} />
+            {/* N2 */}
+            <TextInput labelText='N2' labelValue={n2Value} onTextChange={setN2Value} placeholder='Pressure' style={styles.inputText} />
 
-          {/* Low input */}
-          <TextInput labelText='Low' labelValue={lowValue} onTextChange={setLowValue} placeholder='Level' style={styles.inputText} />
+            {/* LTS input */}
+            <Layout style = {styles.rowContainer}>
+              <TextInput labelText='LTS' labelValue={ltsId} onTextChange={setLTSId} placeholder='Tank ID' style={styles.tankInput} />
+              <TextInput labelText=' ' labelValue={ltsValue} onTextChange={setLTSValue} placeholder='Value' style={styles.tankInput} />
+              <TextInput labelText=' ' labelValue={ltsPressure} onTextChange={setLTSPressure} placeholder='Pressure' style={styles.tankInput} />
+            </Layout>
 
-          {/* mid input */}
-          <TextInput labelText='Mid' labelValue={medValue} onTextChange={setMedValue} placeholder='Level' style={styles.inputText} />
+            {/* Low input */}
+            <Layout style = {styles.rowContainer}>
+              <TextInput labelText='Low' labelValue={lowId} onTextChange={setLowId} placeholder='Tank ID' style={styles.tankInput} />
+              <TextInput labelText=' ' labelValue={lowValue} onTextChange={setLowValue} placeholder='Value' style={styles.tankInput} />
+              <TextInput labelText=' ' labelValue={lowPressure} onTextChange={setLowPressure} placeholder='Pressure' style={styles.tankInput} />
+            </Layout>
+            {/* mid input */}
+            <Layout style = {styles.rowContainer}>
+              <TextInput labelText='Med' labelValue={medId} onTextChange={setMedId} placeholder='Tank ID' style={styles.tankInput} />
+              <TextInput labelText=' ' labelValue={medValue} onTextChange={setMedValue} placeholder='Value' style={styles.tankInput} />
+              <TextInput labelText=' ' labelValue={medPressure} onTextChange={setMedPressure} placeholder='Pressure' style={styles.tankInput} />
+            </Layout>
+            {/* high input */}
+            <Layout style = {styles.rowContainer}>
+              <TextInput labelText='High' labelValue={highId} onTextChange={setHighId} placeholder='Tank ID' style={styles.tankInput} />
+              <TextInput labelText=' ' labelValue={highValue} onTextChange={setHighValue} placeholder='Value' style={styles.tankInput} />
+              <TextInput labelText=' ' labelValue={highPressure} onTextChange={setHighPressure} placeholder='Pressure' style={styles.tankInput} />
+            </Layout>
+            {/* notes entry */}
+            <TextInput labelText='Notes' labelValue={notesValue} onTextChange={setNotesValue} placeholder='All Good.' multiplelines={true} style={styles.notesInput}/>
 
-          {/* high input */}
-          <TextInput labelText='High' labelValue={highValue} onTextChange={setHighValue} placeholder='Level' style={styles.inputText} />
+            {/* submit button */}
+            <Button
+              onPress={() => {
+                const now = new Date();
+                const year = now.getFullYear().toString()
+                const month = (now.getMonth() + 1).toString() // the month is zero-base, likely due to something with Oracle's implementation, despite this not being used in any culture's dating system (that i know of) - August
+                const day = now.getDate().toString()
+                const hours= now.getHours().toString()
+                const minutes = now.getMinutes().toString()
 
-          {/* notes entry */}
-          <TextInput labelText='Notes' labelValue={notesValue} onTextChange={setNotesValue} placeholder='All Good.' multiplelines={true} style={styles.notesInput}/>
-
-          {/* submit button */}
-          <Button
-            onPress={() => alert('submitted notes!')}
-            appearance='filled'
-            status='primary'
-            style={{margin: 15}}>
-            Submit
-          </Button>
-        </Layout>
+                const data: Entry = 
+                {
+                  time_in: `${year}-${month}-${day} ${timeValue}`,
+                  time_out: `${year}-${month}-${day} ${hours}:${minutes}`,
+                  names: nameValue,
+                  instrument: instruments[selectedIndex.row] ? instruments[selectedIndex.row] : null,
+                  n2_pressure: n2Value ? n2Value: null,
+                  lts: 
+                  {
+                    id: ltsId,
+                    value: ltsValue,
+                    unit: "ppm",
+                    pressure: ltsPressure
+                  },
+                  low_cal:
+                  {
+                    id:lowId,
+                    value:lowValue,
+                    unit:"ppm",
+                    pressure: lowPressure
+                  },
+                  mid_cal:
+                  {
+                    id:medId,
+                    value:medValue,
+                    unit: "ppm",
+                    pressure: medPressure
+                  },
+                  high_cal:
+                  {
+                    id:highId,
+                    value:highValue,
+                    unit: "ppm",
+                    pressure: highPressure
+                  },
+                  additional_notes: notesValue
+                };
+                  setFile("test", buildNotes(data), "this is just the begining");
+              }
+            }
+              appearance='filled'
+              status='primary'
+              style={{margin: 15}}>
+              Submit
+            </Button>
+          </Layout>
+        </ScrollView>
       </ApplicationProvider>
       // <ScrollView style = {styles.scrollContainer}>
       //   <View style={styles.container}>
@@ -242,10 +298,15 @@ export default function AddNotes({ navigation }: NaviProp) {
       flex: 1,
       margin: 15
     },
-    notesInput: {
-      flex: 4,
+    tankInput: {
+      flex: 1,
       margin: 15
-    }
+    },
+    notesInput:
+    {
+      flex: 1,
+      margin: 15
+    },
     // scrollContainer: {
     //   backgroundColor: '#fff'
     // },
@@ -264,32 +325,24 @@ export default function AddNotes({ navigation }: NaviProp) {
     // dropdownContainer: {
     //   marginTop: 50,
     //   alignItems: 'flex-start',
-    // },
-    // timeInput: {
-    //   height: 40,
-    //   margin: 10,
-    //   width: 200,
-    //   borderWidth: 1,
-    //   padding: 10,
-    // },
-    // areaInput: {
-    //   height: 200,
-    //   margin: 15,
-    //   width: 380,
-    //   borderWidth: 1,
-    //   padding: 10,
-    //   marginTop: 5,
-    //   marginBottom: 5,
-    // },
+    //},
+    areaInput: {
+      height: 200,
+      margin: 15,
+      width: 380,
+      borderWidth: 1,
+      padding: 10,
+      marginTop: 5,
+      marginBottom: 5,
+    },
 
-    // rowContainer:
-    // {
-    //   flex: 1,
-    //   backgroundColor: '#fff',
-    //   flexDirection: 'row',
-    //   alignItems: 'flex-start',        // has button fill space horizontally
-    //   justifyContent: 'space-evenly',
-    // },
+    rowContainer:
+    {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'stretch',        // has button fill space horizontally
+      justifyContent: 'space-evenly',
+    },
     // submitButton: {
     //   paddingLeft: 10,
     //   justifyContent: 'center',     // this and alignItems places text in center of button

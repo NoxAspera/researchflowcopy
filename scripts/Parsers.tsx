@@ -4,7 +4,7 @@
  */
 export interface TankInfo {
     id: string;
-    value: number;
+    value: string;
     unit: string;
     pressure: string;
 }
@@ -40,7 +40,7 @@ export interface ParsedData {
  * 
  * @returns a ParsedData object that contains the information of the given document
  */
-export function parseDocument(text: string): ParsedData {
+export function parseNotes(text: string): ParsedData {
     const siteIdPattern = /# Site id: \*\*(.*?)\*\*/;
     const timePattern = /- Time (in|out): (.*?)z/gi;
     const namePattern = /- Name: (.*?)\n/;
@@ -82,7 +82,7 @@ export function parseDocument(text: string): ParsedData {
         const tankType = tankMatch[1].toLowerCase().replace(" ", "_") as keyof typeof tanks;
         tanks[tankType] = {
             id: tankMatch[2],
-            value: parseFloat(tankMatch[3]),
+            value: tankMatch[3],
             unit: "ppm",
             pressure: tankMatch[4]
         };
@@ -120,19 +120,26 @@ export function parseDocument(text: string): ParsedData {
  * This method should build a string that makes a valid entry for a document from the repository
  * @param data - the data for the new entry in the document
  */
-export function buildDocument(data: Entry): string
+export function buildNotes(data: Entry): string
 {
     let result:string = "---\n"
 
     result += `- Time in: ${data.time_in}Z\n`;
     result += `- Time out: ${data.time_out}Z\n`;
     result += `- Name: ${data.names}\n`;
-    result += `- Instrument: ${data.instrument}\n`
+    if(data.instrument != null)
+    {
+        result += `- Instrument: ${data.instrument}\n`
+    }
     result += `- N2: ${data.n2_pressure}\n`;
+    if(data.lts != null)
+    {
     result += `- LTS: ${data.lts?.id} value ${data.lts?.value} ppm ${data.lts?.pressure}\n`;
-    result += `- Low Cal: ${data.low_cal?.id} value ${data.low_cal?.value} ppm ${data.low_cal?.pressure}\n`;
-    result += `- Mid Cal: ${data.mid_cal?.id} value ${data.mid_cal?.value} ppm ${data.mid_cal?.pressure}\n`;
-    result += `- High Cal: ${data.high_cal?.id} value ${data.high_cal?.value} ppm ${data.high_cal?.pressure}\n`;
-    result += data.additional_notes;
+    }
+    result += `- Low Cal: ${data.low_cal?.id} value ${data.low_cal?.value} ${data.low_cal?.unit} ${data.low_cal?.pressure}\n`;
+    result += `- Mid Cal: ${data.mid_cal?.id} value ${data.mid_cal?.value} ${data.mid_cal?.unit} ${data.mid_cal?.pressure}\n`;
+    result += `- High Cal: ${data.high_cal?.id} value ${data.high_cal?.value} ${data.high_cal?.unit} ${data.high_cal?.pressure}\n`;
+    
+    result += `- ${data.additional_notes}\n`;
     return result
 }
