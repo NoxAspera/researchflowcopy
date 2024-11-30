@@ -18,6 +18,13 @@ type RouteParams = {
   info: string; 
 };
 
+
+function checkValidNumber(entry:string)
+{
+  const anyNonNumber = /^(\d+)(\.\d+)?$/gm
+ return anyNonNumber.test(entry)
+}
+
 export default function AddNotes({ navigation }: NaviProp) {
     type routeProp = RouteProp<{params: RouteParams}, 'params'>;
     const route = useRoute<routeProp>();
@@ -33,9 +40,9 @@ export default function AddNotes({ navigation }: NaviProp) {
     const [lowId, setLowId] = useState("");
     const [lowValue, setLowValue] = useState("");
     const [lowPressure, setLowPressure] = useState("");
-    const [medId, setMedId] = useState("");
-    const [medValue, setMedValue] = useState("");
-    const [medPressure, setMedPressure] = useState("");
+    const [midId, setmidId] = useState("");
+    const [midValue, setmidValue] = useState("");
+    const [midPressure, setmidPressure] = useState("");
     const [highId, setHighId] = useState("");
     const [highValue, setHighValue] = useState("");
     const [highPressure, setHighPressure] = useState("");
@@ -60,15 +67,15 @@ export default function AddNotes({ navigation }: NaviProp) {
               onSelect={(index) => setSelectedIndex(index as IndexPath)}
               value={instruments[selectedIndex.row]}
               style={{margin: 15, flex: 1}}>
-              <SelectItem 
-                title='Instrument 1'
-              />
-              <SelectItem 
-                title='Instrument 2'
-              />
-              <SelectItem 
-                title='Instrument 3'
-              />
+                <SelectItem 
+                  title='Instrument 1'
+                />
+                <SelectItem 
+                  title='Instrument 2'
+                />
+                <SelectItem 
+                  title='Instrument 3'
+                />
             </Select>
 
             {/* text inputs */}
@@ -86,6 +93,8 @@ export default function AddNotes({ navigation }: NaviProp) {
               <TextInput labelText=' ' labelValue={ltsPressure} onTextChange={setLTSPressure} placeholder='Pressure' style={styles.tankInput} />
             </Layout>
 
+            {/* Note for all tank inputs, the single space labels are there to make sure the other entry fields are alligned good*/}
+
             {/* Low input */}
             <Layout style = {styles.rowContainer}>
               <TextInput labelText='Low' labelValue={lowId} onTextChange={setLowId} placeholder='Tank ID' style={styles.tankInput} />
@@ -94,11 +103,11 @@ export default function AddNotes({ navigation }: NaviProp) {
             </Layout>
             {/* mid input */}
             <Layout style = {styles.rowContainer}>
-              <TextInput labelText='Med' labelValue={medId} onTextChange={setMedId} placeholder='Tank ID' style={styles.tankInput} />
-              <TextInput labelText=' ' labelValue={medValue} onTextChange={setMedValue} placeholder='Value' style={styles.tankInput} />
-              <TextInput labelText=' ' labelValue={medPressure} onTextChange={setMedPressure} placeholder='Pressure' style={styles.tankInput} />
+              <TextInput labelText='mid' labelValue={midId} onTextChange={setmidId} placeholder='Tank ID' style={styles.tankInput} />
+              <TextInput labelText=' ' labelValue={midValue} onTextChange={setmidValue} placeholder='Value' style={styles.tankInput} />
+              <TextInput labelText=' ' labelValue={midPressure} onTextChange={setmidPressure} placeholder='Pressure' style={styles.tankInput} />
             </Layout>
-            {/* high input */}
+            {/* high input */} 
             <Layout style = {styles.rowContainer}>
               <TextInput labelText='High' labelValue={highId} onTextChange={setHighId} placeholder='Tank ID' style={styles.tankInput} />
               <TextInput labelText=' ' labelValue={highValue} onTextChange={setHighValue} placeholder='Value' style={styles.tankInput} />
@@ -109,14 +118,94 @@ export default function AddNotes({ navigation }: NaviProp) {
 
             {/* submit button */}
             <Button
-              onPress={() => {
+              onPress={() => 
+              {
+                const LTSignored: boolean = (ltsId == "" && ltsValue == "" && ltsPressure == "")
+              //check if any fields that need to be filled are actually empty
+                if(nameValue == "")
+                {
+                  alert("Please fill in the Name field")
+                  return
+                }
+                if(timeValue == "")
+                {
+                  alert("Please enter a time")
+                  return
+                }
+                if(n2Value != "" && (!checkValidNumber(n2Value)))
+                {
+                  alert("Please enter a valid N2 pressure")
+                  return
+                }
+                if(!LTSignored && !checkValidNumber(ltsId))
+                {
+                  alert("Please enter a valid LTS ID")
+                  return
+                }
+                if(!LTSignored && !checkValidNumber(ltsValue))
+                {
+                  alert("Please enter a valid LTS Value")
+                  return
+                }
+                if(!LTSignored && !checkValidNumber(ltsPressure))
+                {
+                  alert("Please enter a valid LTS Pressure")
+                  return
+                }
+                if(lowId != "" && !checkValidNumber(lowId))
+                {
+                  alert("Please enter a valid ID for the low tank")
+                  return
+                }
+                if(!checkValidNumber(lowValue))
+                {
+                  alert("Please enter a valid value for the low tank")
+                  return
+                }
+                if(!checkValidNumber(lowPressure))
+                {
+                  alert("Please enter a valid pressure for the low tank")
+                  return
+                }
+                if(!checkValidNumber(midId))
+                {
+                  alert("Please enter a valid ID for the mid tank")
+                  return
+                }
+                if(!checkValidNumber(midValue))
+                {
+                  alert("Please enter a valid value for the mid tank")
+                  return
+                }
+                if(!checkValidNumber(midPressure))
+                {
+                  alert("Please enter a valid pressure for the mid tank")
+                  return
+                }
+                if(!checkValidNumber(highId))
+                {
+                  alert("Please enter a valid ID for the high tank")
+                  return
+                }
+                if(!checkValidNumber(highValue))
+                {
+                  alert("Please enter a valid value for the high tank")
+                  return
+                }
+                if(!checkValidNumber(highPressure))
+                {
+                  alert("Please enter a valid pressure for the high tank")
+                  return
+                }
+
                 const now = new Date();
                 const year = now.getFullYear().toString()
-                const month = (now.getMonth() + 1).toString() // the month is zero-base, likely due to something with Oracle's implementation, despite this not being used in any culture's dating system (that i know of) - August
+                const month = (now.getMonth() + 1).toString() // now.getMonth() is zero-base (i.e. January is 0), likely due to something with Oracle's implementation - August
                 const day = now.getDate().toString()
                 const hours= now.getHours().toString()
                 const minutes = now.getMinutes().toString()
-
+                
+                //not putting this in a seperate function is messy, but if we did, it would be worse - August
                 const data: Entry = 
                 {
                   time_in: `${year}-${month}-${day} ${timeValue}`,
@@ -124,7 +213,7 @@ export default function AddNotes({ navigation }: NaviProp) {
                   names: nameValue,
                   instrument: instruments[selectedIndex.row] ? instruments[selectedIndex.row] : null,
                   n2_pressure: n2Value ? n2Value: null,
-                  lts: 
+                  lts: LTSignored ? null:
                   {
                     id: ltsId,
                     value: ltsValue,
@@ -140,10 +229,10 @@ export default function AddNotes({ navigation }: NaviProp) {
                   },
                   mid_cal:
                   {
-                    id:medId,
-                    value:medValue,
+                    id:midId,
+                    value:midValue,
                     unit: "ppm",
-                    pressure: medPressure
+                    pressure: midPressure
                   },
                   high_cal:
                   {
@@ -152,9 +241,9 @@ export default function AddNotes({ navigation }: NaviProp) {
                     unit: "ppm",
                     pressure: highPressure
                   },
-                  additional_notes: notesValue
+                  additional_notes: notesValue 
                 };
-                  setFile("test", buildNotes(data), "this is just the begining");
+                setFile(site, buildNotes(data), "updating notes from researchFlow");
               }
             }
               appearance='filled'

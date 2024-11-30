@@ -91,7 +91,7 @@ export function parseNotes(text: string): ParsedData {
     // Parse additional notes
     const notesMatch = text.match(additionalNotesPattern);
     let additionalNotes = ""
-    notesMatch ? notesMatch.forEach(function (value) {additionalNotes += (value + "\n")}) : null;
+    notesMatch ? notesMatch.forEach(function (value) {additionalNotes += (value + "\n- ")}) : null;
 
     // Construct final parsed data
     const jsonData: ParsedData = {
@@ -131,15 +131,20 @@ export function buildNotes(data: Entry): string
     {
         result += `- Instrument: ${data.instrument}\n`
     }
-    result += `- N2: ${data.n2_pressure}\n`;
+    if(data.n2_pressure == "")
+    {
+        result += `- N2: ${data.n2_pressure}\n`;
+    }
     if(data.lts != null)
     {
-    result += `- LTS: ${data.lts?.id} value ${data.lts?.value} ppm ${data.lts?.pressure}\n`;
+        result += `- LTS: ${data.lts?.id} value ${data.lts?.value} ppm ${data.lts?.pressure}\n`;
     }
     result += `- Low Cal: ${data.low_cal?.id} value ${data.low_cal?.value} ${data.low_cal?.unit} ${data.low_cal?.pressure}\n`;
     result += `- Mid Cal: ${data.mid_cal?.id} value ${data.mid_cal?.value} ${data.mid_cal?.unit} ${data.mid_cal?.pressure}\n`;
     result += `- High Cal: ${data.high_cal?.id} value ${data.high_cal?.value} ${data.high_cal?.unit} ${data.high_cal?.pressure}\n`;
-    
-    result += `- ${data.additional_notes}\n`;
+    if(data.additional_notes != "")
+    {
+        result += `- ${data.additional_notes}\n`;
+    }
     return result
 }
