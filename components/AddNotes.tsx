@@ -18,6 +18,11 @@ type RouteParams = {
   info: string; 
 };
 
+function checkValidTime(entry:string)
+{
+  const timeMatch = /^[0-2][0-9]:[0-5][0-9]$/gm
+  return timeMatch.test(entry)
+}
 
 function checkValidNumber(entry:string)
 {
@@ -81,7 +86,7 @@ export default function AddNotes({ navigation }: NaviProp) {
             {/* text inputs */}
             {/* Time input */}
             <TextInput labelText='Name' labelValue={nameValue} onTextChange={setNameValue} placeholder='ResearchFlow' style={styles.inputText} />
-            <TextInput labelText='Time' labelValue={timeValue} onTextChange={setTimeValue} placeholder='15:00' style={styles.inputText} />
+            <TextInput labelText='Time Started' labelValue={timeValue} onTextChange={setTimeValue} placeholder='15:00' style={styles.inputText} />
 
             {/* N2 */}
             <TextInput labelText='N2' labelValue={n2Value} onTextChange={setN2Value} placeholder='Pressure' style={styles.inputText} />
@@ -127,9 +132,9 @@ export default function AddNotes({ navigation }: NaviProp) {
                   alert("Please fill in the Name field")
                   return
                 }
-                if(timeValue == "")
+                if(!checkValidTime(timeValue))
                 {
-                  alert("Please enter a time")
+                  alert("Please enter a valid time in 24Hr (military) format")
                   return
                 }
                 if(n2Value != "" && (!checkValidNumber(n2Value)))
