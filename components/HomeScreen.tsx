@@ -1,6 +1,6 @@
 /**
  * Home Screen
- * By Blake Stambaugh
+ * @author Blake Stambaugh
  * 11/26/2024
  * 
  * The follow code represents the home page the user sees when they first launch our app.

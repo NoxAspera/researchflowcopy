@@ -23,7 +23,7 @@ export async function getSites()
     const headers = new Headers();
     headers.append("User-Agent", "ResearchFlow");
     headers.append("Accept", "application/vnd.github.raw+json");
-    headers.append("Authorization", `YOUR TOKEN HERE`);
+    headers.append("Authorization", `Bearer YOUR TOKEN HERE`);
     headers.append("X-GitHub-Api-Version", "2022-11-28");
 
     const requestOptions: RequestInfo = new Request(url, 
@@ -92,10 +92,9 @@ export async function setFile(siteName: string, content: string, commitMessage: 
     const pullResponse = (await getFile(siteName))
     const hash = pullResponse.sha
     const existingContent = atob(pullResponse.content)
-    const fullDoc = btoa(content + existingContent)
-    console.log(hash);
-
-    const base64Content = btoa(content);
+    const siteHeader = `# Site id: **${siteName}**`
+    const existingNotes = existingContent.substring(siteHeader.length, existingContent.length -1) 
+    const fullDoc = btoa(siteHeader +"\n" + content + existingNotes)
 
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/site_notes/${siteName}.md`;
     const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`
