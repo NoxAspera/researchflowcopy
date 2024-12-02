@@ -1,19 +1,25 @@
+/**
+ * TextInput.tsx
+ * By Blake Stambaugh
+ * 11/27/24
+ * 
+ * This property objectifies our text input. It will take in any text, and styling choices
+ * for each input.
+ */
 import { Input } from "@ui-kitten/components";
-import { View, Text, StyleSheet, ViewStyle } from "react-native";
-import { TextInput } from "react-native-gesture-handler";
-import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
-import { customTheme } from './CustomTheme'
+import { StyleSheet, ViewStyle } from "react-native";
 
 interface TIProp{
-    labelText: string;
+    labelText?: string;
     labelValue: string;
     onTextChange: (arg0: string) => void;
     placeholder?: string; 
     multiplelines?: boolean;
     style?: ViewStyle;
+    secureEntry?: boolean; // used for hiding passwords and other sensitive info
 }
 
-const AddNotesTextInput: React.FC<TIProp> = ({ labelText, labelValue, onTextChange, placeholder, multiplelines, style }) => {
+const AddNotesTextInput: React.FC<TIProp> = ({ labelText, labelValue, onTextChange, placeholder, multiplelines, style, secureEntry }) => {
     return (
       <Input
         label={labelText}
@@ -22,6 +28,7 @@ const AddNotesTextInput: React.FC<TIProp> = ({ labelText, labelValue, onTextChan
         multiline={multiplelines ? true : false}
         onChangeText={(arg0) => onTextChange(arg0)}
         style={style}
+        secureTextEntry={secureEntry ? true : false}
       />
     );
 };
