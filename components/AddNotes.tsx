@@ -1,6 +1,6 @@
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -11,7 +11,8 @@ import TextInput from './TextInput'
 import { ApplicationProvider, IndexPath, Input, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
-import { setFile } from '../scripts/APIRequests';
+import { setFile, getFileContents } from '../scripts/APIRequests';
+import { parseNotes, ParsedData } from '../scripts/Parsers'
 
 type RouteParams = {
   site: string; 
@@ -30,12 +31,56 @@ function checkValidNumber(entry:string)
  return anyNonNumber.test(entry)
 }
 
+/**
+ * @author Megan Ostlie
+ *  a function that pulls the current note document for the specified site from GitHub
+ *  @param siteName the name of the site
+ * 
+ * @returns a ParsedData object that contains the information of the given document
+ */
+async function processNotes(siteName: string) {
+  const fileContents = await getFileContents(siteName);
+  const parsedData = parseNotes(fileContents);
+  return parsedData
+}
+
+/**
+ * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
+ *  Creates the input elements for the user to input site note information.
+ *  Pulls the current notes for the selected site from GitHub and autofills certain fields.
+ *  Takes the inputted information from the user to build a new string that is added to that site's note document.
+ * 
+ */
 export default function AddNotes({ navigation }: NaviProp) {
     type routeProp = RouteProp<{params: RouteParams}, 'params'>;
     const route = useRoute<routeProp>();
     //let site = route.params?.site;
     const { site, info } = route.params || {}
 
+    // State to hold parsed data
+    const [data, setData] = useState<ParsedData | null>(null);
+
+    // Get current notes for the site
+    useEffect(() => {
+        async function fetchData() {
+            if (site && !data) {
+                try {
+                    const parsedData = await processNotes(site);
+                    setData(parsedData); // Update state with the latest entry
+                } catch (error) {
+                    console.error("Error processing notes:", error);
+                }
+            }
+        }
+        fetchData();
+    }, [site]); // Re-run if `site` changes
+
+    //Get latest notes entry from site
+    let latestEntry = null;
+    if (data) {
+      latestEntry = data.entries[0];
+    }
+    
     // these use states to set and store values in the text inputs
     const [timeValue, setTimeValue] = useState("");
     const [nameValue, setNameValue] = useState("");
@@ -53,10 +98,36 @@ export default function AddNotes({ navigation }: NaviProp) {
     const [highPressure, setHighPressure] = useState("");
     const [n2Value, setN2Value] = useState("");
     const [notesValue, setNotesValue] = useState("");
+    const [instrumentInput, setInstrumentInput] = useState("");
 
     // Use IndexPath for selected index for drop down menu
     const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
-    const instruments = ['Instrument 1', 'Instrument 2', 'Instrument 3']
+    const [instruments, setInstruments] = useState<string[]>(['Instrument 1']);
+
+    //Set tank ids, values, and instruments if available in parsed data
+    useEffect(() => {
+      if (latestEntry) {
+          if (latestEntry.lts) {
+              setLTSId(latestEntry.lts.id || "");
+              setLTSValue(latestEntry.lts.value || "");
+          }
+          if (latestEntry.low_cal) {
+            setLowId(latestEntry.low_cal.id || "");
+            setLowValue(latestEntry.low_cal.value || "");
+          }
+          if (latestEntry.mid_cal) {
+            setmidId(latestEntry.mid_cal.id || "");
+            setmidValue(latestEntry.mid_cal.value || "");
+          }
+          if (latestEntry.high_cal) {
+            setHighId(latestEntry.high_cal.id || "");
+            setHighValue(latestEntry.high_cal.value || "");
+          }
+          if (latestEntry.instrument) {
+            setInstruments([latestEntry.instrument]);
+          }
+      }
+  }, [latestEntry]);
 
     //alert("found: " + site);
     return (
@@ -67,21 +138,31 @@ export default function AddNotes({ navigation }: NaviProp) {
             <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
             
             {/* drop down menu for instruments */}
+            {latestEntry && !latestEntry.instrument ? (
+          // Prompt the user to input an instrument if none is parsed
+          <>
+            <TextInput
+              labelText="Instrument"
+              labelValue={instrumentInput}
+              onTextChange={setInstrumentInput}
+              placeholder="Please enter instrument name"
+              style={styles.inputText}
+            />
+          </>
+        ) : (
             <Select label='Instrument'
               selectedIndex={selectedIndex}
               onSelect={(index) => setSelectedIndex(index as IndexPath)}
               value={instruments[selectedIndex.row]}
               style={{margin: 15, flex: 1}}>
-                <SelectItem 
-                  title='Instrument 1'
-                />
-                <SelectItem 
-                  title='Instrument 2'
-                />
-                <SelectItem 
-                  title='Instrument 3'
-                />
+                {instruments.map((instrument, index) => (
+                  <SelectItem 
+                    key={index} 
+                    title={instrument} 
+                  />
+              ))}
             </Select>
+        )}
 
             {/* text inputs */}
             {/* Time input */}
@@ -89,11 +170,11 @@ export default function AddNotes({ navigation }: NaviProp) {
             <TextInput labelText='Time Started' labelValue={timeValue} onTextChange={setTimeValue} placeholder='15:00' style={styles.inputText} />
 
             {/* N2 */}
-            <TextInput labelText='N2' labelValue={n2Value} onTextChange={setN2Value} placeholder='Pressure' style={styles.inputText} />
+              <TextInput labelText='N2 (if applicable)' labelValue={n2Value} onTextChange={setN2Value} placeholder='Pressure' style={styles.inputText} />
 
             {/* LTS input */}
-            <Layout style = {styles.rowContainer}>
-              <TextInput labelText='LTS' labelValue={ltsId} onTextChange={setLTSId} placeholder='Tank ID' style={styles.tankInput} />
+              <Layout style = {styles.rowContainer}>
+              <TextInput labelText='LTS (if applicable)' labelValue={ltsId} onTextChange={setLTSId} placeholder='Tank ID' style={styles.tankInput} />
               <TextInput labelText=' ' labelValue={ltsValue} onTextChange={setLTSValue} placeholder='Value' style={styles.tankInput} />
               <TextInput labelText=' ' labelValue={ltsPressure} onTextChange={setLTSPressure} placeholder='Pressure' style={styles.tankInput} />
             </Layout>
@@ -108,7 +189,7 @@ export default function AddNotes({ navigation }: NaviProp) {
             </Layout>
             {/* mid input */}
             <Layout style = {styles.rowContainer}>
-              <TextInput labelText='mid' labelValue={midId} onTextChange={setmidId} placeholder='Tank ID' style={styles.tankInput} />
+              <TextInput labelText='Mid' labelValue={midId} onTextChange={setmidId} placeholder='Tank ID' style={styles.tankInput} />
               <TextInput labelText=' ' labelValue={midValue} onTextChange={setmidValue} placeholder='Value' style={styles.tankInput} />
               <TextInput labelText=' ' labelValue={midPressure} onTextChange={setmidPressure} placeholder='Pressure' style={styles.tankInput} />
             </Layout>
@@ -126,83 +207,7 @@ export default function AddNotes({ navigation }: NaviProp) {
               onPress={() => 
               {
                 const LTSignored: boolean = (ltsId == "" && ltsValue == "" && ltsPressure == "")
-              //check if any fields that need to be filled are actually empty
-                if(nameValue == "")
-                {
-                  alert("Please fill in the Name field")
-                  return
-                }
-                if(!checkValidTime(timeValue))
-                {
-                  alert("Please enter a valid time in 24Hr (military) format")
-                  return
-                }
-                if(n2Value != "" && (!checkValidNumber(n2Value)))
-                {
-                  alert("Please enter a valid N2 pressure")
-                  return
-                }
-                if(!LTSignored && !checkValidNumber(ltsId))
-                {
-                  alert("Please enter a valid LTS ID")
-                  return
-                }
-                if(!LTSignored && !checkValidNumber(ltsValue))
-                {
-                  alert("Please enter a valid LTS Value")
-                  return
-                }
-                if(!LTSignored && !checkValidNumber(ltsPressure))
-                {
-                  alert("Please enter a valid LTS Pressure")
-                  return
-                }
-                if(lowId != "" && !checkValidNumber(lowId))
-                {
-                  alert("Please enter a valid ID for the low tank")
-                  return
-                }
-                if(!checkValidNumber(lowValue))
-                {
-                  alert("Please enter a valid value for the low tank")
-                  return
-                }
-                if(!checkValidNumber(lowPressure))
-                {
-                  alert("Please enter a valid pressure for the low tank")
-                  return
-                }
-                if(!checkValidNumber(midId))
-                {
-                  alert("Please enter a valid ID for the mid tank")
-                  return
-                }
-                if(!checkValidNumber(midValue))
-                {
-                  alert("Please enter a valid value for the mid tank")
-                  return
-                }
-                if(!checkValidNumber(midPressure))
-                {
-                  alert("Please enter a valid pressure for the mid tank")
-                  return
-                }
-                if(!checkValidNumber(highId))
-                {
-                  alert("Please enter a valid ID for the high tank")
-                  return
-                }
-                if(!checkValidNumber(highValue))
-                {
-                  alert("Please enter a valid value for the high tank")
-                  return
-                }
-                if(!checkValidNumber(highPressure))
-                {
-                  alert("Please enter a valid pressure for the high tank")
-                  return
-                }
-
+             
                 const now = new Date();
                 const year = now.getFullYear().toString()
                 const month = (now.getMonth() + 1).toString() // now.getMonth() is zero-base (i.e. January is 0), likely due to something with Oracle's implementation - August
@@ -216,7 +221,7 @@ export default function AddNotes({ navigation }: NaviProp) {
                   time_in: `${year}-${month}-${day} ${timeValue}`,
                   time_out: `${year}-${month}-${day} ${hours}:${minutes}`,
                   names: nameValue,
-                  instrument: instruments[selectedIndex.row] ? instruments[selectedIndex.row] : null,
+                  instrument: instrumentInput.trim() ? instrumentInput : (instruments[selectedIndex.row] ? instruments[selectedIndex.row] : null),
                   n2_pressure: n2Value ? n2Value: null,
                   lts: LTSignored ? null:
                   {
@@ -259,126 +264,6 @@ export default function AddNotes({ navigation }: NaviProp) {
           </Layout>
         </ScrollView>
       </ApplicationProvider>
-      // <ScrollView style = {styles.scrollContainer}>
-      //   <View style={styles.container}>
-      //     {/* header */}
-      //     <View style={styles.header}>
-      //       <Text style={styles.headerText}>{site}</Text>
-      //     </View>
-    
-      //     {/* drop down menu for instruments */}
-      //     <View style={styles.rowContainer}>
-      //       <Text style={styles.label}>instrument</Text>
-      //       <Picker
-      //           selectedValue={selectedValue}
-      //           onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
-      //           style={styles.picker}
-      //         >
-      //           <Picker.Item label={instrument} value={instrument} />
-      //       </Picker>
-      //     </View>
-          
-      //     {/* <View style = {styles.rowContainer}>
-      //       <Text style = {styles.label}>Time Started:</Text>
-      //       <SafeAreaProvider>
-      //         <SafeAreaView>
-      //           <TextInput
-      //             style = {styles.timeInput}>
-      //           </TextInput>
-      //         </SafeAreaView>
-      //       </SafeAreaProvider>
-      //     </View> */}
-      //     <AddNotesTextInput inputText='Time Started:' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} />
-
-      //     {n2 !== '' && (
-      //       // <View style={styles.rowContainer}>
-      //       //   <Text style={styles.label}>N2:</Text>
-      //       //   <SafeAreaProvider>
-      //       //     <SafeAreaView>
-      //       //       <TextInput
-      //       //         style={styles.timeInput}>
-      //       //       </TextInput>
-      //       //     </SafeAreaView>
-      //       //   </SafeAreaProvider>
-      //       // </View>
-      //       <AddNotesTextInput inputText='N2:' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} />
-      //     )}
-
-      //     {low_tank !== '' && (
-      //       // <View style={styles.rowContainer}>
-      //       //   <Text style={styles.label}>Low: {low_tank}</Text>
-      //       //   <SafeAreaProvider>
-      //       //     <SafeAreaView>
-      //       //       <TextInput
-      //       //         style={styles.timeInput}>
-      //       //       </TextInput>
-      //       //     </SafeAreaView>
-      //       //   </SafeAreaProvider>
-      //       // </View>
-      //       <AddNotesTextInput inputText='Low: ' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} inputTextVar={low_tank} />
-      //     )}
-
-      //     {mid_tank !== '' && (
-      //       // <View style={styles.rowContainer}>
-      //       //   <Text style={styles.label}>Mid: {mid_tank}</Text>
-      //       //   <SafeAreaProvider>
-      //       //     <SafeAreaView>
-      //       //       <TextInput
-      //       //         style={styles.timeInput}>
-      //       //       </TextInput>
-      //       //     </SafeAreaView>
-      //       //   </SafeAreaProvider>
-      //       // </View>
-      //       <AddNotesTextInput inputText='Mid: ' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} inputTextVar={mid_tank} />
-      //     )}
-
-      //     {high_tank !== '' && (
-      //       // <View style={styles.rowContainer}>
-      //       //   <Text style={styles.label}>High: {high_tank}</Text>
-      //       //   <SafeAreaProvider>
-      //       //     <SafeAreaView>
-      //       //       <TextInput
-      //       //         style={styles.timeInput}>
-      //       //       </TextInput>
-      //       //     </SafeAreaView>
-      //       //   </SafeAreaProvider>
-      //       // </View>
-      //       <AddNotesTextInput inputText='High: ' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} inputTextVar={high_tank} />
-      //     )}
-
-      //     {lts !== '' && (
-      //       // <View style={styles.rowContainer}>
-      //       //   <Text style={styles.label}>LTS: {lts}</Text>
-      //       //   <SafeAreaProvider>
-      //       //     <SafeAreaView>
-      //       //       <TextInput
-      //       //         style={styles.timeInput}>
-      //       //       </TextInput>
-      //       //     </SafeAreaView>
-      //       //   </SafeAreaProvider>
-      //       // </View>
-      //       <AddNotesTextInput inputText='LTS: ' inputTextStyle={styles.timeInput} ViewStyle={styles.rowContainer} inputTextVar={lts} />
-      //     )}
-
-
-
-      //     {/* <Text style= {styles.label}>Site Notes</Text>
-      //     <SafeAreaProvider>
-      //       <SafeAreaView>
-      //         <TextInput
-      //           style = {styles.areaInput}>
-      //         </TextInput>
-      //       </SafeAreaView>
-      //     </SafeAreaProvider> */}
-      //     <AddNotesTextInput inputText='Site Notes' inputTextStyle={styles.areaInput} ViewStyle={styles.rowContainer} />
-
-      //     <TouchableOpacity
-      //       style={[styles.homeButton, {backgroundColor: 'red'}]}
-      //       onPress={() => alert("Submit Button Pressed")} >
-      //       <Text style={[styles.homeButtonText, {color: 'white'}]}>Submit!</Text>
-      //     </TouchableOpacity>
-      //   </View>
-      // </ScrollView>
     );
   }
   
@@ -401,25 +286,6 @@ export default function AddNotes({ navigation }: NaviProp) {
       flex: 1,
       margin: 15
     },
-    // scrollContainer: {
-    //   backgroundColor: '#fff'
-    // },
-    // label: {
-    //     margin: 15,
-    //     fontSize: 24,
-    //     alignItems: 'flex-start'
-    // },
-    // picker: {
-    //   height: 65,
-    //   alignItems: 'flex-start',
-    //   width: '64%',
-    //   marginTop: 0,
-    //   marginBottom: 0
-    // },
-    // dropdownContainer: {
-    //   marginTop: 50,
-    //   alignItems: 'flex-start',
-    //},
     areaInput: {
       height: 200,
       margin: 15,
@@ -437,23 +303,4 @@ export default function AddNotes({ navigation }: NaviProp) {
       alignItems: 'stretch',        // has button fill space horizontally
       justifyContent: 'space-evenly',
     },
-    // submitButton: {
-    //   paddingLeft: 10,
-    //   justifyContent: 'center',     // this and alignItems places text in center of button
-    //   alignItems: "center"
-    // },
-    // homeButtonText: {
-    //   flex: 1,
-    //   fontSize: 30
-    // },
-    // header: {
-    //   margin: 10,
-    //   width: '100%', // Ensure the header takes full width
-    //   alignItems: 'flex-start', // Center the text on the left
-    //   marginBottom: 0, // Add space between the header and the buttons
-    // },
-    // headerText: {
-    //   fontSize: 48,
-    //   marginTop: 0,
-    // }
 });

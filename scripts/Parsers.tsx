@@ -46,70 +46,80 @@ export function parseNotes(text: string): ParsedData {
     const namePattern = /- Name: (.*?)\n/;
     const instrumentPattern = /- Instrument: (.*?)\n/;
     const n2Pattern = /- N2: (.*?) psi\n/;
-    const tankPattern = /- (LTS|Low cal|Mid cal|High cal): (.*?) value (.*?) ppm (\d+ psi)/g;
+    const tankPattern = /- (LTS|Low Cal|Mid Cal|High Cal): (.*?) value (.*?) ppm (\d+ psi)/g;
     const additionalNotesPattern = /- (?!Time|Name|Instrument|N2|LTS|Low cal|Mid cal|High cal)(.*)/g;
 
     // Parse site ID
     const siteIdMatch = text.match(siteIdPattern);
     const siteId = siteIdMatch ? siteIdMatch[1] : null;
 
-    // Parse times
-    const times: { [key: string]: string | null } = { in: null, out: null };
-    const timeMatches = text.matchAll(timePattern);
-    for (const match of timeMatches) {
-        const timeType = match[1].toLowerCase();
-        const timeValue = match[2].trim();
-        if (timeType === "in") times.in = timeValue;
-        if (timeType === "out") times.out = timeValue;
-    }
+    // Split the text into individual entries
+    const entryBlocks = text.split("---\n").slice(1);
+    const entries: Entry[] = entryBlocks.map((block) => {
+        // Parse times
+        const times: { [key: string]: string | null } = { in: null, out: null };
+        const timeMatches = block.matchAll(timePattern);
+        for (const match of timeMatches) {
+            const timeType = match[1].toLowerCase();
+            const timeValue = match[2].trim();
+            if (timeType === "in") times.in = timeValue;
+            if (timeType === "out") times.out = timeValue;
+        }
 
-    // Parse names
-    const nameMatch = text.match(namePattern);
-    const names = nameMatch ? nameMatch[1]: null;
+        // Parse names
+        const nameMatch = block.match(namePattern);
+        const names = nameMatch ? nameMatch[1] : null;
 
-    // Parse instrument details
-    const instrumentMatch = text.match(instrumentPattern);
-    const instrument = instrumentMatch ? instrumentMatch[1] : null;
+        // Parse instrument details
+        const instrumentMatch = block.match(instrumentPattern);
+        const instrument = instrumentMatch ? instrumentMatch[1] : null;
 
-    // Parse N2 pressure
-    const n2Match = text.match(n2Pattern);
-    const n2_pressure = n2Match ? n2Match[1] + " psi" : null;
+        // Parse N2 pressure
+        const n2Match = block.match(n2Pattern);
+        const n2_pressure = n2Match ? n2Match[1] + " psi" : null;
 
-    // Parse tank information
-    const tanks: { [key: string]: TankInfo | null } = { lts: null, low_cal: null, mid_cal: null, high_cal: null };
-    let tankMatch;
-    while ((tankMatch = tankPattern.exec(text)) !== null) {
-        const tankType = tankMatch[1].toLowerCase().replace(" ", "_") as keyof typeof tanks;
-        tanks[tankType] = {
-            id: tankMatch[2],
-            value: tankMatch[3],
-            unit: "ppm",
-            pressure: tankMatch[4]
+        // Parse tank information
+        const tanks: { [key: string]: TankInfo | null } = {
+            lts: null,
+            low_cal: null,
+            mid_cal: null,
+            high_cal: null,
         };
-    }
+        let tankMatch;
+        while ((tankMatch = tankPattern.exec(block)) !== null) {
+            const tankType = tankMatch[1].toLowerCase().replace(" ", "_") as keyof typeof tanks;
+            tanks[tankType] = {
+                id: tankMatch[2],
+                value: tankMatch[3],
+                unit: "ppm",
+                pressure: tankMatch[4],
+            };
+        }
 
-    // Parse additional notes
-    const notesMatch = text.match(additionalNotesPattern);
-    let additionalNotes = ""
-    notesMatch ? notesMatch.forEach(function (value) {additionalNotes += (value + "\n- ")}) : null;
+        // Parse additional notes
+        const notesMatch = block.match(additionalNotesPattern);
+        let additionalNotes = "";
+        notesMatch ? notesMatch.forEach((value) => (additionalNotes += value + "\n- ")) : null;
+
+        // Return the parsed entry
+        return {
+            time_in: times.in,
+            time_out: times.out,
+            names: names,
+            instrument: instrument,
+            n2_pressure: n2_pressure,
+            lts: tanks.lts,
+            low_cal: tanks.low_cal,
+            mid_cal: tanks.mid_cal,
+            high_cal: tanks.high_cal,
+            additional_notes: additionalNotes,
+        };
+    });
 
     // Construct final parsed data
     const jsonData: ParsedData = {
         site_id: siteId,
-        entries: [
-            {
-                time_in: times.in,
-                time_out: times.out,
-                names: names,
-                instrument: instrument,
-                n2_pressure: n2_pressure,
-                lts: tanks.lts,
-                low_cal: tanks.low_cal,
-                mid_cal: tanks.mid_cal,
-                high_cal: tanks.high_cal,
-                additional_notes: additionalNotes
-            }
-        ]
+        entries: entries,
     };
 
     return jsonData;
@@ -131,17 +141,17 @@ export function buildNotes(data: Entry): string
     {
         result += `- Instrument: ${data.instrument}\n`
     }
-    if(data.n2_pressure == "")
+    if(data.n2_pressure != "")
     {
-        result += `- N2: ${data.n2_pressure}\n`;
+        result += `- N2: ${data.n2_pressure} psi\n`;
     }
     if(data.lts != null)
     {
-        result += `- LTS: ${data.lts?.id} value ${data.lts?.value} ppm ${data.lts?.pressure}\n`;
+        result += `- LTS: ${data.lts?.id} value ${data.lts?.value} ppm ${data.lts?.pressure} psi\n`;
     }
-    result += `- Low Cal: ${data.low_cal?.id} value ${data.low_cal?.value} ${data.low_cal?.unit} ${data.low_cal?.pressure}\n`;
-    result += `- Mid Cal: ${data.mid_cal?.id} value ${data.mid_cal?.value} ${data.mid_cal?.unit} ${data.mid_cal?.pressure}\n`;
-    result += `- High Cal: ${data.high_cal?.id} value ${data.high_cal?.value} ${data.high_cal?.unit} ${data.high_cal?.pressure}\n`;
+    result += `- Low Cal: ${data.low_cal?.id} value ${data.low_cal?.value} ${data.low_cal?.unit} ${data.low_cal?.pressure} psi\n`;
+    result += `- Mid Cal: ${data.mid_cal?.id} value ${data.mid_cal?.value} ${data.mid_cal?.unit} ${data.mid_cal?.pressure} psi\n`;
+    result += `- High Cal: ${data.high_cal?.id} value ${data.high_cal?.value} ${data.high_cal?.unit} ${data.high_cal?.pressure} psi\n`;
     if(data.additional_notes != "")
     {
         result += `- ${data.additional_notes}\n`;

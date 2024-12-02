@@ -45,6 +45,7 @@ export async function getSites()
  */
 async function getFile(siteName: string)
 {
+    siteName = siteName.toLowerCase();
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/site_notes/${siteName}.md`;
 
     const headers = new Headers();
@@ -75,8 +76,9 @@ async function getFile(siteName: string)
 
 export async function getFileContents(siteName: string): Promise<string>
 {   
+    siteName = siteName.toLowerCase();
     const content =  (await getFile(siteName)).content
-    console.log(atob(content))
+    //console.log(atob(content))
     return atob(content)
 }
 /**
@@ -89,6 +91,7 @@ export async function getFileContents(siteName: string): Promise<string>
  * @returns the contents of the file as a string
  */
 export async function setFile(siteName: string, content: string, commitMessage: string) {
+    siteName = siteName.toLowerCase();
     const pullResponse = (await getFile(siteName))
     const hash = pullResponse.sha
     const existingContent = atob(pullResponse.content)
