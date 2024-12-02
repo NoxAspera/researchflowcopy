@@ -8,6 +8,7 @@ import { ApplicationProvider, Button, Card, IndexPath, Input, Layout, Modal, Sel
 import * as eva from '@eva-design/eva';
 import TextInput from './TextInput'
 import { customTheme } from './CustomTheme'
+import PopupProp from './Popup';
 
 export default function TankTracker({ navigation }) {
     const route = useRoute();
@@ -38,20 +39,10 @@ export default function TankTracker({ navigation }) {
           </Layout>
 
           {/* popup if user has missing credentials */}
-          <Layout>
-            <Modal
-            visible={visible}
-            backdropStyle={styles.backdrop}
-            onBackdropPress={() => setVisible(false)}>
-              <Card disabled={true} style={{backgroundColor: customTheme['color-danger-700']}}>
-                <Text>Missing Login Credentials</Text>
-                <Button onPress={() => setVisible(false)}
-                        status='danger'>
-                  DISMISS
-                </Button>
-              </Card>
-            </Modal>
-          </Layout>
+          <PopupProp popupText='Missing Login Credentials' 
+            popupColor={customTheme['color-danger-700']} 
+            onPress={setVisible} 
+            visible={visible}/>
 
           <Layout style={styles.textInputContainer}>
             {/* text inputs */}
@@ -102,8 +93,5 @@ export default function TankTracker({ navigation }) {
     },
     textInput: {
       margin: 15
-    },
-    backdrop: {
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
 });
