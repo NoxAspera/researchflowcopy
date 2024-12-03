@@ -10,13 +10,15 @@ import SelectInstrument from './components/SelectInstrument'
 import InstrumentMaintenance from './components/InstrumentMaintenance'
 import SelectTank from './components/SelectTank'
 import TankTracker from './components/TankTracker'
+import Auth from './components/Auth'
 
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Login">
+        <Stack.Screen name="Login" component={Auth} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="SelectSite" component={SelectSite} />
         <Stack.Screen name="AddNotes" component={AddNotes} />
@@ -30,5 +32,3 @@ export default function App() {
     </NavigationContainer>
   );
 }
-
-

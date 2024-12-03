@@ -55,10 +55,8 @@ export default function SelectSite({navigation}: HomeScreenProps) {
     { id: 2, label: 'DBK', onPress: () => handleConfirm('DBK')},
     { id: 3, label: 'FRU', onPress: () => handleConfirm('FRU')},
     { id: 4, label: 'HDP', onPress: () => handleConfirm('HDP')},
-    { id: 5, label: 'HPL', onPress: () => handleConfirm('HPL')},
-    { id: 6, label: 'RPK', onPress: () => handleConfirm('RPK')},
-    { id: 7, label: 'SUG', onPress: () => handleConfirm('SUG')},
-    { id: 8, label: 'WBB', onPress: () => handleConfirm('WBB')}
+    { id: 5, label: 'SUG', onPress: () => handleConfirm('SUG')},
+    { id: 6, label: 'WBB', onPress: () => handleConfirm('WBB')}
   ]
 
   return (
