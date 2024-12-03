@@ -1,13 +1,20 @@
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+/**
+ * Login Page
+ * By Blake Stambaugh
+ * 12/2/2024
+ * 
+ * This is the login page for the app. As of 12/2, it just has a text input
+ * and does not check if the credentials are valid. This will be fixed in
+ * a later update.
+ */
+import { StyleSheet } from 'react-native';
 import React, { useState } from 'react';
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
-import { ScrollView } from 'react-native-gesture-handler';
-import { ApplicationProvider, Button, Card, IndexPath, Input, Layout, Modal, Select, SelectItem, Text } from '@ui-kitten/components';
+import { ApplicationProvider, Button, Layout, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import TextInput from './TextInput'
 import { customTheme } from './CustomTheme'
+import PopupProp from './Popup';
 import { setGithubToken } from '../scripts/APIRequests';
 
 export default function Login({ navigation }) {
@@ -40,20 +47,10 @@ export default function Login({ navigation }) {
           </Layout>
 
           {/* popup if user has missing credentials */}
-          <Layout>
-            <Modal
-            visible={visible}
-            backdropStyle={styles.backdrop}
-            onBackdropPress={() => setVisible(false)}>
-              <Card disabled={true} style={{backgroundColor: customTheme['color-danger-700']}}>
-                <Text>Missing Login Credentials</Text>
-                <Button onPress={() => setVisible(false)}
-                        status='danger'>
-                  DISMISS
-                </Button>
-              </Card>
-            </Modal>
-          </Layout>
+          <PopupProp popupText='Missing Login Credentials' 
+            popupColor={customTheme['color-danger-700']} 
+            onPress={setVisible} 
+            visible={visible}/>
 
           <Layout style={styles.textInputContainer}>
             {/* text inputs */}
@@ -63,7 +60,7 @@ export default function Login({ navigation }) {
                 onTextChange={setEmailValue} 
                 placeholder='Email' 
                 style={styles.textInput}/>
-                
+
             {/* Password input */}
             <TextInput 
                 labelValue={passwordValue} 
@@ -104,8 +101,5 @@ export default function Login({ navigation }) {
     },
     textInput: {
       margin: 15
-    },
-    backdrop: {
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
 });
