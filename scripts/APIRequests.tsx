@@ -9,6 +9,17 @@ export interface siteResponse
     name: string
 }
 
+let githubToken: string | null = null;
+
+/**
+ * Sets the GitHub token for subsequent API requests.
+ * @param token The personal access token from the login screen.
+ */
+export function setGithubToken(token: string) {
+    githubToken = token;
+}
+
+
 //ATTENTION: for all the below requests replace YOUR TOKEN HERE with a personal access key from github, makes sure it has at least all repo permissions
 //if you commit your token to the repository, you will need to first fix your commit and then regenerate your token/ delete it. 
 
@@ -23,7 +34,7 @@ export async function getSites()
     const headers = new Headers();
     headers.append("User-Agent", "ResearchFlow");
     headers.append("Accept", "application/vnd.github.raw+json");
-    headers.append("Authorization", `Bearer YOUR TOKEN HERE`);
+    headers.append("Authorization", `Bearer ${githubToken}`);
     headers.append("X-GitHub-Api-Version", "2022-11-28");
 
     const requestOptions: RequestInfo = new Request(url, 
@@ -46,12 +57,13 @@ export async function getSites()
 async function getFile(siteName: string)
 {
     siteName = siteName.toLowerCase();
+    console.log(githubToken);
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/site_notes/${siteName}.md`;
 
     const headers = new Headers();
     headers.append("User-Agent", "ResearchFlow");
     headers.append("Accept", "application/vnd.github+json");
-    headers.append("Authorization", "Bearer YOUR TOKEN HERE");
+    headers.append("Authorization", `Bearer ${githubToken}`);
     headers.append("X-GitHub-Api-Version", "2022-11-28");
 
     const requestOptions: RequestInfo = new Request(url, 
@@ -104,7 +116,7 @@ export async function setFile(siteName: string, content: string, commitMessage: 
     const headers = new Headers();
     headers.append("User-Agent", "ResearchFlow");
     headers.append("Accept", "application/vnd.github+json");
-    headers.append("Authorization", "Bearer YOUR TOKEN HERE");
+    headers.append("Authorization", `Bearer ${githubToken}`);
     headers.append("X-GitHub-Api-Version", "2022-11-28");
 
     const requestOptions: RequestInfo = new Request(url, 
