@@ -19,7 +19,6 @@ export default function Login({ navigation }) {
     // helper method that will make sure the user has entered credentials
     function checkTextEntry() {
         if (emailValue != "" && passwordValue != "") {
-            console.log(passwordValue)
             setGithubToken(passwordValue)
             navigation.navigate('Home')
         }

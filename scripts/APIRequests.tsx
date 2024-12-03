@@ -57,7 +57,6 @@ export async function getSites()
 async function getFile(siteName: string)
 {
     siteName = siteName.toLowerCase();
-    console.log(githubToken);
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/site_notes/${siteName}.md`;
 
     const headers = new Headers();
