@@ -1,10 +1,16 @@
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+/**
+ * Login Page
+ * By Blake Stambaugh
+ * 12/2/2024
+ * 
+ * This is the login page for the app. As of 12/2, it just has a text input
+ * and does not check if the credentials are valid. This will be fixed in
+ * a later update.
+ */
+import { StyleSheet } from 'react-native';
 import React, { useState } from 'react';
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
-import { ScrollView } from 'react-native-gesture-handler';
-import { ApplicationProvider, Button, Card, IndexPath, Input, Layout, Modal, Select, SelectItem, Text } from '@ui-kitten/components';
+import { ApplicationProvider, Button, Layout, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import TextInput from './TextInput'
 import { customTheme } from './CustomTheme'

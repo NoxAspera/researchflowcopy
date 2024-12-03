@@ -7,6 +7,7 @@
  * for each input.
  */
 import { Input } from "@ui-kitten/components";
+import { stat } from "fs";
 import { StyleSheet, ViewStyle } from "react-native";
 
 interface TIProp{
@@ -17,12 +18,14 @@ interface TIProp{
     multiplelines?: boolean;
     style?: ViewStyle;
     secureEntry?: boolean; // used for hiding passwords and other sensitive info
+    status?: string;
 }
 
-const AddNotesTextInput: React.FC<TIProp> = ({ labelText, labelValue, onTextChange, placeholder, multiplelines, style, secureEntry }) => {
+const AddNotesTextInput: React.FC<TIProp> = ({ labelText, labelValue, onTextChange, placeholder, multiplelines, style, secureEntry, status }) => {
     return (
       <Input
         label={labelText}
+        status={status || 'basic'}
         placeholder={placeholder}
         value={labelValue}
         multiline={multiplelines ? true : false}
