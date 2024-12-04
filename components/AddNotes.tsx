@@ -41,8 +41,13 @@ function checkValidNumber(entry:string)
  */
 async function processNotes(siteName: string) {
   const fileContents = await getFileContents(siteName);
-  const parsedData = parseNotes(fileContents);
-  return parsedData
+  if(fileContents.data){
+    return parseNotes(fileContents.data)
+  }
+  else
+  {
+    return null
+  }
 }
 
 /**
