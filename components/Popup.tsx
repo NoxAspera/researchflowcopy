@@ -19,8 +19,7 @@ const PopupProp: React.FC<PUProp> = ({ popupText, popupColor, visible, onPress }
             onBackdropPress={() => onPress(false)}>
               <Card disabled={true} style={{backgroundColor: popupColor}}>
                 <Text>{popupText}</Text>
-                <Button onPress={() => onPress(false)}
-                        status='danger'>
+                <Button onPress={() => onPress(false)}>
                   DISMISS
                 </Button>
               </Card>

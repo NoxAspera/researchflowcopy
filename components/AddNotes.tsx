@@ -13,6 +13,7 @@ import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import { setFile, getFileContents } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
+import PopupProp from './Popup';
 
 type RouteParams = {
   site: string; 
@@ -104,6 +105,28 @@ export default function AddNotes({ navigation }: NaviProp) {
     const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
     const [instruments, setInstruments] = useState<string[]>(['Instrument 1']);
 
+    // used for determining if PUT request was successful
+    // will set the success/fail notification to visible, aswell as the color and text
+    const [visible, setVisible] = useState(false);
+    const [messageColor, setMessageColor] = useState("");
+    const [message, setMessage] = useState("");
+
+    // will call setFile to send the PUT request. 
+    // If it is successful it will display a success message
+    // if it fails then it will display a failure message
+    const handleUpdate = async (data: Entry) => {
+        const result = await setFile(site, buildNotes(data), "updating notes from researchFlow");
+        if (result.success) {
+            setMessage("File updated successfully!");
+            setMessageColor(customTheme['color-success-700']);
+            setVisible(true);
+          } else {
+            setMessage(`Error: ${result.error}`);
+            setMessageColor(customTheme['color-danger-700']);
+            setVisible(true);
+        }
+    };
+
     //Set tank ids, values, and instruments if available in parsed data
     useEffect(() => {
       if (latestEntry) {
@@ -136,11 +159,16 @@ export default function AddNotes({ navigation }: NaviProp) {
           <Layout style={styles.container}>
             {/* header */}
             <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
+
+            {/* success/failure popup */}
+            <PopupProp popupText={message} 
+            popupColor={messageColor} 
+            onPress={setVisible} 
+            visible={visible}/>
             
             {/* drop down menu for instruments */}
             {latestEntry && !latestEntry.instrument ? (
           // Prompt the user to input an instrument if none is parsed
-          <>
             <TextInput
               labelText="Instrument"
               labelValue={instrumentInput}
@@ -148,7 +176,6 @@ export default function AddNotes({ navigation }: NaviProp) {
               placeholder="Please enter instrument name"
               style={styles.inputText}
             />
-          </>
         ) : (
             <Select label='Instrument'
               selectedIndex={selectedIndex}
@@ -216,7 +243,7 @@ export default function AddNotes({ navigation }: NaviProp) {
                 const minutes = now.getMinutes().toString()
                 
                 //not putting this in a seperate function is messy, but if we did, it would be worse - August
-                const data: Entry = 
+                let data: Entry = 
                 {
                   time_in: `${year}-${month}-${day} ${timeValue}`,
                   time_out: `${year}-${month}-${day} ${hours}:${minutes}`,
@@ -253,7 +280,9 @@ export default function AddNotes({ navigation }: NaviProp) {
                   },
                   additional_notes: notesValue 
                 };
-                setFile(site, buildNotes(data), "updating notes from researchFlow");
+                
+                // give success and failure popups
+                handleUpdate(data);
               }
             }
               appearance='filled'
