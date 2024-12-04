@@ -127,23 +127,23 @@ export async function setFile(siteName: string, content: string, commitMessage: 
         }
     )
     // this code will not produce an error
-    const response = await fetch(requestOptions)
-    const data = response.json()
-    return { success: true, data }
+//     const response = await fetch(requestOptions)
+//     const data = response.json()
+//     return { success: true, data }
     
-    // this code will produce an error
-    // try {
-    //     const response = await fetch(url, requestOptions);
-    //     console.log(response)
+    //this code will produce an error
+    try {
+        const response = await fetch(requestOptions);
+        console.log(response)
 
-    //     if (response.ok) {
-    //         const data = await response.json();
-    //         return { success: true, data };
-    //     } else {
-    //         const errorData = await response.json();
-    //         return { success: false, error: errorData.message };
-    //     }
-    // } catch (error) {
-    //     return { success: false, error: error };
-    // }
+        if (response.ok) {
+            const data = await response.json();
+            return { success: true, data };
+        } else {
+            const errorData = await response.json();
+            return { success: false, error: errorData.message };
+        }
+    } catch (error) {
+        return { success: false, error: error };
+    }
 }
