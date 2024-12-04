@@ -95,12 +95,18 @@ async function getFile(siteName: string)
  * @returns the contents of the file as a string
  */
 
-export async function getFileContents(siteName: string): Promise<string>
+export async function getFileContents(siteName: string)
 {   
     siteName = siteName.toLowerCase();
-    const content =  (await getFile(siteName)).data.content
-    //console.log(atob(content))
-    return atob(content)
+    const response = await getFile(siteName)
+    if(response.success)
+    {
+        return {success: true, data: atob(response.data.content)}
+    }
+    else
+    {
+        return response
+    }
 }
 /**
  * @author August O'Rourke

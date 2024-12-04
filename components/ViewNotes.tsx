@@ -8,11 +8,19 @@ import { Entry, buildNotes, parseNotes, ParsedData } from '../scripts/Parsers';
 import { customTheme } from './CustomTheme';
 import { NaviProp } from './types';
 import { ScrollView } from 'react-native-gesture-handler';
+import PopupProp from './Popup';
+
+
+
 /**
  * @author Blake Stambaugh, August O'Rourke
  * @returns The add Notes page in our app
  */
 export default function ViewNotes({ navigation }: NaviProp) {
+
+    const [visible, setVisible] = useState(false);
+    const [messageColor, setMessageColor] = useState("");
+    const [message, setMessage] = useState("");
     const route = useRoute();
     let site = route.params?.site;
     let notes: Entry[] = []
@@ -25,7 +33,16 @@ export default function ViewNotes({ navigation }: NaviProp) {
             if (site && !data) {
                 try {
                     const parsedData = await getFileContents(site);
-                   setData(parsedData.substring(parsedData.indexOf("\n")).split(new RegExp("(___|---)")))
+                    if(parsedData.success)
+                    {
+                      setData(parsedData.data.substring(parsedData.data.indexOf("\n")).split(new RegExp("(___|---)")))
+                    }
+                    else
+                    {
+                      setMessage(`Error: ${parsedData.error}`);
+                      setMessageColor(customTheme['color-danger-700']);
+                      setVisible(true);
+                    }
                 } catch (error) {
                     console.error("Error retreiveing  notes:", error);
                 }
@@ -42,7 +59,10 @@ export default function ViewNotes({ navigation }: NaviProp) {
             <Text category='h1'
               style={{textAlign: 'center'}}>{site}</Text>
 
-            {/* Card 1 */}
+          <PopupProp popupText={message} 
+            popupColor={messageColor} 
+            onPress={setVisible} 
+            visible={visible}/>
 
           {data?.map((entry) =>
             {
@@ -66,51 +86,6 @@ export default function ViewNotes({ navigation }: NaviProp) {
         </ScrollView>
       </ApplicationProvider>
       
-      // <ScrollView style = {styles.scrollContainer}>
-      //   <View style={styles.container}>
-      //     {/* header */}
-      //     <View style={styles.header}>
-      //       <Text style={styles.headerText}>{site}</Text>
-      //     </View>
-
-      //     {/* drop down menu for instruments */}
-      //     <View style={styles.rowContainer}>
-      //       <Text style={styles.label}>Instrument</Text>
-      //       <Text style={styles.label}>Instrument name</Text>
-      //     </View>
-
-      //     <View style = {styles.rowContainer}>
-      //       <Text style = {styles.label}>Time Started</Text>
-      //       <SafeAreaProvider>
-      //         <SafeAreaView>
-      //           <Text style={styles.label}>8:30 am</Text>
-      //         </SafeAreaView>
-      //       </SafeAreaProvider>
-      //     </View>
-
-      //     <View style ={styles.rowContainer}>
-      //       <Text style = {styles.label}>Tank 1</Text>
-      //       <SafeAreaProvider>
-      //         <SafeAreaView>
-      //           <Text style={styles.label}>1800 psi</Text>
-      //         </SafeAreaView>
-      //     </SafeAreaProvider>
-      //     </View>
-
-      //     <Text style= {styles.label}>Site Notes</Text>
-      //     <SafeAreaProvider>
-      //       <SafeAreaView>
-      //         <Text style={styles.normal}>Today on site I tested these things, next time will need to bring these tools</Text>
-      //       </SafeAreaView>
-      //     </SafeAreaProvider>
-
-      //     <TouchableOpacity
-      //       style={[styles.homeButton, {backgroundColor: 'red'}]}
-      //       onPress={() => alert("Submit Button Pressed")} >
-      //       <Text style={[styles.homeButtonText, {color: 'white'}]}>Edit!</Text>
-      //     </TouchableOpacity>
-      //   </View>
-      // </ScrollView>
     );
   }
 
