@@ -62,7 +62,7 @@ async function getFile(siteName: string)
     const headers = new Headers();
     headers.append("User-Agent", "ResearchFlow");
     headers.append("Accept", "application/vnd.github+json");
-    headers.append("Authorization", `Bearer ${githubToken}`);
+    headers.append("Authorization", `Bearer justnotright`);
     headers.append("X-GitHub-Api-Version", "2022-11-28");
 
     const requestOptions: RequestInfo = new Request(url, 
@@ -72,10 +72,20 @@ async function getFile(siteName: string)
             redirect: "follow"
         }
     )
+    try {
+        const response = await fetch(requestOptions);
 
-    const response = await fetch(requestOptions);
-    const data = await response.json();
-    return data
+        if (response.ok) {
+            const data = await response.json();
+            return { success: true, data };
+        } else {
+            const errorData = await response.json();
+            return { success: false, error: errorData.message };
+        }
+    } catch (error) {
+        return { success: false, error: error };
+    }
+
 }
 
 /**
@@ -88,7 +98,7 @@ async function getFile(siteName: string)
 export async function getFileContents(siteName: string): Promise<string>
 {   
     siteName = siteName.toLowerCase();
-    const content =  (await getFile(siteName)).content
+    const content =  (await getFile(siteName)).data.content
     //console.log(atob(content))
     return atob(content)
 }
@@ -104,8 +114,12 @@ export async function getFileContents(siteName: string): Promise<string>
 export async function setFile(siteName: string, content: string, commitMessage: string) {
     siteName = siteName.toLowerCase();
     const pullResponse = (await getFile(siteName))
-    const hash = pullResponse.sha
-    const existingContent = atob(pullResponse.content)
+    if(pullResponse.error)
+    {
+        return {success: false, error: pullResponse.error}
+    }
+    const hash = pullResponse.data.sha
+    const existingContent = atob(pullResponse.data.content)
     const siteHeader = `# Site id: **${siteName}**`
     const existingNotes = existingContent.substring(siteHeader.length, existingContent.length -1) 
     const fullDoc = btoa(siteHeader +"\n" + content + existingNotes)
@@ -134,7 +148,6 @@ export async function setFile(siteName: string, content: string, commitMessage: 
     //this code will produce an error
     try {
         const response = await fetch(requestOptions);
-        console.log(response)
 
         if (response.ok) {
             const data = await response.json();
