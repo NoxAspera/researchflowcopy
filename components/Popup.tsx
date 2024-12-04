@@ -1,6 +1,6 @@
-import { Button, Card, Layout, Modal } from '@ui-kitten/components';
+import { Button, Card, Layout, Modal, Text } from '@ui-kitten/components';
 import React from 'react'
-import { StyleSheet, Text, ColorValue } from "react-native"
+import { StyleSheet, ColorValue } from "react-native"
 
 interface PUProp{
     popupText: string;
