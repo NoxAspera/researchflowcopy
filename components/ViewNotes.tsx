@@ -1,60 +1,71 @@
-import { StyleSheet, View, TouchableOpacity, ViewProps } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import React, { useState } from 'react';
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { useRoute } from '@react-navigation/native';
-import { ScrollView, TextInput } from 'react-native-gesture-handler';
-import { NaviProp } from './types';
-import { ApplicationProvider, Card, Layout, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
-import { customTheme } from './CustomTheme'
-
+import { useRoute } from '@react-navigation/native';
+import { ApplicationProvider, Card, Layout, Text } from '@ui-kitten/components';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet } from 'react-native';
+import { getFileContents } from '../scripts/APIRequests';
+import { Entry, buildNotes, parseNotes, ParsedData } from '../scripts/Parsers';
+import { customTheme } from './CustomTheme';
+import { NaviProp } from './types';
+import { ScrollView } from 'react-native-gesture-handler';
+/**
+ * @author Blake Stambaugh, August O'Rourke
+ * @returns The add Notes page in our app
+ */
 export default function ViewNotes({ navigation }: NaviProp) {
     const route = useRoute();
     let site = route.params?.site;
-    const [selectedValue, setSelectedValue] = useState("");
+    let notes: Entry[] = []
 
-    const Header = (props: ViewProps): React.ReactElement => (
-      <View {...props}>
-        <Text category='h6'>
-          Site Name
-        </Text>
-        <Text category='s1'>
-          Instrument Name
-        </Text>
-        <Text category='s2'>
-          Time Stamp of When it was submitted
-        </Text>
-      </View>
-    );
+    const [data, setData] = useState<string[] | null>(null);
 
-    //alert("found: " + site);
+    // Get current notes for the site
+    useEffect(() => {
+        async function fetchData() {
+            if (site && !data) {
+                try {
+                    const parsedData = await getFileContents(site);
+                   setData(parsedData.substring(parsedData.indexOf("\n")).split(new RegExp("(___|---)")))
+                } catch (error) {
+                    console.error("Error retreiveing  notes:", error);
+                }
+            }
+        }
+        fetchData();
+    }, [site]);
     return (
+      
       <ApplicationProvider {...eva} theme={customTheme}>
-        <Layout style={styles.container} level='1'>
-          {/* header */}
-          <Text category='h1'
-            style={{textAlign: 'center'}}>{site}</Text>
+        <ScrollView style = {styles.scrollContainer}>
+          <Layout style={styles.container} level='1'>
+            {/* header */}
+            <Text category='h1'
+              style={{textAlign: 'center'}}>{site}</Text>
 
-          {/* Card 1 */}
-          <Card
-            header={(props) => <Header {...props} />}
-            style={{flex: 1, margin: 20, backgroundColor: customTheme['color-primary-700']}}>
-            <Text>
-              Here is where the notes about previous sites will go. 
-            </Text>
-          </Card>
+            {/* Card 1 */}
 
-          {/* card 2 */}
-          <Card
-            header={(props) => <Header {...props} />}
-            style={{flex: 1, margin: 20, backgroundColor: customTheme['color-primary-700']}}>
-            <Text>
-              We can have other sections of notes below it up to a certain point.  
-            </Text>
-          </Card>
-        </Layout>
+          {data?.map((entry) =>
+            {
+              const dateMatch = /(\d+)-(\d+)-(\d+)/
+              const date = entry.match(dateMatch)
+              // not sure why but split leaves a new line sometimes
+              if (entry !== "___" && entry !== "---" && entry !== "\n"){
+                return (
+                <Card>
+                  <Text category='h3'>
+                    {date?.at(0)}
+                  </Text>
+                  <Text>
+                    {entry}
+                  </Text>
+                </Card>)    
+              } 
+            }
+         )}
+          </Layout>
+        </ScrollView>
       </ApplicationProvider>
+      
       // <ScrollView style = {styles.scrollContainer}>
       //   <View style={styles.container}>
       //     {/* header */}
@@ -110,7 +121,7 @@ export default function ViewNotes({ navigation }: NaviProp) {
       justifyContent: 'space-evenly',
     },
     scrollContainer: {
-      backgroundColor: '#fff'
+      backgroundColor: '#1C2760'
     },
 
     label: {
