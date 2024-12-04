@@ -14,6 +14,7 @@ import { customTheme } from './CustomTheme'
 import { setFile, getFileContents } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
+import PopupProp2Button from './Popup2Button';
 
 type RouteParams = {
   site: string; 
@@ -115,6 +116,33 @@ export default function AddNotes({ navigation }: NaviProp) {
     const [visible, setVisible] = useState(false);
     const [messageColor, setMessageColor] = useState("");
     const [message, setMessage] = useState("");
+    //used for popup if info is missing
+    const [visible2, setVisible2] = useState(false);
+
+    //method will warn user if fields haven't been input
+    function checkTextEntries(data: Entry){
+        if(timeValue == "" ||
+           nameValue == "" ||
+           ltsId == "" ||
+           ltsValue == "" ||
+           ltsPressure == "" ||
+           lowId == "" ||
+           lowValue == "" ||
+           lowPressure == "" ||
+           midId == "" ||
+           midValue == "" ||
+           midPressure == "" ||
+           highId == "" ||
+           highValue == "" ||
+           highPressure == "" ||
+           n2Value == "" ||
+           notesValue == ""){
+               setVisible2(true);
+        }
+        else{
+            handleUpdate(data);
+           }
+    }
 
     // will call setFile to send the PUT request. 
     // If it is successful it will display a success message
@@ -170,6 +198,13 @@ export default function AddNotes({ navigation }: NaviProp) {
             popupColor={messageColor} 
             onPress={setVisible} 
             visible={visible}/>
+            {/* popup if user has missing input */}
+            <PopupProp2Button popupText='Missing some input field(s)'
+            popupColor={customTheme['color-danger-700']}
+            onPress={handleUpdate}
+            onPress2={setVisible2}
+            visible={visible2}/>
+
             
             {/* drop down menu for instruments */}
             {latestEntry && !latestEntry.instrument ? (
@@ -287,7 +322,7 @@ export default function AddNotes({ navigation }: NaviProp) {
                 };
                 
                 // give success and failure popups
-                handleUpdate(data);
+                checkTextEntries(data);
               }
             }
               appearance='filled'

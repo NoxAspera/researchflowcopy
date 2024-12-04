@@ -62,7 +62,7 @@ async function getFile(siteName: string)
     const headers = new Headers();
     headers.append("User-Agent", "ResearchFlow");
     headers.append("Accept", "application/vnd.github+json");
-    headers.append("Authorization", `Bearer justnotright`);
+    headers.append("Authorization", `Bearer ${githubToken}`);
     headers.append("X-GitHub-Api-Version", "2022-11-28");
 
     const requestOptions: RequestInfo = new Request(url, 
