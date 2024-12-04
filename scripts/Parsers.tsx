@@ -46,7 +46,7 @@ export function parseNotes(text: string): ParsedData {
     const namePattern = /- Name: (.*?)\n/;
     const instrumentPattern = /- Instrument: (.*?)\n/;
     const n2Pattern = /- N2: (.*?) psi\n/;
-    const tankPattern = /- (LTS|Low Cal|Mid Cal|High Cal): (.*?) value (.*?) ppm (\d+ psi)/g;
+    const tankPattern = /- (LTS|Low Cal|Mid Cal|High Cal): (.*?) value (~)* | ( ~ )* (.*?) ppm (\d+ psi)/g;
     const additionalNotesPattern = /- (?!Time|Name|Instrument|N2|LTS|Low cal|Mid cal|High cal)(.*)/g;
 
     // Parse site ID

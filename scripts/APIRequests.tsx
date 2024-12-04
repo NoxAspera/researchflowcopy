@@ -75,6 +75,7 @@ async function getFile(siteName: string)
 
     const response = await fetch(requestOptions);
     const data = await response.json();
+    //console.log(data)
     return data
 }
 
@@ -128,6 +129,6 @@ export async function setFile(siteName: string, content: string, commitMessage: 
     )
     const response = await fetch(requestOptions)
     const data = response.json()
-    console.log(response)
+    //console.log(response)
     
 }
