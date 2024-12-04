@@ -126,8 +126,24 @@ export async function setFile(siteName: string, content: string, commitMessage: 
             redirect: "follow"
         }
     )
+    // this code will not produce an error
     const response = await fetch(requestOptions)
     const data = response.json()
-    console.log(response)
+    return { success: true, data }
     
+    // this code will produce an error
+    // try {
+    //     const response = await fetch(url, requestOptions);
+    //     console.log(response)
+
+    //     if (response.ok) {
+    //         const data = await response.json();
+    //         return { success: true, data };
+    //     } else {
+    //         const errorData = await response.json();
+    //         return { success: false, error: errorData.message };
+    //     }
+    // } catch (error) {
+    //     return { success: false, error: error };
+    // }
 }
