@@ -1,6 +1,6 @@
 /**
  * TextInput.tsx
- * By Blake Stambaugh
+ * @author Blake Stambaugh
  * 11/27/24
  * 
  * This property objectifies our text input. It will take in any text, and styling choices

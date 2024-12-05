@@ -19,10 +19,6 @@ export function setGithubToken(token: string) {
     githubToken = token;
 }
 
-
-//ATTENTION: for all the below requests replace YOUR TOKEN HERE with a personal access key from github, makes sure it has at least all repo permissions
-//if you commit your token to the repository, you will need to first fix your commit and then regenerate your token/ delete it. 
-
 /**
  * @author August O'Rourke
  *  This method gets a list of sites from the CS_4000_mock_docs repository
@@ -146,12 +142,7 @@ export async function setFile(siteName: string, content: string, commitMessage: 
             redirect: "follow"
         }
     )
-    // this code will not produce an error
-//     const response = await fetch(requestOptions)
-//     const data = response.json()
-//     return { success: true, data }
     
-    //this code will produce an error
     try {
         const response = await fetch(requestOptions);
 
