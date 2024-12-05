@@ -14,6 +14,7 @@ import { customTheme } from './CustomTheme'
 import { setFile, getFileContents } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
+import PopupProp2Button from './Popup2Button';
 
 type RouteParams = {
   site: string; 
@@ -115,21 +116,102 @@ export default function AddNotes({ navigation }: NaviProp) {
     const [visible, setVisible] = useState(false);
     const [messageColor, setMessageColor] = useState("");
     const [message, setMessage] = useState("");
+    //used for popup if info is missing
+    const [visible2, setVisible2] = useState(false);
+
+    //method will warn user if fields haven't been input
+    function checkTextEntries(){
+        if(timeValue == "" ||
+           nameValue == "" ||
+           ltsId == "" ||
+           ltsValue == "" ||
+           ltsPressure == "" ||
+           lowId == "" ||
+           lowValue == "" ||
+           lowPressure == "" ||
+           midId == "" ||
+           midValue == "" ||
+           midPressure == "" ||
+           highId == "" ||
+           highValue == "" ||
+           highPressure == "" ||
+           n2Value == "" ||
+           notesValue == ""){
+               setVisible2(true);
+        }
+        else{
+            handleUpdate();
+           }
+    }
 
     // will call setFile to send the PUT request. 
     // If it is successful it will display a success message
     // if it fails then it will display a failure message
-    const handleUpdate = async (data: Entry) => {
+    const handleUpdate = async () => {
+        const LTSignored: boolean = (ltsId == "" && ltsValue == "" && ltsPressure == "")
+
+        // get time submitted
+        const now = new Date();
+        const year = now.getFullYear().toString()
+        const month = (now.getMonth() + 1).toString() // now.getMonth() is zero-base (i.e. January is 0), likely due to something with Oracle's implementation - August
+        const day = now.getDate().toString()
+        const hours= now.getHours().toString()
+        const minutes = now.getMinutes().toString()
+        
+        //not putting this in a seperate function is messy, but if we did, it would be worse - August
+        let data: Entry = 
+        {
+          time_in: `${year}-${month}-${day} ${timeValue}`,
+          time_out: `${year}-${month}-${day} ${hours}:${minutes}`,
+          names: nameValue,
+          instrument: instrumentInput.trim() ? instrumentInput : (instruments[selectedIndex.row] ? instruments[selectedIndex.row] : null),
+          n2_pressure: n2Value ? n2Value: null,
+          lts: LTSignored ? null:
+          {
+            id: ltsId,
+            value: ltsValue,
+            unit: "ppm",
+            pressure: ltsPressure
+          },
+          low_cal:
+          {
+            id:lowId,
+            value:lowValue,
+            unit:"ppm",
+            pressure: lowPressure
+          },
+          mid_cal:
+          {
+            id:midId,
+            value:midValue,
+            unit: "ppm",
+            pressure: midPressure
+          },
+          high_cal:
+          {
+            id:highId,
+            value:highValue,
+            unit: "ppm",
+            pressure: highPressure
+          },
+          additional_notes: notesValue 
+        };
+
+        // send the request
         const result = await setFile(site, buildNotes(data), "updating notes from researchFlow");
+
+        // if the warning popup is visible, remove it
+        if(visible2) { setVisible2(false); }
+
+        // check to see if the request was ok, give a message based on that
         if (result.success) {
             setMessage("File updated successfully!");
             setMessageColor(customTheme['color-success-700']);
-            setVisible(true);
           } else {
             setMessage(`Error: ${result.error}`);
             setMessageColor(customTheme['color-danger-700']);
-            setVisible(true);
-        }
+          }
+        setVisible(true);
     };
 
     //Set tank ids, values, and instruments if available in parsed data
@@ -170,6 +252,13 @@ export default function AddNotes({ navigation }: NaviProp) {
             popupColor={messageColor} 
             onPress={setVisible} 
             visible={visible}/>
+            {/* popup if user has missing input */}
+            <PopupProp2Button popupText='Missing some input field(s)'
+            popupColor={customTheme['color-danger-700']}
+            sendData={handleUpdate}
+            removePopup={setVisible2}
+            visible={visible2}/>
+
             
             {/* drop down menu for instruments */}
             {latestEntry && !latestEntry.instrument ? (
@@ -238,56 +327,8 @@ export default function AddNotes({ navigation }: NaviProp) {
             <Button
               onPress={() => 
               {
-                const LTSignored: boolean = (ltsId == "" && ltsValue == "" && ltsPressure == "")
-             
-                const now = new Date();
-                const year = now.getFullYear().toString()
-                const month = (now.getMonth() + 1).toString() // now.getMonth() is zero-base (i.e. January is 0), likely due to something with Oracle's implementation - August
-                const day = now.getDate().toString()
-                const hours= now.getHours().toString()
-                const minutes = now.getMinutes().toString()
-                
-                //not putting this in a seperate function is messy, but if we did, it would be worse - August
-                let data: Entry = 
-                {
-                  time_in: `${year}-${month}-${day} ${timeValue}`,
-                  time_out: `${year}-${month}-${day} ${hours}:${minutes}`,
-                  names: nameValue,
-                  instrument: instrumentInput.trim() ? instrumentInput : (instruments[selectedIndex.row] ? instruments[selectedIndex.row] : null),
-                  n2_pressure: n2Value ? n2Value: null,
-                  lts: LTSignored ? null:
-                  {
-                    id: ltsId,
-                    value: ltsValue,
-                    unit: "ppm",
-                    pressure: ltsPressure
-                  },
-                  low_cal:
-                  {
-                    id:lowId,
-                    value:lowValue,
-                    unit:"ppm",
-                    pressure: lowPressure
-                  },
-                  mid_cal:
-                  {
-                    id:midId,
-                    value:midValue,
-                    unit: "ppm",
-                    pressure: midPressure
-                  },
-                  high_cal:
-                  {
-                    id:highId,
-                    value:highValue,
-                    unit: "ppm",
-                    pressure: highPressure
-                  },
-                  additional_notes: notesValue 
-                };
-                
                 // give success and failure popups
-                handleUpdate(data);
+                checkTextEntries();
               }
             }
               appearance='filled'
