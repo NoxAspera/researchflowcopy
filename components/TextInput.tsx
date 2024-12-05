@@ -7,6 +7,7 @@
  * for each input.
  */
 import { Input } from "@ui-kitten/components";
+import React from "react";
 import { StyleSheet, ViewStyle } from "react-native";
 
 interface TIProp{

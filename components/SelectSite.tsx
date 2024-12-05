@@ -1,8 +1,16 @@
-import { StyleSheet, Text, View, Alert, TouchableOpacity } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+/**
+ * Select Site Page
+ * @author Blake Stambaugh and Megan Ostlie
+ * 12/5/24
+ * 
+ * This page is the lets the user select the site they are currently at. When they
+ * choose an action on the home page, they will be directed to this screen to determine
+ * their site. Once they have chosen a site, they will be sent to the page they requested
+ * and all info for that site will be given.
+ */
+import { StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
-import { parseNotes} from '../scripts/Parsers';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ApplicationProvider, Layout, Button } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
@@ -12,7 +20,10 @@ import { customTheme } from './CustomTheme'
 type RootStackParamList = {
   SelectSite: undefined; // Add any other screens with their params here
   AddNotes: { site: string };
-  // OtherScreen: { paramName: string }; // Example with params
+  ViewNotes: { site: string };
+  BadData: { site: string };
+  InstrumentMaintenance: { site: string };
+  TankTracker: { site: string };
 };
 
 // Type for the navigation prop for this screen
@@ -23,40 +34,19 @@ interface HomeScreenProps {
 }
 
 export default function SelectSite({navigation}: HomeScreenProps) {
-  const [selectedValue, setSelectedValue] = useState("CSP");
   const route = useRoute();
+
+  // previous buttons hit, used to know where to go next
   let from = route.params?.from;
 
-  const handleConfirm = (selectedSite: string) => {
-    if(from === 'AddNotes')
-    {
-      navigation.navigate('AddNotes', {site: selectedSite}); //{site: selectValue} tells the AddNotes what the selected value is
-    }
-    else if(from === 'ViewNotes')
-    {
-      navigation.navigate('ViewNotes', {site: selectedSite}); //{site: selectValue} tells the AddNotes what the selected value is
-    }
-    else if(from === 'BadData')
-    {
-      navigation.navigate('BadData', {site: selectedSite}); //{site: selectValue} tells the AddNotes what the selected value is
-    }
-    else if (from === 'InstrumentMaintenance')
-    {
-      navigation.navigate('InstrumentMaintenance', {site: selectedSite});
-    }
-    else if (from === 'TankTracker')
-    {
-      navigation.navigate('TankTracker', {site: selectedSite});
-    }
-  };
-
+  // data for buttons
   const buttonData = [
-    { id: 1, label: 'CSP', onPress: () => handleConfirm('CSP')},
-    { id: 2, label: 'DBK', onPress: () => handleConfirm('DBK')},
-    { id: 3, label: 'FRU', onPress: () => handleConfirm('FRU')},
-    { id: 4, label: 'HDP', onPress: () => handleConfirm('HDP')},
-    { id: 5, label: 'SUG', onPress: () => handleConfirm('SUG')},
-    { id: 6, label: 'WBB', onPress: () => handleConfirm('WBB')}
+    { id: 1, label: 'CSP', onPress: () => navigation.navigate(from, {site: 'CSP'})},
+    { id: 2, label: 'DBK', onPress: () => navigation.navigate(from, {site: 'DBK'})},
+    { id: 3, label: 'FRU', onPress: () => navigation.navigate(from, {site: 'FRU'})},
+    { id: 4, label: 'HDP', onPress: () => navigation.navigate(from, {site: 'HDP'})},
+    { id: 5, label: 'SUG', onPress: () => navigation.navigate(from, {site: 'SUG'})},
+    { id: 6, label: 'WBB', onPress: () => navigation.navigate(from, {site: 'WBB'})}
   ]
 
   return (
@@ -73,31 +63,6 @@ export default function SelectSite({navigation}: HomeScreenProps) {
         ))}
       </Layout>
     </ApplicationProvider>
-    // <View style={styles.container}>
-    //   <View style={styles.dropdownContainer}>
-    //     <Text style={styles.label}>Where are you?</Text>
-    //     <Picker
-    //       selectedValue={selectedValue}
-    //       onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
-    //       style={styles.picker}
-    //     >
-    //       <Picker.Item label="CSP" value="CSP" />
-    //       <Picker.Item label="DBK" value="DBK" />
-    //       <Picker.Item label="FRU" value="FRU" />
-    //       <Picker.Item label="HDP" value="HDP" />
-    //       <Picker.Item label="HPL" value="HPL" />
-    //       <Picker.Item label="RPK" value="RPK" />
-    //       <Picker.Item label="SUG" value="SUG" />
-    //       <Picker.Item label="WBB" value="WBB" />
-    //     </Picker>
-    //   </View>
-
-    //   <View style={styles.buttonContainer}>
-    //     <TouchableOpacity style={styles.button} onPress={() => handleConfirm()}>
-    //       <Text style={styles.buttonText}>Confirm</Text>
-    //     </TouchableOpacity>
-    //   </View>
-    // </View
   );
 }
 
@@ -107,30 +72,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     padding: 20,
   },
-  dropdownContainer: {
-    marginTop: 50,
-    alignItems: 'center',
-  },
-  label: {
-    fontSize: 36,
-    marginBottom: 50,
-  },
-  picker: {
-    height: 50,
-    width: '50%',
-  },
-  buttonContainer: {
-    marginBottom: 30,
-  },
   button: {
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 8,
     alignItems: 'center',
-  },
-  buttonText: {
-    fontSize: 24,
-    color: '#fff',
-    fontWeight: 'bold',
   },
 });

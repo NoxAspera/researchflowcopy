@@ -1,7 +1,15 @@
+/**
+ * Popup 2 buttons
+ * @author David Schiwal and Blake Stambaugh
+ * 12/5/24
+ * 
+ * This is another pop up property but has two buttons, both do different actions. 
+ * As of writing this, it is used only for the 'missing data are you sure you want
+ * to submit' pop up
+ */
 import { Button, Card, Layout, Modal, Text } from '@ui-kitten/components';
 import React from 'react'
 import { StyleSheet, ColorValue } from "react-native"
-import { Entry } from '../scripts/Parsers';
 
 interface PUProp{
     popupText: string;
@@ -12,25 +20,25 @@ interface PUProp{
 }
 
 const PopupProp2Button: React.FC<PUProp> = ({ popupText, popupColor, visible, sendData, removePopup }) => {
-
     return (
-        <Layout>
-            <Modal
-            visible={visible}
-            backdropStyle={styles.backdrop}
-            onBackdropPress={() => removePopup(false)}>
-              <Card disabled={true} style={{backgroundColor: popupColor}}>
-                <Text style={{flex: 1}}>{popupText}</Text>
-                <Button onPress={() => sendData()}>
-                  SUBMIT ANYWAYS
-                </Button>
-                <Button onPress={() => removePopup(false)}
-                  style={{marginTop: 15}}>
-                  EDIT INPUT
-                </Button>
-              </Card>
-            </Modal>
-          </Layout>
+      <Layout>
+        <Modal
+          visible={visible}
+          backdropStyle={styles.backdrop}
+          onBackdropPress={() => removePopup(false)}
+        >
+          <Card disabled={true} style={{ backgroundColor: popupColor }}>
+            <Text style={{ flex: 1 }}>{popupText}</Text>
+            <Button onPress={() => sendData()}>SUBMIT ANYWAYS</Button>
+            <Button
+              onPress={() => removePopup(false)}
+              style={{ marginTop: 15 }}
+            >
+              EDIT INPUT
+            </Button>
+          </Card>
+        </Modal>
+      </Layout>
     );
 };
 

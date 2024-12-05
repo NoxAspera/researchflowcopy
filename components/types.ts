@@ -1,4 +1,10 @@
-// types.ts
+/**
+ * Types.ts
+ * @author Blake Stambaugh
+ * 12/5/24
+ * 
+ * Helper that will contain more complicated types, like those for navigation.
+ */
 import { StackNavigationProp } from '@react-navigation/stack';
 
 // Define the type for the stack's navigation parameters
