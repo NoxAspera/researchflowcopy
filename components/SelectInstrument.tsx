@@ -5,6 +5,7 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
+import { NavigationType } from './types'
 
 export default function SelectInstrument({navigation}) {
 

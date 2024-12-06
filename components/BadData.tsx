@@ -15,10 +15,10 @@ import TextInput from './TextInput'
 import { ApplicationProvider, Button, Layout, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
+import { NavigationType, routeProp } from './types'
 
-
-export default function BadData({ navigation }: NaviProp) {
-    const route = useRoute();
+export default function BadData({ navigation }: NavigationType) {
+    const route = useRoute<routeProp>();
     let site = route.params?.site;
 
     // these use states to set and store values in the text inputs

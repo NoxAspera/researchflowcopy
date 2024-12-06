@@ -9,13 +9,14 @@
 import { StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
-import { ApplicationProvider, Button, IndexPath, Input, Layout, Select, SelectItem, Text } from '@ui-kitten/components';
+import { ApplicationProvider, Button, IndexPath, Layout, Select, SelectItem, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
+import { NavigationType, routeProp } from './types'
 
-export default function InstrumentMaintenance({ navigation }) {
-    const route = useRoute();
+export default function InstrumentMaintenance({ navigation }: NavigationType) {
+    const route = useRoute<routeProp>();
     let site = route.params?.site;
 
     // used for setting and remembering the input values

@@ -13,9 +13,9 @@ import { StyleSheet } from 'react-native';
 import { getFileContents } from '../scripts/APIRequests';
 import { Entry } from '../scripts/Parsers';
 import { customTheme } from './CustomTheme';
-import { NaviProp } from './types';
 import { ScrollView } from 'react-native-gesture-handler';
 import PopupProp from './Popup';
+import { NavigationType, routeProp } from './types'
 
 
 
@@ -23,8 +23,8 @@ import PopupProp from './Popup';
  * @author Blake Stambaugh, August O'Rourke
  * @returns The add Notes page in our app
  */
-export default function ViewNotes({ navigation }: NaviProp) {
-  const route = useRoute();
+export default function ViewNotes({ navigation }: NavigationType) {
+  const route = useRoute<routeProp>();
   let site = route.params?.site;
   let notes: Entry[] = [];
 

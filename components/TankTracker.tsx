@@ -13,9 +13,10 @@ import { ApplicationProvider, Button, IndexPath, Layout, Select, SelectItem, Tex
 import * as eva from '@eva-design/eva';
 import TextInput from './TextInput'
 import { customTheme } from './CustomTheme'
+import { NavigationType, routeProp } from './types'
 
-export default function TankTracker({ navigation }) {
-    const route = useRoute();
+export default function TankTracker({ navigation }: NavigationType) {
+    const route = useRoute<routeProp>();
     let site = route.params?.site;
 
     // used for setting and remembering the input values

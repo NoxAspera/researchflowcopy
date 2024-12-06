@@ -19,11 +19,8 @@ import { setFile, getFileContents } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
+import { NavigationType, routeProp } from './types'
 
-type RouteParams = {
-  site: string; 
-  info: string; 
-};
 
 function checkValidTime(entry:string)
 {
@@ -62,10 +59,8 @@ async function processNotes(siteName: string) {
  *  Takes the inputted information from the user to build a new string that is added to that site's note document.
  * 
  */
-export default function AddNotes({ navigation }: NaviProp) {
-    type routeProp = RouteProp<{params: RouteParams}, 'params'>;
+export default function AddNotes({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
-    //let site = route.params?.site;
     const { site, info } = route.params || {}
 
     // State to hold parsed data

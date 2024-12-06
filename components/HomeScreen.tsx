@@ -14,8 +14,9 @@ import { ApplicationProvider, Layout, Text } from '@ui-kitten/components'
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import React from 'react';
+import { NavigationType } from './types'
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen({ navigation }: NavigationType) {
   return (
     <ApplicationProvider {...eva} theme={customTheme}>
       <Layout style={styles.container}>

@@ -6,9 +6,7 @@ import HomeScreen from './components/HomeScreen'
 import AddNotes from './components/AddNotes'
 import ViewNotes from './components/ViewNotes'
 import BadData from './components/BadData'
-import SelectInstrument from './components/SelectInstrument'
 import InstrumentMaintenance from './components/InstrumentMaintenance'
-import SelectTank from './components/SelectTank'
 import TankTracker from './components/TankTracker'
 import Auth from './components/Auth'
 
@@ -24,9 +22,7 @@ export default function App() {
         <Stack.Screen name="AddNotes" component={AddNotes} />
         <Stack.Screen name="ViewNotes" component={ViewNotes} />
         <Stack.Screen name="BadData" component={BadData} />
-        <Stack.Screen name="SelectInstrument" component={SelectInstrument} />
         <Stack.Screen name="InstrumentMaintenance" component={InstrumentMaintenance} />
-        <Stack.Screen name="SelectTank" component={SelectTank} />
         <Stack.Screen name="TankTracker" component={TankTracker} />
       </Stack.Navigator>
     </NavigationContainer>
