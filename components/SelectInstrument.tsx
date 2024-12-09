@@ -1,9 +1,14 @@
-import { StyleSheet, Text, View, Alert, Button, TouchableOpacity } from 'react-native';
+/**
+ * depreciated
+ */
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
+import { NavigationType } from './types'
 
 export default function SelectInstrument({navigation}) {
+
   const [selectedValue, setSelectedValue] = useState("Pump LG-14-0237");
   const route = useRoute();
 

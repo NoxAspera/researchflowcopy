@@ -1,33 +1,43 @@
+/**
+ * Home Button Property
+ * @author Blake Stambaugh
+ * 12/5/24
+ * 
+ * This property abstracts the buttons on the home page
+ */
+import { Layout, Text } from '@ui-kitten/components';
 import React from 'react'
-import { StyleSheet, TouchableOpacity, Text } from "react-native"
+import { StyleSheet, TouchableWithoutFeedback } from "react-native"
 
 interface HBProp{
-    color: string;
     text: string;
     onPress: () => void; // may change depending on the function pass in
 }
 
-const HomeButtonProp: React.FC<HBProp> = ({ color, text, onPress }) => {
+const HomeButtonProp: React.FC<HBProp> = ({ text, onPress }) => {
     return (
-        <TouchableOpacity
-            style={[styles.homeButton, {backgroundColor: color}]}
-            onPress={() => onPress()} >
-            <Text style={styles.homeButtonText}>{text}</Text>
-        </TouchableOpacity>
+      <TouchableWithoutFeedback onPress={onPress}>
+        <Layout style={styles.tab} level="2">
+          <Text category="h5">{text}</Text>
+        </Layout>
+      </TouchableWithoutFeedback>
     );
 };
 
 const styles = StyleSheet.create({
-    homeButton: {
-      flex: 1,                      // has button fill space vertically
-      borderRadius: 10,
-      justifyContent: 'center',     // this and alignItems places text in center of button
-      alignItems: "center",
-      margin: 10
-    },
-    homeButtonText: {
-      flex: 1,
-      fontSize: 30
+    tab: {
+      width: '90%', // Card width to adjust appearance
+      height: 200,
+      marginVertical: 10,
+      padding: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 8,
+      elevation: 4, // For shadow on Android
+      shadowColor: '#000', // For shadow on iOS
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
     }
   });
 

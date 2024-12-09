@@ -1,25 +1,26 @@
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+/**
+ * Add Notes Page
+ * @author Blake Stambaugh, Megan Ostlie, August O'Rourke, and David Schiwal
+ *  12/4/24
+ * This page will take in input from the user, format it, and upload it to the
+ * github repo.
+ */
+import { StyleSheet } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { StackNavigationProp } from '@react-navigation/stack';
-import AddNotesTextInput from './TextInput';
 import { buildNotes, Entry } from '../scripts/Parsers';
 import { NaviProp } from './types';
 import TextInput from './TextInput'
-import { ApplicationProvider, IndexPath, Input, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
+import { ApplicationProvider, IndexPath, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import { setFile, getFileContents } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
+import { NavigationType, routeProp } from './types'
 
-type RouteParams = {
-  site: string; 
-  info: string; 
-};
 
 function checkValidTime(entry:string)
 {
@@ -58,10 +59,8 @@ async function processNotes(siteName: string) {
  *  Takes the inputted information from the user to build a new string that is added to that site's note document.
  * 
  */
-export default function AddNotes({ navigation }: NaviProp) {
-    type routeProp = RouteProp<{params: RouteParams}, 'params'>;
+export default function AddNotes({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
-    //let site = route.params?.site;
     const { site, info } = route.params || {}
 
     // State to hold parsed data
@@ -158,7 +157,7 @@ export default function AddNotes({ navigation }: NaviProp) {
         const hours= now.getHours().toString()
         const minutes = now.getMinutes().toString()
         
-        //not putting this in a seperate function is messy, but if we did, it would be worse - August
+        // create an entry object data that will be sent off to the repo
         let data: Entry = 
         {
           time_in: `${year}-${month}-${day} ${timeValue}`,
@@ -239,7 +238,6 @@ export default function AddNotes({ navigation }: NaviProp) {
       }
   }, [latestEntry]);
 
-    //alert("found: " + site);
     return (
       <ApplicationProvider {...eva} theme={customTheme}>
         <ScrollView>
@@ -252,6 +250,7 @@ export default function AddNotes({ navigation }: NaviProp) {
             popupColor={messageColor} 
             onPress={setVisible} 
             visible={visible}/>
+
             {/* popup if user has missing input */}
             <PopupProp2Button popupText='Missing some input field(s)'
             popupColor={customTheme['color-danger-700']}
@@ -259,18 +258,17 @@ export default function AddNotes({ navigation }: NaviProp) {
             removePopup={setVisible2}
             visible={visible2}/>
 
-            
             {/* drop down menu for instruments */}
             {latestEntry && !latestEntry.instrument ? (
-          // Prompt the user to input an instrument if none is parsed
-            <TextInput
-              labelText="Instrument"
-              labelValue={instrumentInput}
-              onTextChange={setInstrumentInput}
-              placeholder="Please enter instrument name"
-              style={styles.inputText}
-            />
-        ) : (
+              // Prompt the user to input an instrument if none is parsed
+              <TextInput
+                labelText="Instrument"
+                labelValue={instrumentInput}
+                onTextChange={setInstrumentInput}
+                placeholder="Please enter instrument name"
+                style={styles.inputText}
+              />
+            ) : (
             <Select label='Instrument'
               selectedIndex={selectedIndex}
               onSelect={(index) => setSelectedIndex(index as IndexPath)}
@@ -281,56 +279,121 @@ export default function AddNotes({ navigation }: NaviProp) {
                     key={index} 
                     title={instrument} 
                   />
-              ))}
+                ))}
             </Select>
-        )}
+            )}
 
             {/* text inputs */}
-            {/* Time input */}
-            <TextInput labelText='Name' labelValue={nameValue} onTextChange={setNameValue} placeholder='ResearchFlow' style={styles.inputText} />
-            <TextInput labelText='Time Started' labelValue={timeValue} onTextChange={setTimeValue} placeholder='15:00' style={styles.inputText} />
+            {/* Name input */}
+            <TextInput labelText='Name' 
+              labelValue={nameValue} 
+              onTextChange={setNameValue} 
+              placeholder='ResearchFlow' 
+              style={styles.inputText} />
+
+              {/* Time input */}
+            <TextInput labelText='Time Started' 
+              labelValue={timeValue} 
+              onTextChange={setTimeValue} 
+              placeholder='15:00' 
+              style={styles.inputText} />
 
             {/* N2 */}
-              <TextInput labelText='N2 (if applicable)' labelValue={n2Value} onTextChange={setN2Value} placeholder='Pressure' style={styles.inputText} />
+            <TextInput labelText='N2 (if applicable)' 
+              labelValue={n2Value} 
+              onTextChange={setN2Value} 
+              placeholder='Pressure' 
+              style={styles.inputText} />
 
             {/* LTS input */}
-              <Layout style = {styles.rowContainer}>
-              <TextInput labelText='LTS (if applicable)' labelValue={ltsId} onTextChange={setLTSId} placeholder='Tank ID' style={styles.tankInput} />
-              <TextInput labelText=' ' labelValue={ltsValue} onTextChange={setLTSValue} placeholder='Value' style={styles.tankInput} />
-              <TextInput labelText=' ' labelValue={ltsPressure} onTextChange={setLTSPressure} placeholder='Pressure' style={styles.tankInput} />
+            <Layout style = {styles.rowContainer}>
+              <TextInput labelText='LTS (if applicable)' 
+                labelValue={ltsId} 
+                onTextChange={setLTSId} 
+                placeholder='Tank ID' 
+                style={styles.tankInput} />
+              <TextInput labelText=' ' 
+                labelValue={ltsValue} 
+                onTextChange={setLTSValue} 
+                placeholder='Value' 
+                style={styles.tankInput} />
+              <TextInput labelText=' ' 
+                labelValue={ltsPressure} 
+                onTextChange={setLTSPressure} 
+                placeholder='Pressure' 
+                style={styles.tankInput} />
             </Layout>
 
-            {/* Note for all tank inputs, the single space labels are there to make sure the other entry fields are alligned good*/}
+            {/* Note for all tank inputs, the single space labels are there to make sure the other entry fields are alligned well*/}
 
             {/* Low input */}
             <Layout style = {styles.rowContainer}>
-              <TextInput labelText='Low' labelValue={lowId} onTextChange={setLowId} placeholder='Tank ID' style={styles.tankInput} />
-              <TextInput labelText=' ' labelValue={lowValue} onTextChange={setLowValue} placeholder='Value' style={styles.tankInput} />
-              <TextInput labelText=' ' labelValue={lowPressure} onTextChange={setLowPressure} placeholder='Pressure' style={styles.tankInput} />
+              <TextInput labelText='Low' 
+                labelValue={lowId} 
+                onTextChange={setLowId} 
+                placeholder='Tank ID' 
+                style={styles.tankInput} />
+              <TextInput labelText=' ' 
+                labelValue={lowValue} 
+                onTextChange={setLowValue} 
+                placeholder='Value' 
+                style={styles.tankInput} />
+              <TextInput labelText=' ' 
+                labelValue={lowPressure} 
+                onTextChange={setLowPressure} 
+                placeholder='Pressure' 
+                style={styles.tankInput} />
             </Layout>
+
             {/* mid input */}
             <Layout style = {styles.rowContainer}>
-              <TextInput labelText='Mid' labelValue={midId} onTextChange={setmidId} placeholder='Tank ID' style={styles.tankInput} />
-              <TextInput labelText=' ' labelValue={midValue} onTextChange={setmidValue} placeholder='Value' style={styles.tankInput} />
-              <TextInput labelText=' ' labelValue={midPressure} onTextChange={setmidPressure} placeholder='Pressure' style={styles.tankInput} />
+              <TextInput labelText='Mid' 
+                labelValue={midId} 
+                onTextChange={setmidId} 
+                placeholder='Tank ID' 
+                style={styles.tankInput} />
+              <TextInput labelText=' ' 
+                labelValue={midValue} 
+                onTextChange={setmidValue} 
+                placeholder='Value' 
+                style={styles.tankInput} />
+              <TextInput labelText=' ' 
+                labelValue={midPressure} 
+                onTextChange={setmidPressure} 
+                placeholder='Pressure' 
+                style={styles.tankInput} />
             </Layout>
+
             {/* high input */} 
             <Layout style = {styles.rowContainer}>
-              <TextInput labelText='High' labelValue={highId} onTextChange={setHighId} placeholder='Tank ID' style={styles.tankInput} />
-              <TextInput labelText=' ' labelValue={highValue} onTextChange={setHighValue} placeholder='Value' style={styles.tankInput} />
-              <TextInput labelText=' ' labelValue={highPressure} onTextChange={setHighPressure} placeholder='Pressure' style={styles.tankInput} />
+              <TextInput labelText='High' 
+                labelValue={highId} 
+                onTextChange={setHighId} 
+                placeholder='Tank ID' 
+                style={styles.tankInput} />
+              <TextInput labelText=' ' 
+                labelValue={highValue} 
+                onTextChange={setHighValue} 
+                placeholder='Value' 
+                style={styles.tankInput} />
+              <TextInput labelText=' ' 
+                labelValue={highPressure} 
+                onTextChange={setHighPressure} 
+                placeholder='Pressure' 
+                style={styles.tankInput} />
             </Layout>
+
             {/* notes entry */}
-            <TextInput labelText='Notes' labelValue={notesValue} onTextChange={setNotesValue} placeholder='All Good.' multiplelines={true} style={styles.notesInput}/>
+            <TextInput labelText='Notes' 
+              labelValue={notesValue} 
+              onTextChange={setNotesValue} 
+              placeholder='All Good.' 
+              multiplelines={true} 
+              style={styles.notesInput}/>
 
             {/* submit button */}
             <Button
-              onPress={() => 
-              {
-                // give success and failure popups
-                checkTextEntries();
-              }
-            }
+              onPress={() => checkTextEntries()}
               appearance='filled'
               status='primary'
               style={{margin: 15}}>
@@ -370,7 +433,6 @@ export default function AddNotes({ navigation }: NaviProp) {
       marginTop: 5,
       marginBottom: 5,
     },
-
     rowContainer:
     {
       flex: 1,

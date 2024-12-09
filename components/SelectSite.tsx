@@ -1,30 +1,27 @@
-import { StyleSheet, Text, View, Alert, TouchableOpacity } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import React, { useState } from 'react';
-import { useRoute } from '@react-navigation/native';
-import { parseNotes} from '../scripts/Parsers';
-import { StackNavigationProp } from '@react-navigation/stack';
+/**
+ * Select Site Page
+ * @author Blake Stambaugh and Megan Ostlie
+ * 12/5/24
+ * 
+ * This page is the lets the user select the site they are currently at. When they
+ * choose an action on the home page, they will be directed to this screen to determine
+ * their site. Once they have chosen a site, they will be sent to the page they requested
+ * and all info for that site will be given.
+ */
+import { StyleSheet } from 'react-native';
+import React from 'react';
+import { RouteProp, useRoute } from '@react-navigation/native';
 import { ApplicationProvider, Layout, Button } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
+import { NavigationType, routeProp } from './types'
 
-// Define the type for the stack's navigation parameters
-type RootStackParamList = {
-  SelectSite: undefined; // Add any other screens with their params here
-  AddNotes: { site: string };
-  // OtherScreen: { paramName: string }; // Example with params
-};
 
-// Type for the navigation prop for this screen
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'SelectSite'>;
+export default function SelectSite({navigation}: NavigationType) {
+  // type routeProp = RouteProp<{params: RouteParams}, 'params'>;
+  const route = useRoute<routeProp>();
 
-interface HomeScreenProps {
-  navigation: HomeScreenNavigationProp;
-}
-
-export default function SelectSite({navigation}: HomeScreenProps) {
-  const [selectedValue, setSelectedValue] = useState("CSP");
-  const route = useRoute();
+  // previous buttons hit, used to know where to go next
   let from = route.params?.from;
 
   const handleConfirm = (selectedSite: string) => {
@@ -50,6 +47,8 @@ export default function SelectSite({navigation}: HomeScreenProps) {
     }
   };
 
+
+  // data for buttons
   const buttonData = [
     { id: 1, label: 'CSP', onPress: () => handleConfirm('CSP')},
     { id: 2, label: 'DBK', onPress: () => handleConfirm('DBK')},
@@ -73,31 +72,6 @@ export default function SelectSite({navigation}: HomeScreenProps) {
         ))}
       </Layout>
     </ApplicationProvider>
-    // <View style={styles.container}>
-    //   <View style={styles.dropdownContainer}>
-    //     <Text style={styles.label}>Where are you?</Text>
-    //     <Picker
-    //       selectedValue={selectedValue}
-    //       onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
-    //       style={styles.picker}
-    //     >
-    //       <Picker.Item label="CSP" value="CSP" />
-    //       <Picker.Item label="DBK" value="DBK" />
-    //       <Picker.Item label="FRU" value="FRU" />
-    //       <Picker.Item label="HDP" value="HDP" />
-    //       <Picker.Item label="HPL" value="HPL" />
-    //       <Picker.Item label="RPK" value="RPK" />
-    //       <Picker.Item label="SUG" value="SUG" />
-    //       <Picker.Item label="WBB" value="WBB" />
-    //     </Picker>
-    //   </View>
-
-    //   <View style={styles.buttonContainer}>
-    //     <TouchableOpacity style={styles.button} onPress={() => handleConfirm()}>
-    //       <Text style={styles.buttonText}>Confirm</Text>
-    //     </TouchableOpacity>
-    //   </View>
-    // </View
   );
 }
 
@@ -107,30 +81,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     padding: 20,
   },
-  dropdownContainer: {
-    marginTop: 50,
-    alignItems: 'center',
-  },
-  label: {
-    fontSize: 36,
-    marginBottom: 50,
-  },
-  picker: {
-    height: 50,
-    width: '50%',
-  },
-  buttonContainer: {
-    marginBottom: 30,
-  },
   button: {
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 8,
     alignItems: 'center',
-  },
-  buttonText: {
-    fontSize: 24,
-    color: '#fff',
-    fontWeight: 'bold',
   },
 });

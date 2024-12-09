@@ -16,8 +16,9 @@ import TextInput from './TextInput'
 import { customTheme } from './CustomTheme'
 import PopupProp from './Popup';
 import { setGithubToken } from '../scripts/APIRequests';
+import { NavigationType } from './types'
 
-export default function Login({ navigation }) {
+export default function Login({ navigation }: NavigationType) {
     const route = useRoute();
 
     // will set the no email/password notification to visible
@@ -37,6 +38,7 @@ export default function Login({ navigation }) {
           setVisible(true)
         }
     }
+
     // used for setting and remembering the input values
     const [emailValue, setEmailValue] = useState("");
     const [passwordValue, setPasswordValue] = useState("");
@@ -44,6 +46,7 @@ export default function Login({ navigation }) {
     return (
       <ApplicationProvider {...eva} theme={customTheme}>
         <Layout style={styles.container} level='1'>
+
           {/* header */}
           <Layout style={styles.loginText}>
             <Text category='h1' style={{textAlign: 'center'}}>Hello</Text>
@@ -56,8 +59,9 @@ export default function Login({ navigation }) {
             onPress={setVisible} 
             visible={visible}/>
 
+          {/* text inputs */}
           <Layout style={styles.textInputContainer}>
-            {/* text inputs */}
+            
             {/* Email input */}
             <TextInput 
                 labelValue={emailValue} 

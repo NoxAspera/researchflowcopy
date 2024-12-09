@@ -1,14 +1,21 @@
+/**
+ * View Notes
+ * @author Blake Stambaugh, August O'Rourke
+ * 12/5/24
+ * 
+ * View notes page. Will pull in data from the github repo and display it for the user in cards.
+ */
 import * as eva from '@eva-design/eva';
 import { useRoute } from '@react-navigation/native';
 import { ApplicationProvider, Card, Layout, Text } from '@ui-kitten/components';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { getFileContents } from '../scripts/APIRequests';
-import { Entry, buildNotes, parseNotes, ParsedData } from '../scripts/Parsers';
+import { Entry } from '../scripts/Parsers';
 import { customTheme } from './CustomTheme';
-import { NaviProp } from './types';
 import { ScrollView } from 'react-native-gesture-handler';
 import PopupProp from './Popup';
+import { NavigationType, routeProp } from './types'
 
 
 
@@ -16,78 +23,75 @@ import PopupProp from './Popup';
  * @author Blake Stambaugh, August O'Rourke
  * @returns The add Notes page in our app
  */
-export default function ViewNotes({ navigation }: NaviProp) {
+export default function ViewNotes({ navigation }: NavigationType) {
+  const route = useRoute<routeProp>();
+  let site = route.params?.site;
+  let notes: Entry[] = [];
 
-    const [visible, setVisible] = useState(false);
-    const [messageColor, setMessageColor] = useState("");
-    const [message, setMessage] = useState("");
-    const route = useRoute();
-    let site = route.params?.site;
-    let notes: Entry[] = []
+  const [visible, setVisible] = useState(false);
+  const [messageColor, setMessageColor] = useState("");
+  const [message, setMessage] = useState("");
 
-    const [data, setData] = useState<string[] | null>(null);
+  const [data, setData] = useState<string[] | null>(null);
 
-    // Get current notes for the site
-    useEffect(() => {
-        async function fetchData() {
-            if (site && !data) {
-                try {
-                    const parsedData = await getFileContents(site);
-                    if(parsedData.success)
-                    {
-                      setData(parsedData.data.substring(parsedData.data.indexOf("\n")).split(new RegExp("(___|---)")))
-                    }
-                    else
-                    {
-                      setMessage(`Error: ${parsedData.error}`);
-                      setMessageColor(customTheme['color-danger-700']);
-                      setVisible(true);
-                    }
-                } catch (error) {
-                    console.error("Error retreiveing  notes:", error);
-                }
-            }
+  // Get current notes for the site
+  useEffect(() => {
+    async function fetchData() {
+      if (site && !data) {
+        try {
+          const parsedData = await getFileContents(site);
+          if (parsedData.success) {
+            setData(
+              parsedData.data
+                .substring(parsedData.data.indexOf("\n"))
+                .split(new RegExp("(___|---)"))
+            );
+          } else {
+            setMessage(`Error: ${parsedData.error}`);
+            setMessageColor(customTheme["color-danger-700"]);
+            setVisible(true);
+          }
+        } catch (error) {
+          console.error("Error retreiveing  notes:", error);
         }
-        fetchData();
-    }, [site]);
-    return (
-      
-      <ApplicationProvider {...eva} theme={customTheme}>
-        <ScrollView style = {styles.scrollContainer}>
-          <Layout style={styles.container} level='1'>
-            {/* header */}
-            <Text category='h1'
-              style={{textAlign: 'center'}}>{site}</Text>
+      }
+    }
+    fetchData();
+  }, [site]);
+  return (
+    <ApplicationProvider {...eva} theme={customTheme}>
+      <ScrollView style={styles.scrollContainer}>
+        <Layout style={styles.container} level="1">
+          {/* header */}
+          <Text category="h1" style={{ textAlign: "center" }}>
+            {site}
+          </Text>
 
-          <PopupProp popupText={message} 
-            popupColor={messageColor} 
-            onPress={setVisible} 
-            visible={visible}/>
+          <PopupProp
+            popupText={message}
+            popupColor={messageColor}
+            onPress={setVisible}
+            visible={visible}
+          />
 
-          {data?.map((entry) =>
-            {
-              const dateMatch = /(\d+)-(\d+)-(\d+)/
-              const date = entry.match(dateMatch)
-              // not sure why but split leaves a new line sometimes
-              if (entry !== "___" && entry !== "---" && entry !== "\n"){
-                return (
+          {data?.map((entry) => {
+            const dateMatch = /(\d+)-(\d+)-(\d+)/;
+            const date = entry.match(dateMatch);
+            // not sure why but split leaves a new line sometimes
+            if (entry !== "___" && entry !== "---" && entry !== "\n") {
+              return (
                 <Card>
-                  <Text category='h3'>
-                    {date?.at(0)}
-                  </Text>
-                  <Text>
-                    {entry}
-                  </Text>
-                </Card>)    
-              } 
+                  <Text category="h3">{date?.at(0)}</Text>
+                  <Text>{entry}</Text>
+                </Card>
+              );
             }
-         )}
-          </Layout>
-        </ScrollView>
-      </ApplicationProvider>
-      
-    );
-  }
+          })}
+        </Layout>
+      </ScrollView>
+    </ApplicationProvider>
+  );
+}
 
   const styles = StyleSheet.create({
     container: {
@@ -109,12 +113,6 @@ export default function ViewNotes({ navigation }: NaviProp) {
           fontSize: 16,
           alignItems: 'flex-start'
         },
-    /*picker: {
-      height: 65,
-      alignItems: 'flex-start',
-      width: '50%',
-      marginBottom: 25
-    },*/
     dropdownContainer: {
       marginTop: 50,
       alignItems: 'flex-start',
