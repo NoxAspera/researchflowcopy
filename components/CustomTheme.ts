@@ -1,7 +1,7 @@
 /**
  * CustomTheme.ts
- * By Blake Stambaugh
- * 
+ * @author Blake Stambaugh
+ * 11/27/24
  * builds a custom EVA theme used on UI Kitten components
  */
 import { dark } from '@eva-design/eva';

@@ -1,6 +1,6 @@
 /**
  * Bad Data Page
- * By David Schiwal and Blake Stambaugh
+ * @author David Schiwal, Blake Stambaugh
  * 12/5/24
  * 
  * This page allows the user to mark data as bad. They will enter in
