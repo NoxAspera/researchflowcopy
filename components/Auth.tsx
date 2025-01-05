@@ -16,8 +16,9 @@ import TextInput from './TextInput'
 import { customTheme } from './CustomTheme'
 import PopupProp from './Popup';
 import { setGithubToken } from '../scripts/APIRequests';
+import { NaviProp } from './types';
 
-export default function Login({ navigation }) {
+export default function Login({ navigation }: NaviProp) {
     const route = useRoute();
 
     // will set the no email/password notification to visible
