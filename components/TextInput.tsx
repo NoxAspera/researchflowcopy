@@ -1,14 +1,20 @@
 /**
  * TextInput.tsx
- * By Blake Stambaugh
+ * @author Blake Stambaugh
  * 11/27/24
  * 
  * This property objectifies our text input. It will take in any text, and styling choices
  * for each input.
  */
 import { Input } from "@ui-kitten/components";
+import React from "react";
 import { StyleSheet, ViewStyle } from "react-native";
 
+/**
+ * TIProp
+ * @author Blake Stambaugh
+ * used to give types to text input parameters
+ */
 interface TIProp{
     labelText?: string;
     labelValue: string;
