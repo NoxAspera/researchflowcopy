@@ -42,7 +42,11 @@ export async function getSites()
     )
     const response = await fetch(requestOptions);
     const data: siteResponse[] = await response.json();
-    return data;
+    const mdFiles = data
+        .filter(item => item.name.endsWith(".md"))
+        .map(item => item.name.replace(/\.md$/, ""));
+    
+    return mdFiles;
 }
 /**
  * @author August O'Rourke
