@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "main": "expo/AppEntry.js",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web"
   },
   "dependencies": {
+    "@babel/runtime": "^7.26.0",
     "@eva-design/eva": "^2.2.0",
     "@octokit/rest": "^21.0.2",
     "@react-native-masked-view/masked-view": "0.3.2",
