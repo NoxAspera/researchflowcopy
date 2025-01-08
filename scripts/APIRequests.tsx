@@ -36,17 +36,23 @@ export async function getSites()
     const requestOptions: RequestInfo = new Request(url, 
         {
             method: "GET",
-            headers: headers,
+             headers: headers,
             redirect: "follow"
         }
     )
-    const response = await fetch(requestOptions);
-    const data: siteResponse[] = await response.json();
-    const mdFiles = data
-        .filter(item => item.name.endsWith(".md"))
-        .map(item => item.name.replace(/\.md$/, ""));
-    
-    return mdFiles;
+    try{
+        const response = await fetch(requestOptions);
+        const data: siteResponse[] = await response.json();
+        const mdFiles = data
+            .filter(item => item.name.endsWith(".md"))
+            .map(item => item.name.replace(/\.md$/, ""));
+        
+        return {success:true, data:mdFiles};
+    }
+    catch(error)
+    {
+        return {success: true, error: error}
+    }
 }
 /**
  * @author August O'Rourke

@@ -14,6 +14,7 @@ import { RouteProp, useRoute } from '@react-navigation/native';
 import { ApplicationProvider, Layout, Button } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
+import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
 import { getSites } from '../scripts/APIRequests';
 
@@ -24,17 +25,29 @@ export default function SelectSite({navigation}: NavigationType) {
 
   // previous buttons hit, used to know where to go next
   let from = route.params?.from;
-
+  const [visible, setVisible] = useState(false);
+  const [messageColor, setMessageColor] = useState("");
+  const [message, setMessage] = useState("");
   // State to hold the list of site names
-  const [siteNames, setSiteNames] = useState<string[]>([]);
+  const [siteNames, setSiteNames] = useState<string[]>();
 
   // Fetch site names from GitHub Repo
   useEffect(() => {
     const fetchSiteNames = async () => {
       try {
         const names = await getSites();
-        setSiteNames(names); // Set the fetched site names
-      } catch (error) {
+        if(names.success)
+        {
+          setSiteNames(names.data);
+        } // Set the fetched site names
+        else {
+          setMessage(`Error: ${names.error}`);
+          setMessageColor(customTheme["color-danger-700"]);
+          setVisible(true)
+      } 
+    }
+      catch (error)
+      {
         console.error("Error processing site names:", error);
       }
     };
@@ -87,6 +100,14 @@ export default function SelectSite({navigation}: NavigationType) {
   return (
     <ApplicationProvider {...eva} theme={customTheme}>
       <Layout style={styles.container}>
+
+      <PopupProp
+            popupText={message}
+            popupColor={messageColor}
+            onPress={setVisible}
+            visible={visible}
+          />
+
         {buttonData.map((button) => (
           <Button
             key={button.id}
