@@ -18,7 +18,6 @@ import React from 'react';
 import { NavigationType } from './types'
 
 export default function HomeScreen({ navigation }: NavigationType) {
-  setBadData("rpk", "licor_6262", "woah", "epic");
   return (
     <ApplicationProvider {...eva} theme={customTheme}>
       <Layout style={styles.container}>
