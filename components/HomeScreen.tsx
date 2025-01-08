@@ -11,12 +11,14 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import HomeButtonProp from './HomeButtonProp';
 import { NaviProp } from './types';
 import { ApplicationProvider, Layout, Text } from '@ui-kitten/components'
+import { setBadData } from '../scripts/APIRequests';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import React from 'react';
 import { NavigationType } from './types'
 
 export default function HomeScreen({ navigation }: NavigationType) {
+  setBadData("rpk", "licor_6262", "woah", "epic");
   return (
     <ApplicationProvider {...eva} theme={customTheme}>
       <Layout style={styles.container}>

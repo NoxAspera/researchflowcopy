@@ -19,6 +19,79 @@ export function setGithubToken(token: string) {
     githubToken = token;
 }
 
+export async function setBadData(siteName: string, instrument: string, newEntry: string, commitMessage: string)
+{
+    siteName = siteName.toLowerCase();
+    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad/test/test.csv`;
+
+    let headers = new Headers();
+    headers.append("User-Agent", "ResearchFlow");
+    headers.append("Accept", "application/vnd.github+json");
+    headers.append("Authorization", `Bearer ${githubToken}`);
+    headers.append("X-GitHub-Api-Version", "2022-11-28");
+
+    let requestOptions: RequestInfo = new Request(url, 
+        {
+            method: "GET",
+            headers: headers,
+            redirect: "follow"
+        }
+    )
+    let newFile = ""
+    let sha = ""
+    try {
+        const response = await fetch(requestOptions);
+        console.log(response)
+        if (response.ok) {
+            const data = await response.json();
+            let plainContent = atob(data.content);
+            let entries = plainContent.substring(plainContent.indexOf("\n"))
+            let headers = plainContent.substring(0, plainContent.indexOf("\n"))
+            sha = data.sha
+            newFile = headers + newEntry + plainContent
+            newFile = btoa(newFile)
+            console.log(headers);
+        } 
+        else {
+            const errorData = await response.json();
+            return { success: false, error: errorData.message };
+        }
+    } 
+    catch (error) 
+    {
+        return { success: false, error: error };
+    }
+
+    const bodyString = `{"message":"${commitMessage}","content":"${newFile}","sha":"${sha}"}`
+    headers = new Headers();
+    headers.append("User-Agent", "ResearchFlow");
+    headers.append("Accept", "application/vnd.github+json");
+    headers.append("Authorization", `Bearer ${githubToken}`);
+    headers.append("X-GitHub-Api-Version", "2022-11-28");
+
+    requestOptions = new Request(url, 
+        {
+            method: "PUT",
+            headers: headers,
+            body: bodyString,
+            redirect: "follow"
+        }
+    )
+    try {
+        const response = await fetch(requestOptions);
+
+        if (response.ok) {
+            const data = await response.json();
+            return { success: true, data };
+        } else {
+            const errorData = await response.json();
+            return { success: false, error: errorData.message };
+        }
+    } catch (error) {
+        return { success: false, error: error };
+    }
+}
+
 /**
  * @author August O'Rourke
  *  This method gets a list of sites from the CS_4000_mock_docs repository
