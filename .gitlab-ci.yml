@@ -1,0 +1,25 @@
+image: reactnativecommunity/react-native-android
+
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+    - echo "Building..."
+    - pnpm install
+  artifacts:
+    expire_in: 1 days
+    when: on_success
+    paths:
+      - node_modules/
+
+test:
+  stage: test
+  dependencies: build
+  script: 
+    - echo "Testing..."
+    - pnpn test
+  
+  
