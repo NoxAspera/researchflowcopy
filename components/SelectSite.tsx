@@ -9,12 +9,14 @@
  * and all info for that site will be given.
  */
 import { StyleSheet } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ApplicationProvider, Layout, Button } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
+import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
+import { getSites } from '../scripts/APIRequests';
 
 
 export default function SelectSite({navigation}: NavigationType) {
@@ -23,6 +25,56 @@ export default function SelectSite({navigation}: NavigationType) {
 
   // previous buttons hit, used to know where to go next
   let from = route.params?.from;
+  const [visible, setVisible] = useState(false);
+  const [messageColor, setMessageColor] = useState("");
+  const [message, setMessage] = useState("");
+  // State to hold the list of site names
+  const [siteNames, setSiteNames] = useState<string[]>();
+
+  // Fetch site names from GitHub Repo
+  useEffect(() => {
+    const fetchSiteNames = async () => {
+      try {
+        const names = await getSites();
+        if(names.success)
+        {
+          setSiteNames(names.data);
+        } // Set the fetched site names
+        else {
+          setMessage(`Error: ${names.error}`);
+          setMessageColor(customTheme["color-danger-700"]);
+          setVisible(true)
+      } 
+    }
+      catch (error)
+      {
+        console.error("Error processing site names:", error);
+      }
+    };
+
+    fetchSiteNames();
+  }, []);
+
+  // data for buttons
+  let buttonData = [];
+
+  if (from == 'AddNotes' || from == 'ViewNotes') {
+    if (siteNames) {
+      for (let i = 0; i < siteNames.length; i++) {
+        buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});
+      }
+    }
+  } 
+  else {
+    buttonData = [
+      { id: 1, label: 'CSP', onPress: () => handleConfirm('CSP')},
+      { id: 2, label: 'DBK', onPress: () => handleConfirm('DBK')},
+      { id: 3, label: 'FRU', onPress: () => handleConfirm('FRU')},
+      { id: 4, label: 'HDP', onPress: () => handleConfirm('HDP')},
+      { id: 5, label: 'SUG', onPress: () => handleConfirm('SUG')},
+      { id: 6, label: 'WBB', onPress: () => handleConfirm('WBB')}
+    ];
+  }
 
   const handleConfirm = (selectedSite: string) => {
     if(from === 'AddNotes')
@@ -47,20 +99,17 @@ export default function SelectSite({navigation}: NavigationType) {
     }
   };
 
-
-  // data for buttons
-  const buttonData = [
-    { id: 1, label: 'CSP', onPress: () => handleConfirm('CSP')},
-    { id: 2, label: 'DBK', onPress: () => handleConfirm('DBK')},
-    { id: 3, label: 'FRU', onPress: () => handleConfirm('FRU')},
-    { id: 4, label: 'HDP', onPress: () => handleConfirm('HDP')},
-    { id: 5, label: 'SUG', onPress: () => handleConfirm('SUG')},
-    { id: 6, label: 'WBB', onPress: () => handleConfirm('WBB')}
-  ]
-
   return (
     <ApplicationProvider {...eva} theme={customTheme}>
       <Layout style={styles.container}>
+
+      <PopupProp
+            popupText={message}
+            popupColor={messageColor}
+            onPress={setVisible}
+            visible={visible}
+          />
+
         {buttonData.map((button) => (
           <Button
             key={button.id}
