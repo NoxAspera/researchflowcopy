@@ -16,6 +16,7 @@ import { ApplicationProvider, Button, Layout, Text } from '@ui-kitten/components
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import { NavigationType, routeProp } from './types'
+import { setBadData } from '../scripts/APIRequests';
 
 export default function BadData({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
@@ -29,6 +30,16 @@ export default function BadData({ navigation }: NavigationType) {
     const [nameValue, setNameValue] = useState("");
     const [entryTimeValue, setEntryTimeValue] = useState("");
     const [reasonValue, setReasonValue] = useState("");
+
+    const buildBadDataString = (): string => {
+      return `${startTimeValue},${endTimeValue},${oldIDValue},${newIDValue},${entryTimeValue},${nameValue},${reasonValue}`;
+    };
+
+    const handleSubmit = () => {
+      const badDataString = buildBadDataString();
+      //alert(`Submitted bad data:\n${badDataString}`);
+      setBadData(site, "test", badDataString, "Update test.csv");
+    };
 
     return (
       <ApplicationProvider {...eva} theme={customTheme}>
@@ -90,7 +101,7 @@ export default function BadData({ navigation }: NavigationType) {
 
           {/* submit button */}
           <Button
-            onPress={() => alert('submitted bad data!')}
+            onPress={handleSubmit}
             appearance='filled'
             status='primary'
             style={{margin: 15}}>

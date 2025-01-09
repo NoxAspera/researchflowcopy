@@ -41,16 +41,17 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
     let sha = ""
     try {
         const response = await fetch(requestOptions);
-        console.log(response)
+        //console.log(response)
         if (response.ok) {
             const data = await response.json();
             let plainContent = atob(data.content);
             let entries = plainContent.substring(plainContent.indexOf("\n"))
             let headers = plainContent.substring(0, plainContent.indexOf("\n"))
             sha = data.sha
-            newFile = headers + newEntry + plainContent
+            newFile = headers + '\n' + newEntry + entries
             newFile = btoa(newFile)
-            console.log(headers);
+            //console.log(headers);
+            //console.log(entries);
         } 
         else {
             const errorData = await response.json();
