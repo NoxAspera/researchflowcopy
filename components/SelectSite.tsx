@@ -56,22 +56,24 @@ export default function SelectSite({navigation}: NavigationType) {
   }, []);
 
   // data for buttons
-  let buttonData = [
-    { id: 1, label: 'CSP', onPress: () => handleConfirm('CSP')},
-    { id: 2, label: 'DBK', onPress: () => handleConfirm('DBK')},
-    { id: 3, label: 'FRU', onPress: () => handleConfirm('FRU')},
-    { id: 4, label: 'HDP', onPress: () => handleConfirm('HDP')},
-    { id: 5, label: 'SUG', onPress: () => handleConfirm('SUG')},
-    { id: 6, label: 'WBB', onPress: () => handleConfirm('WBB')}
-  ]
+  let buttonData = [];
 
   if (from == 'AddNotes' || from == 'ViewNotes') {
     if (siteNames) {
-      buttonData = [];
       for (let i = 0; i < siteNames.length; i++) {
         buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});
       }
     }
+  } 
+  else {
+    buttonData = [
+      { id: 1, label: 'CSP', onPress: () => handleConfirm('CSP')},
+      { id: 2, label: 'DBK', onPress: () => handleConfirm('DBK')},
+      { id: 3, label: 'FRU', onPress: () => handleConfirm('FRU')},
+      { id: 4, label: 'HDP', onPress: () => handleConfirm('HDP')},
+      { id: 5, label: 'SUG', onPress: () => handleConfirm('SUG')},
+      { id: 6, label: 'WBB', onPress: () => handleConfirm('WBB')}
+    ];
   }
 
   const handleConfirm = (selectedSite: string) => {

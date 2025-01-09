@@ -51,7 +51,7 @@ export async function getSites()
     }
     catch(error)
     {
-        return {success: true, error: error}
+        return {success: false, error: error}
     }
 }
 /**
