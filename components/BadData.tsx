@@ -12,7 +12,7 @@ import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { NaviProp } from './types';
 import TextInput from './TextInput'
-import { ApplicationProvider, Button, Layout, Text } from '@ui-kitten/components';
+import { ApplicationProvider, Button, Layout, Text, Datepicker, NativeDateService } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import { NavigationType, routeProp } from './types'
@@ -26,18 +26,61 @@ export default function BadData({ navigation }: NavigationType) {
     const [oldIDValue, setOldIDValue] = useState("");
     const [newIDValue, setNewIDValue] = useState("");
     const [startTimeValue, setStartTimeValue] = useState("");
+    const [startDateValue, setStartDateValue] = useState<Date | null>(null);
     const [endTimeValue, setEndTimeValue] = useState("");
+    const [endDateValue, setEndDateValue] = useState<Date | null>(null);
     const [nameValue, setNameValue] = useState("");
-    const [entryTimeValue, setEntryTimeValue] = useState("");
     const [reasonValue, setReasonValue] = useState("");
 
+    // Function to format the date
+    const formatDate = (date: Date | null): string => {
+      return date ? date.toISOString().split("T")[0] : "";
+    };
+
+    const validateTime = (time: string) => {
+      const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
+      return timeRegex.test(time); // Returns true if the time matches HH:MM:SS format
+    };
+
+    const getCurrentUtcDateTime = () => {
+      const now = new Date();
+      const year = now.getUTCFullYear();
+      const month = String(now.getUTCMonth() + 1).padStart(2, "0");
+      const day = String(now.getUTCDate()).padStart(2, "0");
+      const hours = String(now.getUTCHours()).padStart(2, "0");
+      const minutes = String(now.getUTCMinutes()).padStart(2, "0");
+      const seconds = String(now.getUTCSeconds()).padStart(2, "0");
+  
+      // Format as "YYYY-MM-DDTHH:MM:SSZ"
+      const utcDateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
+      return utcDateTime;
+    };
+
     const buildBadDataString = (): string => {
-      return `${startTimeValue},${endTimeValue},${oldIDValue},${newIDValue},${entryTimeValue},${nameValue},${reasonValue}`;
+      const currentTime = getCurrentUtcDateTime()
+      return `${formatDate(startDateValue)}T${startTimeValue}Z,${formatDate(endDateValue)}T${endTimeValue}Z,${oldIDValue},${newIDValue},${currentTime},${nameValue},${reasonValue}`;
     };
 
     const handleSubmit = () => {
+      if (
+        !oldIDValue ||
+        !newIDValue ||
+        !startDateValue ||
+        !startTimeValue ||
+        !endTimeValue ||
+        !nameValue ||
+        !reasonValue
+      ) {
+        alert("Please fill out all fields before submitting.");
+        return;
+      }
+      if (
+        !validateTime(startTimeValue) || 
+        !validateTime(endTimeValue)) {
+          alert("Please make sure time entries follow the HH:MM:SS format");
+          return;
+        }
       const badDataString = buildBadDataString();
-      //alert(`Submitted bad data:\n${badDataString}`);
       setBadData(site, "test", badDataString, "Update test.csv");
     };
 
@@ -63,18 +106,38 @@ export default function BadData({ navigation }: NavigationType) {
             placeholder='67890' 
             style={styles.textInput}/>
 
+          {/* start date input */}
+          <Datepicker
+            label='Start Date'
+            date={startDateValue}
+            onSelect={(date) => setStartDateValue(date as Date)}
+            min={new Date(1900, 0, 1)}
+            max={new Date(2500, 12, 31)}
+            placeholder="Start Date"
+            style={styles.textInput}/>
+
           {/* start time input */}
           <TextInput labelText='Start Time' 
             labelValue={startTimeValue}
             onTextChange={setStartTimeValue} 
-            placeholder='12:00 PM' 
+            placeholder='12:00:00' 
+            style={styles.textInput}/>
+
+          {/* end date input */}
+          <Datepicker
+            label='End Date'
+            date={endDateValue}
+            onSelect={(date) => setEndDateValue(date as Date)}
+            min={new Date(1900, 0, 1)}
+            max={new Date(2500, 12, 31)}
+            placeholder="End Date"
             style={styles.textInput}/>
 
           {/* end time input */}
           <TextInput labelText='End Time' 
             labelValue={endTimeValue} 
             onTextChange={setEndTimeValue} 
-            placeholder='12:00 AM' 
+            placeholder='12:00:00' 
             style={styles.textInput}/>
 
           {/* Name input */}
@@ -82,13 +145,6 @@ export default function BadData({ navigation }: NavigationType) {
             labelValue={nameValue} 
             onTextChange={setNameValue} 
             placeholder='John Doe' 
-            style={styles.textInput}/>
-
-          {/* time entry input */}
-          <TextInput labelText='Time Entry' 
-            labelValue={entryTimeValue} 
-            onTextChange={setEntryTimeValue} 
-            placeholder='12 hours' 
             style={styles.textInput}/>
 
           {/* reason entry */}
