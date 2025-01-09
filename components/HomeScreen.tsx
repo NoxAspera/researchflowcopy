@@ -11,6 +11,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import HomeButtonProp from './HomeButtonProp';
 import { NaviProp } from './types';
 import { ApplicationProvider, Layout, Text } from '@ui-kitten/components'
+import { setBadData } from '../scripts/APIRequests';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import React from 'react';
