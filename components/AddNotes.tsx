@@ -273,7 +273,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               selectedIndex={selectedIndex}
               onSelect={(index) => setSelectedIndex(index as IndexPath)}
               value={instruments[selectedIndex.row]}
-              style={{margin: 15, flex: 1}}>
+              style={{margin: 8, flex: 1}}>
                 {instruments.map((instrument, index) => (
                   <SelectItem 
                     key={index} 
@@ -396,7 +396,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               onPress={() => checkTextEntries()}
               appearance='filled'
               status='primary'
-              style={{margin: 15}}>
+              style={{margin: 8}}>
               Submit
             </Button>
           </Layout>
@@ -413,25 +413,23 @@ export default function AddNotes({ navigation }: NavigationType) {
     },
     inputText: {
       flex: 1,
-      margin: 15
+      margin: 8
     },
     tankInput: {
       flex: 1,
-      margin: 15
+      margin: 8
     },
     notesInput:
     {
       flex: 1,
-      margin: 15
+      margin: 8
     },
     areaInput: {
       height: 200,
-      margin: 15,
+      margin: 10,
       width: 380,
       borderWidth: 1,
       padding: 10,
-      marginTop: 5,
-      marginBottom: 5,
     },
     rowContainer:
     {

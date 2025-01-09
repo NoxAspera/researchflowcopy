@@ -7,7 +7,8 @@
  */
 import { Layout, Text } from '@ui-kitten/components';
 import React from 'react'
-import { StyleSheet, TouchableWithoutFeedback } from "react-native"
+import { StyleSheet, TouchableWithoutFeedback, Dimensions } from "react-native"
+const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
 
 interface HBProp{
     text: string;
@@ -26,9 +27,9 @@ const HomeButtonProp: React.FC<HBProp> = ({ text, onPress }) => {
 
 const styles = StyleSheet.create({
     tab: {
-      width: '90%', // Card width to adjust appearance
-      height: 200,
-      marginVertical: 10,
+      width: width * .9, // Card width to adjust appearance
+      height: height/8.5,
+      marginVertical: height/70,
       padding: 20,
       alignItems: 'center',
       justifyContent: 'center',
