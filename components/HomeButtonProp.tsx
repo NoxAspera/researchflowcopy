@@ -7,21 +7,22 @@
  */
 import { Layout, Text, Button } from '@ui-kitten/components';
 import React from 'react'
-import { StyleSheet, TouchableWithoutFeedback, Dimensions } from "react-native"
+import { StyleSheet, TouchableWithoutFeedback, Dimensions, ColorValue } from "react-native"
 const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
 
 interface HBProp{
     text: string;
-    //style: StyleSheet;
+    color: ColorValue;
     onPress: () => void; // may change depending on the function pass in
 }
-//might be able to pass in the style of the button from outside to enable different colors for the buttons
-const HomeButtonProp: React.FC<HBProp> = ({ text, onPress }) => {
+
+
+const HomeButtonProp: React.FC<HBProp> = ({ text, color, onPress }) => {
     return (
       <TouchableWithoutFeedback onPress={onPress}>
         <Layout level="2">
           <Button
-            style={styles.tab}
+            style={[styles.tab, { backgroundColor: color}]}//makes a stylesheet with styles.tab stylesheet and the new thing you take in
             status='primary'
           >
             {evaProps => <Text {...evaProps} category="h5" style={{color: "white"}}>{text}</Text>}
