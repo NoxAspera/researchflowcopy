@@ -19,10 +19,88 @@ export function setGithubToken(token: string) {
     githubToken = token;
 }
 
+export async function getBadDataSites()
+{
+    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad`;
+
+    let headers = new Headers();
+    headers.append("User-Agent", "ResearchFlow");
+    headers.append("Accept", "application/vnd.github+json");
+    headers.append("Authorization", `Bearer ${githubToken}`);
+    headers.append("X-GitHub-Api-Version", "2022-11-28");
+
+    let requestOptions: RequestInfo = new Request(url, 
+        {
+            method: "GET",
+            headers: headers,
+            redirect: "follow"
+        }
+    )
+    try {
+        const response = await fetch(requestOptions);
+        if (response.ok) {
+            const data = await response.json();
+            // Extract all folder names from the response
+            const folderNames = data
+                .filter((item: any) => item.type === "dir") // Ensure only directories are included
+                .map((item: any) => item.name); // Map to the "name" property
+
+            return {success:true, data:folderNames};
+        } 
+        else {
+            const errorData = await response.json();
+            return { success: false, error: errorData.message };
+        }
+    } 
+    catch (error) 
+    {
+        return { success: false, error: error };
+    }
+}
+
+export async function getBadDataFiles(siteName: string)
+{
+    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad/${siteName}`;
+
+    let headers = new Headers();
+    headers.append("User-Agent", "ResearchFlow");
+    headers.append("Accept", "application/vnd.github+json");
+    headers.append("Authorization", `Bearer ${githubToken}`);
+    headers.append("X-GitHub-Api-Version", "2022-11-28");
+
+    let requestOptions: RequestInfo = new Request(url, 
+        {
+            method: "GET",
+            headers: headers,
+            redirect: "follow"
+        }
+    )
+    try {
+        const response = await fetch(requestOptions);
+        if (response.ok) {
+            const data: siteResponse[] = await response.json();
+            
+            const csvFiles = data
+                .filter(item => item.name.endsWith(".csv"))
+                .map(item => item.name.replace(/\.csv$/, ""));
+
+            return {success:true, data:csvFiles};
+        } 
+        else {
+            const errorData = await response.json();
+            return { success: false, error: errorData.message };
+        }
+    } 
+    catch (error) 
+    {
+        return { success: false, error: error };
+    }
+}
+
 export async function setBadData(siteName: string, instrument: string, newEntry: string, commitMessage: string)
 {
     siteName = siteName.toLowerCase();
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad/test/test.csv`;
+    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad/${siteName}/${instrument}.csv`;
 
     let headers = new Headers();
     headers.append("User-Agent", "ResearchFlow");
@@ -48,7 +126,7 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
             let entries = plainContent.substring(plainContent.indexOf("\n"))
             let headers = plainContent.substring(0, plainContent.indexOf("\n"))
             sha = data.sha
-            newFile = headers + '\n' + newEntry + entries
+            newFile = headers + '\n' + entries + '\n' + newEntry
             newFile = btoa(newFile)
             //console.log(headers);
             //console.log(entries);

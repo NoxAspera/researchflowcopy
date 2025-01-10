@@ -1,7 +1,7 @@
 /**
  * Select Site Page
  * @author Blake Stambaugh and Megan Ostlie
- * 12/5/24
+ * Updated: 1/10/24
  * 
  * This page is the lets the user select the site they are currently at. When they
  * choose an action on the home page, they will be directed to this screen to determine
@@ -16,7 +16,7 @@ import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
-import { getSites } from '../scripts/APIRequests';
+import { getBadDataSites, getSites } from '../scripts/APIRequests';
 
 
 export default function SelectSite({navigation}: NavigationType) {
@@ -35,16 +35,17 @@ export default function SelectSite({navigation}: NavigationType) {
   useEffect(() => {
     const fetchSiteNames = async () => {
       try {
-        const names = await getSites();
-        if(names.success)
+        let names;
+        if (from === 'AddNotes' || from === 'ViewNotes') {
+          names = await getSites();
+        } else if (from === 'BadData') {
+          names = await getBadDataSites();
+        }
+        if(names)
         {
           setSiteNames(names.data);
+          console.log(siteNames);
         } // Set the fetched site names
-        else {
-          setMessage(`Error: ${names.error}`);
-          setMessageColor(customTheme["color-danger-700"]);
-          setVisible(true)
-      } 
     }
       catch (error)
       {
@@ -53,12 +54,12 @@ export default function SelectSite({navigation}: NavigationType) {
     };
 
     fetchSiteNames();
-  }, []);
+  }, [from]);
 
   // data for buttons
   let buttonData = [];
 
-  if (from == 'AddNotes' || from == 'ViewNotes') {
+  if (from == 'AddNotes' || from == 'ViewNotes' || from == 'BadData') {
     if (siteNames) {
       for (let i = 0; i < siteNames.length; i++) {
         buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});

@@ -1,36 +1,57 @@
 /**
  * Bad Data Page
- * @author David Schiwal, Blake Stambaugh
- * 12/5/24
+ * @author David Schiwal, Blake Stambaugh, Megan Ostlie
+ * Updated: 1/10/25
  * 
  * This page allows the user to mark data as bad. They will enter in
  * a date range, the data, and why it is bad. The code will format and
  * submit that request to the github repo.
  */
 import { StyleSheet } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { NaviProp } from './types';
 import TextInput from './TextInput'
-import { ApplicationProvider, Button, Layout, Text, Datepicker, NativeDateService } from '@ui-kitten/components';
+import { ApplicationProvider, Button, Layout, Text, Datepicker, Select, SelectItem, IndexPath } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import { NavigationType, routeProp } from './types'
-import { setBadData } from '../scripts/APIRequests';
+import { setBadData, getBadDataFiles } from '../scripts/APIRequests';
 
 export default function BadData({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
     let site = route.params?.site;
 
     // these use states to set and store values in the text inputs
-    const [oldIDValue, setOldIDValue] = useState("");
-    const [newIDValue, setNewIDValue] = useState("");
+    const [oldIDValue, setOldIDValue] = useState("all");
+    const [newIDValue, setNewIDValue] = useState("NA");
     const [startTimeValue, setStartTimeValue] = useState("");
     const [startDateValue, setStartDateValue] = useState<Date | null>(null);
     const [endTimeValue, setEndTimeValue] = useState("");
     const [endDateValue, setEndDateValue] = useState<Date | null>(null);
     const [nameValue, setNameValue] = useState("");
     const [reasonValue, setReasonValue] = useState("");
+    const [selectedFileIndex, setSelectedFileIndex] = useState<IndexPath | undefined>(undefined);
+    const [fileOptions, setFileOptions] = useState<string[]>([]);
+    const [instrument, setInstrument] = useState<string | undefined>(undefined);
+
+    useEffect(() => {
+      const fetchBadDataFiles = async () => {
+        try {
+          const response = await getBadDataFiles(site);
+          if (response.success) {
+            setFileOptions(response.data || []); // Set the file names as options
+          } else {
+            alert(`Error fetching files: ${response.error}`);
+          }
+        } catch (error) {
+          console.error("Error fetching bad data files:", error);
+        }
+      };
+  
+      fetchBadDataFiles();
+    }, [site]);
+  
 
     // Function to format the date
     const formatDate = (date: Date | null): string => {
@@ -61,6 +82,11 @@ export default function BadData({ navigation }: NavigationType) {
       return `${formatDate(startDateValue)}T${startTimeValue}Z,${formatDate(endDateValue)}T${endTimeValue}Z,${oldIDValue},${newIDValue},${currentTime},${nameValue},${reasonValue}`;
     };
 
+    const handleFileSelection = (index: IndexPath) => {
+      setSelectedFileIndex(index);
+      setInstrument(fileOptions[index.row]);
+    };
+
     const handleSubmit = () => {
       if (
         !oldIDValue ||
@@ -69,7 +95,8 @@ export default function BadData({ navigation }: NavigationType) {
         !startTimeValue ||
         !endTimeValue ||
         !nameValue ||
-        !reasonValue
+        !reasonValue ||
+        !instrument
       ) {
         alert("Please fill out all fields before submitting.");
         return;
@@ -81,7 +108,7 @@ export default function BadData({ navigation }: NavigationType) {
           return;
         }
       const badDataString = buildBadDataString();
-      setBadData(site, "test", badDataString, "Update test.csv");
+      setBadData(site, instrument, badDataString, `Update ${instrument}.csv`);
     };
 
     return (
@@ -92,6 +119,23 @@ export default function BadData({ navigation }: NavigationType) {
           <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
           
           {/* text inputs */}
+          {/* select instrument */}
+          <Select
+            label = "Instrument"
+            selectedIndex={selectedFileIndex}
+            onSelect={(index) => handleFileSelection(index as IndexPath)}
+            placeholder="Choose an instrument"
+            style={styles.textInput}
+            value={
+              selectedFileIndex !== undefined
+              ? fileOptions[selectedFileIndex.row] // Display the selected file
+              : undefined
+            }>
+          {fileOptions.map((file, index) => (
+            <SelectItem key={index} title={file} />
+          ))}
+          </Select>
+
           {/* old id input */}
           <TextInput labelText='Old ID' 
             labelValue={oldIDValue} 
