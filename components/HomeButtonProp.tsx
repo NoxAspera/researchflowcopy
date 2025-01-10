@@ -19,21 +19,16 @@ interface HBProp{
 
 const HomeButtonProp: React.FC<HBProp> = ({ text, color, onPress }) => {
     return (
-      <TouchableWithoutFeedback onPress={onPress}>
-        <Layout level="2">
-          <Button
-            style={[styles.tab, { backgroundColor: color}]}//makes a stylesheet with styles.tab stylesheet and the new thing you take in
-            status='primary'
-          >
-            {evaProps => <Text {...evaProps} category="h5" style={{color: "white"}}>{text}</Text>}
-          </Button>  
-        </Layout>
-      </TouchableWithoutFeedback>
-      /*<TouchableWithoutFeedback onPress={onPress}>
-        <Layout {...style} level="2">
-          <Text category="h5">{text}</Text>  
-        </Layout>
-      </TouchableWithoutFeedback>*/
+      <Layout level="2">
+        <Button
+        //makes a stylesheet with styles.tab stylesheet and the new thing you take in
+          style={[styles.tab, { backgroundColor: color}]}
+          status='primary'
+          onPress={onPress}
+        >
+          {evaProps => <Text {...evaProps} category="h5" style={{color: "black"}}>{text}</Text>}
+        </Button>  
+      </Layout>
     );
 };
 
@@ -51,7 +46,6 @@ const styles = StyleSheet.create({
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.2,
       shadowRadius: 4,
-      //backgroundColor: "#061c9c" //changes color of all buttons
     }
   });
 

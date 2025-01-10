@@ -24,27 +24,27 @@ export default function HomeScreen({ navigation }: NavigationType) {
             <ScrollView contentContainerStyle={styles.scrollContainer}>
               
             {/* Add Notes */}
-            <HomeButtonProp text='ADD NOTES' color="#061c9c"//style={styles.tab}
+            <HomeButtonProp text='ADD NOTES' color="#AEDD94"
               onPress={() => navigation.navigate('SelectSite', {from: 'AddNotes'})} />
 
             {/* VIEW PAST NOTES */}
-            <HomeButtonProp text='VIEW NOTES' color="#061c9c"//style={styles.tab}
+            <HomeButtonProp text='VIEW NOTES' color="#EBEBEB"
               onPress={() => navigation.navigate('SelectSite', {from: 'ViewNotes'})} />
 
             {/* BAD DATA */}
-            <HomeButtonProp text='BAD DATA' color="#061c9c"//style={styles.tab}
+            <HomeButtonProp text='BAD DATA' color="#FF8A84"
               onPress={() => navigation.navigate('SelectSite', {from: 'BadData'})} />
 
             {/* INSTRUMENT MAINTENENCE */}
-            <HomeButtonProp text='INSTRUMENT MAINTENENCE' color="#061c9c"//style={styles.tab}
+            <HomeButtonProp text='INSTRUMENT MAINTENENCE' color="#FEF8A0"
               onPress={() => navigation.navigate('SelectSite', {from: 'InstrumentMaintenance'})} />
 
             {/* TANK TRACKER */}
-            <HomeButtonProp text='TANK TRACKER' color="#061c9c"//style={styles.tab}
+            <HomeButtonProp text='TANK TRACKER' color="#4DD7FA"
               onPress={() => navigation.navigate('SelectSite', {from: 'TankTracker'})} />
             
             {/* PLAN A VISIT */}
-            <HomeButtonProp text='PLAN A VISIT' color="#061c9c"//style={styles.tab}
+            <HomeButtonProp text='PLAN A VISIT' color="#FFC581"
               onPress={() => navigation.navigate('SelectSite', {from: 'TankTracker'})} />
 
             </ScrollView>
@@ -63,19 +63,4 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center', // Center cards horizontally
   },
-  tab: {
-    width: width * .9, // Card width to adjust appearance
-    height: height/8.5,
-    marginVertical: height/70,
-    padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 8,
-    elevation: 4, // For shadow on Android
-    shadowColor: '#000', // For shadow on iOS
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    //backgroundColor: "#061c9c" //changes color of all buttons
-  }
 });
