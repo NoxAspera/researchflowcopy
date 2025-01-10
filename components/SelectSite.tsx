@@ -44,7 +44,6 @@ export default function SelectSite({navigation}: NavigationType) {
         if(names)
         {
           setSiteNames(names.data);
-          console.log(siteNames);
         } // Set the fetched site names
     }
       catch (error)
