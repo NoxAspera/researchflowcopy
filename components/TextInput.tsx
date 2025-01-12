@@ -6,7 +6,7 @@
  * This property objectifies our text input. It will take in any text, and styling choices
  * for each input.
  */
-import { Input } from "@ui-kitten/components";
+import { Input, Text } from "@ui-kitten/components";
 import React from "react";
 import { StyleSheet, ViewStyle } from "react-native";
 
@@ -29,7 +29,7 @@ interface TIProp{
 const AddNotesTextInput: React.FC<TIProp> = ({ labelText, labelValue, onTextChange, placeholder, multiplelines, style, secureEntry, status }) => {
     return (
       <Input
-        label={labelText}
+        label={evaProps => <Text {...evaProps} category="p2" style={{color: "white"}}>{labelText}</Text>}
         status={status || 'basic'}
         placeholder={placeholder}
         value={labelValue}
@@ -37,15 +37,19 @@ const AddNotesTextInput: React.FC<TIProp> = ({ labelText, labelValue, onTextChan
         onChangeText={(arg0) => onTextChange(arg0)}
         style={style}
         secureTextEntry={secureEntry ? true : false}
+        textStyle={styles.textInputStyle}
       />
     );
 };
 
 const styles = StyleSheet.create({
     label: {
-        margin: 15,
+        margin: 20,
         fontSize: 24,
         alignItems: 'flex-start'
+    },
+    textInputStyle: {
+      maxHeight: 24
     }
   });
 

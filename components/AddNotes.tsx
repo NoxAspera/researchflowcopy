@@ -269,7 +269,7 @@ export default function AddNotes({ navigation }: NavigationType) {
                 style={styles.inputText}
               />
             ) : (
-            <Select label='Instrument'
+            <Select label={evaProps => <Text {...evaProps} category="c1" style={{color: "white"}}>Instrument</Text>}
               selectedIndex={selectedIndex}
               onSelect={(index) => setSelectedIndex(index as IndexPath)}
               value={instruments[selectedIndex.row]}
@@ -289,7 +289,8 @@ export default function AddNotes({ navigation }: NavigationType) {
               labelValue={nameValue} 
               onTextChange={setNameValue} 
               placeholder='ResearchFlow' 
-              style={styles.inputText} />
+              style={styles.inputText}
+             />
 
               {/* Time input */}
             <TextInput labelText='Time Started' 
@@ -395,9 +396,9 @@ export default function AddNotes({ navigation }: NavigationType) {
             <Button
               onPress={() => checkTextEntries()}
               appearance='filled'
-              status='primary'
-              style={{margin: 8}}>
-              Submit
+              status='primary' 
+              style={{margin: 20, backgroundColor: "#06b4e0"}}>
+              {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Submit</Text>}
             </Button>
           </Layout>
         </ScrollView>

@@ -82,8 +82,8 @@ export default function Login({ navigation }: NavigationType) {
                 onPress={checkTextEntry}
                 appearance='filled'
                 status='primary'
-                style={{margin: 15}}>
-                SIGN IN
+                style={{margin: 15, backgroundColor: "#06b4e0"}}>
+                {evaProps => <Text {...evaProps} category="h5" style={{color: "black"}}>SIGN IN</Text>}
             </Button>
           </Layout>
         </Layout>
