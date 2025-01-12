@@ -50,7 +50,7 @@ export default function Login({ navigation }: NavigationType) {
           {/* header */}
           <Layout style={styles.loginText}>
             <Text category='h1' style={{textAlign: 'center'}}>Hello</Text>
-            <Text category='s1' style={{textAlign: 'center'}}>Sign in using your GitHub credentials</Text>
+            <Text category='h6' style={{textAlign: 'center'}}>Sign in using your GitHub credentials</Text>
           </Layout>
 
           {/* popup if user has missing credentials */}

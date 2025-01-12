@@ -43,13 +43,9 @@ const AddNotesTextInput: React.FC<TIProp> = ({ labelText, labelValue, onTextChan
 };
 
 const styles = StyleSheet.create({
-    label: {
-        margin: 20,
-        fontSize: 24,
-        alignItems: 'flex-start'
-    },
     textInputStyle: {
-      maxHeight: 24
+      maxHeight: 24,
+      fontSize: 18
     }
   });
 
