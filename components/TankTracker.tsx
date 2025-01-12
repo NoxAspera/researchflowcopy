@@ -42,7 +42,7 @@ export default function TankTracker({ navigation }: NavigationType) {
 
           {/* drop down menu for instruments */}
           <Select
-            label="Tanks"
+            label={evaProps => <Text {...evaProps} category="c1" style={{color: "white"}}>Tanks</Text>}
             selectedIndex={selectedIndex}
             onSelect={(index) => setSelectedIndex(index as IndexPath)}
             value={tanks[selectedIndex.row]}

@@ -38,8 +38,8 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
           </Text>
 
           {/* drop down menu for instruments */}
-          <Select
-            label="Instrument"
+          <Select 
+            label={evaProps => <Text {...evaProps} category="c1" style={{color: "white"}}>Instrument</Text>}
             selectedIndex={selectedIndex}
             onSelect={(index) => setSelectedIndex(index as IndexPath)}
             value={instruments[selectedIndex.row]}
