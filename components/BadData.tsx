@@ -17,6 +17,8 @@ import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import { NavigationType, routeProp } from './types'
 import { setBadData, getBadDataFiles } from '../scripts/APIRequests';
+import PopupProp from './Popup';
+import PopupProp2Button from './Popup2Button';
 
 export default function BadData({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
@@ -33,7 +35,7 @@ export default function BadData({ navigation }: NavigationType) {
     const [reasonValue, setReasonValue] = useState("");
     const [selectedFileIndex, setSelectedFileIndex] = useState<IndexPath | undefined>(undefined);
     const [fileOptions, setFileOptions] = useState<string[]>([]);
-    const [instrument, setInstrument] = useState<string | undefined>(undefined);
+    const [instrument, setInstrument] = useState("");
 
     useEffect(() => {
       const fetchBadDataFiles = async () => {
@@ -87,6 +89,13 @@ export default function BadData({ navigation }: NavigationType) {
       setInstrument(fileOptions[index.row]);
     };
 
+    // used for determining if PUT request was successful
+    // will set the success/fail notification to visible, aswell as the color and text
+    const [visible, setVisible] = useState(false);
+    const [messageColor, setMessageColor] = useState("");
+    const [message, setMessage] = useState("");
+    const [visible2, setVisible2] = useState(false);
+
     const handleSubmit = () => {
       if (
         !oldIDValue ||
@@ -98,18 +107,36 @@ export default function BadData({ navigation }: NavigationType) {
         !reasonValue ||
         !instrument
       ) {
-        alert("Please fill out all fields before submitting.");
+        //alert("Please fill out all fields before submitting.");
+        setMessage("Please fill out all fields before submitting.");
+        setMessageColor(customTheme['color-danger-700']);
+        setVisible(true);
         return;
       }
       if (
         !validateTime(startTimeValue) || 
         !validateTime(endTimeValue)) {
-          alert("Please make sure time entries follow the HH:MM:SS format");
+          //alert("Please make sure time entries follow the HH:MM:SS format");
+          setMessage("Please make sure time entries follow the HH:MM:SS format.");
+          setMessageColor(customTheme['color-danger-700']);
+          setVisible(true);
           return;
         }
-      const badDataString = buildBadDataString();
-      setBadData(site, instrument, badDataString, `Update ${instrument}.csv`);
+      handleUpdate();
     };
+
+    const handleUpdate = async () => {
+      const badDataString = buildBadDataString();
+      const result = await setBadData(site, instrument, badDataString, `Update ${instrument}.csv`);
+      if (result.success) {
+          setMessage("File updated successfully!");
+          setMessageColor(customTheme['color-success-700']);
+        } else {
+          setMessage(`Error: ${result.error}`);
+          setMessageColor(customTheme['color-danger-700']);
+        }
+      setVisible(true);
+    }
 
     return (
       <ApplicationProvider {...eva} theme={customTheme}>
@@ -117,6 +144,12 @@ export default function BadData({ navigation }: NavigationType) {
 
           {/* header */}
           <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
+
+          {/* success/failure popup */}
+          <PopupProp popupText={message} 
+            popupColor={messageColor} 
+            onPress={setVisible} 
+            visible={visible}/>
           
           {/* text inputs */}
           {/* select instrument */}
