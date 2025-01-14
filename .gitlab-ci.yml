@@ -17,9 +17,10 @@ build:
 
 test:
   stage: test
-  dependencies: build
+  dependencies: 
+    - build
   script: 
     - echo "Testing..."
-    - pnpn test
+    - pnpm test
   
   
