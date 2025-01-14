@@ -6,6 +6,8 @@ stages:
 
 build:
   stage: build
+  tags: 
+    - saas-linux-medium-amd64
   script:
     - echo "Building..."
     - pnpm install
