@@ -1,7 +1,7 @@
 /**
  * Select Site Page
  * @author Blake Stambaugh and Megan Ostlie
- * Updated: 1/10/24
+ * Updated: 1/14/25 - MO
  * 
  * This page is the lets the user select the site they are currently at. When they
  * choose an action on the home page, they will be directed to this screen to determine
@@ -9,7 +9,7 @@
  * and all info for that site will be given.
  */
 import { StyleSheet } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ApplicationProvider, Layout, Button } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
@@ -93,7 +93,7 @@ export default function SelectSite({navigation}: NavigationType) {
     }
     else if (from === 'InstrumentMaintenance')
     {
-      navigation.navigate('InstrumentMaintenance', {site: selectedSite});
+      navigation.navigate('SelectInstrument', {from: selectedSite});
     }
     else if (from === 'TankTracker')
     {
