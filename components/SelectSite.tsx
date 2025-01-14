@@ -16,7 +16,7 @@ import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
-import { getBadDataSites, getSites } from '../scripts/APIRequests';
+import { getBadDataSites, getDirectory } from '../scripts/APIRequests';
 
 
 export default function SelectSite({navigation}: NavigationType) {
@@ -37,7 +37,7 @@ export default function SelectSite({navigation}: NavigationType) {
       try {
         let names;
         if (from === 'AddNotes' || from === 'ViewNotes') {
-          names = await getSites();
+          names = await getDirectory("site_notes");
         } else if (from === 'BadData') {
           names = await getBadDataSites();
         }
