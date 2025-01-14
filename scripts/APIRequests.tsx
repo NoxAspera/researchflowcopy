@@ -94,12 +94,76 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
 
 /**
  * @author August O'Rourke
+ * This appends the string in the content field the contents of a markdown file in the site notes folder from the CS_4000_mock_docs repository, if it exists,
+ * this method could also create a new file, but that has not been tested/ won't be used in the final app (at least right now)
+ * @param siteName the name of the site that we are trying to edit the notes for 
+ * @param content the content we are going to append to the exitsting file
+ * @param commitMessage the commit message that will go on gitHub
+ * @returns the contents of the file as a string
+ */
+export async function setInstrumentFile(path: string, content: string, commitMessage: string, mobile:boolean, site?: string) {
+    console.log("here")
+    const pullResponse = (await getFile(path))
+    if(pullResponse.error)
+    {
+        return {success: false, error: pullResponse.error}
+    }
+    console.log(pullResponse)
+    const hash = pullResponse.data.sha
+    const existingContent = atob(pullResponse.data.content)
+    const maintenanceHeader = `Maintenance Log\n---`
+    let staticHeader = existingContent.substring(0,existingContent.indexOf(maintenanceHeader) + maintenanceHeader.length)
+    if(mobile && site)
+    {
+        let staticHeaderNoLocation  = staticHeader.substring(0, staticHeader.indexOf("---\nCurrently At"))
+        let locationHeader = `---\nCurrently At ${site}\n` + maintenanceHeader
+        staticHeader = staticHeaderNoLocation + locationHeader
+    }
+    const existingNotes = existingContent.substring(existingContent.indexOf(maintenanceHeader) + maintenanceHeader.length) 
+    console.log(existingNotes)
+    console.log(staticHeader)
+    const fullDoc = btoa(staticHeader +"\n" + content + existingNotes)
+
+    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}.md`;
+    const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`
+    const headers = new Headers();
+    headers.append("User-Agent", "ResearchFlow");
+    headers.append("Accept", "application/vnd.github+json");
+    headers.append("Authorization", `Bearer ${githubToken}`);
+    headers.append("X-GitHub-Api-Version", "2022-11-28");
+
+    const requestOptions: RequestInfo = new Request(url, 
+        {
+            method: "PUT",
+            headers: headers,
+            body: bodyString,
+            redirect: "follow"
+        }
+    )
+    
+    try {
+        const response = await fetch(requestOptions);
+        console.log(response)
+        if (response.ok) {
+            const data = await response.json();
+            return { success: true, data };
+        } else {
+            const errorData = await response.json();
+            return { success: false, error: errorData.message };
+        }
+    } catch (error) {
+        return { success: false, error: error };
+    }
+}
+
+/**
+ * @author August O'Rourke
  *  This method gets a list of sites from the CS_4000_mock_docs repository
  * @returns returns a list of sites with the type of siteResponse
  */
-export async function getSites()
+export async function getDirectory(path: string)
 {
-    const url = 'https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/site_notes'
+    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}`
     const headers = new Headers();
     headers.append("User-Agent", "ResearchFlow");
     headers.append("Accept", "application/vnd.github.raw+json");
@@ -115,6 +179,7 @@ export async function getSites()
     )
     try{
         const response = await fetch(requestOptions);
+        console.log(response)
         const data: siteResponse[] = await response.json();
         const mdFiles = data
             .filter(item => item.name.endsWith(".md"))
@@ -133,10 +198,10 @@ export async function getSites()
  * @param siteName The site notes we are trying to get
  * @returns the json response retrieved from the rest endpoint
  */
-async function getFile(siteName: string)
+async function getFile(path: string)
 {
-    siteName = siteName.toLowerCase();
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/site_notes/${siteName}.md`;
+    path.toLowerCase()
+    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}.md`;
 
     const headers = new Headers();
     headers.append("User-Agent", "ResearchFlow");
@@ -153,7 +218,7 @@ async function getFile(siteName: string)
     )
     try {
         const response = await fetch(requestOptions);
-
+        console.log(response)
         if (response.ok) {
             const data = await response.json();
             return { success: true, data };
@@ -174,10 +239,10 @@ async function getFile(siteName: string)
  * @returns the contents of the file as a string
  */
 
-export async function getFileContents(siteName: string)
+export async function getFileContents(path: string)
 {   
-    siteName = siteName.toLowerCase();
-    const response = await getFile(siteName)
+    path = path.toLowerCase();
+    const response = await getFile(path)
     if(response.success)
     {
         return {success: true, data: atob(response.data.content)}
@@ -198,7 +263,7 @@ export async function getFileContents(siteName: string)
  */
 export async function setFile(siteName: string, content: string, commitMessage: string) {
     siteName = siteName.toLowerCase();
-    const pullResponse = (await getFile(siteName))
+    const pullResponse = (await getFile(`site_notes/${siteName}`))
     if(pullResponse.error)
     {
         return {success: false, error: pullResponse.error}

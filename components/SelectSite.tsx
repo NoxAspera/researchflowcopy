@@ -16,7 +16,7 @@ import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
-import { getSites } from '../scripts/APIRequests';
+import { getDirectory } from '../scripts/APIRequests';
 
 
 export default function SelectSite({navigation}: NavigationType) {
@@ -35,7 +35,7 @@ export default function SelectSite({navigation}: NavigationType) {
   useEffect(() => {
     const fetchSiteNames = async () => {
       try {
-        const names = await getSites();
+        const names = await getDirectory("site_notes");
         if(names.success)
         {
           setSiteNames(names.data);
