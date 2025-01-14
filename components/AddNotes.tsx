@@ -42,7 +42,7 @@ function checkValidNumber(entry:string)
  * @returns a ParsedData object that contains the information of the given document
  */
 async function processNotes(siteName: string) {
-  const fileContents = await getFileContents(siteName);
+  const fileContents = await getFileContents(`site_notes/${siteName}`);
   if(fileContents.data){
     return parseNotes(fileContents.data)
   }
