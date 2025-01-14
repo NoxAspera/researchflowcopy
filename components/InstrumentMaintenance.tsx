@@ -1,7 +1,7 @@
 /**
  * Instrument Maintenance Page
- * @author David Schiwal and Blake Stambaugh
- * 12/5/24
+ * @author David Schiwal, Blake Stambaugh, Megan Ostlie
+ * Updated: 1/14/25
  * 
  * This is the page for instrument maintenance. It will take in the user input, format
  * it, and send it to the github repo.
@@ -14,64 +14,103 @@ import TextInput from './TextInput'
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import { NavigationType, routeProp } from './types'
-import { getDirectory } from '../scripts/APIRequests';
+import PopupProp from './Popup';
+import { getDirectory, setInstrumentFile, getInstrumentSite } from '../scripts/APIRequests';
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
     let site = route.params?.site;
+    let instrumentName = site.slice(site.lastIndexOf("/") + 1);
 
     // used for setting and remembering the input values
     const [nameValue, setNameValue] = useState("");
     const [dateValue, setDateValue] = useState("");
     const [notesValue, setNotesValue] = useState("");
-    const [instruments, setInstruments] = useState<string[]>([]);
-    const [instrument, setInstrument] = useState("");
+    const [siteValue, setSiteValue] = useState("");
 
-    // Use IndexPath for selected index for drop down menu
-    const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
+    // used for determining if PUT request was successful
+    // will set the success/fail notification to visible, aswell as the color and text
+    const [visible, setVisible] = useState(false);
+    const [messageColor, setMessageColor] = useState("");
+    const [message, setMessage] = useState("");
 
     useEffect(() => {
-          const fetchBadDataFiles = async () => {
-            try {
-              const response = await getDirectory(`instrument_maint/${site}`);
-              if (response.success) {
-                setInstruments(response.data || []); // Set the file names as options
-              } else {
-                alert(`Error fetching files: ${response.error}`);
-              }
-            } catch (error) {
-              console.error("Error fetching bad data files:", error);
+      const fetchSite = async () => {
+        if (site.includes("LGR")) {
+          try {
+            const response = await getInstrumentSite(site);
+            if (response.success) {
+              setSiteValue(response.data || ""); // Set the file names as options
+            } else {
+              alert(`Error fetching site: ${response.error}`);
             }
-          };
+          } catch (error) {
+            console.error("Error fetching instrument site:", error);
+          }
+        } 
+      };
+      fetchSite();
+    }, [site]);
+
+    const buildInstrumentNotes = (): string => {
+      let result:string = "---\n"
+
+      result += `- Time in: ${dateValue}Z\n`;
+      result += `- Name: ${nameValue}Z\n`;
+      result += `- Notes: ${notesValue}Z\n`;
       
-          fetchBadDataFiles();
-        }, [site]);
-    //const instruments = ['Instrument 1', 'Instrument 2', 'Instrument 3']
+      return result;
+    };
+    
+    const handleSubmit = () => {
+      if (!nameValue || !dateValue || !notesValue) {
+        setMessage("Please fill out all fields before submitting.");
+        setMessageColor(customTheme['color-danger-700']);
+        setVisible(true);
+        return;
+      }
+      handleUpdate();
+    }
+
+    const handleUpdate = async () => {
+      const instrumentNotes = buildInstrumentNotes();
+      const result = await setInstrumentFile(site, instrumentNotes, `Update ${instrumentName}.md`, site.includes("LGR"), siteValue);
+      if (result.success) {
+          setMessage("File updated successfully!");
+          setMessageColor(customTheme['color-success-700']);
+        } else {
+          setMessage(`Error: ${result.error}`);
+          setMessageColor(customTheme['color-danger-700']);
+        }
+      setVisible(true);
+    }
 
     return (
       <ApplicationProvider {...eva} theme={customTheme}>
         <Layout style={styles.container} level="1">
 
+          {/* success/failure popup */}
+          <PopupProp popupText={message} 
+            popupColor={messageColor} 
+            onPress={setVisible} 
+            visible={visible}/>
+
           {/* header */}
           <Text category="h1" style={{ textAlign: "center" }}>
-            {site}
+            {instrumentName}
           </Text>
-
-          {/* drop down menu for instruments */}
-          <Select
-            label="Instrument"
-            selectedIndex={selectedIndex}
-            onSelect={(index) => setSelectedIndex(index as IndexPath)}
-            value={instruments[selectedIndex.row]}
-            style={{ margin: 15, flex: 1 }}
-          >
-            {instruments.map((file, index) => (
-                <SelectItem key={index} title={file} />
-            ))}
-          </Select>
 
           {/* text inputs */}
           {/* Time input */}
+          {siteValue && (
+          <TextInput
+            labelText="Location"
+            labelValue={siteValue}
+            onTextChange={setSiteValue}
+            placeholder="Enter site"
+            style={styles.textInput}
+          />
+          )}
           <TextInput
             labelText="Time"
             labelValue={dateValue}
@@ -101,7 +140,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
           {/* submit button */}
           <Button
-            onPress={() => alert("submitted request!")}
+            onPress={() => handleSubmit()}
             appearance="filled"
             status="primary"
             style={{ margin: 15 }}

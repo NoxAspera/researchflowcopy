@@ -171,6 +171,18 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
     }
 }
 
+export async function getInstrumentSite(path: string) {
+    const pullResponse = (await getFile(path))
+    if(pullResponse.error)
+    {
+        return {success: false, error: pullResponse.error}
+    }
+    const existingContent = atob(pullResponse.data.content)
+    const match = existingContent.match(/Currently at (\w+)/);
+    //return match ? match[1] : null;
+    return { success: true, data: match ? match[1] : null };
+}
+
 /**
  * @author August O'Rourke
  * This appends the string in the content field the contents of a markdown file in the site notes folder from the CS_4000_mock_docs repository, if it exists,
