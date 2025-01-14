@@ -263,7 +263,7 @@ export async function getFileContents(path: string)
  */
 export async function setFile(siteName: string, content: string, commitMessage: string) {
     siteName = siteName.toLowerCase();
-    const pullResponse = (await getFile(siteName))
+    const pullResponse = (await getFile(`site_notes/${siteName}`))
     if(pullResponse.error)
     {
         return {success: false, error: pullResponse.error}
