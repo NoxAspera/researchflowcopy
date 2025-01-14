@@ -258,13 +258,19 @@ export async function getDirectory(path: string)
     )
     try{
         const response = await fetch(requestOptions);
-        console.log(response)
+        //console.log(response)
         const data: siteResponse[] = await response.json();
-        const mdFiles = data
-            .filter(item => item.name.endsWith(".md"))
-            .map(item => item.name.replace(/\.md$/, ""));
-        
-        return {success:true, data:mdFiles};
+        let options;
+        if (path === "instrument_maint") {
+            options = data
+                .filter((item: any) => item.type === "dir")
+                .map((item: any) => item.name); 
+        } else {
+            options = data
+                .filter(item => item.name.endsWith(".md"))
+                .map(item => item.name.replace(/\.md$/, ""));
+        }
+        return {success:true, data:options};
     }
     catch(error)
     {

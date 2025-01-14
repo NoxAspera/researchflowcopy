@@ -40,8 +40,10 @@ export default function SelectSite({navigation}: NavigationType) {
           names = await getDirectory("site_notes");
         } else if (from === 'BadData') {
           names = await getBadDataSites();
+        } else if (from === 'InstrumentMaintenance') {
+          names = await getDirectory("instrument_maint")
         }
-        if(names)
+        if(names?.success)
         {
           setSiteNames(names.data);
         } // Set the fetched site names
@@ -58,7 +60,7 @@ export default function SelectSite({navigation}: NavigationType) {
   // data for buttons
   let buttonData = [];
 
-  if (from == 'AddNotes' || from == 'ViewNotes' || from == 'BadData') {
+  if (from == 'AddNotes' || from == 'ViewNotes' || from == 'BadData' || from == 'InstrumentMaintenance') {
     if (siteNames) {
       for (let i = 0; i < siteNames.length; i++) {
         buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});

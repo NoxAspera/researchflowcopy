@@ -7,13 +7,14 @@
  * it, and send it to the github repo.
  */
 import { StyleSheet } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { ApplicationProvider, Button, IndexPath, Layout, Select, SelectItem, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import { NavigationType, routeProp } from './types'
+import { getDirectory } from '../scripts/APIRequests';
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
@@ -23,10 +24,29 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     const [nameValue, setNameValue] = useState("");
     const [dateValue, setDateValue] = useState("");
     const [notesValue, setNotesValue] = useState("");
+    const [instruments, setInstruments] = useState<string[]>([]);
+    const [instrument, setInstrument] = useState("");
 
     // Use IndexPath for selected index for drop down menu
     const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
-    const instruments = ['Instrument 1', 'Instrument 2', 'Instrument 3']
+
+    useEffect(() => {
+          const fetchBadDataFiles = async () => {
+            try {
+              const response = await getDirectory(`instrument_maint/${site}`);
+              if (response.success) {
+                setInstruments(response.data || []); // Set the file names as options
+              } else {
+                alert(`Error fetching files: ${response.error}`);
+              }
+            } catch (error) {
+              console.error("Error fetching bad data files:", error);
+            }
+          };
+      
+          fetchBadDataFiles();
+        }, [site]);
+    //const instruments = ['Instrument 1', 'Instrument 2', 'Instrument 3']
 
     return (
       <ApplicationProvider {...eva} theme={customTheme}>
@@ -45,9 +65,9 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
             value={instruments[selectedIndex.row]}
             style={{ margin: 15, flex: 1 }}
           >
-            <SelectItem title="Instrument 1" />
-            <SelectItem title="Instrument 2" />
-            <SelectItem title="Instrument 3" />
+            {instruments.map((file, index) => (
+                <SelectItem key={index} title={file} />
+            ))}
           </Select>
 
           {/* text inputs */}
