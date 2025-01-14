@@ -19,6 +19,13 @@ export function setGithubToken(token: string) {
     githubToken = token;
 }
 
+
+export async function gitCallback()
+{
+    
+
+}
+
 /**
  * @author August O'Rourke
  *  This method gets a list of sites from the CS_4000_mock_docs repository

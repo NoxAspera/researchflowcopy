@@ -1,5 +1,6 @@
 {
   "expo": {
+    "newArchEnabled": true,
     "name": "ResearchFlow",
     "slug": "ResearchFlow",
     "version": "1.0.0",

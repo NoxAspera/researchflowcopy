@@ -7,8 +7,8 @@
  * and does not check if the credentials are valid. This will be fixed in
  * a later update.
  */
-import { StyleSheet } from 'react-native';
-import React, { useState } from 'react';
+import { StyleSheet, Linking } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { ApplicationProvider, Button, Layout, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
@@ -16,80 +16,19 @@ import TextInput from './TextInput'
 import { customTheme } from './CustomTheme'
 import PopupProp from './Popup';
 import { setGithubToken } from '../scripts/APIRequests';
+import * as WebBrowser from 'expo-web-browser'
 import { NavigationType } from './types'
+import * as auth from 'react-native-app-auth'
+
 
 export default function Login({ navigation }: NavigationType) {
-    const route = useRoute();
-
-    // will set the no email/password notification to visible
-    const [visible, setVisible] = useState(false);
-
-    // helper method that will make sure the user has entered credentials
-    function checkTextEntry() {
-        // used for testing purposes only
-        if (emailValue == "admin" && passwordValue == "1234"){ 
-            navigation.navigate('Home')
-        }
-        else if (emailValue != "" && passwordValue != "") {
-            setGithubToken(passwordValue)
-            navigation.navigate('Home')
-        }
-        else {
-          setVisible(true)
-        }
+  const authData = await pb.collection('users').authWithOAuth2({
+    provider: 'github',
+    urlCallback: async () => {
+        // open the Google sign-in url in the default browser
+        await Linking.openURL("https://github.com/Mostlie/CS_4000_mock_docs/c");
     }
-
-    // used for setting and remembering the input values
-    const [emailValue, setEmailValue] = useState("");
-    const [passwordValue, setPasswordValue] = useState("");
-
-    return (
-      <ApplicationProvider {...eva} theme={customTheme}>
-        <Layout style={styles.container} level='1'>
-
-          {/* header */}
-          <Layout style={styles.loginText}>
-            <Text category='h1' style={{textAlign: 'center'}}>Hello</Text>
-            <Text category='s1' style={{textAlign: 'center'}}>Sign in using your GitHub credentials</Text>
-          </Layout>
-
-          {/* popup if user has missing credentials */}
-          <PopupProp popupText='Missing Login Credentials' 
-            popupColor={customTheme['color-danger-700']} 
-            onPress={setVisible} 
-            visible={visible}/>
-
-          {/* text inputs */}
-          <Layout style={styles.textInputContainer}>
-            
-            {/* Email input */}
-            <TextInput 
-                labelValue={emailValue} 
-                onTextChange={setEmailValue} 
-                placeholder='Email' 
-                style={styles.textInput}/>
-
-            {/* Password input */}
-            <TextInput 
-                labelValue={passwordValue} 
-                onTextChange={setPasswordValue} 
-                placeholder='Password' 
-                style={styles.textInput} 
-                secureEntry={true}/>
-            
-            {/* Sign in button */}
-            <Button
-                onPress={checkTextEntry}
-                appearance='filled'
-                status='primary'
-                style={{margin: 15}}>
-                SIGN IN
-            </Button>
-          </Layout>
-        </Layout>
-      </ApplicationProvider>
-    );
-  }
+}
 
   const styles = StyleSheet.create({
     container: {
