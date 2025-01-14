@@ -48,15 +48,5 @@
     "ts-jest": "^29.2.5",
     "typescript": "~5.3.3"
   },
-  "jest": {
-    "preset": "jest-expo",
-    "transform": {
-      "^.+\\.[jt]sx?$": "babel-jest"
-    },
-    "transformIgnorePatterns": [
-      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|@ui-kitten/.*|@react-native/js-polyfills/.*)"
-    ],
-    "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"]
-  },
   "private": true
 }

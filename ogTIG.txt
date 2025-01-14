@@ -3,3 +3,35 @@ node_modules/(?!(?:.pnpm/)?((jest-)?react-native|@react-native(-community)?|expo
 node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|@ui-kitten/.*|@react-native/js-polyfills/.*)
 
 node_modules/(?!(?:.pnpm/)?((jest-)?react-native|@ui-kitten/.*|@react-native/js-polyfills/.*))
+
+node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|@ui-kitten/.*|@react-native/js-polyfills/.*)
+
+node_modules/(?!(?:.pnpm/)?((jest-)?react-native||@react-native(-community)?||expo(nent)?||@expo(nent)?/.*||@expo-google-fonts/.*||react-navigation|@react-navigation/.*||@sentry/react-native||native-base||react-native-svg||@ui-kitten/.*||@react-native/js-polyfills/.*))
+
+
+{
+  "extends": "./node_modules/expo/tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react",
+    "strict": true
+  }
+}
+
+      "^.+\\.tsx?$": "ts-jest",
+
+
+"jest": {
+    "preset": "jest-expo",
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest", 
+      "^.+\\.jsx?$": "babel-jest"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!(?:.pnpm/)?((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|@ui-kitten/.*|@react-native/js-polyfills/.*))"
+    ],
+    "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"]
+  },
+
+
+  //working??
+  node_modules/(?!(?:.pnpm/)?(@ui-kitten/.*||@react-native/js-polyfills/.*))
