@@ -1,8 +1,41 @@
 image: reactnativecommunity/react-native-android
 
+variables:
+  ADB_INSTALL_TIMEOUT: 10 # Timeout for ADB installation
+
+before_script:
+  # Install pnpm globally
+  - npm install -g pnpm
+  # Install dependencies
+  - pnpm install
+
 stages:
+  - android
   - build
   - test
+
+android:
+  stage: android
+  tags:
+    - android
+  script:
+    - echo "Setting up Android Emulator..."
+    # Download and install the necessary Android SDK tools and emulator
+    - sdkmanager "system-images;android-30;google_apis;x86_64"
+    - sdkmanager --licenses
+    - sdkmanager "platform-tools" "platforms;android-30"
+    - echo "no" | avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64"
+    # Start the emulator in headless mode
+    - nohup emulator -avd test_avd -no-snapshot -no-audio -no-window &
+    # Wait for the emulator to boot
+    - adb wait-for-device
+    - adb shell input keyevent 82 # Unlock the emulator screen
+    - echo "Emulator is ready!"
+  artifacts:
+    expire_in: 1 day
+    when: on_success
+    paths:
+      - $ANDROID_HOME
 
 build:
   stage: build
@@ -10,8 +43,6 @@ build:
     - android
   script:
     - echo "Building..."
-    - npm install -g pnpm
-    - pnpm install
     - pnpm android
   artifacts:
     expire_in: 1 days
@@ -22,6 +53,7 @@ build:
 test:
   stage: test
   dependencies: 
+    - android
     - build
   script: 
     - echo "Testing..."
