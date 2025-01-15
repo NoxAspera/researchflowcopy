@@ -11,12 +11,16 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import HomeButtonProp from './HomeButtonProp';
 import { NaviProp } from './types';
 import { ApplicationProvider, Layout, Text } from '@ui-kitten/components'
+import { setBadData } from '../scripts/APIRequests';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import React from 'react';
 import { NavigationType } from './types'
+import { setInstrumentFile } from '../scripts/APIRequests';
 
 export default function HomeScreen({ navigation }: NavigationType) {
+  //setInstrumentFile("instrument_maint/LGR_UGGA/LGR-13-0075", "testing", "updating from research flow", false)
+  setInstrumentFile("instrument_maint/Teledyne/T200", "testing", "updating from research flow", false)
   return (
     <ApplicationProvider {...eva} theme={customTheme}>
       <Layout style={styles.container}>
