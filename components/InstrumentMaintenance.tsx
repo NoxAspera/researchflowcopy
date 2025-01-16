@@ -116,7 +116,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
             labelText="Time"
             labelValue={dateValue}
             onTextChange={setDateValue}
-            placeholder="12:00 PM"
+            placeholder="17:00"
             style={styles.textInput}
           />
 
