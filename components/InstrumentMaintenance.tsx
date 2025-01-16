@@ -21,6 +21,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
     let site = route.params?.site;
     let instrumentName = site.slice(site.lastIndexOf("/") + 1);
+    let needsLocation = site.includes("LGR");
 
     // used for setting and remembering the input values
     const [nameValue, setNameValue] = useState("");
@@ -53,17 +54,17 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     }, [site]);
 
     const buildInstrumentNotes = (): string => {
-      let result:string = "---\n"
+      let result:string = `- Time in: ${dateValue}Z\n`;
 
-      result += `- Time in: ${dateValue}Z\n`;
-      result += `- Name: ${nameValue}Z\n`;
-      result += `- Notes: ${notesValue}Z\n`;
+      result += `- Name: ${nameValue}\n`;
+      result += `- Notes: ${notesValue}\n`;
+      result += '---\n'
       
       return result;
     };
     
     const handleSubmit = () => {
-      if (!nameValue || !dateValue || !notesValue) {
+      if (!nameValue || !dateValue || !notesValue || (needsLocation && !siteValue.trim())) {
         setMessage("Please fill out all fields before submitting.");
         setMessageColor(customTheme['color-danger-700']);
         setVisible(true);
@@ -74,7 +75,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
     const handleUpdate = async () => {
       const instrumentNotes = buildInstrumentNotes();
-      const result = await setInstrumentFile(site, instrumentNotes, `Update ${instrumentName}.md`, site.includes("LGR"), siteValue);
+      const result = await setInstrumentFile(site, instrumentNotes, `Update ${instrumentName}.md`, needsLocation, siteValue);
       if (result.success) {
           setMessage("File updated successfully!");
           setMessageColor(customTheme['color-success-700']);
@@ -102,7 +103,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
           {/* text inputs */}
           {/* Time input */}
-          {siteValue && (
+          {needsLocation && (
           <TextInput
             labelText="Location"
             labelValue={siteValue}
