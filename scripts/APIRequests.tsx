@@ -126,7 +126,7 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
             let entries = plainContent.substring(plainContent.indexOf("\n"))
             let headers = plainContent.substring(0, plainContent.indexOf("\n"))
             sha = data.sha
-            newFile = headers + '\n' + entries + '\n' + newEntry
+            newFile = headers + entries + '\n' + newEntry
             newFile = btoa(newFile)
             //console.log(headers);
             //console.log(entries);
@@ -171,6 +171,18 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
     }
 }
 
+export async function getInstrumentSite(path: string) {
+    const pullResponse = (await getFile(path))
+    if(pullResponse.error)
+    {
+        return {success: false, error: pullResponse.error}
+    }
+    const existingContent = atob(pullResponse.data.content)
+    const match = existingContent.match(/Currently at (\w+)/);
+    //return match ? match[1] : null;
+    return { success: true, data: match ? match[1] : null };
+}
+
 /**
  * @author August O'Rourke
  * This appends the string in the content field the contents of a markdown file in the site notes folder from the CS_4000_mock_docs repository, if it exists,
@@ -181,26 +193,26 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
  * @returns the contents of the file as a string
  */
 export async function setInstrumentFile(path: string, content: string, commitMessage: string, mobile:boolean, site?: string) {
-    console.log("here")
+    //console.log("here")
     const pullResponse = (await getFile(path))
     if(pullResponse.error)
     {
         return {success: false, error: pullResponse.error}
     }
-    console.log(pullResponse)
+    //console.log(pullResponse)
     const hash = pullResponse.data.sha
     const existingContent = atob(pullResponse.data.content)
     const maintenanceHeader = `Maintenance Log\n---`
     let staticHeader = existingContent.substring(0,existingContent.indexOf(maintenanceHeader) + maintenanceHeader.length)
     if(mobile && site)
     {
-        let staticHeaderNoLocation  = staticHeader.substring(0, staticHeader.indexOf("---\nCurrently At"))
-        let locationHeader = `---\nCurrently At ${site}\n` + maintenanceHeader
+        let staticHeaderNoLocation  = staticHeader.substring(0, staticHeader.indexOf("---\nCurrently at"))
+        let locationHeader = `---\nCurrently at ${site}\n` + '---\n' + maintenanceHeader
         staticHeader = staticHeaderNoLocation + locationHeader
     }
     const existingNotes = existingContent.substring(existingContent.indexOf(maintenanceHeader) + maintenanceHeader.length) 
-    console.log(existingNotes)
-    console.log(staticHeader)
+    //console.log(existingNotes)
+    //console.log(staticHeader)
     const fullDoc = btoa(staticHeader +"\n" + content + existingNotes)
 
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}.md`;
@@ -222,7 +234,7 @@ export async function setInstrumentFile(path: string, content: string, commitMes
     
     try {
         const response = await fetch(requestOptions);
-        console.log(response)
+        //console.log(response)
         if (response.ok) {
             const data = await response.json();
             return { success: true, data };
@@ -258,13 +270,19 @@ export async function getDirectory(path: string)
     )
     try{
         const response = await fetch(requestOptions);
-        console.log(response)
+        //console.log(response)
         const data: siteResponse[] = await response.json();
-        const mdFiles = data
-            .filter(item => item.name.endsWith(".md"))
-            .map(item => item.name.replace(/\.md$/, ""));
-        
-        return {success:true, data:mdFiles};
+        let options;
+        if (path === "instrument_maint") {
+            options = data
+                .filter((item: any) => item.type === "dir")
+                .map((item: any) => item.name); 
+        } else {
+            options = data
+                .filter(item => item.name.endsWith(".md"))
+                .map(item => item.name.replace(/\.md$/, ""));
+        }
+        return {success:true, data:options};
     }
     catch(error)
     {
