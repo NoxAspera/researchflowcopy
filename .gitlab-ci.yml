@@ -25,8 +25,10 @@ android:
     - sdkmanager --licenses
     - sdkmanager "platform-tools" "platforms;android-30"
     - echo "no" | avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64"
+    - adb kill-server
+    - adb start-server
     # Start the emulator in headless mode
-    - nohup emulator -avd test_avd -no-snapshot -no-audio -no-window -verbose &
+    - nohup emulator -avd test_avd -no-snapshot -no-audio -no-window -no-accel -wipe-data -verbose &
     # Wait for the emulator to boot
     - adb wait-for-device
     - adb shell input keyevent 82 # Unlock the emulator screen
