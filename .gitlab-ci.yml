@@ -26,11 +26,12 @@ android:
     - sdkmanager "platform-tools" "platforms;android-30"
     - echo "no" | avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64"
     # Start the emulator in headless mode
-    - nohup emulator -avd test_avd -no-snapshot -no-audio -no-window &
+    - nohup emulator -avd test_avd -no-snapshot -no-audio -no-window -verbose &
     # Wait for the emulator to boot
     - adb wait-for-device
     - adb shell input keyevent 82 # Unlock the emulator screen
     - echo "Emulator is ready!"
+  timeout: 20m
   artifacts:
     expire_in: 1 day
     when: on_success
