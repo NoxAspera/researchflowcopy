@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
+import * as crypto from 'react-native-crypto';
 import * as WebBrowser from 'expo-web-browser';
 import { makeRedirectUri, useAuthRequest } from 'expo-auth-session';
+import { setGithubToken } from '../scripts/APIRequests';
 import { Button } from 'react-native';
 import React from 'react';
 
@@ -13,9 +15,14 @@ const discovery = {
   revocationEndpoint: 'https://github.com/settings/connections/applications/Iv23liZ9ogrXCPdG093f',
 };
 
+
+
 export default function App() {
+  const state:string  =  crypto.randomBytes(20).toString("utf-8");
+  const newState = state
   const [request, response, promptAsync] = useAuthRequest(
     {
+      state: state,
       clientId: 'Iv23liZ9ogrXCPdG093f',
       scopes: ['identity', 'repo'],
       redirectUri: makeRedirectUri({
@@ -27,7 +34,14 @@ export default function App() {
 
   useEffect(() => {
     if (response?.type === 'success') {
-      const { code } = response.params;
+      console.log(response)
+      console.log(newState)
+      console.log(response.params.state)
+      if(response.params.state === state)
+      {
+        const { code } = response.params;
+        console.log(code)
+      }
     }
   }, [response]);
 
