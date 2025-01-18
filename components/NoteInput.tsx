@@ -12,7 +12,7 @@ import { StyleSheet, ViewStyle } from "react-native";
 
 /**
  * NIProp
- * @author Blake Stambaugh
+ * @author Blake Stambaugh, David Schiwal
  * used to give types to note input parameters
  */
 interface NIProp{
@@ -33,7 +33,7 @@ const AddNotesNoteInput: React.FC<NIProp> = ({ labelText, labelValue, onTextChan
         status={status || 'basic'}
         placeholder={placeholder}
         value={labelValue}
-        multiline={multiplelines ? true : false}
+        multiline={multiplelines ? true : true}
         onChangeText={(arg0) => onTextChange(arg0)}
         style={style}
         secureTextEntry={secureEntry ? true : false}

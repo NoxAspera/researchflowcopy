@@ -22,7 +22,7 @@ export default function HomeScreen({ navigation }: NavigationType) {
     <ApplicationProvider {...eva} theme={customTheme}>
       <Layout style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-              
+            {/*If you add a new navigation point you have to add it in types.ts, and App.tsx*/}
             {/* Add Notes */}
             <HomeButtonProp text='ADD NOTES' color="#AEDD94"
               onPress={() => navigation.navigate('SelectSite', {from: 'AddNotes'})} />
@@ -45,7 +45,7 @@ export default function HomeScreen({ navigation }: NavigationType) {
             
             {/* PLAN A VISIT */}
             <HomeButtonProp text='PLAN A VISIT' color="#FFC581"
-              onPress={() => navigation.navigate('SelectSite', {from: 'TankTracker'})} />
+              onPress={() => navigation.navigate('SelectSite', {from: 'PlanVisit'})} />
 
             </ScrollView>
         </Layout>

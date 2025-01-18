@@ -19,6 +19,7 @@ export type RootStackParamList = {
     BadData: { site: string };
     InstrumentMaintenance: { site: string };
     TankTracker: { site: string };
+    PlanVisit: {site: string}
 
     // used for auth
     Home: undefined;

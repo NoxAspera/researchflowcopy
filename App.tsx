@@ -9,6 +9,7 @@ import BadData from './components/BadData'
 import InstrumentMaintenance from './components/InstrumentMaintenance'
 import TankTracker from './components/TankTracker'
 import Auth from './components/Auth'
+import PlanVisit from './components/PlanVisit';
 
 const Stack = createStackNavigator();
 
@@ -24,6 +25,7 @@ export default function App() {
         <Stack.Screen name="BadData" component={BadData} />
         <Stack.Screen name="InstrumentMaintenance" component={InstrumentMaintenance} />
         <Stack.Screen name="TankTracker" component={TankTracker} />
+        <Stack.Screen name="PlanVisit" component={PlanVisit} />
       </Stack.Navigator>
     </NavigationContainer>
   );

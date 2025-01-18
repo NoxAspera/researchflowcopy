@@ -45,6 +45,9 @@ export default function SelectSite({navigation}: NavigationType) {
     {
       navigation.navigate('TankTracker', {site: selectedSite});
     }
+    else if (from == 'PlanVisit'){
+      navigation.navigate('PlanVisit', {site: selectedSite})
+    }
   };
 
 
