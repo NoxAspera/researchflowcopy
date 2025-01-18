@@ -24,9 +24,15 @@ android:
     - sdkmanager --verbose "system-images;android-30;google_apis;x86_64"
     - sdkmanager --licenses
     - sdkmanager --verbose "platform-tools" "platforms;android-30"
+
+    # create the android virtual device and see that it was made correctly
     - echo "no" | avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64"
+    - if [ $? -ne 0 ]; then echo "Error- Failed to create AVD."; exit 1; fi
+    - avdmanager list avd
+
     # Start the emulator in headless mode
     - nohup emulator -avd test_avd -no-snapshot -no-audio -no-window -verbose > emulator.log 2>&1 &
+
     # Wait for the emulator to boot
     - adb start-server
     - adb wait-for-device || (echo "Emulator failed to start"; exit 1)
