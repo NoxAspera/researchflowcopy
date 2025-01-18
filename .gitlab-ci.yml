@@ -1,4 +1,5 @@
-image: reactnativecommunity/react-native-android
+image: circleci/android:api-30
+  # reactnativecommunity/react-native-android
 
 variables:
   ADB_INSTALL_TIMEOUT: 20 # Timeout for ADB installation
@@ -22,11 +23,11 @@ android:
     - echo "Setting up Android Emulator..."
     # Download and install the necessary Android SDK tools and emulator
     - sdkmanager --verbose "system-images;android-30;google_apis;x86_64"
-    - sdkmanager --verbose --licenses
+    - sdkmanager --licenses
     - sdkmanager --verbose "platform-tools" "platforms;android-30"
     - echo "no" | avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64"
     # Start the emulator in headless mode
-    - nohup emulator -avd test_avd -no-snapshot -no-audio -no-window &
+    - nohup emulator -avd test_avd -no-snapshot -no-audio -no-window -verbose > emulator.log 2>&1 &
     # Wait for the emulator to boot
     - adb wait-for-device
     - adb shell input keyevent 82 # Unlock the emulator screen
@@ -34,9 +35,10 @@ android:
 
   artifacts:
     expire_in: 1 day
-    when: on_success
+    # when: on_success
     paths:
       - $ANDROID_HOME
+      - emulator.log
 
 build:
   stage: build
