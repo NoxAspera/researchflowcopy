@@ -1,5 +1,4 @@
-image: cimg/base:2025.01
-  # reactnativecommunity/react-native-android
+image: reactnativecommunity/react-native-android
 
 variables:
   ADB_INSTALL_TIMEOUT: 20 # Timeout for ADB installation
