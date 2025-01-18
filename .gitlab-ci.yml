@@ -2,6 +2,8 @@ image: reactnativecommunity/react-native-android
 
 variables:
   ADB_INSTALL_TIMEOUT: 20 # Timeout for ADB installation
+  ANDROID_HOME: /opt/android-sdk
+  PATH: $ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH
 
 before_script:
   # Install pnpm globally
