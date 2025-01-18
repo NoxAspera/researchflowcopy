@@ -20,8 +20,9 @@ android:
     - android
   script:
     - echo "Setting up Android Emulator..."
+    - rm -rf $ANDROID_HOME/*
     # Download and install the necessary Android SDK tools and emulator
-    - sdkmanager "system-images;android-30;google_apis;x86_64"
+    - sdkmanager --verbose "system-images;android-30;google_apis;x86_64"
     - yes | sdkmanager --licenses
     - sdkmanager "platform-tools" "platforms;android-30"
     - echo "no" | avdmanager create avd -n test_avd -k "system-images;android-30;google_apis;x86_64"
