@@ -1,4 +1,4 @@
-image: circleci/android:api-30
+image: cimg/base
   # reactnativecommunity/react-native-android
 
 variables:
