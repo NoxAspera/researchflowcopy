@@ -34,16 +34,16 @@ android:
 
     # Start the emulator in headless mode
     - nohup emulator -avd test_avd -no-snapshot -no-accel -no-audio -no-window -verbose > emulator.log 2>&1 &
+    - tail -f emulator.log &
 
     # Wait for the emulator to boot
     - adb start-server
     - adb wait-for-device || (echo "Emulator failed to start"; exit 1)
     - adb shell input keyevent 82 # Unlock the emulator screen
     - echo "Emulator is ready!"
-
   artifacts:
     expire_in: 1 day
-    # when: on_success
+    when: always
     paths:
       - $ANDROID_HOME
       - emulator.log
