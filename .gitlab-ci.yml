@@ -9,7 +9,7 @@ before_script:
   # Install dependencies
   - pnpm install
   - sdkmanager --update
-  - apt-get update && apt-get install -y libc6 libstdc++6 libgcc1 libx11-6 libx11-xcb1 libxrender1 libxrandr2 mesa-utils libpulse0
+  - apt-get update && apt-get install -y libc6 libstdc++6 libgcc1 libx11-6 libx11-xcb1 libxrender1 libxrandr2 mesa-utils libpulse0 libxi6
   - apt-get install -y xvfb
 
 stages:
