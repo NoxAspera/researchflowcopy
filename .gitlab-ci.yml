@@ -10,6 +10,7 @@ before_script:
   - pnpm install
   - sdkmanager --update
   - apt-get update && apt-get install -y libc6 libstdc++6 libgcc1 libx11-6 libx11-xcb1 libxrender1 libxrandr2 mesa-utils
+  - apt-get install -y xvfb
 
 stages:
   - android
@@ -33,6 +34,8 @@ android:
     - avdmanager list avd
 
     # Start the emulator in headless mode
+    - Xvfb :1 &
+    - export DISPLAY=:1
     - nohup emulator -avd test_avd -no-snapshot -no-accel -no-audio -no-window -verbose > emulator.log 2>&1 &
     - tail -f emulator.log &
 
