@@ -1,7 +1,7 @@
 /**
  * Select Site Page
  * @author Blake Stambaugh and Megan Ostlie
- * Updated: 1/10/24
+ * Updated: 1/14/25 - MO
  * 
  * This page is the lets the user select the site they are currently at. When they
  * choose an action on the home page, they will be directed to this screen to determine
@@ -9,7 +9,7 @@
  * and all info for that site will be given.
  */
 import { StyleSheet } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ApplicationProvider, Layout, Button, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
@@ -40,8 +40,10 @@ export default function SelectSite({navigation}: NavigationType) {
           names = await getDirectory("site_notes");
         } else if (from === 'BadData') {
           names = await getBadDataSites();
+        } else if (from === 'InstrumentMaintenance') {
+          names = await getDirectory("instrument_maint")
         }
-        if(names)
+        if(names?.success)
         {
           setSiteNames(names.data);
         } // Set the fetched site names
@@ -58,7 +60,7 @@ export default function SelectSite({navigation}: NavigationType) {
   // data for buttons
   let buttonData = [];
 
-  if (from == 'AddNotes' || from == 'ViewNotes' || from == 'BadData') {
+  if (from == 'AddNotes' || from == 'ViewNotes' || from == 'BadData' || from == 'InstrumentMaintenance') {
     if (siteNames) {
       for (let i = 0; i < siteNames.length; i++) {
         buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});
@@ -91,7 +93,7 @@ export default function SelectSite({navigation}: NavigationType) {
     }
     else if (from === 'InstrumentMaintenance')
     {
-      navigation.navigate('InstrumentMaintenance', {site: selectedSite});
+      navigation.navigate('SelectInstrument', {from: selectedSite});
     }
     else if (from === 'TankTracker')
     {

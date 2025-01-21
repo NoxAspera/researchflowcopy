@@ -1,7 +1,7 @@
 /**
  * Types.ts
  * @author Blake Stambaugh
- * 12/5/24
+ * Updated: 1/14/25 - MO
  * 
  * Helper that will contain more complicated types, like those for navigation.
  */
@@ -12,6 +12,7 @@ import { RouteProp } from '@react-navigation/native';
 export type RootStackParamList = {
     // used for home screen
     SelectSite: { from: string }; 
+    SelectInstrument: { from: string};
 
     // used for site select
     AddNotes: { site: string };
