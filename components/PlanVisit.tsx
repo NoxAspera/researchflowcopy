@@ -3,34 +3,31 @@
  * @author Blake Stambaugh and David Schiwal
  * 12/5/24
  * 
- * This page is responsible for tracking tank statuses. Will look at previous
- * data and determine when it will most likely run out and need replacement.
+ * This page is responsible for planning visits.
  */
 import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
-import { ApplicationProvider, Button, IndexPath, Layout, Select, SelectItem, Text } from '@ui-kitten/components';
+import { ApplicationProvider, Button, IndexPath, Layout, Datepicker, Select, SelectItem, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import TextInput from './TextInput'
 import { customTheme } from './CustomTheme'
 import { NavigationType, routeProp } from './types'
 import { ScrollView } from 'react-native-gesture-handler';
 
-export default function TankTracker({ navigation }: NavigationType) {
+export default function PlanVisit({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
     let site = route.params?.site;
 
     // used for setting and remembering the input values
     const [nameValue, setNameValue] = useState("");
-    const [dateValue, setDateValue] = useState("");
-    const [PSIValue, setPSIValue] = useState("");
-    const [CO2Value, setCO2Value] = useState("");
-    const [CH4Value, setCH4Value] = useState("");
+    const [dateValue, setDateValue] = useState<Date | null>(null);
     const [notesValue, setNotesValue] = useState("");
+    
 
     // Use IndexPath for selected index for drop down menu
     const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
-    const tanks = ['Tank 1', 'Tank 2', 'Tank 3']
+    const instruments = ['Instrument 1', 'Instrument 2', 'Instrument 3']
 
     return (
       <KeyboardAvoidingView
@@ -45,28 +42,16 @@ export default function TankTracker({ navigation }: NavigationType) {
                 {site}
               </Text>
 
-              {/* drop down menu for tanks */}
-              <Select
-                label={evaProps => <Text {...evaProps} category="c1" style={{color: "white"}}>Tanks</Text>}
-                selectedIndex={selectedIndex}
-                onSelect={(index) => setSelectedIndex(index as IndexPath)}
-                value={tanks[selectedIndex.row]}
-                style={{ margin: 8, flex: 1 }}
-              >
-                <SelectItem title="Tank 1" />
-                <SelectItem title="Tank 2" />
-                <SelectItem title="Tank 3" />
-              </Select>
+              {/* start date input */}
+              <Datepicker
+                label='Visit Date'
+                date={dateValue}
+                onSelect={(date) => setDateValue(date as Date)}
+                min={new Date(1900, 0, 1)}
+                max={new Date(2500, 12, 31)}
+                placeholder="Visit Date"
+                style={styles.textInput}/>
 
-              {/* text inputs */}
-              {/* Time input */}
-              <TextInput
-                labelText="Time"
-                labelValue={dateValue}
-                onTextChange={setDateValue}
-                placeholder="12:00 PM"
-                style={styles.textInput}
-              />
 
               {/* Name input */}
               <TextInput
@@ -76,45 +61,21 @@ export default function TankTracker({ navigation }: NavigationType) {
                 placeholder="Jane Doe"
                 style={styles.textInput}
               />
-
-              {/* tank measurements */}
-              <Text category="h3" style={{ textAlign: "center", paddingTop: 25 }}>
-                Tank Measurements
-              </Text>
-
-              {/* PSI input */}
+              {/* list of items entry */}
               <TextInput
-                labelText="PSI"
-                labelValue={PSIValue}
-                onTextChange={setPSIValue}
-                placeholder="100"
-                style={styles.textInput}
-              />
-
-              {/* C02 entry */}
-              <TextInput
-                labelText="CO2"
-                labelValue={CO2Value}
-                onTextChange={setCO2Value}
-                placeholder="100"
-                style={styles.textInput}
-              />
-
-              {/* CH4 entry */}
-              <TextInput
-                labelText="CH4"
-                labelValue={CH4Value}
-                onTextChange={setCH4Value}
-                placeholder="100"
-                style={styles.textInput}
+                labelText="Items to bring"
+                labelValue={notesValue}
+                onTextChange={setNotesValue}
+                placeholder="Instrument 1"
+                style={styles.reasonText}
               />
 
               {/* notes entry */}
               <TextInput
-                labelText="Notes"
+                labelText="Additional Notes"
                 labelValue={notesValue}
                 onTextChange={setNotesValue}
-                placeholder="Tank draining at normal rate."
+                placeholder="Make sure to download previous site docs"
                 style={styles.reasonText}
               />
 

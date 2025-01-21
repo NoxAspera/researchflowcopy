@@ -6,16 +6,18 @@
  * This is the page for instrument maintenance. It will take in the user input, format
  * it, and send it to the github repo.
  */
-import { StyleSheet } from 'react-native';
+import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { ApplicationProvider, Button, IndexPath, Layout, Select, SelectItem, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
+import NoteInput from './NoteInput'
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import { NavigationType, routeProp } from './types'
 import PopupProp from './Popup';
 import { getDirectory, setInstrumentFile, getInstrumentSite } from '../scripts/APIRequests';
+import { ScrollView } from 'react-native-gesture-handler';
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
@@ -87,14 +89,12 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     }
 
     return (
-      <ApplicationProvider {...eva} theme={customTheme}>
-        <Layout style={styles.container} level="1">
-
-          {/* success/failure popup */}
-          <PopupProp popupText={message} 
-            popupColor={messageColor} 
-            onPress={setVisible} 
-            visible={visible}/>
+      <KeyboardAvoidingView
+                        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                        style={styles.container}>
+        <ApplicationProvider {...eva} theme={customTheme}>
+          <ScrollView>
+            <Layout style={styles.container} level="1">
 
           {/* header */}
           <Text category="h1" style={{ textAlign: "center" }}>
@@ -120,36 +120,38 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
             style={styles.textInput}
           />
 
-          {/* Name input */}
-          <TextInput
-            labelText="Name"
-            labelValue={nameValue}
-            onTextChange={setNameValue}
-            placeholder="Jane Doe"
-            style={styles.textInput}
-          />
+              {/* Name input */}
+              <TextInput
+                labelText="Name"
+                labelValue={nameValue}
+                onTextChange={setNameValue}
+                placeholder="Jane Doe"
+                style={styles.textInput}
+              />
 
-          {/* notes entry */}
-          <TextInput
-            labelText="Request"
-            labelValue={notesValue}
-            onTextChange={setNotesValue}
-            placeholder="Giving bad reading."
-            multiplelines={true}
-            style={styles.requestText}
-          />
+              {/* notes entry */}
+              <NoteInput
+                labelText="Request"
+                labelValue={notesValue}
+                onTextChange={setNotesValue}
+                placeholder="Giving bad reading."
+                multiplelines={true}
+                style={styles.requestText}
+              />
 
-          {/* submit button */}
-          <Button
-            onPress={() => handleSubmit()}
-            appearance="filled"
-            status="primary"
-            style={{ margin: 15 }}
-          >
-            Submit
-          </Button>
-        </Layout>
-      </ApplicationProvider>
+              {/* submit button */}
+              <Button
+                onPress={() => handleSubmit()}
+                appearance="filled"
+                status="primary"
+                style={{ margin: 15 }}
+              >
+                Submit
+              </Button>
+            </Layout>
+          </ScrollView>
+        </ApplicationProvider>
+      </KeyboardAvoidingView>
     );
   }
 
@@ -160,7 +162,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
       justifyContent: 'flex-start',
     },
     requestText: {
-      flex: 6,
+      flex: 1,
       margin: 15
     },
     textInput: {

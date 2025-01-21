@@ -82,7 +82,7 @@ export default function ViewNotes({ navigation }: NavigationType) {
               return (
                 <Card>
                   <Text category="h3">{date?.at(0)}</Text>
-                  <Text>{entry}</Text>
+                  <Text category='p1'>{entry}</Text>
                 </Card>
               );
             }

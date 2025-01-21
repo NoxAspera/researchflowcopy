@@ -5,30 +5,38 @@
  * 
  * This property abstracts the buttons on the home page
  */
-import { Layout, Text } from '@ui-kitten/components';
+import { Layout, Text, Button } from '@ui-kitten/components';
 import React from 'react'
-import { StyleSheet, TouchableWithoutFeedback } from "react-native"
+import { StyleSheet, TouchableWithoutFeedback, Dimensions, ColorValue } from "react-native"
+const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
 
 interface HBProp{
     text: string;
+    color: ColorValue;
     onPress: () => void; // may change depending on the function pass in
 }
 
-const HomeButtonProp: React.FC<HBProp> = ({ text, onPress }) => {
+
+const HomeButtonProp: React.FC<HBProp> = ({ text, color, onPress }) => {
     return (
-      <TouchableWithoutFeedback onPress={onPress}>
-        <Layout style={styles.tab} level="2">
-          <Text category="h5">{text}</Text>
-        </Layout>
-      </TouchableWithoutFeedback>
+      <Layout level="2">
+        <Button
+        //makes a stylesheet with styles.tab stylesheet and the new thing you take in
+          style={[styles.tab, { backgroundColor: color}]}
+          status='primary'
+          onPress={onPress}
+        >
+          {evaProps => <Text {...evaProps} category="h5" style={{color: "black"}}>{text}</Text>}
+        </Button>  
+      </Layout>
     );
 };
 
 const styles = StyleSheet.create({
     tab: {
-      width: '90%', // Card width to adjust appearance
-      height: 200,
-      marginVertical: 10,
+      width: width * .9, // Card width to adjust appearance
+      height: height/8.5,
+      marginVertical: height/70,
       padding: 20,
       alignItems: 'center',
       justifyContent: 'center',

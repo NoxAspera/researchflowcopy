@@ -11,7 +11,7 @@
 import { StyleSheet } from 'react-native';
 import React, { Component, useEffect, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { ApplicationProvider, Layout, Button } from '@ui-kitten/components';
+import { ApplicationProvider, Layout, Button, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import PopupProp from './Popup';
@@ -99,6 +99,9 @@ export default function SelectSite({navigation}: NavigationType) {
     {
       navigation.navigate('TankTracker', {site: selectedSite});
     }
+    else if (from == 'PlanVisit'){
+      navigation.navigate('PlanVisit', {site: selectedSite})
+    }
   };
 
   return (
@@ -118,7 +121,8 @@ export default function SelectSite({navigation}: NavigationType) {
             style={styles.button}
             onPress={button.onPress}
           >
-            {button.label}
+          {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>{button.label}</Text>}
+            
           </Button>
         ))}
       </Layout>
@@ -137,5 +141,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     borderRadius: 8,
     alignItems: 'center',
+    backgroundColor: "#06b4e0"
   },
 });
