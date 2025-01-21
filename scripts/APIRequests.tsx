@@ -1,3 +1,4 @@
+import * as variables from "../config"
 /**
  * @author August O'Rourke
  * small interface to wrap the getSites response
@@ -11,19 +12,44 @@ export interface siteResponse
 
 let githubToken: string | null = null;
 
-/**
- * Sets the GitHub token for subsequent API requests.
- * @param token The personal access token from the login screen.
- */
-export function setGithubToken(token: string) {
+
+
+export function setGithubToken(token:string)
+{
     githubToken = token;
 }
 
+/**
+ * generates a GithubToken using the code from the first half of the OAuth response given from the Auth Component
+ * @param token The personal access token from the login screen.
+ */
+export async function generateGithubToken(code: string) {
+    const url = `https://github.com/login/oauth/access_token?client_id=${variables.GITHUB_CLIENT_ID}&client_secret=${variables.GITHUB_CLIENT_SECRET}&code=${code}`;
 
-export async function gitCallback()
-{
-    
+    const headers = new Headers();
+    headers.append("Accept", "application/json");
+    headers.append("Content-Type", "application/json");
 
+    const requestOptions: RequestInfo = new Request(url, 
+        {
+            method: "POST",
+            headers: headers,
+            redirect: "follow"
+        }
+    )
+    try {
+        const response = await fetch(requestOptions);
+
+        if (response.ok) {
+            const data = await response.json();
+            return { success: true, data };
+        } else {
+            const errorData = await response.json();
+            return { success: false, error: errorData.message };
+        }
+    } catch (error) {
+        return { success: false, error: error };
+    }
 }
 
 /**
@@ -63,10 +89,12 @@ async function getFile(siteName: string)
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/site_notes/${siteName}.md`;
 
     const headers = new Headers();
+    headers.append("Authorization", `Bearer ${githubToken}`);
     headers.append("User-Agent", "ResearchFlow");
     headers.append("Accept", "application/vnd.github+json");
-    headers.append("Authorization", `Bearer ${githubToken}`);
     headers.append("X-GitHub-Api-Version", "2022-11-28");
+
+    console.log(githubToken)
 
     const requestOptions: RequestInfo = new Request(url, 
         {
@@ -83,6 +111,7 @@ async function getFile(siteName: string)
             return { success: true, data };
         } else {
             const errorData = await response.json();
+            console.log(errorData)
             return { success: false, error: errorData.message };
         }
     } catch (error) {
@@ -102,6 +131,7 @@ export async function getFileContents(siteName: string)
 {   
     siteName = siteName.toLowerCase();
     const response = await getFile(siteName)
+    console.log(response)
     if(response.success)
     {
         return {success: true, data: atob(response.data.content)}

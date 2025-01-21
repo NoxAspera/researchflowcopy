@@ -1,10 +1,16 @@
 import { useEffect } from 'react';
-import * as crypto from 'react-native-crypto';
 import * as WebBrowser from 'expo-web-browser';
-import { makeRedirectUri, useAuthRequest } from 'expo-auth-session';
-import { setGithubToken } from '../scripts/APIRequests';
-import { Button } from 'react-native';
+import * as config from "../config"
+import { makeRedirectUri, useAuthRequest, AuthSessionResult} from 'expo-auth-session';
+import { generateGithubToken, setGithubToken } from '../scripts/APIRequests';
+import { StyleSheet, View, TouchableOpacity, ScrollView, TouchableWithoutFeedback, ImageBackground, Image } from 'react-native';
+import { NavigationType} from './types'
+import * as eva from '@eva-design/eva';
+import { customTheme } from './CustomTheme'
 import React from 'react';
+import { ApplicationProvider, Layout, Text } from '@ui-kitten/components'
+import HomeButtonProp from './HomeButtonProp';
+
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -15,16 +21,24 @@ const discovery = {
   revocationEndpoint: 'https://github.com/settings/connections/applications/Iv23liZ9ogrXCPdG093f',
 };
 
+async function handleResponse(response: AuthSessionResult | null)
+{
+  if (response?.type === 'success') {
+    console.log(response)
+      const { code } = response.params;
+      const {token_type, scopes, access_token} = (await generateGithubToken(code)).data
+      console.log(scopes)
+      console.log(token_type)
+      setGithubToken(access_token);
+  }
+}
 
 
-export default function App() {
-  const state:string  =  crypto.randomBytes(20).toString("utf-8");
-  const newState = state
+export default function App({navigation}: NavigationType) {
   const [request, response, promptAsync] = useAuthRequest(
     {
-      state: state,
-      clientId: 'Iv23liZ9ogrXCPdG093f',
-      scopes: ['identity', 'repo'],
+      clientId: config.GITHUB_CLIENT_ID,
+      scopes: ['repo'],
       redirectUri: makeRedirectUri({
         scheme: 'researchflowuofu'
       }),
@@ -33,25 +47,32 @@ export default function App() {
   );
 
   useEffect(() => {
-    if (response?.type === 'success') {
-      console.log(response)
-      console.log(newState)
-      console.log(response.params.state)
-      if(response.params.state === state)
-      {
-        const { code } = response.params;
-        console.log(code)
-      }
-    }
+    handleResponse(response)
   }, [response]);
 
   return (
-    <Button
-      disabled={!request}
-      title="Login"
-      onPress={() => {
-        promptAsync();
-      }}
-    />
+    <ApplicationProvider {...eva} theme={customTheme}>
+      <Layout style={styles.container}>
+        <HomeButtonProp
+          text="Login With Github"
+          onPress={() => {
+            promptAsync();
+            navigation.navigate("Home");
+          }}
+        />
+      </Layout>
+    </ApplicationProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',        // has button fill space horizontally
+    justifyContent: 'space-evenly',
+  },
+  scrollContainer: {
+    paddingVertical: 16,
+    alignItems: 'center', // Center cards horizontally
+  },
+});
