@@ -46,8 +46,8 @@ android:
     - avdmanager list avd
 
     # Start the emulator in headless mode
-    # - Xvfb :1 &
-    # - export DISPLAY=:1
+    - Xvfb :1 &
+    - export DISPLAY=:1
     - emulator -avd test_avd -no-snapshot -no-accel -no-audio -verbose > emulator.log 2>&1 &
     - tail -f emulator.log &
 
