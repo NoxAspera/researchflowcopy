@@ -5,11 +5,11 @@ variables:
   ADB_INSTALL_TIMEOUT: 20 # Timeout for ADB installation
 
   before_script:
-    # get necessary libraries
-  - apt-get update && apt-get install -y curl sudo wget unzip bzip2 libdrm-deb libxkbcommon-deb libgbm-dev libasound-dev libnss3 libxcursorl libpulse-deb libxshmfence-dev xauth xvfb git x11vnc fluxbox wmctrl libdbus-glib-1-2
+  # get necessary libraries
+  - sudo apt-get update && apt-get install -y curl sudo wget unzip bzip2 libdrm-deb libxkbcommon-deb libgbm-dev libasound-dev libnss3 libxcursorl libpulse-deb libxshmfence-dev xauth xvfb git x11vnc fluxbox wmctrl libdbus-glib-1-2
   # install nodejs and npm
-  - apt install nodejs
-  - apt install npm
+  - sudo apt install nodejs
+  - sudo apt install npm
   # Install pnpm globally
   - npm install -g pnpm
   # Install dependencies
