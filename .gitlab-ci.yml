@@ -53,7 +53,7 @@ android:
 
     # Wait for the emulator to boot
     # - adb start-server
-    - abd devices
+    - adb devices
     - adb wait-for-device 
     # || (echo "Emulator failed to start"; exit 1)
     - adb shell input keyevent 82 # Unlock the emulator screen
