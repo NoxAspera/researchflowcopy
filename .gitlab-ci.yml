@@ -8,9 +8,15 @@ before_script:
   # install updates and get necessary libraries
   - apt-get update && apt-get install -y curl sudo wget unzip bzip2 libdrm-dev libxkbcommon-dev libgbm-dev libasound-dev libnss3 libxcursor1 libpulse-dev libxshmfence-dev xauth xvfb git x11vnc fluxbox wmctrl libdbus-glib-1-2
   # Install Node.js and npm
-  - curl -fsSL https://deb.nodesource.com/setup_current.x | sudo -E bash -
-  - apt-get install -y nodejs
-  - apt-get install -y npm
+  # Download and install nvm:
+  - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+  # Download and install Node.js:
+  - nvm install 23
+  # Verify the Node.js version:
+  - node -v # Should print "v23.6.1".
+  - nvm current # Should print "v23.6.1".
+  # Verify npm version:
+  - npm -v # Should print "10.9.2".
   # Install pnpm globally
   - npm install -g pnpm
   # Install dependencies
