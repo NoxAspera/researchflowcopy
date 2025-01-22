@@ -4,14 +4,17 @@ image: openjdk:18-jdk-slim
 variables:
   ADB_INSTALL_TIMEOUT: 20 # Timeout for ADB installation
 
-before_script:
+  before_script:
+    # get necessary libraries
+  - apt-get update && apt-get install -y curl sudo wget unzip bzip2 libdrm-deb libxkbcommon-deb libgbm-dev libasound-dev libnss3 libxcursorl libpulse-deb libxshmfence-dev xauth xvfb git x11vnc fluxbox wmctrl libdbus-glib-1-2
+  # install nodejs and npm
+  - apt install nodejs
+  - apt install npm
   # Install pnpm globally
   - npm install -g pnpm
   # Install dependencies
   - pnpm install
   - sdkmanager --update
-  # get necessary libraries
-  - apt-get update && apt-get install -y curl sudo wget unzip bzip2 libdrm-deb libxkbcommon-deb libgbm-dev libasound-dev libnss3 libxcursorl libpulse-deb libxshmfence-dev xauth xvfb git x11vnc fluxbox wmctrl libdbus-glib-1-2
   # libc6 libstdc++6 libgcc1 libx11-6 libx11-xcb1 libxrender1 libxrandr2 mesa-utils libpulse0 libxi6
 
 stages:
@@ -27,7 +30,7 @@ android:
     - echo "Setting up Android Emulator..."
     # Download and install the necessary Android SDK tools and emulator
     - sdkmanager --verbose "platform-tools" "platforms;android-30" "emulator" "system-images;android-30;google_apis;x86_64"
-    - sdkmanager --licenses
+    - echo "yes" | sdkmanager --licenses
     # - sdkmanager --verbose "platform-tools" "platforms;android-30"
 
     # create the android virtual device and see that it was made correctly
