@@ -23,6 +23,9 @@ const rootStack: RootStackParamList = {
   TankTracker: {
     site: ''
   },
+  SelectInstrument:{
+    from: ''
+  },
   Home: undefined
 }
 
