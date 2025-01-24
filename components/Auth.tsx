@@ -35,6 +35,7 @@ async function handleResponse(response: AuthSessionResult | null)
 
 
 export default function App({navigation}: NavigationType) {
+  console.log(makeRedirectUri({scheme: 'researchflowuofu'}))
   const [request, response, promptAsync] = useAuthRequest(
     {
       clientId: config.GITHUB_CLIENT_ID,

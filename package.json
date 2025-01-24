@@ -2,7 +2,9 @@
   "name": "researchflow",
   "version": "1.0.0",
   "main": "expo/AppEntry.js",
-  "scripts": {
+  "expo-modules-autolinking": "",
+    "scripts": {
+    "eas-build-pre-install": "echo node-linker=holisted >> ../../.nprmc",
     "preinstall": "npx only-allow pnpm",
     "start": "expo start",
     "android": "expo run:android",
