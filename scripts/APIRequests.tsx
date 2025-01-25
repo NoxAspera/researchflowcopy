@@ -1,5 +1,4 @@
 import csv from 'csvtojson';
-import {jsonToCSV} from 'react-native-csv'
 
 /**
  * @author August O'Rourke
@@ -10,6 +9,25 @@ export interface siteResponse
     download_url: string
     git_url: string
     name: string
+}
+/**
+ * @author August O'Rourke
+ * This method turns an array of tankRecords into a csv string
+ * @param object -an array of TankRecord Objects
+ * @returns a csv-ifyed string
+ */
+function csvify( object: TankRecord[])
+{
+    let returnString = "fillId,serial,updatedAt,pressure,location,owner,co2,co2Stdev,co2Sterr,co2N,ch4,ch4Stdev,ch4Sterr,ch4N,co,coStdev,coSterr,coN,d13c,d13cStdev,d13cSterr,d13cN,d18o,d18oStdev,d18oSterr,d18oN,co2RelativeTo,comment,userId,co2InstrumentId,ch4InstrumentId,coInstrumentId,ottoCalibrationFile,co2CalibrationFile,ch4RelativeTo,ch4CalibrationFile,coRelativeTo,coCalibrationFile,tankId\n"
+    object.forEach(value => 
+        { 
+            //i really don't like this but i don't know how else to do it, this sucks
+            let newLine = `${value.fillId},${value.serial},${value.updatedAt},${value.pressure},${value.location},${value.owner},${value.co2},${value.co2Stdev},${value.co2Sterr},${value.co2N},${value.ch4},${value.ch4Stdev},${value.ch4Sterr},${value.ch4N},${value.co},${value.coStdev},${value.coSterr},${value.coN},${value.d13c},${value.d13cStdev},${value.d13cSterr},${value.d13cN},${value.d18o},${value.d18oStdev},${value.d18oSterr},${value.d18oN},${value.co2RelativeTo},${value.comment},${value.userId},${value.co2InstrumentId},${value.ch4InstrumentId},${value.coInstrumentId},${value.ottoCalibrationFile},${value.co2CalibrationFile},${value.ch4RelativeTo},${value.ch4CalibrationFile},${value.coRelativeTo},${value.coCalibrationFile},${value.coCalibrationFile},${value.tankId}\n`
+            returnString += newLine.replaceAll("undefined", "")
+            console.log("finished loop")
+        })
+
+    return returnString
 }
 /**
  * This interface is taken from this public repository https://github.com/benfasoli/tank-tracker,
@@ -68,7 +86,12 @@ let tankTrackerSha = ""
 export function setGithubToken(token: string) {
     githubToken = token;
 }
-
+/**
+ * This method updates the tank tracker csv on the repo
+ * @author August O'Rourke
+ * @param newEntry the new entry to be added to the tank tracker csv
+ * @returns a resopnse containing whether or not adding was successful, and the response data
+ */
 export async function setTankTracker(newEntry: TankRecord)
 {
     let temp = Array.from(tankDict.values())
@@ -81,9 +104,8 @@ export async function setTankTracker(newEntry: TankRecord)
         })
     }
     )
-
-    let newContent = jsonToCSV(plainfullDoc)
-
+    console.log(plainfullDoc)
+    let newContent = csvify(plainfullDoc)
     const fullDoc = btoa(newContent)
 
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
@@ -105,7 +127,7 @@ export async function setTankTracker(newEntry: TankRecord)
     
     try {
         const response = await fetch(requestOptions);
-        //console.log(response)
+        console.log(response)
         if (response.ok) {
             const data = await response.json();
             return { success: true, data };
@@ -117,20 +139,34 @@ export async function setTankTracker(newEntry: TankRecord)
         return { success: false, error: error };
     }
 }
-
+/**
+ * This method returns a list of Tank Entries for a specific tank 
+ * @author August O'Rourke
+ * @param key - the tank we are trying to get a list for
+ * @returns an array of Tank Record Objects
+ */
 export function getTankEntries(key:string)
 {
     console.log(tankDict.get(key))
     return tankDict.get(key)
 }
 
+/**
+ * This method returns a list of TankId's in the csv 
+ * @author August O'Rourke
+ * @returns a string list of all the unique tank ID's in the csv
+ */
 export function getTankList()
 {   
     let id_array = []
     console.log(Array.from(tankDict.keys()))
     return Array.from(tankDict.keys())
 }
-
+/**
+ * This method prepares the code to run other various methods relating to the tank tracker, it needs to be called during the main menu, after authorization has already occured
+ * 
+ * @returns a success response, it probably isn't needed though 
+ */
 export async function tankTrackerSpinUp()
 {
     tankDict= new Map()

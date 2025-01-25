@@ -56,24 +56,15 @@ importers:
       octokit:
         specifier: ^4.0.2
         version: 4.0.2
-      papaparse:
-        specifier: ^5.5.1
-        version: 5.5.1
       react:
         specifier: 18.3.1
         version: 18.3.1
       react-native:
         specifier: 0.76.3
         version: 0.76.3(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@13.6.9)(@types/react@18.3.16)(react@18.3.1)
-      react-native-csv:
-        specifier: ^0.2.0
-        version: 0.2.0(react-native@0.76.3(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@13.6.9)(@types/react@18.3.16)(react@18.3.1))(react@18.3.1)
       react-native-gesture-handler:
         specifier: ~2.20.2
         version: 2.20.2(react-native@0.76.3(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@13.6.9)(@types/react@18.3.16)(react@18.3.1))(react@18.3.1)
-      react-native-papaparse:
-        specifier: ^0.0.0
-        version: 0.0.0
       react-native-reanimated:
         specifier: ~3.16.1
         version: 3.16.5(@babel/core@7.26.0)(react-native@0.76.3(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@13.6.9)(@types/react@18.3.16)(react@18.3.1))(react@18.3.1)
@@ -3243,9 +3234,6 @@ packages:
   pako@1.0.11:
     resolution: {integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==}
 
-  papaparse@5.5.1:
-    resolution: {integrity: sha512-EuEKUhyxrHVozD7g3/ztsJn6qaKse8RPfR6buNB2dMJvdtXNhcw8jccVi/LxNEY3HVrV6GO6Z4OoeCG9Iy9wpA==}
-
   parse-asn1@5.1.7:
     resolution: {integrity: sha512-CTM5kuWR3sx9IFamcl5ErfPl6ea/N8IYwiJ+vpeB2g+1iknv7zBl5uPwbMbRVznRVbrNY6lGuDoE5b30grmbqg==}
     engines: {node: '>= 0.10'}
@@ -3454,20 +3442,11 @@ packages:
     peerDependencies:
       react-native-randombytes: '>=2.0.0 <4.0.0'
 
-  react-native-csv@0.2.0:
-    resolution: {integrity: sha512-4KJ6l5trEd/g5sAZe29QZdbFdANw0dASO3l5f7YRY+TM82HI3ysh122zE39QhT0Q/6KT0cJhKCdZZ7+ocSzBag==}
-    peerDependencies:
-      react: '*'
-      react-native: '*'
-
   react-native-gesture-handler@2.20.2:
     resolution: {integrity: sha512-HqzFpFczV4qCnwKlvSAvpzEXisL+Z9fsR08YV5LfJDkzuArMhBu2sOoSPUF/K62PCoAb+ObGlTC83TKHfUd0vg==}
     peerDependencies:
       react: '*'
       react-native: '*'
-
-  react-native-papaparse@0.0.0:
-    resolution: {integrity: sha512-144Mju0DHCCjnb/c4fkQZhwdQkVdI3vPibFOZRYTZkWpLPW8DCovrm6mOmZXleyg8rm/S19TJhf/+CMDMS13eg==}
 
   react-native-randombytes@3.6.1:
     resolution: {integrity: sha512-qxkwMbOZ0Hff1V7VqpaWrR6ItkA+oF6bnI79Qp9F3Tk8WBsdKDi6m1mi3dEdFWePoRLrhJ2L03rU0yabst1tVw==}
@@ -8218,8 +8197,6 @@ snapshots:
 
   pako@1.0.11: {}
 
-  papaparse@5.5.1: {}
-
   parse-asn1@5.1.7:
     dependencies:
       asn1.js: 4.10.1
@@ -8439,13 +8416,6 @@ snapshots:
       randomfill: 1.0.4
       react-native-randombytes: 3.6.1
 
-  react-native-csv@0.2.0(react-native@0.76.3(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@13.6.9)(@types/react@18.3.16)(react@18.3.1))(react@18.3.1):
-    dependencies:
-      '@types/papaparse': 5.3.15
-      papaparse: 5.5.1
-      react: 18.3.1
-      react-native: 0.76.3(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@13.6.9)(@types/react@18.3.16)(react@18.3.1)
-
   react-native-gesture-handler@2.20.2(react-native@0.76.3(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@13.6.9)(@types/react@18.3.16)(react@18.3.1))(react@18.3.1):
     dependencies:
       '@egjs/hammerjs': 2.0.17
@@ -8454,8 +8424,6 @@ snapshots:
       prop-types: 15.8.1
       react: 18.3.1
       react-native: 0.76.3(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@13.6.9)(@types/react@18.3.16)(react@18.3.1)
-
-  react-native-papaparse@0.0.0: {}
 
   react-native-randombytes@3.6.1:
     dependencies:
