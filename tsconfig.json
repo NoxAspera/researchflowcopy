@@ -1,7 +1,10 @@
 {
-  "extends": "./node_modules/expo/tsconfig.base.json",
   "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
     "jsx": "react",
-    "strict": true
-  }
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+  },
+  "extends": "expo/tsconfig.base"
 }
