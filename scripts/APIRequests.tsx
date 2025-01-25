@@ -1,3 +1,6 @@
+import csv from 'csvtojson';
+import {jsonToCSV} from 'react-native-csv'
+
 /**
  * @author August O'Rourke
  * small interface to wrap the getSites response
@@ -8,15 +11,173 @@ export interface siteResponse
     git_url: string
     name: string
 }
+/**
+ * This interface is taken from this public repository https://github.com/benfasoli/tank-tracker,
+*/
+export interface TankRecord {
+    updatedAt: string;
+    serial: string;
+    tankId: string;
+    fillId: string;
+    userId: string;
+    pressure: number;
+    location: string;
+    owner: string;
+    co2?: number;
+    co2Stdev?: number;
+    co2Sterr?: number;
+    co2N?: number;
+    co2RelativeTo?: string;
+    co2CalibrationFile?: string;
+    co2InstrumentId?: string;
+    ch4?: number;
+    ch4Stdev?: number;
+    ch4Sterr?: number;
+    ch4N?: number;
+    ch4RelativeTo?: string;
+    ch4CalibrationFile?: string;
+    ch4InstrumentId?: string;
+    co?: number;
+    coStdev?: number;
+    coSterr?: number;
+    coN?: number;
+    coRelativeTo?: string;
+    coCalibrationFile?: string;
+    coInstrumentId?: string;
+    d13c?: number;
+    d13cStdev?: number;
+    d13cSterr?: number;
+    d13cN?: number;
+    d18o?: number;
+    d18oStdev?: number;
+    d18oSterr?: number;
+    d18oN?: number;
+    ottoCalibrationFile?: string;
+    comment?: string;
+  };
 
 let githubToken: string | null = null;
 
+let tankDict: Map<string, TankRecord[]>;
+
+let tankTrackerSha = ""
 /**
  * Sets the GitHub token for subsequent API requests.
  * @param token The personal access token from the login screen.
  */
 export function setGithubToken(token: string) {
     githubToken = token;
+}
+
+export async function setTankTracker(newEntry: TankRecord)
+{
+    let temp = Array.from(tankDict.values())
+    let plainfullDoc: TankRecord[] = [newEntry]
+    temp.forEach(value =>
+    {
+        value.forEach(value =>
+        {
+            plainfullDoc.push(value)
+        })
+    }
+    )
+
+    let newContent = jsonToCSV(plainfullDoc)
+
+    const fullDoc = btoa(newContent)
+
+    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
+    const bodyString = `{"message":"updating from research flow","content":"${fullDoc}","sha":"${tankTrackerSha}"}`
+    const headers = new Headers();
+    headers.append("User-Agent", "ResearchFlow");
+    headers.append("Accept", "application/vnd.github+json");
+    headers.append("Authorization", `Bearer ${githubToken}`);
+    headers.append("X-GitHub-Api-Version", "2022-11-28");
+
+    const requestOptions: RequestInfo = new Request(url, 
+        {
+            method: "PUT",
+            headers: headers,
+            body: bodyString,
+            redirect: "follow"
+        }
+    )
+    
+    try {
+        const response = await fetch(requestOptions);
+        //console.log(response)
+        if (response.ok) {
+            const data = await response.json();
+            return { success: true, data };
+        } else {
+            const errorData = await response.json();
+            return { success: false, error: errorData.message };
+        }
+    } catch (error) {
+        return { success: false, error: error };
+    }
+}
+
+export function getTankEntries(key:string)
+{
+    console.log(tankDict.get(key))
+    return tankDict.get(key)
+}
+
+export function getTankList()
+{   
+    let id_array = []
+    console.log(Array.from(tankDict.keys()))
+    return Array.from(tankDict.keys())
+}
+
+export async function tankTrackerSpinUp()
+{
+    tankDict= new Map()
+    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
+
+    const headers = new Headers();
+    headers.append("User-Agent", "ResearchFlow");
+    headers.append("Accept", "application/vnd.github+json");
+    headers.append("Authorization", `Bearer ${githubToken}`);
+    headers.append("X-GitHub-Api-Version", "2022-11-28");
+
+    const requestOptions: RequestInfo = new Request(url, 
+        {
+            method: "GET",
+            headers: headers,
+            redirect: "follow"
+        }
+    )
+    try {
+        const response = await fetch(requestOptions);
+        console.log(response)
+        if (response.ok) {
+            const data = await response.json();
+            tankTrackerSha = data.sha
+            let tankData = await csv().fromString(atob(data.content))
+            let id_array: string[] =[]
+            
+            tankData.forEach(value => 
+                {
+                    let temp: TankRecord[] | undefined = []
+                    if(tankDict?.has(value.tankId))
+                    {
+                       temp =  tankDict.get(value.tankId)
+                    } 
+
+                    temp?.push(value)
+                    tankDict?.set(value.tankId, temp ? temp: [])
+                })
+
+            console.log("spin-up complete")
+            return {success: true}
+        } else {
+            return {success: false, status: response.status, message: response.statusText}
+        }
+    } catch (error) {
+        return {sucess: false, error: error}
+    }
 }
 
 export async function getBadDataSites()
