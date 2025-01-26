@@ -12,11 +12,13 @@ import Auth from './components/Auth'
 import SelectInstrument from './components/SelectInstrument';
 import PlanVisit from './components/PlanVisit';
 import { ThemeContext } from './components/theme-context'
-import { ApplicationProvider } from '@ui-kitten/components';
+import { ApplicationProvider, IconRegistry } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
+import { EvaIconsPack } from '@ui-kitten/eva-icons';
 import SelectTank from './components/SelectTank';
 import customColors from './custom-theme.json'
 import { useState } from 'react';
+import SettingsButton from './components/SettingsButton';
 
 const Stack = createStackNavigator();
 type ThemeType = 'light' | 'dark';
@@ -36,20 +38,21 @@ export default function App() {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      <IconRegistry icons={EvaIconsPack} />
       <ApplicationProvider {...eva} theme={currentTheme}>
         <NavigationContainer>
           <Stack.Navigator initialRouteName="Login">
-            <Stack.Screen name="Login" component={Auth} />
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="SelectSite" component={SelectSite} />
-            <Stack.Screen name="AddNotes" component={AddNotes} />
-            <Stack.Screen name="ViewNotes" component={ViewNotes} />
-            <Stack.Screen name="BadData" component={BadData} />
-            <Stack.Screen name="InstrumentMaintenance" component={InstrumentMaintenance} />
-            <Stack.Screen name="TankTracker" component={TankTracker} />
-            <Stack.Screen name="SelectInstrument" component={SelectInstrument} />
-            <Stack.Screen name="PlanVisit" component={PlanVisit} />
-            <Stack.Screen name="SelectTank" component={SelectTank} />
+            <Stack.Screen name="Login" component={Auth} options={{ headerRight: () => <SettingsButton/>}}/>
+            <Stack.Screen name="Home" component={HomeScreen} options={{ headerRight: () => <SettingsButton/>}}/>
+            <Stack.Screen name="SelectSite" component={SelectSite} options={{ headerRight: () => <SettingsButton/>}}/>
+            <Stack.Screen name="AddNotes" component={AddNotes} options={{ headerRight: () => <SettingsButton/>}}/>
+            <Stack.Screen name="ViewNotes" component={ViewNotes} options={{ headerRight: () => <SettingsButton/>}}/>
+            <Stack.Screen name="BadData" component={BadData} options={{ headerRight: () => <SettingsButton/>}}/>
+            <Stack.Screen name="InstrumentMaintenance" component={InstrumentMaintenance} options={{ headerRight: () => <SettingsButton/>}}/>
+            <Stack.Screen name="TankTracker" component={TankTracker} options={{ headerRight: () => <SettingsButton/>}}/>
+            <Stack.Screen name="SelectInstrument" component={SelectInstrument} options={{ headerRight: () => <SettingsButton/>}}/>
+            <Stack.Screen name="PlanVisit" component={PlanVisit} options={{ headerRight: () => <SettingsButton/>}}/>
+            <Stack.Screen name="SelectTank" component={SelectTank} options={{ headerRight: () => <SettingsButton/>}}/>
           </Stack.Navigator>
         </NavigationContainer>
       </ApplicationProvider>

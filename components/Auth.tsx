@@ -16,7 +16,6 @@ import { customTheme } from './CustomTheme'
 import PopupProp from './Popup';
 import { setGithubToken } from '../scripts/APIRequests';
 import { NavigationType } from './types'
-import SettingsPageTest from './SettingsPageTest';
 import { ThemeContext } from './theme-context';
 
 export default function Login({ navigation }: NavigationType) {
@@ -39,7 +38,6 @@ export default function Login({ navigation }: NavigationType) {
             navigation.navigate('Home')
         }
         else {
-          // console.log(theme);
           setVisible(true);
         }
     }
@@ -53,8 +51,6 @@ export default function Login({ navigation }: NavigationType) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
         <Layout style={styles.container} level='1'>
-
-          <SettingsPageTest />
 
           {/* header */}
           <Layout style={isDarkMode ? styles.loginTextDark : styles.loginTextLight}>

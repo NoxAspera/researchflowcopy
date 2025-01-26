@@ -50,8 +50,8 @@ const SettingsPage: React.FC<SettingsPageProp> = ({ visbility, onPress }) => {
       width: '70%',
       position: 'absolute',
       left: '0%',
-      height: '95%',
-      top: '7%',
+      height: '98%',
+      top: '3%',
     },
     card: {
       flex: 1,
