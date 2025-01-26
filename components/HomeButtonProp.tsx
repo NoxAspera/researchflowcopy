@@ -5,7 +5,7 @@
  * 
  * This property abstracts the buttons on the home page
  */
-import { Layout, Text, Button } from '@ui-kitten/components';
+import { Layout, Text, Button, useTheme } from '@ui-kitten/components';
 import React from 'react'
 import { StyleSheet, TouchableWithoutFeedback, Dimensions, ColorValue } from "react-native"
 const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
@@ -18,6 +18,7 @@ interface HBProp{
 
 
 const HomeButtonProp: React.FC<HBProp> = ({ text, color, onPress }) => {
+    const theme = useTheme();
     return (
       <Layout level="2">
         <Button

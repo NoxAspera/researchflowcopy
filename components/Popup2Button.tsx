@@ -7,7 +7,7 @@
  * As of writing this, it is used only for the 'missing data are you sure you want
  * to submit' pop up
  */
-import { Button, Card, Layout, Modal, Text } from '@ui-kitten/components';
+import { Button, Card, Layout, Modal, Text, useTheme } from '@ui-kitten/components';
 import React from 'react'
 import { StyleSheet, ColorValue } from "react-native"
 
@@ -20,6 +20,7 @@ interface PUProp{
 }
 
 const PopupProp2Button: React.FC<PUProp> = ({ popupText, popupColor, visible, sendData, removePopup }) => {
+  const theme = useTheme();
     return (
       <Layout>
         <Modal

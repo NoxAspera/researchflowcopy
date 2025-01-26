@@ -6,7 +6,7 @@
  * This property objectifies our note input. It will take in any text, and styling choices
  * for each input.
  */
-import { Input, Text } from "@ui-kitten/components";
+import { Input, Text, useTheme } from "@ui-kitten/components";
 import React from "react";
 import { StyleSheet, ViewStyle } from "react-native";
 
@@ -27,6 +27,7 @@ interface NIProp{
 }
 
 const AddNotesNoteInput: React.FC<NIProp> = ({ labelText, labelValue, onTextChange, placeholder, multiplelines, style, secureEntry, status }) => {
+  const theme = useTheme();
     return (
       <Input
         label={evaProps => <Text {...evaProps} category="p2" style={{color: "white"}}>{labelText}</Text>}

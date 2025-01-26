@@ -7,7 +7,7 @@
  */
 import * as eva from '@eva-design/eva';
 import { useRoute } from '@react-navigation/native';
-import { ApplicationProvider, Card, Layout, Text } from '@ui-kitten/components';
+import { Card, Layout, Text, useTheme } from '@ui-kitten/components';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { getFileContents } from '../scripts/APIRequests';
@@ -27,6 +27,7 @@ export default function ViewNotes({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   let site = route.params?.site;
   let notes: Entry[] = [];
+  const theme = useTheme();
 
   const [visible, setVisible] = useState(false);
   const [messageColor, setMessageColor] = useState("");
@@ -59,37 +60,35 @@ export default function ViewNotes({ navigation }: NavigationType) {
     fetchData();
   }, [site]);
   return (
-    <ApplicationProvider {...eva} theme={customTheme}>
-      <ScrollView style={styles.scrollContainer}>
-        <Layout style={styles.container} level="1">
-          {/* header */}
-          <Text category="h1" style={{ textAlign: "center" }}>
-            {site}
-          </Text>
+    <ScrollView style={styles.scrollContainer}>
+      <Layout style={styles.container} level="1">
+        {/* header */}
+        <Text category="h1" style={{ textAlign: "center" }}>
+          {site}
+        </Text>
 
-          <PopupProp
-            popupText={message}
-            popupColor={messageColor}
-            onPress={setVisible}
-            visible={visible}
-          />
+        <PopupProp
+          popupText={message}
+          popupColor={messageColor}
+          onPress={setVisible}
+          visible={visible}
+        />
 
-          {data?.map((entry) => {
-            const dateMatch = /(\d+)-(\d+)-(\d+)/;
-            const date = entry.match(dateMatch);
-            // not sure why but split leaves a new line sometimes
-            if (entry !== "___" && entry !== "---" && entry !== "\n") {
-              return (
-                <Card>
-                  <Text category="h3">{date?.at(0)}</Text>
-                  <Text category='p1'>{entry}</Text>
-                </Card>
-              );
-            }
-          })}
-        </Layout>
-      </ScrollView>
-    </ApplicationProvider>
+        {data?.map((entry) => {
+          const dateMatch = /(\d+)-(\d+)-(\d+)/;
+          const date = entry.match(dateMatch);
+          // not sure why but split leaves a new line sometimes
+          if (entry !== "___" && entry !== "---" && entry !== "\n") {
+            return (
+              <Card>
+                <Text category="h3">{date?.at(0)}</Text>
+                <Text category="p1">{entry}</Text>
+              </Card>
+            );
+          }
+        })}
+      </Layout>
+    </ScrollView>
   );
 }
 

@@ -11,9 +11,7 @@
 import { StyleSheet } from 'react-native';
 import React, { Component, useEffect, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { ApplicationProvider, Layout, Button, Text } from '@ui-kitten/components';
-import * as eva from '@eva-design/eva';
-import { customTheme } from './CustomTheme'
+import { Layout, Button, Text, useTheme } from '@ui-kitten/components';
 import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
 import { getBadDataSites, getDirectory } from '../scripts/APIRequests';
@@ -22,6 +20,7 @@ import { getBadDataSites, getDirectory } from '../scripts/APIRequests';
 export default function SelectSite({navigation}: NavigationType) {
   // type routeProp = RouteProp<{params: RouteParams}, 'params'>;
   const route = useRoute<routeProp>();
+  const theme = useTheme();
 
   // previous buttons hit, used to know where to go next
   let from = route.params?.from;
@@ -105,28 +104,24 @@ export default function SelectSite({navigation}: NavigationType) {
   };
 
   return (
-    <ApplicationProvider {...eva} theme={customTheme}>
-      <Layout style={styles.container}>
-
+    <Layout style={styles.container}>
       <PopupProp
-            popupText={message}
-            popupColor={messageColor}
-            onPress={setVisible}
-            visible={visible}
-          />
+        popupText={message}
+        popupColor={messageColor}
+        onPress={setVisible}
+        visible={visible}
+      />
 
-        {buttonData.map((button) => (
-          <Button
-            key={button.id}
-            style={styles.button}
-            onPress={button.onPress}
-          >
-          {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>{button.label}</Text>}
-            
-          </Button>
-        ))}
-      </Layout>
-    </ApplicationProvider>
+      {buttonData.map((button) => (
+        <Button key={button.id} style={styles.button} onPress={button.onPress}>
+          {(evaProps) => (
+            <Text {...evaProps} category="h6" style={{ color: "black" }}>
+              {button.label}
+            </Text>
+          )}
+        </Button>
+      ))}
+    </Layout>
   );
 }
 
