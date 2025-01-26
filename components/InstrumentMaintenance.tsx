@@ -102,6 +102,12 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
           </Text>
 
           {/* text inputs */}
+          {/* success/failure popup */}
+          <PopupProp popupText={message} 
+            popupColor={messageColor} 
+            onPress={setVisible} 
+            visible={visible}/>
+            
           {/* Time input */}
           {needsLocation && (
           <TextInput

@@ -16,7 +16,8 @@ import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
-import { getBadDataSites, getDirectory } from '../scripts/APIRequests';
+import { getBadDataSites, getDirectory, getTankList } from '../scripts/APIRequests';
+import { ScrollView } from 'react-native-gesture-handler';
 
 
 export default function SelectSite({navigation}: NavigationType) {
@@ -41,7 +42,11 @@ export default function SelectSite({navigation}: NavigationType) {
         } else if (from === 'BadData') {
           names = await getBadDataSites();
         } else if (from === 'InstrumentMaintenance') {
-          names = await getDirectory("instrument_maint")
+          names = await getDirectory("instrument_maint");
+        } else if (from === 'TankTracker') {
+          //names = getTankList();
+          //console.log(names);
+          setSiteNames(getTankList());
         }
         if(names?.success)
         {
@@ -60,7 +65,7 @@ export default function SelectSite({navigation}: NavigationType) {
   // data for buttons
   let buttonData = [];
 
-  if (from == 'AddNotes' || from == 'ViewNotes' || from == 'BadData' || from == 'InstrumentMaintenance') {
+  if (from == 'AddNotes' || from == 'ViewNotes' || from == 'BadData' || from == 'InstrumentMaintenance' || from == 'TankTracker') {
     if (siteNames) {
       for (let i = 0; i < siteNames.length; i++) {
         buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});
@@ -106,6 +111,7 @@ export default function SelectSite({navigation}: NavigationType) {
 
   return (
     <ApplicationProvider {...eva} theme={customTheme}>
+      <ScrollView>
       <Layout style={styles.container}>
 
       <PopupProp
@@ -126,6 +132,7 @@ export default function SelectSite({navigation}: NavigationType) {
           </Button>
         ))}
       </Layout>
+      </ScrollView>
     </ApplicationProvider>
   );
 }

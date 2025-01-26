@@ -7,7 +7,7 @@
  * data and determine when it will most likely run out and need replacement.
  */
 import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { ApplicationProvider, Button, IndexPath, Layout, Select, SelectItem, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
@@ -15,32 +15,12 @@ import TextInput from './TextInput'
 import { customTheme } from './CustomTheme'
 import { NavigationType, routeProp } from './types'
 import { ScrollView } from 'react-native-gesture-handler';
-import { getTankEntries, getTankList, setTankTracker, TankRecord, tankTrackerSpinUp } from '../scripts/APIRequests';
-
-
+import PopupProp from './Popup';
+import { getLatestTankEntry, TankRecord } from '../scripts/APIRequests';
 
 export default function TankTracker({ navigation }: NavigationType) {
-  const [tankIDs, setTankIDs] = useState<string[]>();
-  useEffect(() => {
-    const fetchTankID = async () => {
-      try {
-          getTankList()
-          getTankEntries("god a")
-          let temp: TankRecord = {updatedAt: "2025-01-24T23:32:00Z", serial: "cc163107", tankId: "27", fillId: "221129_J47", userId: "AugustO", pressure: 2000, location: "RPK", owner: "UATAQ"}
-          setTankTracker(temp)
-        } // Set the fetched site names
-      catch (error)
-      {
-        console.error("Error processing site names:", error);
-      }
-    };
-
-    fetchTankID();
-  });
-
-
     const route = useRoute<routeProp>();
-    let site = route.params?.site;
+    let tank = route.params?.site;
 
     // used for setting and remembering the input values
     const [nameValue, setNameValue] = useState("");
@@ -49,10 +29,61 @@ export default function TankTracker({ navigation }: NavigationType) {
     const [CO2Value, setCO2Value] = useState("");
     const [CH4Value, setCH4Value] = useState("");
     const [notesValue, setNotesValue] = useState("");
+    const [fillIDValue, setFillIDValue] = useState("");
+    const [locationValue, setLocationValue] = useState("");
+
+    const [visible, setVisible] = useState(false);
+    const [messageColor, setMessageColor] = useState("");
+    const [message, setMessage] = useState("");
+
+    useEffect(() => {
+      if (tank) {
+        const latestEntry = getLatestTankEntry(tank);
+        console.log(latestEntry);
+        if (latestEntry) {
+          console.log(latestEntry.fillId);
+          setLocationValue(latestEntry.location);
+          setCO2Value(latestEntry.co2.toString());
+          setCH4Value(latestEntry.ch4.toString());
+          setFillIDValue(latestEntry.fillId);
+          setPSIValue(latestEntry.pressure.toString());
+        }
+      }
+    }, [tank]);
 
     // Use IndexPath for selected index for drop down menu
     const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
     const tanks = ['Tank 1', 'Tank 2', 'Tank 3']
+
+    const getCurrentUtcDateTime = () => {
+      const now = new Date();
+      const year = now.getUTCFullYear();
+      const month = String(now.getUTCMonth() + 1).padStart(2, "0");
+      const day = String(now.getUTCDate()).padStart(2, "0");
+      const hours = String(now.getUTCHours()).padStart(2, "0");
+      const minutes = String(now.getUTCMinutes()).padStart(2, "0");
+      const seconds = String(now.getUTCSeconds()).padStart(2, "0");
+  
+      // Format as "YYYY-MM-DDTHH:MM:SSZ"
+      const utcDateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
+      return utcDateTime;
+    };
+
+    const buildTankEntry = (): string => {
+      const currentTime = getCurrentUtcDateTime()
+      return `${fillIDValue},serial,${currentTime},${PSIValue},${locationValue},owner,${CO2Value},co2Stdev,co2Sterr,co2N,${CH4Value},ch4Stdev,ch4Sterr,ch4N,co,coStdev,coSterr,coN,d13c,d13cStdev,d13cSterr,d13cN,d18o,d18oStdev,d18oSterr,d18oN,co2RelativeTo,${notesValue},${nameValue},co2InstrumentId,ch4InstrumentId,coInstrumentId,ottoCalibrationFile,co2CalibrationFile,ch4RelativeTo,ch4CalibrataionFile,coRelativeTo,coCalibrationFile,tankID`;
+    };
+
+    const handleSubmit = () => {
+      if (!nameValue || !locationValue || !PSIValue) {
+        setMessage("Please make sure Name, Location, and PSI are filled out before submitting.");
+        setMessageColor(customTheme['color-danger-700']);
+        setVisible(true);
+        return;
+      }
+      const entry = buildTankEntry();
+      alert(entry);
+    }
 
     return (
       <KeyboardAvoidingView
@@ -64,31 +95,15 @@ export default function TankTracker({ navigation }: NavigationType) {
               
               {/* header */}
               <Text category="h1" style={{ textAlign: "center" }}>
-                {site}
+                {tank}
               </Text>
 
-              {/* drop down menu for tanks */}
-              <Select
-                label={evaProps => <Text {...evaProps} category="c1" style={{color: "white"}}>Tanks</Text>}
-                selectedIndex={selectedIndex}
-                onSelect={(index) => setSelectedIndex(index as IndexPath)}
-                value={tanks[selectedIndex.row]}
-                style={{ margin: 8, flex: 1 }}
-              >
-                <SelectItem title="Tank 1" />
-                <SelectItem title="Tank 2" />
-                <SelectItem title="Tank 3" />
-              </Select>
-
               {/* text inputs */}
-              {/* Time input */}
-              <TextInput
-                labelText="Time"
-                labelValue={dateValue}
-                onTextChange={setDateValue}
-                placeholder="12:00 PM"
-                style={styles.textInput}
-              />
+              {/* success/failure popup */}
+              <PopupProp popupText={message} 
+                popupColor={messageColor} 
+                onPress={setVisible} 
+                visible={visible}/>
 
               {/* Name input */}
               <TextInput
@@ -99,10 +114,23 @@ export default function TankTracker({ navigation }: NavigationType) {
                 style={styles.textInput}
               />
 
-              {/* tank measurements */}
-              <Text category="h3" style={{ textAlign: "center", paddingTop: 25 }}>
-                Tank Measurements
-              </Text>
+              {/* FillID input */}
+              <TextInput
+                labelText="Fill ID"
+                labelValue={fillIDValue}
+                onTextChange={setFillIDValue}
+                placeholder="240124_M1"
+                style={styles.textInput}
+              />
+
+              {/* Location input */}
+              <TextInput
+                labelText="Location"
+                labelValue={locationValue}
+                onTextChange={setLocationValue}
+                placeholder="Enter location"
+                style={styles.textInput}
+              />
 
               {/* PSI input */}
               <TextInput
@@ -142,7 +170,7 @@ export default function TankTracker({ navigation }: NavigationType) {
 
               {/* submit button */}
               <Button
-                onPress={() => alert("submitted request!")}
+                onPress={() => handleSubmit()}
                 appearance="filled"
                 status="primary"
                 style={{ margin: 8 }}

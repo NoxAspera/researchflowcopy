@@ -147,10 +147,19 @@ export async function setTankTracker(newEntry: TankRecord)
  */
 export function getTankEntries(key:string)
 {
-    console.log(tankDict.get(key))
+    //console.log(tankDict.get(key))
     return tankDict.get(key)
 }
 
+export function getLatestTankEntry(key:string): TankRecord | undefined {
+    let entries = getTankEntries(key);
+    if (entries) {
+        return entries.reduce((latest, current) => {
+            return new Date(current.updatedAt) > new Date(latest.updatedAt) ? current : latest;
+          });
+    }
+}
+    
 /**
  * This method returns a list of TankId's in the csv 
  * @author August O'Rourke
@@ -187,11 +196,20 @@ export async function tankTrackerSpinUp()
     )
     try {
         const response = await fetch(requestOptions);
-        console.log(response)
+        //console.log(response)
         if (response.ok) {
             const data = await response.json();
             tankTrackerSha = data.sha
-            let tankData = await csv().fromString(atob(data.content))
+            // Decode base64 content
+            let decodedContent = atob(data.content);
+            console.log(decodedContent.charCodeAt(0));
+            // Remove UTF-8 BOM if it exists (0xEF, 0xBB, 0xBF)
+            if (decodedContent.charCodeAt(0) === 0xEF && decodedContent.charCodeAt(1) === 0xBB && decodedContent.charCodeAt(2) === 0xBF) {
+                // Remove the BOM (first 3 characters)
+                decodedContent = decodedContent.slice(3);
+            }
+            let tankData = await csv().fromString(decodedContent);
+            //console.log(tankData)
             let id_array: string[] =[]
             
             tankData.forEach(value => 
