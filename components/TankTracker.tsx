@@ -7,7 +7,7 @@
  * data and determine when it will most likely run out and need replacement.
  */
 import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { ApplicationProvider, Button, IndexPath, Layout, Select, SelectItem, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
@@ -15,8 +15,30 @@ import TextInput from './TextInput'
 import { customTheme } from './CustomTheme'
 import { NavigationType, routeProp } from './types'
 import { ScrollView } from 'react-native-gesture-handler';
+import { getTankEntries, getTankList, setTankTracker, TankRecord, tankTrackerSpinUp } from '../scripts/APIRequests';
+
+
 
 export default function TankTracker({ navigation }: NavigationType) {
+  const [tankIDs, setTankIDs] = useState<string[]>();
+  useEffect(() => {
+    const fetchTankID = async () => {
+      try {
+          getTankList()
+          getTankEntries("god a")
+          let temp: TankRecord = {updatedAt: "2025-01-24T23:32:00Z", serial: "cc163107", tankId: "27", fillId: "221129_J47", userId: "AugustO", pressure: 2000, location: "RPK", owner: "UATAQ"}
+          setTankTracker(temp)
+        } // Set the fetched site names
+      catch (error)
+      {
+        console.error("Error processing site names:", error);
+      }
+    };
+
+    fetchTankID();
+  });
+
+
     const route = useRoute<routeProp>();
     let site = route.params?.site;
 
