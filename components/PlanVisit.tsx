@@ -7,7 +7,7 @@
  */
 import { StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import React, { useState } from "react";
-import { useRoute, useTheme } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 import { Button, IndexPath, Layout, Datepicker, Text } from "@ui-kitten/components";
 import TextInput from "./TextInput";
 import { customTheme } from "./CustomTheme";
@@ -16,7 +16,6 @@ import { ScrollView } from "react-native-gesture-handler";
 
 export default function PlanVisit({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
-  const theme = useTheme();
   let site = route.params?.site;
 
   // used for setting and remembering the input values

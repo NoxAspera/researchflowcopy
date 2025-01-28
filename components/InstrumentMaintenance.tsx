@@ -15,8 +15,7 @@ import {
   Layout,
   Select,
   SelectItem,
-  Text,
-  useTheme,
+  Text
 } from "@ui-kitten/components";
 import TextInput from "./TextInput";
 import NoteInput from "./NoteInput";
@@ -31,7 +30,6 @@ import { ScrollView } from "react-native-gesture-handler";
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
-  const theme = useTheme();
   let site = route.params?.site;
   let instrumentName = site.slice(site.lastIndexOf("/") + 1);
   let needsLocation = site.includes("LGR");

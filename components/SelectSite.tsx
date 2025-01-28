@@ -11,7 +11,7 @@
 import { StyleSheet } from 'react-native';
 import React, { Component, useEffect, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { Layout, Button, Text, useTheme } from '@ui-kitten/components';
+import { Layout, Button, Text } from '@ui-kitten/components';
 import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
 import { getBadDataSites, getDirectory } from '../scripts/APIRequests';
@@ -20,7 +20,6 @@ import { getBadDataSites, getDirectory } from '../scripts/APIRequests';
 export default function SelectSite({navigation}: NavigationType) {
   // type routeProp = RouteProp<{params: RouteParams}, 'params'>;
   const route = useRoute<routeProp>();
-  const theme = useTheme();
 
   // previous buttons hit, used to know where to go next
   let from = route.params?.from;

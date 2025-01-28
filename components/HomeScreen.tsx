@@ -8,14 +8,13 @@
  **/
 import { StyleSheet, ScrollView, Dimensions } from "react-native";
 import HomeButtonProp from "./HomeButtonProp";
-import { Layout, useTheme } from "@ui-kitten/components";
+import { Layout } from "@ui-kitten/components";
 import React from "react";
 import { NavigationType } from "./types";
 const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
 import { setInstrumentFile } from "../scripts/APIRequests";
 
 export default function HomeScreen({ navigation }: NavigationType) {
-  const theme = useTheme();
   //setInstrumentFile("instrument_maint/LGR_UGGA/LGR-13-0075", "testing", "updating from research flow", false)
   //setInstrumentFile("instrument_maint/Teledyne/T200", "testing", "updating from research flow", false)
   return (

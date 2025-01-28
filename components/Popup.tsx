@@ -5,7 +5,7 @@
  *
  * This property represents the popup messages that appear on the screen for success and failures.
  */
-import { Button, Card, Layout, Modal, Text, useTheme } from "@ui-kitten/components";
+import { Button, Card, Layout, Modal, Text } from "@ui-kitten/components";
 import React from "react";
 import { StyleSheet, ColorValue } from "react-native";
 
@@ -17,7 +17,6 @@ interface PUProp {
 }
 
 const PopupProp: React.FC<PUProp> = ({ popupText, popupColor, visible, onPress }) => {
-  const theme = useTheme();
   return (
     <Layout>
       <Modal

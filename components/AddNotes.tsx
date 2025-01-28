@@ -13,7 +13,7 @@ import { buildNotes, Entry } from '../scripts/Parsers';
 import { NaviProp } from './types';
 import TextInput from './TextInput'
 import NoteInput from './NoteInput'
-import { IndexPath, Layout, Select, SelectItem, Button, Text, useTheme } from '@ui-kitten/components';
+import { IndexPath, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import { setFile, getFileContents } from '../scripts/APIRequests';
@@ -43,7 +43,6 @@ function checkValidNumber(entry:string)
  * @returns a ParsedData object that contains the information of the given document
  */
 async function processNotes(siteName: string) {
-  const theme = useTheme();
   const fileContents = await getFileContents(`site_notes/${siteName}`);
   if(fileContents.data){
     return parseNotes(fileContents.data)

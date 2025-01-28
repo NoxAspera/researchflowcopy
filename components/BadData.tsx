@@ -20,7 +20,6 @@ import {
   Select,
   SelectItem,
   IndexPath,
-  useTheme,
 } from "@ui-kitten/components";
 import { customTheme } from "./CustomTheme";
 import { NavigationType, routeProp } from "./types";
@@ -31,7 +30,6 @@ import PopupProp2Button from "./Popup2Button";
 
 export default function BadData({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
-  const theme = useTheme();
   let site = route.params?.site;
 
   // these use states to set and store values in the text inputs

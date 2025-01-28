@@ -5,12 +5,10 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
-import { useTheme } from '@ui-kitten/components';
 
 export default function SelectTank({navigation}) {
   const [selectedValue, setSelectedValue] = useState("Tank 1");
   const route = useRoute();
-  const theme = useTheme();
 
   const handleConfirm = () => {
     navigation.navigate('Tank Tracker', {tank: selectedValue});

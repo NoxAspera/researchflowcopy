@@ -5,9 +5,8 @@
  * 
  * View notes page. Will pull in data from the github repo and display it for the user in cards.
  */
-import * as eva from '@eva-design/eva';
 import { useRoute } from '@react-navigation/native';
-import { Card, Layout, Text, useTheme } from '@ui-kitten/components';
+import { Card, Layout, Text } from '@ui-kitten/components';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { getFileContents } from '../scripts/APIRequests';
@@ -27,7 +26,6 @@ export default function ViewNotes({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   let site = route.params?.site;
   let notes: Entry[] = [];
-  const theme = useTheme();
 
   const [visible, setVisible] = useState(false);
   const [messageColor, setMessageColor] = useState("");

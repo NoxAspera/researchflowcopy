@@ -11,7 +11,7 @@
 import { StyleSheet } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { Layout, Button, useTheme } from '@ui-kitten/components';
+import { Layout, Button } from '@ui-kitten/components';
 import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
 import { getBadDataSites, getDirectory } from '../scripts/APIRequests';
@@ -19,7 +19,6 @@ import { getBadDataSites, getDirectory } from '../scripts/APIRequests';
 
 export default function SelectInstrument({navigation}: NavigationType) {
   const route = useRoute<routeProp>();
-  const theme = useTheme();
 
   let from = route.params?.from;
   const [visible, setVisible] = useState(false);

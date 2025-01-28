@@ -9,7 +9,7 @@
 import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
-import { Button, IndexPath, Layout, Select, SelectItem, Text, useTheme } from '@ui-kitten/components';
+import { Button, IndexPath, Layout, Select, SelectItem, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
 import { NavigationType, routeProp } from './types'
 import { ScrollView } from 'react-native-gesture-handler';
@@ -17,7 +17,6 @@ import { ScrollView } from 'react-native-gesture-handler';
 export default function TankTracker({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
     let site = route.params?.site;
-    const theme = useTheme();
 
     // used for setting and remembering the input values
     const [nameValue, setNameValue] = useState("");
