@@ -9,6 +9,7 @@
 import { Input, Text } from "@ui-kitten/components";
 import React from "react";
 import { StyleSheet, ViewStyle } from "react-native";
+import { ThemeContext } from "./ThemeContext";
 
 /**
  * TIProp
@@ -27,9 +28,11 @@ interface TIProp{
 }
 
 const AddNotesTextInput: React.FC<TIProp> = ({ labelText, labelValue, onTextChange, placeholder, multiplelines, style, secureEntry, status }) => {
+    const themeContext = React.useContext(ThemeContext);
+    const isDarkMode = themeContext.theme === 'dark';
     return (
       <Input
-        label={evaProps => <Text {...evaProps} category="p2" style={{color: "white"}}>{labelText}</Text>}
+        label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>{labelText}</Text>}
         status={status || 'basic'}
         placeholder={placeholder}
         value={labelValue}

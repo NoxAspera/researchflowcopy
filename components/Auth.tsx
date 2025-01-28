@@ -10,16 +10,19 @@
 import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
-import { ApplicationProvider, Button, Layout, Text } from '@ui-kitten/components';
-import * as eva from '@eva-design/eva';
+import { Button, Layout, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
 import { customTheme } from './CustomTheme'
 import PopupProp from './Popup';
 import { setGithubToken } from '../scripts/APIRequests';
 import { NavigationType } from './types'
+import { ThemeContext } from './ThemeContext';
 
 export default function Login({ navigation }: NavigationType) {
     const route = useRoute();
+    
+    const themeContext = React.useContext(ThemeContext);
+    const isDarkMode = themeContext.theme === 'dark';
 
     // will set the no email/password notification to visible
     const [visible, setVisible] = useState(false);
@@ -35,7 +38,7 @@ export default function Login({ navigation }: NavigationType) {
             navigation.navigate('Home')
         }
         else {
-          setVisible(true)
+          setVisible(true);
         }
     }
 
@@ -47,50 +50,48 @@ export default function Login({ navigation }: NavigationType) {
       <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
-        <ApplicationProvider {...eva} theme={customTheme}>
-          <Layout style={styles.container} level='1'>
+        <Layout style={styles.container} level='1'>
 
-            {/* header */}
-            <Layout style={styles.loginText}>
-              <Text category='h1' style={{textAlign: 'center'}}>Hello</Text>
-              <Text category='h6' style={{textAlign: 'center'}}>Sign in using your GitHub credentials</Text>
-            </Layout>
-
-            {/* popup if user has missing credentials */}
-            <PopupProp popupText='Missing Login Credentials' 
-              popupColor={customTheme['color-danger-700']} 
-              onPress={setVisible} 
-              visible={visible}/>
-
-            {/* text inputs */}
-            <Layout style={styles.textInputContainer}>
-              
-              {/* Email input */}
-              <TextInput 
-                  labelValue={emailValue} 
-                  onTextChange={setEmailValue} 
-                  placeholder='Email' 
-                  style={styles.textInput}/>
-
-              {/* Password input */}
-              <TextInput 
-                  labelValue={passwordValue} 
-                  onTextChange={setPasswordValue} 
-                  placeholder='Password' 
-                  style={styles.textInput} 
-                  secureEntry={true}/>
-              
-              {/* Sign in button */}
-              <Button
-                  onPress={checkTextEntry}
-                  appearance='filled'
-                  status='primary'
-                  style={{margin: 15, backgroundColor: "#06b4e0"}}>
-                  {evaProps => <Text {...evaProps} category="h5" style={{color: "black"}}>SIGN IN</Text>}
-              </Button>
-            </Layout>
+          {/* header */}
+          <Layout style={isDarkMode ? styles.loginTextDark : styles.loginTextLight}>
+            <Text category='h1' style={{textAlign: 'center'}}>Hello</Text>
+            <Text category='h6' style={{textAlign: 'center'}}>Sign in using your GitHub credentials</Text>
           </Layout>
-        </ApplicationProvider>
+
+          {/* popup if user has missing credentials */}
+          <PopupProp popupText='Missing Login Credentials' 
+            popupColor={customTheme['color-danger-700']} 
+            onPress={setVisible} 
+            visible={visible}/>
+
+          {/* text inputs */}
+          <Layout style={styles.textInputContainer}>
+            
+            {/* Email input */}
+            <TextInput 
+                labelValue={emailValue} 
+                onTextChange={setEmailValue} 
+                placeholder='Email' 
+                style={styles.textInput}/>
+
+            {/* Password input */}
+            <TextInput 
+                labelValue={passwordValue} 
+                onTextChange={setPasswordValue} 
+                placeholder='Password' 
+                style={styles.textInput} 
+                secureEntry={true}/>
+            
+            {/* Sign in button */}
+            <Button
+                onPress={checkTextEntry}
+                appearance='filled'
+                status='primary'
+                style={{margin: 15, backgroundColor: "#06b4e0"}}>
+                {evaProps => <Text {...evaProps} category="h5" style={{color: "black"}}>SIGN IN</Text>}
+            </Button>
+          </Layout>
+        </Layout>
       </KeyboardAvoidingView>
     );
   }
@@ -101,12 +102,18 @@ export default function Login({ navigation }: NavigationType) {
       alignItems: 'stretch',        // has button fill space horizontally
       justifyContent: 'space-evenly',
     },
-    loginText: {
+    loginTextDark: {
         flex: 1,
         alignItems: 'stretch',        // has button fill space horizontally
         justifyContent: 'center',
         backgroundColor: customTheme['color-primary-700']
     },
+    loginTextLight: {
+      flex: 1,
+      alignItems: 'stretch',        // has button fill space horizontally
+      justifyContent: 'center',
+      backgroundColor: customTheme['color-primary-200']
+  },
     textInputContainer: {
         flex: 3,
         justifyContent: 'flex-end'

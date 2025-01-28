@@ -20,6 +20,7 @@
     "@react-navigation/stack": "^7.1.1",
     "@testing-library/jest-native": "^5.4.3",
     "@ui-kitten/components": "^5.3.1",
+    "@ui-kitten/eva-icons": "^5.3.1",
     "csvtojson": "^2.0.10",
     "expo": "^52.0.23",
     "expo-file-system": "~18.0.6",
