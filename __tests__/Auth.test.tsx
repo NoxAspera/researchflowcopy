@@ -69,14 +69,6 @@ jest.mock('@react-navigation/native', () => ({
 
 
 describe('Login page', () => {
-  // // used for swapping between light and dark mode
-  // // Initialize state with a type
-  // type ThemeType = 'light' | 'dark';
-  // const [theme, setTheme] = useState<ThemeType>('light');
-  
-  // // Merge custom theme with Eva's base theme
-  // const currentTheme = { ...eva[theme], ...customColors };
-  
   test('app renders correctly', () => {
     const { getByText } = render(
     <MockThemeProvider>
