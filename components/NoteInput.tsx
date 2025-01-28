@@ -1,9 +1,9 @@
 /**
- * TextInput.tsx
- * @author Blake Stambaugh
+ * NoteInput.tsx
+ * @author Blake Stambaugh, David Schiwal
  * 11/27/24
  * 
- * This property objectifies our text input. It will take in any text, and styling choices
+ * This property objectifies our note input. It will take in any text, and styling choices
  * for each input.
  */
 import { Input, Text } from "@ui-kitten/components";
@@ -11,11 +11,11 @@ import React from "react";
 import { StyleSheet, ViewStyle } from "react-native";
 
 /**
- * TIProp
- * @author Blake Stambaugh
- * used to give types to text input parameters
+ * NIProp
+ * @author Blake Stambaugh, David Schiwal
+ * used to give types to note input parameters
  */
-interface TIProp{
+interface NIProp{
     labelText?: string;
     labelValue: string;
     onTextChange: (arg0: string) => void;
@@ -26,14 +26,14 @@ interface TIProp{
     status?: string;
 }
 
-const AddNotesTextInput: React.FC<TIProp> = ({ labelText, labelValue, onTextChange, placeholder, multiplelines, style, secureEntry, status }) => {
+const AddNotesNoteInput: React.FC<NIProp> = ({ labelText, labelValue, onTextChange, placeholder, multiplelines, style, secureEntry, status }) => {
     return (
       <Input
         label={evaProps => <Text {...evaProps} category="p2" style={{color: "white"}}>{labelText}</Text>}
         status={status || 'basic'}
         placeholder={placeholder}
         value={labelValue}
-        multiline={multiplelines ? true : false}
+        multiline={multiplelines ? true : true}
         onChangeText={(arg0) => onTextChange(arg0)}
         style={style}
         secureTextEntry={secureEntry ? true : false}
@@ -44,9 +44,9 @@ const AddNotesTextInput: React.FC<TIProp> = ({ labelText, labelValue, onTextChan
 
 const styles = StyleSheet.create({
     textInputStyle: {
-      maxHeight: 24,
+      maxHeight: 100,
       fontSize: 18
     }
   });
 
-  export default AddNotesTextInput;
+  export default AddNotesNoteInput;

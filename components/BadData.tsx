@@ -7,15 +7,17 @@
  * a date range, the data, and why it is bad. The code will format and
  * submit that request to the github repo.
  */
-import { StyleSheet } from 'react-native';
+import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { NaviProp } from './types';
 import TextInput from './TextInput'
+import NoteInput from './NoteInput'
 import { ApplicationProvider, Button, Layout, Text, Datepicker, Select, SelectItem, IndexPath } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import { NavigationType, routeProp } from './types'
+import { ScrollView } from 'react-native-gesture-handler';
 import { setBadData, getBadDataFiles } from '../scripts/APIRequests';
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
@@ -139,109 +141,115 @@ export default function BadData({ navigation }: NavigationType) {
     }
 
     return (
-      <ApplicationProvider {...eva} theme={customTheme}>
-        <Layout style={styles.container} level='1'>
+      <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.container}>
+        <ApplicationProvider {...eva} theme={customTheme}>
+          <ScrollView>
+            <Layout style={styles.container} level='1'>
 
-          {/* header */}
-          <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
+              {/* header */}
+              <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
 
-          {/* success/failure popup */}
-          <PopupProp popupText={message} 
-            popupColor={messageColor} 
-            onPress={setVisible} 
-            visible={visible}/>
-          
-          {/* text inputs */}
-          {/* select instrument */}
-          <Select
-            label = "Instrument"
-            selectedIndex={selectedFileIndex}
-            onSelect={(index) => handleFileSelection(index as IndexPath)}
-            placeholder="Choose an instrument"
-            style={styles.textInput}
-            value={
-              selectedFileIndex !== undefined
-              ? fileOptions[selectedFileIndex.row] // Display the selected file
-              : undefined
-            }>
-          {fileOptions.map((file, index) => (
-            <SelectItem key={index} title={file} />
-          ))}
-          </Select>
+              {/* success/failure popup */}
+              <PopupProp popupText={message} 
+                popupColor={messageColor} 
+                onPress={setVisible} 
+                visible={visible}/>
+              
+              {/* text inputs */}
+              {/* select instrument */}
+              <Select
+                label = "Instrument"
+                selectedIndex={selectedFileIndex}
+                onSelect={(index) => handleFileSelection(index as IndexPath)}
+                placeholder="Choose an instrument"
+                style={styles.textInput}
+                value={
+                  selectedFileIndex !== undefined
+                  ? fileOptions[selectedFileIndex.row] // Display the selected file
+                  : undefined
+                }>
+              {fileOptions.map((file, index) => (
+                <SelectItem key={index} title={file} />
+              ))}
+              </Select>
 
-          {/* old id input */}
-          <TextInput labelText='Old ID' 
-            labelValue={oldIDValue} 
-            onTextChange={setOldIDValue} 
-            placeholder='123456' 
-            style={styles.textInput}/>
-          
-          {/* new id input */}
-          <TextInput labelText='New ID' 
-            labelValue={newIDValue} 
-            onTextChange={setNewIDValue} 
-            placeholder='67890' 
-            style={styles.textInput}/>
+              {/* old id input */}
+              <TextInput labelText='Old ID' 
+                labelValue={oldIDValue} 
+                onTextChange={setOldIDValue} 
+                placeholder='123456' 
+                style={styles.textInput}/>
+              
+              {/* new id input */}
+              <TextInput labelText='New ID' 
+                labelValue={newIDValue} 
+                onTextChange={setNewIDValue} 
+                placeholder='67890' 
+                style={styles.textInput}/>
 
-          {/* start date input */}
-          <Datepicker
-            label='Start Date'
-            date={startDateValue}
-            onSelect={(date) => setStartDateValue(date as Date)}
-            min={new Date(1900, 0, 1)}
-            max={new Date(2500, 12, 31)}
-            placeholder="Start Date"
-            style={styles.textInput}/>
+              {/* start date input */}
+              <Datepicker
+                label='Start Date'
+                date={startDateValue}
+                onSelect={(date) => setStartDateValue(date as Date)}
+                min={new Date(1900, 0, 1)}
+                max={new Date(2500, 12, 31)}
+                placeholder="Start Date"
+                style={styles.textInput}/>
 
-          {/* start time input */}
-          <TextInput labelText='Start Time' 
-            labelValue={startTimeValue}
-            onTextChange={setStartTimeValue} 
-            placeholder='12:00:00' 
-            style={styles.textInput}/>
+              {/* start time input */}
+              <TextInput labelText='Start Time' 
+                labelValue={startTimeValue}
+                onTextChange={setStartTimeValue} 
+                placeholder='12:00:00' 
+                style={styles.textInput}/>
 
-          {/* end date input */}
-          <Datepicker
-            label='End Date'
-            date={endDateValue}
-            onSelect={(date) => setEndDateValue(date as Date)}
-            min={new Date(1900, 0, 1)}
-            max={new Date(2500, 12, 31)}
-            placeholder="End Date"
-            style={styles.textInput}/>
+              {/* end date input */}
+              <Datepicker
+                label='End Date'
+                date={endDateValue}
+                onSelect={(date) => setEndDateValue(date as Date)}
+                min={new Date(1900, 0, 1)}
+                max={new Date(2500, 12, 31)}
+                placeholder="End Date"
+                style={styles.textInput}/>
 
-          {/* end time input */}
-          <TextInput labelText='End Time' 
-            labelValue={endTimeValue} 
-            onTextChange={setEndTimeValue} 
-            placeholder='12:00:00' 
-            style={styles.textInput}/>
+              {/* end time input */}
+              <TextInput labelText='End Time' 
+                labelValue={endTimeValue} 
+                onTextChange={setEndTimeValue} 
+                placeholder='12:00:00' 
+                style={styles.textInput}/>
 
-          {/* Name input */}
-          <TextInput labelText='Name' 
-            labelValue={nameValue} 
-            onTextChange={setNameValue} 
-            placeholder='John Doe' 
-            style={styles.textInput}/>
+                  {/* Name input */}
+                  <TextInput labelText='Name' 
+                    labelValue={nameValue} 
+                    onTextChange={setNameValue} 
+                    placeholder='John Doe' 
+                    style={styles.textInput}/>
 
-          {/* reason entry */}
-          <TextInput labelText='Reason for Bad Data' 
-            labelValue={reasonValue} 
-            onTextChange={setReasonValue} 
-            placeholder='Its wack.' 
-            multiplelines={true} 
-            style={styles.reasonText}/>
+                  {/* reason entry */}
+                  <NoteInput labelText='Reason for Bad Data' 
+                    labelValue={reasonValue} 
+                    onTextChange={setReasonValue} 
+                    placeholder='Its wack.' 
+                    multiplelines={true} 
+                    style={styles.reasonText}/>
 
-          {/* submit button */}
-          <Button
-            onPress={handleSubmit}
-            appearance='filled'
-            status='primary'
-            style={{margin: 15}}>
-            Submit
-          </Button>
-        </Layout>
-      </ApplicationProvider>
+              {/* submit button */}
+              <Button
+                onPress={handleSubmit}
+                appearance='filled'
+                status='primary'
+                style={{margin: 15}}>
+                Submit
+              </Button>
+            </Layout>
+          </ScrollView>
+        </ApplicationProvider>
+      </KeyboardAvoidingView>
     );
   }
 
@@ -253,10 +261,10 @@ export default function BadData({ navigation }: NavigationType) {
     },
     reasonText: {
       flex: 4,
-      margin: 15,
+      margin: 6,
     },
     textInput: {
-      margin: 15,
+      margin: 6,
       flex: 1
     }
 });

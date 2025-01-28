@@ -5,13 +5,14 @@
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
-import { StyleSheet } from 'react-native';
+import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { buildNotes, Entry } from '../scripts/Parsers';
 import { NaviProp } from './types';
 import TextInput from './TextInput'
+import NoteInput from './NoteInput'
 import { ApplicationProvider, IndexPath, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
@@ -239,169 +240,174 @@ export default function AddNotes({ navigation }: NavigationType) {
   }, [latestEntry]);
 
     return (
-      <ApplicationProvider {...eva} theme={customTheme}>
-        <ScrollView>
-          <Layout style={styles.container}>
-            {/* header */}
-            <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
+      <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.container}>
+        <ApplicationProvider {...eva} theme={customTheme}>
+          <ScrollView>
+            <Layout style={styles.container}>
+              {/* header */}
+              <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
 
-            {/* success/failure popup */}
-            <PopupProp popupText={message} 
-            popupColor={messageColor} 
-            onPress={setVisible} 
-            visible={visible}/>
+              {/* success/failure popup */}
+              <PopupProp popupText={message} 
+              popupColor={messageColor} 
+              onPress={setVisible} 
+              visible={visible}/>
 
-            {/* popup if user has missing input */}
-            <PopupProp2Button popupText='Missing some input field(s)'
-            popupColor={customTheme['color-danger-700']}
-            sendData={handleUpdate}
-            removePopup={setVisible2}
-            visible={visible2}/>
+              {/* popup if user has missing input */}
+              <PopupProp2Button popupText='Missing some input field(s)'
+              popupColor={customTheme['color-danger-700']}
+              sendData={handleUpdate}
+              removePopup={setVisible2}
+              visible={visible2}/>
 
-            {/* drop down menu for instruments */}
-            {latestEntry && !latestEntry.instrument ? (
-              // Prompt the user to input an instrument if none is parsed
-              <TextInput
-                labelText="Instrument"
-                labelValue={instrumentInput}
-                onTextChange={setInstrumentInput}
-                placeholder="Please enter instrument name"
+              {/* drop down menu for instruments */}
+              {latestEntry && !latestEntry.instrument ? (
+                // Prompt the user to input an instrument if none is parsed
+                <TextInput
+                  labelText="Instrument"
+                  labelValue={instrumentInput}
+                  onTextChange={setInstrumentInput}
+                  placeholder="Please enter instrument name"
+                  style={styles.inputText}
+                />
+              ) : (
+              <Select label={evaProps => <Text {...evaProps} category="c1" style={{color: "white"}}>Instrument</Text>}
+                selectedIndex={selectedIndex}
+                onSelect={(index) => setSelectedIndex(index as IndexPath)}
+                value={instruments[selectedIndex.row]}
+                style={{margin: 8, flex: 1}}>
+                  {instruments.map((instrument, index) => (
+                    <SelectItem 
+                      key={index} 
+                      title={instrument} 
+                    />
+                  ))}
+              </Select>
+              )}
+
+              {/* text inputs */}
+              {/* Name input */}
+              <TextInput labelText='Name' 
+                labelValue={nameValue} 
+                onTextChange={setNameValue} 
+                placeholder='ResearchFlow' 
                 style={styles.inputText}
               />
-            ) : (
-            <Select label='Instrument'
-              selectedIndex={selectedIndex}
-              onSelect={(index) => setSelectedIndex(index as IndexPath)}
-              value={instruments[selectedIndex.row]}
-              style={{margin: 15, flex: 1}}>
-                {instruments.map((instrument, index) => (
-                  <SelectItem 
-                    key={index} 
-                    title={instrument} 
-                  />
-                ))}
-            </Select>
-            )}
 
-            {/* text inputs */}
-            {/* Name input */}
-            <TextInput labelText='Name' 
-              labelValue={nameValue} 
-              onTextChange={setNameValue} 
-              placeholder='ResearchFlow' 
-              style={styles.inputText} />
+                {/* Time input */}
+              <TextInput labelText='Time Started' 
+                labelValue={timeValue} 
+                onTextChange={setTimeValue} 
+                placeholder='15:00' 
+                style={styles.inputText} />
 
-              {/* Time input */}
-            <TextInput labelText='Time Started' 
-              labelValue={timeValue} 
-              onTextChange={setTimeValue} 
-              placeholder='15:00' 
-              style={styles.inputText} />
-
-            {/* N2 */}
-            <TextInput labelText='N2 (if applicable)' 
-              labelValue={n2Value} 
-              onTextChange={setN2Value} 
-              placeholder='Pressure' 
-              style={styles.inputText} />
-
-            {/* LTS input */}
-            <Layout style = {styles.rowContainer}>
-              <TextInput labelText='LTS (if applicable)' 
-                labelValue={ltsId} 
-                onTextChange={setLTSId} 
-                placeholder='Tank ID' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={ltsValue} 
-                onTextChange={setLTSValue} 
-                placeholder='Value' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={ltsPressure} 
-                onTextChange={setLTSPressure} 
+              {/* N2 */}
+              <TextInput labelText='N2 (if needed)' 
+                labelValue={n2Value} 
+                onTextChange={setN2Value} 
                 placeholder='Pressure' 
-                style={styles.tankInput} />
+                style={styles.inputText} />
+
+              {/* LTS input */}
+              <Layout style = {styles.rowContainer}>
+                <TextInput labelText='LTS (if needed)' 
+                  labelValue={ltsId} 
+                  onTextChange={setLTSId} 
+                  placeholder='Tank ID' 
+                  style={styles.tankInput} />
+                <TextInput labelText=' ' 
+                  labelValue={ltsValue} 
+                  onTextChange={setLTSValue} 
+                  placeholder='Value' 
+                  style={styles.tankInput} />
+                <TextInput labelText=' ' 
+                  labelValue={ltsPressure} 
+                  onTextChange={setLTSPressure} 
+                  placeholder='Pressure' 
+                  style={styles.tankInput} />
+              </Layout>
+
+              {/* Note for all tank inputs, the single space labels are there to make sure the other entry fields are alligned well*/}
+
+              {/* Low input */}
+              <Layout style = {styles.rowContainer}>
+                <TextInput labelText='Low' 
+                  labelValue={lowId} 
+                  onTextChange={setLowId} 
+                  placeholder='Tank ID' 
+                  style={styles.tankInput} />
+                <TextInput labelText=' ' 
+                  labelValue={lowValue} 
+                  onTextChange={setLowValue} 
+                  placeholder='Value' 
+                  style={styles.tankInput} />
+                <TextInput labelText=' ' 
+                  labelValue={lowPressure} 
+                  onTextChange={setLowPressure} 
+                  placeholder='Pressure' 
+                  style={styles.tankInput} />
+              </Layout>
+
+              {/* mid input */}
+              <Layout style = {styles.rowContainer}>
+                <TextInput labelText='Mid' 
+                  labelValue={midId} 
+                  onTextChange={setmidId} 
+                  placeholder='Tank ID' 
+                  style={styles.tankInput} />
+                <TextInput labelText=' ' 
+                  labelValue={midValue} 
+                  onTextChange={setmidValue} 
+                  placeholder='Value' 
+                  style={styles.tankInput} />
+                <TextInput labelText=' ' 
+                  labelValue={midPressure} 
+                  onTextChange={setmidPressure} 
+                  placeholder='Pressure' 
+                  style={styles.tankInput} />
+              </Layout>
+
+              {/* high input */} 
+              <Layout style = {styles.rowContainer}>
+                <TextInput labelText='High' 
+                  labelValue={highId} 
+                  onTextChange={setHighId} 
+                  placeholder='Tank ID' 
+                  style={styles.tankInput} />
+                <TextInput labelText=' ' 
+                  labelValue={highValue} 
+                  onTextChange={setHighValue} 
+                  placeholder='Value' 
+                  style={styles.tankInput} />
+                <TextInput labelText=' ' 
+                  labelValue={highPressure} 
+                  onTextChange={setHighPressure} 
+                  placeholder='Pressure' 
+                  style={styles.tankInput} />
+              </Layout>
+
+              {/* notes entry */}
+              <NoteInput labelText='Notes' 
+                labelValue={notesValue} 
+                onTextChange={setNotesValue} 
+                placeholder='All Good.' 
+                multiplelines={true} 
+                style={styles.notesInput}/>
+
+              {/* submit button */}
+              <Button
+                onPress={() => checkTextEntries()}
+                appearance='filled'
+                status='primary' 
+                style={{margin: 20, backgroundColor: "#06b4e0"}}>
+                {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Submit</Text>}
+              </Button>
             </Layout>
-
-            {/* Note for all tank inputs, the single space labels are there to make sure the other entry fields are alligned well*/}
-
-            {/* Low input */}
-            <Layout style = {styles.rowContainer}>
-              <TextInput labelText='Low' 
-                labelValue={lowId} 
-                onTextChange={setLowId} 
-                placeholder='Tank ID' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={lowValue} 
-                onTextChange={setLowValue} 
-                placeholder='Value' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={lowPressure} 
-                onTextChange={setLowPressure} 
-                placeholder='Pressure' 
-                style={styles.tankInput} />
-            </Layout>
-
-            {/* mid input */}
-            <Layout style = {styles.rowContainer}>
-              <TextInput labelText='Mid' 
-                labelValue={midId} 
-                onTextChange={setmidId} 
-                placeholder='Tank ID' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={midValue} 
-                onTextChange={setmidValue} 
-                placeholder='Value' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={midPressure} 
-                onTextChange={setmidPressure} 
-                placeholder='Pressure' 
-                style={styles.tankInput} />
-            </Layout>
-
-            {/* high input */} 
-            <Layout style = {styles.rowContainer}>
-              <TextInput labelText='High' 
-                labelValue={highId} 
-                onTextChange={setHighId} 
-                placeholder='Tank ID' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={highValue} 
-                onTextChange={setHighValue} 
-                placeholder='Value' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={highPressure} 
-                onTextChange={setHighPressure} 
-                placeholder='Pressure' 
-                style={styles.tankInput} />
-            </Layout>
-
-            {/* notes entry */}
-            <TextInput labelText='Notes' 
-              labelValue={notesValue} 
-              onTextChange={setNotesValue} 
-              placeholder='All Good.' 
-              multiplelines={true} 
-              style={styles.notesInput}/>
-
-            {/* submit button */}
-            <Button
-              onPress={() => checkTextEntries()}
-              appearance='filled'
-              status='primary'
-              style={{margin: 15}}>
-              Submit
-            </Button>
-          </Layout>
-        </ScrollView>
-      </ApplicationProvider>
+          </ScrollView>
+        </ApplicationProvider>
+      </KeyboardAvoidingView>
     );
   }
   
@@ -413,25 +419,23 @@ export default function AddNotes({ navigation }: NavigationType) {
     },
     inputText: {
       flex: 1,
-      margin: 15
+      margin: 8
     },
     tankInput: {
       flex: 1,
-      margin: 15
+      margin: 8
     },
     notesInput:
     {
       flex: 1,
-      margin: 15
+      margin: 8,
     },
     areaInput: {
       height: 200,
-      margin: 15,
+      margin: 10,
       width: 380,
       borderWidth: 1,
       padding: 10,
-      marginTop: 5,
-      marginBottom: 5,
     },
     rowContainer:
     {
