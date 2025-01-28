@@ -13,10 +13,13 @@ import TextInput from "./TextInput";
 import { customTheme } from "./CustomTheme";
 import { NavigationType, routeProp } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
+import { ThemeContext } from "./ThemeContext";
 
 export default function PlanVisit({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   let site = route.params?.site;
+  const themeContext = React.useContext(ThemeContext);
+  const isDarkMode = themeContext.theme === 'dark';
 
   // used for setting and remembering the input values
   const [nameValue, setNameValue] = useState("");

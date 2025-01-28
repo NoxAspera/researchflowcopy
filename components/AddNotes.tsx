@@ -21,6 +21,7 @@ import { parseNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
+import { ThemeContext } from './ThemeContext';
 
 
 function checkValidTime(entry:string)
@@ -63,6 +64,8 @@ async function processNotes(siteName: string) {
 export default function AddNotes({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
     const { site, info } = route.params || {}
+    const themeContext = React.useContext(ThemeContext);
+    const isDarkMode = themeContext.theme === 'dark';
 
     // State to hold parsed data
     const [data, setData] = useState<ParsedData | null>(null);
@@ -272,7 +275,7 @@ export default function AddNotes({ navigation }: NavigationType) {
                 style={styles.inputText}
               />
             ) : (
-            <Select label={evaProps => <Text {...evaProps} category="c1" style={{color: "white"}}>Instrument</Text>}
+            <Select label={evaProps => <Text {...evaProps} category="c1" style={{color: isDarkMode ? "white" : "black"}}>Instrument</Text>}
               selectedIndex={selectedIndex}
               onSelect={(index) => setSelectedIndex(index as IndexPath)}
               value={instruments[selectedIndex.row]}
