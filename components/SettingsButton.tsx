@@ -6,15 +6,16 @@ import SettingsPage from './SettingsPage';
 const gearIcon = (props): IconElement => <Icon {...props} name='settings-outline' />;
 
 
-export default function SettingsPageTest() {
+export default function SettingsButton() {
     const [visible, setVisible] = useState(false);
     return (
       <View>
-          <Button onPress={() => setVisible(true)} 
+          <Button testID='settingsButton'
+          onPress={() => setVisible(true)} 
           appearance="ghost"
           accessoryLeft={gearIcon} 
           size='large'/>
-          <SettingsPage visbility={visible} onPress={setVisible}/>
+          <SettingsPage visibility={visible} onPress={setVisible}/>
       </View>
     );
   }

@@ -1,33 +1,37 @@
 import Auth from '../components/Auth';
 import { render } from '@testing-library/react-native'
 import { NaviProp, RootStackParamList } from '../components/types';
-import React from 'react';
+import React, { useState } from 'react';
+import * as eva from '@eva-design/eva';
+import customColors from '../custom-theme.json'
+import { ApplicationProvider } from '@ui-kitten/components';
+import { MockThemeProvider } from '../components/MockThemeProvider';
 
 
-const rootStack: RootStackParamList = {
-  SelectSite: {
-    from: ''
-  },
-  AddNotes: {
-    site: ''
-  },
-  ViewNotes: {
-    site: ''
-  },
-  BadData: {
-    site: ''
-  },
-  InstrumentMaintenance: {
-    site: ''
-  },
-  TankTracker: {
-    site: ''
-  },
-  SelectInstrument:{
-    from: ''
-  },
-  Home: undefined
-}
+// const rootStack: RootStackParamList = {
+//   SelectSite: {
+//     from: ''
+//   },
+//   AddNotes: {
+//     site: ''
+//   },
+//   ViewNotes: {
+//     site: ''
+//   },
+//   BadData: {
+//     site: ''
+//   },
+//   InstrumentMaintenance: {
+//     site: ''
+//   },
+//   TankTracker: {
+//     site: ''
+//   },
+//   SelectInstrument:{
+//     from: ''
+//   },
+//   Home: undefined
+// }
 
 const mockNavigation: NaviProp = {
   dispatch: jest.fn(),
@@ -63,10 +67,24 @@ jest.mock('@react-navigation/native', () => ({
   }),
 }));
 
+
 describe('Login page', () => {
+  // // used for swapping between light and dark mode
+  // // Initialize state with a type
+  // type ThemeType = 'light' | 'dark';
+  // const [theme, setTheme] = useState<ThemeType>('light');
+  
+  // // Merge custom theme with Eva's base theme
+  // const currentTheme = { ...eva[theme], ...customColors };
+  
   test('app renders correctly', () => {
-    const { getByText } = render(<Auth navigation={mockNavigation} />);
-    getByText('Sign in using your GitHub credentials');
+    const { getByText } = render(
+    <MockThemeProvider>
+      <Auth navigation={mockNavigation} />
+    </MockThemeProvider>
+  );
+    const text = getByText('Sign in using your GitHub credentials');
+    expect(text);
   });
 
 })

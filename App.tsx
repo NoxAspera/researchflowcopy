@@ -11,7 +11,7 @@ import TankTracker from './components/TankTracker'
 import Auth from './components/Auth'
 import SelectInstrument from './components/SelectInstrument';
 import PlanVisit from './components/PlanVisit';
-import { ThemeContext } from './components/theme-context'
+import { ThemeContext } from './components/ThemeContext'
 import { ApplicationProvider, IconRegistry } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';

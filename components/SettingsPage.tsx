@@ -1,14 +1,14 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { Modal, Text, Toggle, Card, Layout } from '@ui-kitten/components';
-import { ThemeContext } from './theme-context';
+import { ThemeContext } from './ThemeContext';
 
 interface SettingsPageProp {
-  visbility: boolean;
+  visibility: boolean;
   onPress: (arg0: boolean) => void;
 }
 
-const SettingsPage: React.FC<SettingsPageProp> = ({ visbility, onPress }) => {
+const SettingsPage: React.FC<SettingsPageProp> = ({ visibility, onPress }) => {
     // light / dark mode toggle
     const themeContext = React.useContext(ThemeContext);
     const isDarkMode = themeContext.theme === 'dark';
@@ -18,16 +18,18 @@ const SettingsPage: React.FC<SettingsPageProp> = ({ visbility, onPress }) => {
     };
 
     return (
-      <Layout>
+      <Layout testID='Background'>
           <Modal
+              testID='SettingsPage'
               backdropStyle={styles.backdrop}
               style={styles.modal}
-              visible={visbility}
+              visible={visibility}
               onBackdropPress={() => onPress(false)}
           >
               <Card style={styles.card}>
                   <Text category='h1'>Settings</Text>
                   <Toggle
+                      testID='DarkModeToggle'
                       checked={isDarkMode}
                       onChange={onModeChange}
                       >

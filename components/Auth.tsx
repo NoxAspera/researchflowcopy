@@ -16,7 +16,7 @@ import { customTheme } from './CustomTheme'
 import PopupProp from './Popup';
 import { setGithubToken } from '../scripts/APIRequests';
 import { NavigationType } from './types'
-import { ThemeContext } from './theme-context';
+import { ThemeContext } from './ThemeContext';
 
 export default function Login({ navigation }: NavigationType) {
     const route = useRoute();
