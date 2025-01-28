@@ -1,37 +1,8 @@
 import Auth from '../components/Auth';
-import { render } from '@testing-library/react-native'
+import { fireEvent, render, userEvent } from '@testing-library/react-native'
 import { NaviProp, RootStackParamList } from '../components/types';
 import React, { useState } from 'react';
-import * as eva from '@eva-design/eva';
-import customColors from '../custom-theme.json'
-import { ApplicationProvider } from '@ui-kitten/components';
 import { MockThemeProvider } from '../components/MockThemeProvider';
-
-
-// const rootStack: RootStackParamList = {
-//   SelectSite: {
-//     from: ''
-//   },
-//   AddNotes: {
-//     site: ''
-//   },
-//   ViewNotes: {
-//     site: ''
-//   },
-//   BadData: {
-//     site: ''
-//   },
-//   InstrumentMaintenance: {
-//     site: ''
-//   },
-//   TankTracker: {
-//     site: ''
-//   },
-//   SelectInstrument:{
-//     from: ''
-//   },
-//   Home: undefined
-// }
 
 const mockNavigation: NaviProp = {
   dispatch: jest.fn(),
@@ -78,5 +49,42 @@ describe('Login page', () => {
     const text = getByText('Sign in using your GitHub credentials');
     expect(text);
   });
+
+  test('can login and have the page change', () => {
+    const { getByTestId, queryByPlaceholderText } = render(
+      <MockThemeProvider>
+        <Auth navigation={mockNavigation} />
+      </MockThemeProvider>
+    );
+
+    // get inputs and button
+    const email = queryByPlaceholderText('Email');
+    const pass = queryByPlaceholderText('Password');
+    const button = getByTestId('AuthButton');
+    
+    // give input
+    fireEvent.changeText(email, 'admin');
+    fireEvent.changeText(pass, '1234');
+
+    // hit button to check for success
+    fireEvent.press(button);
+    expect(mockNavigation.navigate).toHaveBeenCalledWith('Home');
+  })
+
+  test('does not redirect with bad login', () => {
+    const { getByTestId, getByText } = render(
+      <MockThemeProvider>
+        <Auth navigation={mockNavigation} />
+      </MockThemeProvider>
+    );
+
+    // get button
+    const button = getByTestId('AuthButton');
+
+    // hit button to check for failure
+    fireEvent.press(button);
+    const popup = getByText("Missing Login Credentials")
+    expect(popup).toBeTruthy();
+  })
 
 })

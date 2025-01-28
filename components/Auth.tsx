@@ -84,6 +84,7 @@ export default function Login({ navigation }: NavigationType) {
             
             {/* Sign in button */}
             <Button
+                testID='AuthButton'
                 onPress={checkTextEntry}
                 appearance='filled'
                 status='primary'

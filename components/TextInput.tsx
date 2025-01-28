@@ -24,12 +24,14 @@ interface TIProp{
     style?: ViewStyle;
     secureEntry?: boolean; // used for hiding passwords and other sensitive info
     status?: string;
+    id?: string;
 }
 
-const AddNotesTextInput: React.FC<TIProp> = ({ labelText, labelValue, onTextChange, placeholder, multiplelines, style, secureEntry, status }) => {
+const AddNotesTextInput: React.FC<TIProp> = ({ labelText, labelValue, onTextChange, placeholder, multiplelines, style, secureEntry, status, id }) => {
   const theme = useTheme();
     return (
       <Input
+        testID={id}
         label={evaProps => <Text {...evaProps} category="p2" style={{color: "white"}}>{labelText}</Text>}
         status={status || 'basic'}
         placeholder={placeholder}
