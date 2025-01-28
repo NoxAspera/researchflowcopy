@@ -1,7 +1,7 @@
 /**
  * Select Site Page
  * @author Blake Stambaugh and Megan Ostlie
- * Updated: 1/14/25 - MO
+ * Updated: 1/27/25 - MO
  * 
  * This page is the lets the user select the site they are currently at. When they
  * choose an action on the home page, they will be directed to this screen to determine
@@ -68,7 +68,9 @@ export default function SelectSite({navigation}: NavigationType) {
   if (from == 'AddNotes' || from == 'ViewNotes' || from == 'BadData' || from == 'InstrumentMaintenance' || from == 'TankTracker') {
     if (siteNames) {
       for (let i = 0; i < siteNames.length; i++) {
-        buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});
+        if (siteNames[i]) {
+          buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});
+        }
       }
     }
   } 

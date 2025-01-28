@@ -22,9 +22,9 @@ function csvify( object: TankRecord[])
     object.forEach(value => 
         { 
             //i really don't like this but i don't know how else to do it, this sucks
-            let newLine = `${value.fillId},${value.serial},${value.updatedAt},${value.pressure},${value.location},${value.owner},${value.co2},${value.co2Stdev},${value.co2Sterr},${value.co2N},${value.ch4},${value.ch4Stdev},${value.ch4Sterr},${value.ch4N},${value.co},${value.coStdev},${value.coSterr},${value.coN},${value.d13c},${value.d13cStdev},${value.d13cSterr},${value.d13cN},${value.d18o},${value.d18oStdev},${value.d18oSterr},${value.d18oN},${value.co2RelativeTo},${value.comment},${value.userId},${value.co2InstrumentId},${value.ch4InstrumentId},${value.coInstrumentId},${value.ottoCalibrationFile},${value.co2CalibrationFile},${value.ch4RelativeTo},${value.ch4CalibrationFile},${value.coRelativeTo},${value.coCalibrationFile},${value.coCalibrationFile},${value.tankId}\n`
+            let newLine = `${value.fillId},${value.serial},${value.updatedAt},${value.pressure},${value.location},${value.owner},${value.co2},${value.co2Stdev},${value.co2Sterr},${value.co2N},${value.ch4},${value.ch4Stdev},${value.ch4Sterr},${value.ch4N},${value.co},${value.coStdev},${value.coSterr},${value.coN},${value.d13c},${value.d13cStdev},${value.d13cSterr},${value.d13cN},${value.d18o},${value.d18oStdev},${value.d18oSterr},${value.d18oN},"${value.co2RelativeTo}","${value.comment}",${value.userId},${value.co2InstrumentId},${value.ch4InstrumentId},${value.coInstrumentId},"${value.ottoCalibrationFile}","${value.co2CalibrationFile}","${value.ch4RelativeTo}","${value.ch4CalibrationFile}","${value.coRelativeTo}","${value.coCalibrationFile}",${value.tankId}\n`
             returnString += newLine.replaceAll("undefined", "")
-            console.log("finished loop")
+            //console.log("finished loop")
         })
 
     return returnString
