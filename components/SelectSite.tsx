@@ -1,7 +1,7 @@
 /**
  * Select Site Page
  * @author Blake Stambaugh and Megan Ostlie
- * Updated: 1/14/25 - MO
+ * Updated: 1/27/25 - MO
  * 
  * This page is the lets the user select the site they are currently at. When they
  * choose an action on the home page, they will be directed to this screen to determine
@@ -14,7 +14,8 @@ import { RouteProp, useRoute } from '@react-navigation/native';
 import { Layout, Button, Text } from '@ui-kitten/components';
 import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
-import { getBadDataSites, getDirectory } from '../scripts/APIRequests';
+import { getBadDataSites, getDirectory, getTankList } from '../scripts/APIRequests';
+import { ScrollView } from 'react-native-gesture-handler';
 
 
 export default function SelectSite({navigation}: NavigationType) {
@@ -39,7 +40,11 @@ export default function SelectSite({navigation}: NavigationType) {
         } else if (from === 'BadData') {
           names = await getBadDataSites();
         } else if (from === 'InstrumentMaintenance') {
-          names = await getDirectory("instrument_maint")
+          names = await getDirectory("instrument_maint");
+        } else if (from === 'TankTracker') {
+          //names = getTankList();
+          //console.log(names);
+          setSiteNames(getTankList());
         }
         if(names?.success)
         {
@@ -58,10 +63,12 @@ export default function SelectSite({navigation}: NavigationType) {
   // data for buttons
   let buttonData = [];
 
-  if (from == 'AddNotes' || from == 'ViewNotes' || from == 'BadData' || from == 'InstrumentMaintenance') {
+  if (from == 'AddNotes' || from == 'ViewNotes' || from == 'BadData' || from == 'InstrumentMaintenance' || from == 'TankTracker') {
     if (siteNames) {
       for (let i = 0; i < siteNames.length; i++) {
-        buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});
+        if (siteNames[i]) {
+          buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});
+        }
       }
     }
   } 
@@ -103,7 +110,10 @@ export default function SelectSite({navigation}: NavigationType) {
   };
 
   return (
-    <Layout style={styles.container}>
+    <ApplicationProvider {...eva} theme={customTheme}>
+      <ScrollView>
+      <Layout style={styles.container}>
+
       <PopupProp
         popupText={message}
         popupColor={messageColor}
@@ -111,16 +121,19 @@ export default function SelectSite({navigation}: NavigationType) {
         visible={visible}
       />
 
-      {buttonData.map((button) => (
-        <Button key={button.id} style={styles.button} onPress={button.onPress}>
-          {(evaProps) => (
-            <Text {...evaProps} category="h6" style={{ color: "black" }}>
-              {button.label}
-            </Text>
-          )}
-        </Button>
-      ))}
-    </Layout>
+        {buttonData.map((button) => (
+          <Button
+            key={button.id}
+            style={styles.button}
+            onPress={button.onPress}
+          >
+          {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>{button.label}</Text>}
+            
+          </Button>
+        ))}
+      </Layout>
+      </ScrollView>
+    </ApplicationProvider>
   );
 }
 

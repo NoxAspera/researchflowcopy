@@ -22,9 +22,9 @@ function csvify( object: TankRecord[])
     object.forEach(value => 
         { 
             //i really don't like this but i don't know how else to do it, this sucks
-            let newLine = `${value.fillId},${value.serial},${value.updatedAt},${value.pressure},${value.location},${value.owner},${value.co2},${value.co2Stdev},${value.co2Sterr},${value.co2N},${value.ch4},${value.ch4Stdev},${value.ch4Sterr},${value.ch4N},${value.co},${value.coStdev},${value.coSterr},${value.coN},${value.d13c},${value.d13cStdev},${value.d13cSterr},${value.d13cN},${value.d18o},${value.d18oStdev},${value.d18oSterr},${value.d18oN},${value.co2RelativeTo},${value.comment},${value.userId},${value.co2InstrumentId},${value.ch4InstrumentId},${value.coInstrumentId},${value.ottoCalibrationFile},${value.co2CalibrationFile},${value.ch4RelativeTo},${value.ch4CalibrationFile},${value.coRelativeTo},${value.coCalibrationFile},${value.coCalibrationFile},${value.tankId}\n`
+            let newLine = `${value.fillId},${value.serial},${value.updatedAt},${value.pressure},${value.location},${value.owner},${value.co2},${value.co2Stdev},${value.co2Sterr},${value.co2N},${value.ch4},${value.ch4Stdev},${value.ch4Sterr},${value.ch4N},${value.co},${value.coStdev},${value.coSterr},${value.coN},${value.d13c},${value.d13cStdev},${value.d13cSterr},${value.d13cN},${value.d18o},${value.d18oStdev},${value.d18oSterr},${value.d18oN},"${value.co2RelativeTo}","${value.comment}",${value.userId},${value.co2InstrumentId},${value.ch4InstrumentId},${value.coInstrumentId},"${value.ottoCalibrationFile}","${value.co2CalibrationFile}","${value.ch4RelativeTo}","${value.ch4CalibrationFile}","${value.coRelativeTo}","${value.coCalibrationFile}",${value.tankId}\n`
             returnString += newLine.replaceAll("undefined", "")
-            console.log("finished loop")
+            //console.log("finished loop")
         })
 
     return returnString
@@ -147,10 +147,19 @@ export async function setTankTracker(newEntry: TankRecord)
  */
 export function getTankEntries(key:string)
 {
-    console.log(tankDict.get(key))
+    //console.log(tankDict.get(key))
     return tankDict.get(key)
 }
 
+export function getLatestTankEntry(key:string): TankRecord | undefined {
+    let entries = getTankEntries(key);
+    if (entries) {
+        return entries.reduce((latest, current) => {
+            return new Date(current.updatedAt) > new Date(latest.updatedAt) ? current : latest;
+          });
+    }
+}
+    
 /**
  * This method returns a list of TankId's in the csv 
  * @author August O'Rourke
@@ -187,11 +196,20 @@ export async function tankTrackerSpinUp()
     )
     try {
         const response = await fetch(requestOptions);
-        console.log(response)
+        //console.log(response)
         if (response.ok) {
             const data = await response.json();
             tankTrackerSha = data.sha
-            let tankData = await csv().fromString(atob(data.content))
+            // Decode base64 content
+            let decodedContent = atob(data.content);
+            console.log(decodedContent.charCodeAt(0));
+            // Remove UTF-8 BOM if it exists (0xEF, 0xBB, 0xBF)
+            if (decodedContent.charCodeAt(0) === 0xEF && decodedContent.charCodeAt(1) === 0xBB && decodedContent.charCodeAt(2) === 0xBF) {
+                // Remove the BOM (first 3 characters)
+                decodedContent = decodedContent.slice(3);
+            }
+            let tankData = await csv().fromString(decodedContent);
+            //console.log(tankData)
             let id_array: string[] =[]
             
             tankData.forEach(value => 
