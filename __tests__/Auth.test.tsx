@@ -1,7 +1,7 @@
 import Auth from '../components/Auth';
-import { fireEvent, render, userEvent } from '@testing-library/react-native'
-import { NaviProp, RootStackParamList } from '../components/types';
-import React, { useState } from 'react';
+import { fireEvent, render } from '@testing-library/react-native'
+import { NaviProp } from '../components/types';
+import React from 'react';
 import { MockThemeProvider } from '../components/MockThemeProvider';
 
 const mockNavigation: NaviProp = {
@@ -40,14 +40,13 @@ jest.mock('@react-navigation/native', () => ({
 
 
 describe('Login page', () => {
-  test('app renders correctly', () => {
-    const { getByText } = render(
+  test('page renders correctly', () => {
+    const { toJSON } = render(
     <MockThemeProvider>
       <Auth navigation={mockNavigation} />
     </MockThemeProvider>
   );
-    const text = getByText('Sign in using your GitHub credentials');
-    expect(text);
+  expect(toJSON()).toMatchSnapshot();
   });
 
   test('can login and have the page change', () => {
