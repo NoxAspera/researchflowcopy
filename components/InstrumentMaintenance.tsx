@@ -31,7 +31,7 @@ import PopupProp from './Popup';
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
-  let site = route.params?.site;
+  let site = route.params?.site ?? "";
   let instrumentName = site.slice(site.lastIndexOf("/") + 1);
   let needsLocation = site.includes("LGR");
 
