@@ -27,6 +27,7 @@ import {
   getInstrumentSite,
 } from "../scripts/APIRequests";
 import { ScrollView } from "react-native-gesture-handler";
+import PopupProp from './Popup';
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();

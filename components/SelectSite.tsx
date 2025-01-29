@@ -110,7 +110,6 @@ export default function SelectSite({navigation}: NavigationType) {
   };
 
   return (
-    <ApplicationProvider {...eva} theme={customTheme}>
       <ScrollView>
       <Layout style={styles.container}>
 
@@ -133,7 +132,6 @@ export default function SelectSite({navigation}: NavigationType) {
         ))}
       </Layout>
       </ScrollView>
-    </ApplicationProvider>
   );
 }
 

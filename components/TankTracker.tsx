@@ -16,6 +16,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import PopupProp from './Popup';
 import { getLatestTankEntry, setTankTracker, TankRecord } from '../scripts/APIRequests';
 import { Float } from 'react-native/Libraries/Types/CodegenTypes';
+import { customTheme } from './CustomTheme'
 
 export default function TankTracker({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
@@ -143,7 +144,6 @@ export default function TankTracker({ navigation }: NavigationType) {
       <KeyboardAvoidingView
                   behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                   style={styles.container}>
-        <ApplicationProvider {...eva} theme={customTheme}>
           <ScrollView>
             <Layout style={styles.container} level="1">
               
@@ -233,7 +233,6 @@ export default function TankTracker({ navigation }: NavigationType) {
               </Button>
             </Layout>
           </ScrollView>
-        </ApplicationProvider>
       </KeyboardAvoidingView>
     );
   }
