@@ -11,9 +11,7 @@
 import { StyleSheet } from 'react-native';
 import React, { Component, useEffect, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { ApplicationProvider, Layout, Button, Text } from '@ui-kitten/components';
-import * as eva from '@eva-design/eva';
-import { customTheme } from './CustomTheme'
+import { Layout, Button, Text } from '@ui-kitten/components';
 import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
 import { getBadDataSites, getDirectory, getTankList } from '../scripts/APIRequests';
@@ -117,11 +115,11 @@ export default function SelectSite({navigation}: NavigationType) {
       <Layout style={styles.container}>
 
       <PopupProp
-            popupText={message}
-            popupColor={messageColor}
-            onPress={setVisible}
-            visible={visible}
-          />
+        popupText={message}
+        popupColor={messageColor}
+        onPress={setVisible}
+        visible={visible}
+      />
 
         {buttonData.map((button) => (
           <Button

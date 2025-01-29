@@ -9,10 +9,8 @@
 import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useDebugValue, useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
-import { ApplicationProvider, Button, IndexPath, Layout, Select, SelectItem, Text } from '@ui-kitten/components';
-import * as eva from '@eva-design/eva';
+import { Button, IndexPath, Layout, Select, SelectItem, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
-import { customTheme } from './CustomTheme'
 import { NavigationType, routeProp } from './types'
 import { ScrollView } from 'react-native-gesture-handler';
 import PopupProp from './Popup';
@@ -161,14 +159,14 @@ export default function TankTracker({ navigation }: NavigationType) {
                 onPress={setVisible} 
                 visible={visible}/>
 
-              {/* Name input */}
-              <TextInput
-                labelText="Name"
-                labelValue={nameValue}
-                onTextChange={setNameValue}
-                placeholder="Jane Doe"
-                style={styles.textInput}
-              />
+            {/* Name input */}
+            <TextInput
+              labelText="Name"
+              labelValue={nameValue}
+              onTextChange={setNameValue}
+              placeholder="Jane Doe"
+              style={styles.textInput}
+            />
 
               {/* FillID input */}
               <TextInput
@@ -215,14 +213,14 @@ export default function TankTracker({ navigation }: NavigationType) {
                 style={styles.textInput}
               />
 
-              {/* notes entry */}
-              <TextInput
-                labelText="Notes"
-                labelValue={notesValue}
-                onTextChange={setNotesValue}
-                placeholder="Tank draining at normal rate."
-                style={styles.reasonText}
-              />
+            {/* notes entry */}
+            <TextInput
+              labelText="Notes"
+              labelValue={notesValue}
+              onTextChange={setNotesValue}
+              placeholder="Tank draining at normal rate."
+              style={styles.reasonText}
+            />
 
               {/* submit button */}
               <Button
