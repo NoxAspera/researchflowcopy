@@ -1,0 +1,1283 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Bad Data renders correctly 1`] = `
+<View
+  onLayout={[Function]}
+  style={
+    [
+      {
+        "alignItems": "stretch",
+        "flex": 1,
+        "justifyContent": "flex-start",
+      },
+      {
+        "paddingBottom": 0,
+      },
+    ]
+  }
+>
+  <View>
+    <View
+      appearance="default"
+      level="1"
+      style={
+        [
+          {
+            "backgroundColor": "#FFFFFF",
+          },
+          {
+            "alignItems": "stretch",
+            "flex": 1,
+            "justifyContent": "flex-start",
+          },
+        ]
+      }
+    >
+      <Text
+        appearance="default"
+        category="h1"
+        status="basic"
+        style={
+          [
+            {
+              "color": "#222B45",
+              "fontFamily": "System",
+              "fontSize": 36,
+              "fontWeight": "800",
+            },
+            {
+              "textAlign": "center",
+            },
+          ]
+        }
+      />
+      <View
+        appearance="default"
+        level="1"
+        style={
+          [
+            {
+              "backgroundColor": "#FFFFFF",
+            },
+            undefined,
+          ]
+        }
+      />
+      <View
+        style={
+          {
+            "flex": 1,
+            "margin": 6,
+          }
+        }
+      >
+        <Text
+          appearance="default"
+          category="p1"
+          status="basic"
+          style={
+            [
+              {
+                "color": "#222B45",
+                "fontFamily": "System",
+                "fontSize": 15,
+                "fontWeight": "400",
+              },
+              [
+                {
+                  "textAlign": "left",
+                },
+                {
+                  "color": "#A0A0A0",
+                  "fontFamily": "System",
+                  "fontSize": 12,
+                  "fontWeight": "800",
+                  "marginBottom": 4,
+                },
+              ],
+            ]
+          }
+        >
+          Instrument
+        </Text>
+        <View>
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onClick={[Function]}
+            onLayout={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#F7F9FC",
+                "borderColor": "#E4E9F2",
+                "borderRadius": 4,
+                "borderWidth": 1,
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+                "minHeight": 40,
+                "opacity": 1,
+                "paddingHorizontal": 8,
+                "paddingVertical": 7,
+              }
+            }
+          >
+            <Text
+              appearance="default"
+              category="p1"
+              ellipsizeMode="tail"
+              numberOfLines={1}
+              status="basic"
+              style={
+                [
+                  {
+                    "color": "#222B45",
+                    "fontFamily": "System",
+                    "fontSize": 15,
+                    "fontWeight": "400",
+                  },
+                  [
+                    {
+                      "flex": 1,
+                      "textAlign": "left",
+                    },
+                    {
+                      "color": "#A0A0A0",
+                      "fontFamily": "System",
+                      "fontSize": 15,
+                      "fontWeight": "400",
+                      "marginHorizontal": 8,
+                    },
+                    "",
+                  ],
+                ]
+              }
+            >
+              Choose an instrument
+            </Text>
+            <View
+              collapsable={false}
+              style={
+                {
+                  "transform": [
+                    {
+                      "rotate": "0deg",
+                    },
+                  ],
+                }
+              }
+            >
+              <RNSVGSvgView
+                align="xMidYMid"
+                bbHeight={24}
+                bbWidth={24}
+                fill="#A0A0A0"
+                focusable={false}
+                meetOrSlice={0}
+                minX={0}
+                minY={0}
+                style={
+                  [
+                    {
+                      "backgroundColor": "transparent",
+                      "borderWidth": 0,
+                    },
+                    {
+                      "height": 24,
+                      "marginHorizontal": 8,
+                      "width": 24,
+                    },
+                    {
+                      "flex": 0,
+                      "height": 24,
+                      "width": 24,
+                    },
+                  ]
+                }
+                vbHeight={24}
+                vbWidth={24}
+              >
+                <RNSVGGroup
+                  fill={
+                    {
+                      "payload": 4288716960,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                    ]
+                  }
+                >
+                  <RNSVGGroup
+                    fill={
+                      {
+                        "payload": 4278190080,
+                        "type": 0,
+                      }
+                    }
+                  >
+                    <RNSVGGroup
+                      fill={
+                        {
+                          "payload": 4278190080,
+                          "type": 0,
+                        }
+                      }
+                    >
+                      <RNSVGRect
+                        fill={
+                          {
+                            "payload": 4278190080,
+                            "type": 0,
+                          }
+                        }
+                        height="24"
+                        opacity={0}
+                        width="24"
+                        x={0}
+                        y={0}
+                      />
+                      <RNSVGPath
+                        d="M12 15.5a1 1 0 0 1-.71-.29l-4-4a1 1 0 1 1 1.42-1.42L12 13.1l3.3-3.18a1 1 0 1 1 1.38 1.44l-4 3.86a1 1 0 0 1-.68.28z"
+                        fill={
+                          {
+                            "payload": 4278190080,
+                            "type": 0,
+                          }
+                        }
+                      />
+                    </RNSVGGroup>
+                  </RNSVGGroup>
+                </RNSVGGroup>
+              </RNSVGSvgView>
+            </View>
+          </View>
+        </View>
+      </View>
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={false}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "flex": 1,
+            "margin": 6,
+            "opacity": 1,
+          }
+        }
+        testID="@undefined/container"
+      >
+        <Text
+          appearance="default"
+          category="p2"
+          status="basic"
+          style={
+            [
+              {
+                "color": "#222B45",
+                "fontFamily": "System",
+                "fontSize": 13,
+                "fontWeight": "400",
+              },
+              {
+                "color": "black",
+              },
+            ]
+          }
+        >
+          Old ID
+        </Text>
+        <View
+          style={
+            [
+              {
+                "backgroundColor": "#F7F9FC",
+                "borderColor": "#E4E9F2",
+                "borderRadius": 4,
+                "borderWidth": 1,
+                "minHeight": 40,
+                "paddingHorizontal": 8,
+                "paddingVertical": 7,
+              },
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "width": "100%",
+              },
+            ]
+          }
+        >
+          <TextInput
+            appearance="default"
+            editable={true}
+            multiline={false}
+            onBlur={[Function]}
+            onChangeText={[Function]}
+            onFocus={[Function]}
+            onMouseEnter={[Function]}
+            onMouseLeave={[Function]}
+            placeholder="123456"
+            placeholderTextColor="#A0A0A0"
+            secureTextEntry={false}
+            size="medium"
+            status="basic"
+            style={
+              [
+                {
+                  "color": "#222B45",
+                  "fontFamily": "System",
+                  "fontSize": 15,
+                  "fontWeight": "normal",
+                  "marginHorizontal": 8,
+                },
+                {
+                  "flexBasis": "auto",
+                  "flexGrow": 1,
+                  "flexShrink": 1,
+                },
+                null,
+                {
+                  "fontSize": 18,
+                  "maxHeight": 24,
+                },
+              ]
+            }
+            testID="@undefined/input"
+            value="all"
+          />
+        </View>
+      </View>
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={false}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "flex": 1,
+            "margin": 6,
+            "opacity": 1,
+          }
+        }
+        testID="@undefined/container"
+      >
+        <Text
+          appearance="default"
+          category="p2"
+          status="basic"
+          style={
+            [
+              {
+                "color": "#222B45",
+                "fontFamily": "System",
+                "fontSize": 13,
+                "fontWeight": "400",
+              },
+              {
+                "color": "black",
+              },
+            ]
+          }
+        >
+          New ID
+        </Text>
+        <View
+          style={
+            [
+              {
+                "backgroundColor": "#F7F9FC",
+                "borderColor": "#E4E9F2",
+                "borderRadius": 4,
+                "borderWidth": 1,
+                "minHeight": 40,
+                "paddingHorizontal": 8,
+                "paddingVertical": 7,
+              },
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "width": "100%",
+              },
+            ]
+          }
+        >
+          <TextInput
+            appearance="default"
+            editable={true}
+            multiline={false}
+            onBlur={[Function]}
+            onChangeText={[Function]}
+            onFocus={[Function]}
+            onMouseEnter={[Function]}
+            onMouseLeave={[Function]}
+            placeholder="67890"
+            placeholderTextColor="#A0A0A0"
+            secureTextEntry={false}
+            size="medium"
+            status="basic"
+            style={
+              [
+                {
+                  "color": "#222B45",
+                  "fontFamily": "System",
+                  "fontSize": 15,
+                  "fontWeight": "normal",
+                  "marginHorizontal": 8,
+                },
+                {
+                  "flexBasis": "auto",
+                  "flexGrow": 1,
+                  "flexShrink": 1,
+                },
+                null,
+                {
+                  "fontSize": 18,
+                  "maxHeight": 24,
+                },
+              ]
+            }
+            testID="@undefined/input"
+            value="NA"
+          />
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "flex": 1,
+            "margin": 6,
+          }
+        }
+      >
+        <Text
+          appearance="default"
+          category="p1"
+          status="basic"
+          style={
+            [
+              {
+                "color": "#222B45",
+                "fontFamily": "System",
+                "fontSize": 15,
+                "fontWeight": "400",
+              },
+              [
+                {
+                  "color": "#A0A0A0",
+                  "fontFamily": "System",
+                  "fontSize": 12,
+                  "fontWeight": "800",
+                  "marginBottom": 4,
+                },
+                {
+                  "textAlign": "left",
+                },
+              ],
+            ]
+          }
+        >
+          Start Date
+        </Text>
+        <View>
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onClick={[Function]}
+            onLayout={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#F7F9FC",
+                "borderColor": "#E4E9F2",
+                "borderRadius": 4,
+                "borderWidth": 1,
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+                "minHeight": 40,
+                "opacity": 1,
+                "paddingHorizontal": 8,
+                "paddingVertical": 7,
+              }
+            }
+          >
+            <Text
+              appearance="default"
+              category="p1"
+              ellipsizeMode="tail"
+              numberOfLines={1}
+              status="basic"
+              style={
+                [
+                  {
+                    "color": "#222B45",
+                    "fontFamily": "System",
+                    "fontSize": 15,
+                    "fontWeight": "400",
+                  },
+                  {
+                    "color": "#A0A0A0",
+                    "fontFamily": "System",
+                    "fontSize": 15,
+                    "fontWeight": "normal",
+                    "marginHorizontal": 8,
+                  },
+                ]
+              }
+            >
+              Start Date
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={false}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "flex": 1,
+            "margin": 6,
+            "opacity": 1,
+          }
+        }
+        testID="@undefined/container"
+      >
+        <Text
+          appearance="default"
+          category="p2"
+          status="basic"
+          style={
+            [
+              {
+                "color": "#222B45",
+                "fontFamily": "System",
+                "fontSize": 13,
+                "fontWeight": "400",
+              },
+              {
+                "color": "black",
+              },
+            ]
+          }
+        >
+          Start Time
+        </Text>
+        <View
+          style={
+            [
+              {
+                "backgroundColor": "#F7F9FC",
+                "borderColor": "#E4E9F2",
+                "borderRadius": 4,
+                "borderWidth": 1,
+                "minHeight": 40,
+                "paddingHorizontal": 8,
+                "paddingVertical": 7,
+              },
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "width": "100%",
+              },
+            ]
+          }
+        >
+          <TextInput
+            appearance="default"
+            editable={true}
+            multiline={false}
+            onBlur={[Function]}
+            onChangeText={[Function]}
+            onFocus={[Function]}
+            onMouseEnter={[Function]}
+            onMouseLeave={[Function]}
+            placeholder="12:00:00"
+            placeholderTextColor="#A0A0A0"
+            secureTextEntry={false}
+            size="medium"
+            status="basic"
+            style={
+              [
+                {
+                  "color": "#222B45",
+                  "fontFamily": "System",
+                  "fontSize": 15,
+                  "fontWeight": "normal",
+                  "marginHorizontal": 8,
+                },
+                {
+                  "flexBasis": "auto",
+                  "flexGrow": 1,
+                  "flexShrink": 1,
+                },
+                null,
+                {
+                  "fontSize": 18,
+                  "maxHeight": 24,
+                },
+              ]
+            }
+            testID="@undefined/input"
+            value=""
+          />
+        </View>
+      </View>
+      <View
+        style={
+          {
+            "flex": 1,
+            "margin": 6,
+          }
+        }
+      >
+        <Text
+          appearance="default"
+          category="p1"
+          status="basic"
+          style={
+            [
+              {
+                "color": "#222B45",
+                "fontFamily": "System",
+                "fontSize": 15,
+                "fontWeight": "400",
+              },
+              [
+                {
+                  "color": "#A0A0A0",
+                  "fontFamily": "System",
+                  "fontSize": 12,
+                  "fontWeight": "800",
+                  "marginBottom": 4,
+                },
+                {
+                  "textAlign": "left",
+                },
+              ],
+            ]
+          }
+        >
+          End Date
+        </Text>
+        <View>
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onClick={[Function]}
+            onLayout={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#F7F9FC",
+                "borderColor": "#E4E9F2",
+                "borderRadius": 4,
+                "borderWidth": 1,
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+                "minHeight": 40,
+                "opacity": 1,
+                "paddingHorizontal": 8,
+                "paddingVertical": 7,
+              }
+            }
+          >
+            <Text
+              appearance="default"
+              category="p1"
+              ellipsizeMode="tail"
+              numberOfLines={1}
+              status="basic"
+              style={
+                [
+                  {
+                    "color": "#222B45",
+                    "fontFamily": "System",
+                    "fontSize": 15,
+                    "fontWeight": "400",
+                  },
+                  {
+                    "color": "#A0A0A0",
+                    "fontFamily": "System",
+                    "fontSize": 15,
+                    "fontWeight": "normal",
+                    "marginHorizontal": 8,
+                  },
+                ]
+              }
+            >
+              End Date
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={false}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "flex": 1,
+            "margin": 6,
+            "opacity": 1,
+          }
+        }
+        testID="@undefined/container"
+      >
+        <Text
+          appearance="default"
+          category="p2"
+          status="basic"
+          style={
+            [
+              {
+                "color": "#222B45",
+                "fontFamily": "System",
+                "fontSize": 13,
+                "fontWeight": "400",
+              },
+              {
+                "color": "black",
+              },
+            ]
+          }
+        >
+          End Time
+        </Text>
+        <View
+          style={
+            [
+              {
+                "backgroundColor": "#F7F9FC",
+                "borderColor": "#E4E9F2",
+                "borderRadius": 4,
+                "borderWidth": 1,
+                "minHeight": 40,
+                "paddingHorizontal": 8,
+                "paddingVertical": 7,
+              },
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "width": "100%",
+              },
+            ]
+          }
+        >
+          <TextInput
+            appearance="default"
+            editable={true}
+            multiline={false}
+            onBlur={[Function]}
+            onChangeText={[Function]}
+            onFocus={[Function]}
+            onMouseEnter={[Function]}
+            onMouseLeave={[Function]}
+            placeholder="12:00:00"
+            placeholderTextColor="#A0A0A0"
+            secureTextEntry={false}
+            size="medium"
+            status="basic"
+            style={
+              [
+                {
+                  "color": "#222B45",
+                  "fontFamily": "System",
+                  "fontSize": 15,
+                  "fontWeight": "normal",
+                  "marginHorizontal": 8,
+                },
+                {
+                  "flexBasis": "auto",
+                  "flexGrow": 1,
+                  "flexShrink": 1,
+                },
+                null,
+                {
+                  "fontSize": 18,
+                  "maxHeight": 24,
+                },
+              ]
+            }
+            testID="@undefined/input"
+            value=""
+          />
+        </View>
+      </View>
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={false}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "flex": 1,
+            "margin": 6,
+            "opacity": 1,
+          }
+        }
+        testID="@undefined/container"
+      >
+        <Text
+          appearance="default"
+          category="p2"
+          status="basic"
+          style={
+            [
+              {
+                "color": "#222B45",
+                "fontFamily": "System",
+                "fontSize": 13,
+                "fontWeight": "400",
+              },
+              {
+                "color": "black",
+              },
+            ]
+          }
+        >
+          Name
+        </Text>
+        <View
+          style={
+            [
+              {
+                "backgroundColor": "#F7F9FC",
+                "borderColor": "#E4E9F2",
+                "borderRadius": 4,
+                "borderWidth": 1,
+                "minHeight": 40,
+                "paddingHorizontal": 8,
+                "paddingVertical": 7,
+              },
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "width": "100%",
+              },
+            ]
+          }
+        >
+          <TextInput
+            appearance="default"
+            editable={true}
+            multiline={false}
+            onBlur={[Function]}
+            onChangeText={[Function]}
+            onFocus={[Function]}
+            onMouseEnter={[Function]}
+            onMouseLeave={[Function]}
+            placeholder="John Doe"
+            placeholderTextColor="#A0A0A0"
+            secureTextEntry={false}
+            size="medium"
+            status="basic"
+            style={
+              [
+                {
+                  "color": "#222B45",
+                  "fontFamily": "System",
+                  "fontSize": 15,
+                  "fontWeight": "normal",
+                  "marginHorizontal": 8,
+                },
+                {
+                  "flexBasis": "auto",
+                  "flexGrow": 1,
+                  "flexShrink": 1,
+                },
+                null,
+                {
+                  "fontSize": 18,
+                  "maxHeight": 24,
+                },
+              ]
+            }
+            testID="@undefined/input"
+            value=""
+          />
+        </View>
+      </View>
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={false}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "flex": 4,
+            "margin": 6,
+            "opacity": 1,
+          }
+        }
+        testID="@undefined/container"
+      >
+        <Text
+          appearance="default"
+          category="p2"
+          status="basic"
+          style={
+            [
+              {
+                "color": "#222B45",
+                "fontFamily": "System",
+                "fontSize": 13,
+                "fontWeight": "400",
+              },
+              {
+                "color": "black",
+              },
+            ]
+          }
+        >
+          Reason for Bad Data
+        </Text>
+        <View
+          style={
+            [
+              {
+                "backgroundColor": "#F7F9FC",
+                "borderColor": "#E4E9F2",
+                "borderRadius": 4,
+                "borderWidth": 1,
+                "minHeight": 40,
+                "paddingHorizontal": 8,
+                "paddingVertical": 7,
+              },
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "width": "100%",
+              },
+            ]
+          }
+        >
+          <TextInput
+            appearance="default"
+            editable={true}
+            multiline={true}
+            onBlur={[Function]}
+            onChangeText={[Function]}
+            onFocus={[Function]}
+            onMouseEnter={[Function]}
+            onMouseLeave={[Function]}
+            placeholder="Its wack."
+            placeholderTextColor="#A0A0A0"
+            secureTextEntry={false}
+            size="medium"
+            status="basic"
+            style={
+              [
+                {
+                  "color": "#222B45",
+                  "fontFamily": "System",
+                  "fontSize": 15,
+                  "fontWeight": "normal",
+                  "marginHorizontal": 8,
+                },
+                {
+                  "flexBasis": "auto",
+                  "flexGrow": 1,
+                  "flexShrink": 1,
+                },
+                null,
+                {
+                  "fontSize": 18,
+                  "maxHeight": 100,
+                },
+              ]
+            }
+            testID="@undefined/input"
+            value=""
+          />
+        </View>
+      </View>
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#596CA7",
+            "borderColor": "#596CA7",
+            "borderRadius": 4,
+            "borderWidth": 1,
+            "flexDirection": "row",
+            "justifyContent": "center",
+            "margin": 15,
+            "minHeight": 40,
+            "minWidth": 40,
+            "opacity": 1,
+            "paddingHorizontal": 10,
+            "paddingVertical": 12,
+          }
+        }
+      >
+        <Text
+          appearance="default"
+          category="p1"
+          status="basic"
+          style={
+            [
+              {
+                "color": "#222B45",
+                "fontFamily": "System",
+                "fontSize": 15,
+                "fontWeight": "400",
+              },
+              {
+                "color": "#FFFFFF",
+                "fontFamily": "System",
+                "fontSize": 14,
+                "fontWeight": "bold",
+                "marginHorizontal": 10,
+              },
+            ]
+          }
+        >
+          Submit
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+`;
