@@ -582,7 +582,15 @@ export async function setFile(siteName: string, content: string, commitMessage: 
     }
     const hash = pullResponse.data.sha
     const existingContent = atob(pullResponse.data.content)
-    const siteHeader = `# Site id: **${siteName}**`
+    let siteHeader;
+    if (siteName.includes("mobile/")) {
+        const site = siteName.replace("mobile/", "");
+        siteHeader = `# Site id: **${site}** \n`
+        siteHeader += existingContent.split("\n")[1];
+        
+    } else {
+        siteHeader = `# Site id: **${siteName}**`
+    }
     const existingNotes = existingContent.substring(siteHeader.length, existingContent.length -1) 
     const fullDoc = btoa(siteHeader +"\n" + content + existingNotes)
 

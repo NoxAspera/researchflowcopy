@@ -35,8 +35,10 @@ export default function SelectSite({navigation}: NavigationType) {
     const fetchSiteNames = async () => {
       try {
         let names;
+        let mobile_names;
         if (from === 'AddNotes' || from === 'ViewNotes') {
           names = await getDirectory("site_notes");
+          mobile_names = await getDirectory("site_notes/mobile");
         } else if (from === 'BadData') {
           names = await getBadDataSites();
         } else if (from === 'InstrumentMaintenance') {
@@ -48,6 +50,9 @@ export default function SelectSite({navigation}: NavigationType) {
         }
         if(names?.success)
         {
+          if (mobile_names?.success) {
+            names.data.push(...mobile_names.data.map(item => "mobile/" + item));
+          }
           setSiteNames(names.data);
         } // Set the fetched site names
     }
