@@ -237,7 +237,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             setHighValue(latestEntry.high_cal.value || "");
           }
           if (latestEntry.instrument) {
-            setInstruments([latestEntry.instrument]);
+            setInstrumentInput(latestEntry.instrument);
           }
       }
   }, [latestEntry]);
@@ -264,9 +264,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             removePopup={setVisible2}
             visible={visible2}/>
 
-            {/* drop down menu for instruments */}
-            {latestEntry && !latestEntry.instrument ? (
-              // Prompt the user to input an instrument if none is parsed
+            {/* text box for instrument */}
               <TextInput
                 labelText="Instrument"
                 labelValue={instrumentInput}
@@ -274,20 +272,6 @@ export default function AddNotes({ navigation }: NavigationType) {
                 placeholder="Please enter instrument name"
                 style={styles.inputText}
               />
-            ) : (
-            <Select label={evaProps => <Text {...evaProps} category="c1" style={{color: isDarkMode ? "white" : "black"}}>Instrument</Text>}
-              selectedIndex={selectedIndex}
-              onSelect={(index) => setSelectedIndex(index as IndexPath)}
-              value={instruments[selectedIndex.row]}
-              style={{margin: 8, flex: 1}}>
-                {instruments.map((instrument, index) => (
-                  <SelectItem 
-                    key={index} 
-                    title={instrument} 
-                  />
-                ))}
-            </Select>
-            )}
 
             {/* text inputs */}
             {/* Name input */}
