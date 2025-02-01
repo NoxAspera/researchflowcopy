@@ -11,9 +11,7 @@
 import { StyleSheet } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { ApplicationProvider, Layout, Button } from '@ui-kitten/components';
-import * as eva from '@eva-design/eva';
-import { customTheme } from './CustomTheme'
+import { Layout, Button } from '@ui-kitten/components';
 import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
 import { getBadDataSites, getDirectory } from '../scripts/APIRequests';
@@ -65,27 +63,20 @@ export default function SelectInstrument({navigation}: NavigationType) {
   };
 
   return (
-    <ApplicationProvider {...eva} theme={customTheme}>
-      <Layout style={styles.container}>
-
+    <Layout style={styles.container}>
       <PopupProp
-            popupText={message}
-            popupColor={messageColor}
-            onPress={setVisible}
-            visible={visible}
-          />
+        popupText={message}
+        popupColor={messageColor}
+        onPress={setVisible}
+        visible={visible}
+      />
 
-        {buttonData.map((button) => (
-          <Button
-            key={button.id}
-            style={styles.button}
-            onPress={button.onPress}
-          >
-            {button.label}
-          </Button>
-        ))}
-      </Layout>
-    </ApplicationProvider>
+      {buttonData.map((button) => (
+        <Button key={button.id} style={styles.button} onPress={button.onPress}>
+          {button.label}
+        </Button>
+      ))}
+    </Layout>
   );
 }
 

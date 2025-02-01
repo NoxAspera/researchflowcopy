@@ -1,7 +1,7 @@
 /**
  * Select Site Page
  * @author Blake Stambaugh and Megan Ostlie
- * Updated: 1/14/25 - MO
+ * Updated: 1/27/25 - MO
  * 
  * This page is the lets the user select the site they are currently at. When they
  * choose an action on the home page, they will be directed to this screen to determine
@@ -11,12 +11,11 @@
 import { StyleSheet } from 'react-native';
 import React, { Component, useEffect, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { ApplicationProvider, Layout, Button, Text } from '@ui-kitten/components';
-import * as eva from '@eva-design/eva';
-import { customTheme } from './CustomTheme'
+import { Layout, Button, Text } from '@ui-kitten/components';
 import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
-import { getBadDataSites, getDirectory } from '../scripts/APIRequests';
+import { getBadDataSites, getDirectory, getTankList, tankTrackerSpinUp } from '../scripts/APIRequests';
+import { ScrollView } from 'react-native-gesture-handler';
 
 
 export default function SelectSite({navigation}: NavigationType) {
@@ -41,7 +40,11 @@ export default function SelectSite({navigation}: NavigationType) {
         } else if (from === 'BadData') {
           names = await getBadDataSites();
         } else if (from === 'InstrumentMaintenance') {
-          names = await getDirectory("instrument_maint")
+          names = await getDirectory("instrument_maint");
+        } else if (from === 'TankTracker') {
+          //names = getTankList();
+          await tankTrackerSpinUp()
+          setSiteNames(getTankList());
         }
         if(names?.success)
         {
@@ -60,10 +63,12 @@ export default function SelectSite({navigation}: NavigationType) {
   // data for buttons
   let buttonData = [];
 
-  if (from == 'AddNotes' || from == 'ViewNotes' || from == 'BadData' || from == 'InstrumentMaintenance') {
+  if (from == 'AddNotes' || from == 'ViewNotes' || from == 'BadData' || from == 'InstrumentMaintenance' || from == 'TankTracker') {
     if (siteNames) {
       for (let i = 0; i < siteNames.length; i++) {
-        buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});
+        if (siteNames[i]) {
+          buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});
+        }
       }
     }
   } 
@@ -105,15 +110,15 @@ export default function SelectSite({navigation}: NavigationType) {
   };
 
   return (
-    <ApplicationProvider {...eva} theme={customTheme}>
+      <ScrollView>
       <Layout style={styles.container}>
 
       <PopupProp
-            popupText={message}
-            popupColor={messageColor}
-            onPress={setVisible}
-            visible={visible}
-          />
+        popupText={message}
+        popupColor={messageColor}
+        onPress={setVisible}
+        visible={visible}
+      />
 
         {buttonData.map((button) => (
           <Button
@@ -126,7 +131,7 @@ export default function SelectSite({navigation}: NavigationType) {
           </Button>
         ))}
       </Layout>
-    </ApplicationProvider>
+      </ScrollView>
   );
 }
 
@@ -135,6 +140,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-around',
     padding: 20,
+    paddingVertical: 20,
   },
   button: {
     paddingVertical: 15,
@@ -143,4 +149,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: "#06b4e0"
   },
+  
 });

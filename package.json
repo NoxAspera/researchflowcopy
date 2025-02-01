@@ -25,6 +25,8 @@
     "cocoapods": "^0.0.0",
     "crypto": "^1.0.1",
     "eas": "^0.1.0",
+    "@ui-kitten/eva-icons": "^5.3.1",
+    "csvtojson": "^2.0.10",
     "expo": "^52.0.23",
     "expo-auth-session": "~6.0.2",
     "expo-crypto": "^14.0.2",
