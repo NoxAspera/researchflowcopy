@@ -74,11 +74,72 @@ export interface TankRecord {
     comment?: string;
   };
 
+export interface visit
+{
+    date: string,
+    name: string,
+    site: string,
+    equipment: string,
+    notes: string,
+}
+
 let githubToken: string | null = null;
 
 let tankDict: Map<string, TankRecord[]>;
 
 let tankTrackerSha = ""
+
+export async function setVisitFile(visit: visit, commitMessage: string)
+{
+    const pullResponse = (await getFile(`researchflow_data/visits`))
+    let existingContent = ""
+    let hash = ""
+    if(pullResponse.success)
+    {
+        hash = pullResponse.data.sha
+        existingContent = atob(pullResponse.data.content) + "\n"
+        
+    }
+    const fullDoc = btoa(existingContent + JSON.stringify(visit))
+
+    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/researchflow_data/visits.md`;
+    let bodyString = `{"message":"${commitMessage}","content":"${fullDoc}"`
+    if (hash!== "")
+    {
+        bodyString+= `,"sha":"${hash}"}`
+    }
+    console.log(bodyString)
+    const headers = new Headers();
+    headers.append("User-Agent", "ResearchFlow");
+    headers.append("Accept", "application/vnd.github+json");
+    headers.append("Authorization", `Bearer ${githubToken}`);
+    headers.append("X-GitHub-Api-Version", "2022-11-28");
+
+    const requestOptions: RequestInfo = new Request(url, 
+        {
+            method: "PUT",
+            headers: headers,
+            body: bodyString,
+            redirect: "follow"
+        }
+    )
+    
+    try {
+        const response = await fetch(requestOptions);
+        console.log(response)
+        if (response.ok) {
+            const data = await response.json();
+            return { success: true, data };
+        } else {
+            const errorData = await response.json();
+            return { success: false, error: errorData.message };
+        }
+    } catch (error) {
+        return { success: false, error: error };
+    }
+}
+
+
 /**
  * Sets the GitHub token for subsequent API requests.
  * @param token The personal access token from the login screen.
