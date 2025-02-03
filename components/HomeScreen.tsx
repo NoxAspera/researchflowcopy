@@ -15,11 +15,9 @@ const { width, height } = Dimensions.get("window"); //this pulls in the screen w
 import { tankTrackerSpinUp, setVisitFile, getFileContents, visit } from '../scripts/APIRequests';
 
 export default function HomeScreen({ navigation }: NavigationType) {
-  //setInstrumentFile("instrument_maint/LGR_UGGA/LGR-13-0075", "testing", "updating from research flow", false)
-  //setInstrumentFile("instrument_maint/Teledyne/T200", "testing", "updating from research flow", false)
+
   tankTrackerSpinUp()
-  const visit: visit = {date: "2025-2-24", equipment: "pencil", name: "August", notes: "testing", site: "test"}
-  setVisitFile(visit, "updating from researchflow")
+  
   return (
     <Layout style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
