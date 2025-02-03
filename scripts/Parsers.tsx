@@ -27,6 +27,18 @@ export interface Entry {
 }
 /**
  * @author Megan Ostlie
+ *  an interface for the information inside mobile sites
+ */
+export interface MobileEntry {
+    time_in: string | null;
+    time_out: string | null;
+    names: string | null;
+    instrument: string | null;
+    tank: TankInfo | null;
+    additional_notes: string | null;
+}
+/**
+ * @author Megan Ostlie
  * a small inteface to contain the entire document
  * 
  */
@@ -46,7 +58,7 @@ export function parseNotes(text: string): ParsedData {
     const namePattern = /- Name: (.*?)\n/;
     const instrumentPattern = /- Instrument: (.*?)\n/;
     const n2Pattern = /- N2: (.*?) psi\n/;
-    const tankPattern = /- (LTS|Low Cal|Mid Cal|High Cal): (.*?) value (.*?) ppm (\d+ psi)/g;
+    const tankPattern = /- (LTS|Low Cal|Mid Cal|High Cal|Tank): (.*?) value (.*?) ppm (\d+ psi)/g;
     const additionalNotesPattern = /- (?!Time|Name|Instrument|N2|LTS|Low cal|Mid cal|High cal)(.*)/g;
 
     // Parse site ID
@@ -84,6 +96,7 @@ export function parseNotes(text: string): ParsedData {
             low_cal: null,
             mid_cal: null,
             high_cal: null,
+            tank: null,
         };
         let tankMatch;
         while ((tankMatch = tankPattern.exec(block)) !== null) {
@@ -112,6 +125,7 @@ export function parseNotes(text: string): ParsedData {
             low_cal: tanks.low_cal,
             mid_cal: tanks.mid_cal,
             high_cal: tanks.high_cal,
+            tank: tanks.tank,
             additional_notes: additionalNotes,
         };
     });
@@ -152,6 +166,34 @@ export function buildNotes(data: Entry): string
     result += `- Low Cal: ${data.low_cal?.id} value ${data.low_cal?.value} ${data.low_cal?.unit} ${data.low_cal?.pressure} psi\n`;
     result += `- Mid Cal: ${data.mid_cal?.id} value ${data.mid_cal?.value} ${data.mid_cal?.unit} ${data.mid_cal?.pressure} psi\n`;
     result += `- High Cal: ${data.high_cal?.id} value ${data.high_cal?.value} ${data.high_cal?.unit} ${data.high_cal?.pressure} psi\n`;
+    if(data.additional_notes != "")
+    {
+        result += `- ${data.additional_notes}\n`;
+    }
+    return result
+}
+
+/**
+ * @author August O'Rourke
+ * 
+ * This method should build a string that makes a valid entry for a document from the repository for mobile sites
+ * @param data - the data for the new entry in the document
+ */
+export function buildMobileNotes(data: MobileEntry): string
+{
+    let result:string = "---\n"
+
+    result += `- Time in: ${data.time_in}Z\n`;
+    result += `- Time out: ${data.time_out}Z\n`;
+    result += `- Name: ${data.names}\n`;
+    if(data.instrument != null)
+    {
+        result += `- Instrument: ${data.instrument}\n`
+    }
+    if(data.tank != null)
+    {
+        result += `- Tank: ${data.tank?.id} value ${data.tank?.value} ppm ${data.tank?.pressure} psi\n`;
+    }
     if(data.additional_notes != "")
     {
         result += `- ${data.additional_notes}\n`;

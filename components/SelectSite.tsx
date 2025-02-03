@@ -91,7 +91,11 @@ export default function SelectSite({navigation}: NavigationType) {
   const handleConfirm = (selectedSite: string) => {
     if(from === 'AddNotes')
     {
-      navigation.navigate('AddNotes', {site: selectedSite}); //{site: selectValue} tells the AddNotes what the selected value is
+      if (selectedSite.includes("mobile/")) {
+        navigation.navigate('AddNotesMobile', {site: selectedSite});
+      } else {
+        navigation.navigate('AddNotes', {site: selectedSite}); //{site: selectValue} tells the AddNotes what the selected value is
+      }
     }
     else if(from === 'ViewNotes')
     {

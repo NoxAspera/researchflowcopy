@@ -16,6 +16,7 @@ export type RootStackParamList = {
 
     // used for site select
     AddNotes: { site: string };
+    AddNotesMobile: { site: string };
     ViewNotes: { site: string };
     BadData: { site: string };
     InstrumentMaintenance: { site: string };
