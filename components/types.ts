@@ -13,6 +13,7 @@ export type RootStackParamList = {
     // used for home screen
     SelectSite: { from: string }; 
     SelectInstrument: { from: string};
+    SelectTank: { from: string};
 
     // used for site select
     AddNotes: { site: string };

@@ -1,75 +1,128 @@
 /**
- * depreciated
+ * Select Tank Page
+ * @author Blake Stambaugh and Megan Ostlie
+ * Updated: 2/3/25 - MO
+ * 
+ * This page is the lets the user select the tank they want to update. Once 
+ * a tank is selected, the page will navigate to the TankTracker.
  */
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import React, { useState } from 'react';
-import { useRoute } from '@react-navigation/native';
+import { StyleSheet, KeyboardAvoidingView, Platform, View } from 'react-native';
+import React, { Component, useEffect, useState } from 'react';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import { Layout, Button, Text } from '@ui-kitten/components';
+import PopupProp from './Popup';
+import { NavigationType, routeProp } from './types'
+import { getBadDataSites, getDirectory, getTankList } from '../scripts/APIRequests';
+import { ScrollView, TextInput, TouchableOpacity } from 'react-native-gesture-handler';
 
-export default function SelectTank({navigation}) {
-  const [selectedValue, setSelectedValue] = useState("Tank 1");
-  const route = useRoute();
+export default function SelectTank({navigation}: NavigationType) {
+  const route = useRoute<routeProp>();
 
-  const handleConfirm = () => {
-    navigation.navigate('Tank Tracker', {tank: selectedValue});
+  // previous buttons hit, used to know where to go next
+  let from = route.params?.from;
+  const [visible, setVisible] = useState(false);
+  const [messageColor, setMessageColor] = useState("");
+  const [message, setMessage] = useState("");
+  // State to hold the list of site names
+  const [tankNames, setTankNames] = useState<string[]>();
+  const [searchQuery, setSearchQuery] = useState<string>(""); // Search input state
+  const [filteredTanks, setFilteredTanks] = useState<string[]>([]); // Filtered results
+
+
+  useEffect(() => {
+    const fetchTankNames = async () => {
+      try {
+        const tanks = getTankList(); // Ensure getTankList is returning a valid list
+        setTankNames(tanks);
+        setFilteredTanks(tanks); // Initialize filtered list
+      } catch (error) {
+        console.error("Error fetching tank names:", error);
+      }
+    };
+
+    fetchTankNames();
+  }, []);
+
+  // Handle search input change
+  const handleSearch = (text: string) => {
+    setSearchQuery(text);
+    if (text.trim() === "") {
+      setFilteredTanks(tankNames); // Show all tanks if no search input
+    } else {
+      setFilteredTanks(tankNames.filter(tank => tank.toLowerCase().includes(text.toLowerCase())));
+    }
+  };
+
+  const handleConfirm = (selectedSite: string) => {
+    navigation.navigate('TankTracker', {site: selectedSite});
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.dropdownContainer}>
-        <Text style={styles.label}>Select Tank</Text>
-        <Picker
-          selectedValue={selectedValue}
-          onValueChange={(itemValue: React.SetStateAction<string>) => setSelectedValue(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Tank 1" value="Tank 1" />
-          <Picker.Item label="Tank 2" value="Tank 2" />
-          <Picker.Item label="Tank 3" value="Tank 3" />
-          <Picker.Item label="Tank 4" value="Tank 4" />
-        </Picker>
-      </View>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"} 
+      style={styles.flexContainer}
+    >
+      <View style={styles.container}>
+        {/* Search Input */}
+        <TextInput
+          style={styles.inputText}
+          placeholder="Search for a tank..."
+          value={searchQuery}
+          onChangeText={handleSearch}
+        />
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => handleConfirm()}>
-          <Text style={styles.buttonText}>Confirm</Text>
-        </TouchableOpacity>
+        {/* Scrollable List */}
+        <ScrollView 
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
+          {filteredTanks.map((tank, index) => (
+            <Button key={index} style={styles.button} onPress={() => handleConfirm(tank)}>
+              <Text style={styles.listText}>{tank}</Text>
+            </Button>
+          ))}
+        </ScrollView>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  flexContainer: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    justifyContent: 'space-around',
     padding: 20,
   },
-  dropdownContainer: {
-    marginTop: 50,
-    alignItems: 'center',
-  },
-  label: {
-    fontSize: 36,
-    marginBottom: 50,
-  },
-  picker: {
+  inputText: {
+    width: "100%",
     height: 50,
-    width: '57%',
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    fontSize: 16,
+    backgroundColor: "#fff",
+    marginBottom: 10, // Space below input
   },
-  buttonContainer: {
-    marginBottom: 30,
+  scrollContainer: {
+    flexGrow: 1, // Ensures content fills space dynamically
+  },
+  listItem: {
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  listText: {
+    fontSize: 18,
   },
   button: {
-    backgroundColor: '#007AFF',
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 8,
     alignItems: 'center',
-  },
-  buttonText: {
-    fontSize: 24,
-    color: '#fff',
-    fontWeight: 'bold',
+    backgroundColor: "#06b4e0"
   },
 });

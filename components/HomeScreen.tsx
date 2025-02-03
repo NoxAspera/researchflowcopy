@@ -63,7 +63,7 @@ export default function HomeScreen({ navigation }: NavigationType) {
           text="TANK TRACKER"
           color="#4DD7FA"
           onPress={() =>
-            navigation.navigate("SelectSite", { from: "TankTracker" })
+            navigation.navigate("SelectTank", { from: "TankTracker" })
           }
         />
 
