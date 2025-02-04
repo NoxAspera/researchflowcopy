@@ -21,6 +21,7 @@ export default function SelectInstrument({navigation}: NavigationType) {
   const route = useRoute<routeProp>();
 
   let from = route.params?.from;
+  let notes = route.params?.notes;
   const [visible, setVisible] = useState(false);
   const [messageColor, setMessageColor] = useState("");
   const [message, setMessage] = useState("");
@@ -59,7 +60,11 @@ export default function SelectInstrument({navigation}: NavigationType) {
   }
 
   const handleConfirm = (selectedInstrument: string) => {
-    navigation.navigate('InstrumentMaintenance', {site: `instrument_maint/${from}/${selectedInstrument}`}); 
+    if (notes) {
+      navigation.navigate('ViewNotes', {site: `instrument_maint/${from}/${selectedInstrument}`});
+    } else {
+      navigation.navigate('InstrumentMaintenance', {site: `instrument_maint/${from}/${selectedInstrument}`}); 
+    }
   };
 
   return (

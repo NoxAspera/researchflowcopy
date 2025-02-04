@@ -38,7 +38,7 @@ export default function HomeScreen({ navigation }: NavigationType) {
           text="VIEW NOTES"
           color="#EBEBEB"
           onPress={() =>
-            navigation.navigate("SelectSite", { from: "ViewNotes" })
+            navigation.navigate("SelectNotes", { from: "ViewNotes" })
           }
         />
 

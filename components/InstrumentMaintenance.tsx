@@ -66,7 +66,14 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   }, [site]);
 
   const buildInstrumentNotes = (): string => {
-    let result: string = `- Time in: ${dateValue}Z\n`;
+    const now = new Date();
+    const year = now.getFullYear().toString()
+    const month = (now.getMonth() + 1).toString() // now.getMonth() is zero-base (i.e. January is 0), likely due to something with Oracle's implementation - August
+    const day = now.getDate().toString()
+    const hours= now.getHours().toString()
+    const minutes = now.getMinutes().toString()
+
+    let result: string = `- Time in: ${year}-${month}-${day} ${dateValue}\n`;
 
     result += `- Name: ${nameValue}\n`;
     result += `- Notes: ${notesValue}\n`;

@@ -38,7 +38,7 @@ export default function ViewNotes({ navigation }: NavigationType) {
     async function fetchData() {
       if (site && !data) {
         try {
-          const parsedData = await getFileContents(`site_notes/${site}`);
+          const parsedData = await getFileContents(site);
           if (parsedData.success) {
             setData(
               parsedData.data

@@ -512,7 +512,7 @@ export async function getDirectory(path: string)
  */
 async function getFile(path: string)
 {
-    path.toLowerCase()
+    //path.toLowerCase()
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}.md`;
 
     const headers = new Headers();
@@ -553,7 +553,7 @@ async function getFile(path: string)
 
 export async function getFileContents(path: string)
 {   
-    path = path.toLowerCase();
+    //path = path.toLowerCase();
     const response = await getFile(path)
     if(response.success)
     {
