@@ -11,10 +11,11 @@
 import { StyleSheet } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { Layout, Button } from '@ui-kitten/components';
+import { Layout, Button, Text } from '@ui-kitten/components';
 import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
 import { getBadDataSites, getDirectory } from '../scripts/APIRequests';
+import { ScrollView } from 'react-native-gesture-handler';
 
 
 export default function SelectInstrument({navigation}: NavigationType) {
@@ -68,6 +69,7 @@ export default function SelectInstrument({navigation}: NavigationType) {
   };
 
   return (
+    <ScrollView>
     <Layout style={styles.container}>
       <PopupProp
         popupText={message}
@@ -78,10 +80,11 @@ export default function SelectInstrument({navigation}: NavigationType) {
 
       {buttonData.map((button) => (
         <Button key={button.id} style={styles.button} onPress={button.onPress}>
-          {button.label}
+          {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>{button.label}</Text>}
         </Button>
       ))}
     </Layout>
+    </ScrollView>
   );
 }
 
@@ -96,5 +99,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     borderRadius: 8,
     alignItems: 'center',
+    backgroundColor: "#06b4e0"
   },
 });

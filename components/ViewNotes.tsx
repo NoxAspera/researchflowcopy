@@ -1,7 +1,7 @@
 /**
  * View Notes
- * @author Blake Stambaugh, August O'Rourke
- * 12/5/24
+ * @author Blake Stambaugh, August O'Rourke, Megan Ostlie
+ * Updated: 2/4/25 - MO
  * 
  * View notes page. Will pull in data from the github repo and display it for the user in cards.
  */
@@ -20,7 +20,7 @@ import { NavigationType, routeProp } from './types'
 
 /**
  * @author Blake Stambaugh, August O'Rourke
- * @returns The add Notes page in our app
+ * @returns The view notes page in our app
  */
 export default function ViewNotes({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -40,8 +40,25 @@ export default function ViewNotes({ navigation }: NavigationType) {
         try {
           const parsedData = await getFileContents(site);
           if (parsedData.success) {
+            let fileContent = parsedData.data;
+
+            if (site.includes("Teledyne")) {
+              // Find the start of "Maintenance Log"
+              const maintenanceIndex = fileContent.indexOf("Maintenance Log");
+              if (maintenanceIndex !== -1) {
+                // Find the end of the "Maintenance Log" line
+                const startOfLogContent = fileContent.indexOf("\n", maintenanceIndex) + 1;
+  
+                // Keep the first line + everything after the "Maintenance Log" line
+                const firstLineEnd = fileContent.indexOf("\n");
+                fileContent =
+                  fileContent.substring(0, firstLineEnd + 1) + // Keep the first line
+                  fileContent.substring(startOfLogContent); // Skip "Maintenance Log" line
+              }
+            }
+
             setData(
-              parsedData.data
+              fileContent
                 .substring(parsedData.data.indexOf("\n"))
                 .split(new RegExp("(___|---)"))
             );
@@ -62,7 +79,7 @@ export default function ViewNotes({ navigation }: NavigationType) {
       <Layout style={styles.container} level="1">
         {/* header */}
         <Text category="h1" style={{ textAlign: "center" }}>
-          {site}
+          {site.split("/").pop()}
         </Text>
 
         <PopupProp

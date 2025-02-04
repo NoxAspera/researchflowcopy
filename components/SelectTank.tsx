@@ -33,8 +33,9 @@ export default function SelectTank({navigation}: NavigationType) {
     const fetchTankNames = async () => {
       try {
         const tanks = getTankList(); // Ensure getTankList is returning a valid list
-        setTankNames(tanks);
-        setFilteredTanks(tanks); // Initialize filtered list
+        const validTanks = tanks.filter(tank => tank && tank.trim() !== "");
+        setTankNames(validTanks);
+        setFilteredTanks(validTanks); // Initialize filtered list
       } catch (error) {
         console.error("Error fetching tank names:", error);
       }
@@ -78,7 +79,7 @@ export default function SelectTank({navigation}: NavigationType) {
         >
           {filteredTanks.map((tank, index) => (
             <Button key={index} style={styles.button} onPress={() => handleConfirm(tank)}>
-              <Text style={styles.listText}>{tank}</Text>
+              {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>{tank}</Text>}
             </Button>
           ))}
         </ScrollView>
