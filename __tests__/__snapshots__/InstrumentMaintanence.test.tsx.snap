@@ -52,6 +52,19 @@ exports[`Instrument Maintenance renders correctly 1`] = `
         }
       />
       <View
+        appearance="default"
+        level="1"
+        style={
+          [
+            {
+              "backgroundColor": "#FFFFFF",
+            },
+            undefined,
+          ]
+        }
+        testID=""
+      />
+      <View
         accessibilityState={
           {
             "busy": undefined,
@@ -86,7 +99,7 @@ exports[`Instrument Maintenance renders correctly 1`] = `
             "opacity": 1,
           }
         }
-        testID="@undefined/container"
+        testID="@/container"
       >
         <Text
           appearance="default"
@@ -163,7 +176,7 @@ exports[`Instrument Maintenance renders correctly 1`] = `
                 },
               ]
             }
-            testID="@undefined/input"
+            testID="@/input"
             value=""
           />
         </View>
@@ -203,7 +216,7 @@ exports[`Instrument Maintenance renders correctly 1`] = `
             "opacity": 1,
           }
         }
-        testID="@undefined/container"
+        testID="@/container"
       >
         <Text
           appearance="default"
@@ -280,7 +293,7 @@ exports[`Instrument Maintenance renders correctly 1`] = `
                 },
               ]
             }
-            testID="@undefined/input"
+            testID="@/input"
             value=""
           />
         </View>
@@ -320,7 +333,7 @@ exports[`Instrument Maintenance renders correctly 1`] = `
             "opacity": 1,
           }
         }
-        testID="@undefined/container"
+        testID="@/container"
       >
         <Text
           appearance="default"
@@ -397,7 +410,7 @@ exports[`Instrument Maintenance renders correctly 1`] = `
                 },
               ]
             }
-            testID="@undefined/input"
+            testID="@/input"
             value=""
           />
         </View>

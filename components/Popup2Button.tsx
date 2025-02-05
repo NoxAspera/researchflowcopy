@@ -17,11 +17,12 @@ interface PUProp{
     visible: boolean;
     sendData: () => Promise<void>;
     removePopup: (arg1: boolean) => void;
+    testid?: string;
 }
 
-const PopupProp2Button: React.FC<PUProp> = ({ popupText, popupColor, visible, sendData, removePopup }) => {
+const PopupProp2Button: React.FC<PUProp> = ({ popupText, popupColor, visible, sendData, removePopup, testid = '' }) => {
     return (
-      <Layout>
+      <Layout testID={testid}>
         <Modal
           visible={visible}
           backdropStyle={styles.backdrop}

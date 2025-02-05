@@ -6,6 +6,17 @@ import SettingsPage from "../components/SettingsPage";
 import { ThemeContext } from "../components/ThemeContext";
 import { MockThemeProvider } from "../components/MockThemeProvider";
 
+beforeEach(() => {
+  jest.spyOn(console, 'error')
+  // @ts-ignore jest.spyOn adds this functionallity
+  console.error.mockImplementation(() => null);
+});
+
+afterEach(() => {
+  // @ts-ignore jest.spyOn adds this functionallity
+  console.error.mockRestore()
+})
+
 describe("Settings Page", () => {
   test("button renders correctly", () => {
     const { toJSON } = render(

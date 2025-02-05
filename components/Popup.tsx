@@ -14,11 +14,12 @@ interface PUProp {
   popupColor: ColorValue;
   visible: boolean;
   onPress: (arg0: boolean) => void;
+  testid?: string;
 }
 
-const PopupProp: React.FC<PUProp> = ({ popupText, popupColor, visible, onPress }) => {
+const PopupProp: React.FC<PUProp> = ({ popupText, popupColor, visible, onPress, testid = '' }) => {
   return (
-    <Layout>
+    <Layout testID={testid}>
       <Modal
         visible={visible}
         backdropStyle={styles.backdrop}

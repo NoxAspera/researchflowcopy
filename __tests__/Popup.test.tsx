@@ -3,6 +3,17 @@ import React from "react";
 import { MockThemeProvider } from "../components/MockThemeProvider";
 import PopupProp from "../components/Popup";
 
+beforeEach(() => {
+  jest.spyOn(console, 'error')
+  // @ts-ignore jest.spyOn adds this functionallity
+  console.error.mockImplementation(() => null);
+});
+
+afterEach(() => {
+  // @ts-ignore jest.spyOn adds this functionallity
+  console.error.mockRestore()
+})
+
 describe("Popup", () => {
   test("button works", () => {
     const action = jest.fn();

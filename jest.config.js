@@ -14,4 +14,5 @@ module.exports = {
     "node_modules/(?!(?:.pnpm/)?((jest-)?react-native||@react-native(-community)?||expo(nent)?||@expo(nent)?/.*||@expo-google-fonts/.*||react-navigation|@react-navigation/.*||@sentry/react-native||native-base||react-native-svg||@ui-kitten/.*||@react-native/js-polyfills/.*))"
   ],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 }

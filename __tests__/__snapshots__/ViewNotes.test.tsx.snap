@@ -53,6 +53,7 @@ exports[`View Notes renders correctly 1`] = `
           undefined,
         ]
       }
+      testID=""
     />
   </View>
 </View>

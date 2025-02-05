@@ -268,6 +268,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             {latestEntry && !latestEntry.instrument ? (
               // Prompt the user to input an instrument if none is parsed
               <TextInput
+                testid ='instrumentInput'
                 labelText="Instrument"
                 labelValue={instrumentInput}
                 onTextChange={setInstrumentInput}

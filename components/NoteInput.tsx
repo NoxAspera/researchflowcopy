@@ -16,22 +16,33 @@ import { ThemeContext } from "./ThemeContext";
  * @author Blake Stambaugh, David Schiwal
  * used to give types to note input parameters
  */
-interface NIProp{
-    labelText?: string;
-    labelValue: string;
-    onTextChange: (arg0: string) => void;
-    placeholder?: string; 
-    multiplelines?: boolean;
-    style?: ViewStyle;
-    secureEntry?: boolean; // used for hiding passwords and other sensitive info
-    status?: string;
+interface NIProp {
+  labelValue: string;
+  onTextChange: (arg0: string) => void;
+  labelText?: string;
+  placeholder?: string;
+  multiplelines?: boolean;
+  style?: ViewStyle;
+  secureEntry?: boolean; // used for hiding passwords and other sensitive info
+  status?: string;
+  testid?: string;
 }
 
-const AddNotesNoteInput: React.FC<NIProp> = ({ labelText, labelValue, onTextChange, placeholder, multiplelines, style, secureEntry, status }) => {
+const AddNotesNoteInput: React.FC<NIProp> = ({ 
+  labelValue, 
+  onTextChange, 
+  labelText = '', 
+  placeholder = '', 
+  multiplelines = false, 
+  style = styles.defaultStyle, 
+  secureEntry = false, 
+  status = 'basic',
+  testid = ''}) => {
     const themeContext = React.useContext(ThemeContext);
     const isDarkMode = themeContext.theme === 'dark';
     return (
       <Input
+        testID={testid}
         label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>{labelText}</Text>}
         status={status || 'basic'}
         placeholder={placeholder}
@@ -49,6 +60,10 @@ const styles = StyleSheet.create({
     textInputStyle: {
       maxHeight: 100,
       fontSize: 18
+    },
+    defaultStyle: {
+      flex: 1,
+      margin: 8,
     }
   });
 

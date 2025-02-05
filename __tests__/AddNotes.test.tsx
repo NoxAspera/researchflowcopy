@@ -4,6 +4,20 @@ import React from 'react';
 import { MockThemeProvider } from '../components/MockThemeProvider';
 import AddNotes from '../components/AddNotes';
 
+
+
+beforeEach(() => {
+  jest.spyOn(console, 'error')
+  // @ts-ignore jest.spyOn adds this functionallity
+  console.error.mockImplementation(() => null);
+});
+
+afterEach(() => {
+  // @ts-ignore jest.spyOn adds this functionallity
+  console.error.mockRestore()
+})
+
+
 const mockNavigation: NaviProp = {
   dispatch: jest.fn(),
   navigate: jest.fn(),
@@ -96,4 +110,15 @@ describe('Add Notes', () => {
     const popup = getByText("Missing some input field(s)");
     expect(popup).toBeTruthy();
   })
+
+  // test('takes user input', () => {
+  //   const { getByTestId } = render(
+  //     <MockThemeProvider>
+  //       <AddNotes navigation={mockNavigation} />
+  //     </MockThemeProvider>
+  //     );
+
+  //   const instrumentInput = getByTestId('instrumentInput');
+  //   expect(instrumentInput).toBeTruthy();
+  // })
 });

@@ -198,7 +198,7 @@ exports[`Plan a visit renders correctly 1`] = `
             "opacity": 1,
           }
         }
-        testID="@undefined/container"
+        testID="@/container"
       >
         <Text
           appearance="default"
@@ -275,7 +275,7 @@ exports[`Plan a visit renders correctly 1`] = `
                 },
               ]
             }
-            testID="@undefined/input"
+            testID="@/input"
             value=""
           />
         </View>
@@ -315,7 +315,7 @@ exports[`Plan a visit renders correctly 1`] = `
             "opacity": 1,
           }
         }
-        testID="@undefined/container"
+        testID="@/container"
       >
         <Text
           appearance="default"
@@ -392,7 +392,7 @@ exports[`Plan a visit renders correctly 1`] = `
                 },
               ]
             }
-            testID="@undefined/input"
+            testID="@/input"
             value=""
           />
         </View>
@@ -432,7 +432,7 @@ exports[`Plan a visit renders correctly 1`] = `
             "opacity": 1,
           }
         }
-        testID="@undefined/container"
+        testID="@/container"
       >
         <Text
           appearance="default"
@@ -509,7 +509,7 @@ exports[`Plan a visit renders correctly 1`] = `
                 },
               ]
             }
-            testID="@undefined/input"
+            testID="@/input"
             value=""
           />
         </View>

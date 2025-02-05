@@ -4,6 +4,17 @@ import React from 'react';
 import { MockThemeProvider } from '../components/MockThemeProvider';
 import InstrumentMaintenance from '../components/InstrumentMaintenance';
 
+beforeEach(() => {
+  jest.spyOn(console, 'error')
+  // @ts-ignore jest.spyOn adds this functionallity
+  console.error.mockImplementation(() => null);
+});
+
+afterEach(() => {
+  // @ts-ignore jest.spyOn adds this functionallity
+  console.error.mockRestore()
+})
+
 const mockNavigation: NaviProp = {
   dispatch: jest.fn(),
   navigate: jest.fn(),

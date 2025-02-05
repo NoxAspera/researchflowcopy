@@ -19,9 +19,14 @@ import SelectTank from './components/SelectTank';
 import customColors from './custom-theme.json'
 import { useState } from 'react';
 import SettingsButton from './components/SettingsButton';
+import { LogBox } from 'react-native';
 
 const Stack = createStackNavigator();
 type ThemeType = 'light' | 'dark';
+
+LogBox.ignoreLogs([
+  'Warning: MeasureElement: Support for defaultProps will be removed from function components in a future major release. Use JavaScript default parameters instead.'
+]);
 
 export default function App() {
   // used for swapping between light and dark mode

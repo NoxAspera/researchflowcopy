@@ -62,6 +62,7 @@ exports[`Bad Data renders correctly 1`] = `
             undefined,
           ]
         }
+        testID=""
       />
       <View
         style={
@@ -315,7 +316,7 @@ exports[`Bad Data renders correctly 1`] = `
             "opacity": 1,
           }
         }
-        testID="@undefined/container"
+        testID="@/container"
       >
         <Text
           appearance="default"
@@ -392,7 +393,7 @@ exports[`Bad Data renders correctly 1`] = `
                 },
               ]
             }
-            testID="@undefined/input"
+            testID="@/input"
             value="all"
           />
         </View>
@@ -432,7 +433,7 @@ exports[`Bad Data renders correctly 1`] = `
             "opacity": 1,
           }
         }
-        testID="@undefined/container"
+        testID="@/container"
       >
         <Text
           appearance="default"
@@ -509,7 +510,7 @@ exports[`Bad Data renders correctly 1`] = `
                 },
               ]
             }
-            testID="@undefined/input"
+            testID="@/input"
             value="NA"
           />
         </View>
@@ -661,7 +662,7 @@ exports[`Bad Data renders correctly 1`] = `
             "opacity": 1,
           }
         }
-        testID="@undefined/container"
+        testID="@/container"
       >
         <Text
           appearance="default"
@@ -738,7 +739,7 @@ exports[`Bad Data renders correctly 1`] = `
                 },
               ]
             }
-            testID="@undefined/input"
+            testID="@/input"
             value=""
           />
         </View>
@@ -890,7 +891,7 @@ exports[`Bad Data renders correctly 1`] = `
             "opacity": 1,
           }
         }
-        testID="@undefined/container"
+        testID="@/container"
       >
         <Text
           appearance="default"
@@ -967,7 +968,7 @@ exports[`Bad Data renders correctly 1`] = `
                 },
               ]
             }
-            testID="@undefined/input"
+            testID="@/input"
             value=""
           />
         </View>
@@ -1007,7 +1008,7 @@ exports[`Bad Data renders correctly 1`] = `
             "opacity": 1,
           }
         }
-        testID="@undefined/container"
+        testID="@/container"
       >
         <Text
           appearance="default"
@@ -1084,7 +1085,7 @@ exports[`Bad Data renders correctly 1`] = `
                 },
               ]
             }
-            testID="@undefined/input"
+            testID="@/input"
             value=""
           />
         </View>
@@ -1124,7 +1125,7 @@ exports[`Bad Data renders correctly 1`] = `
             "opacity": 1,
           }
         }
-        testID="@undefined/container"
+        testID="@/container"
       >
         <Text
           appearance="default"
@@ -1201,7 +1202,7 @@ exports[`Bad Data renders correctly 1`] = `
                 },
               ]
             }
-            testID="@undefined/input"
+            testID="@/input"
             value=""
           />
         </View>
