@@ -14,6 +14,8 @@ import { customTheme } from "./CustomTheme";
 import { NavigationType, routeProp } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
 import { ThemeContext } from "./ThemeContext";
+import { visit, setVisitFile } from "../scripts/APIRequests";
+import PopupProp from './Popup';
 
 export default function PlanVisit({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -25,13 +27,34 @@ export default function PlanVisit({ navigation }: NavigationType) {
   const [nameValue, setNameValue] = useState("");
   const [dateValue, setDateValue] = useState<Date | null>(null);
   const [notesValue, setNotesValue] = useState("");
+  const [additionalNotesValue, setAdditionalNotesValue] = useState("");
 
-  // Use IndexPath for selected index for drop down menu
-  const [selectedIndex, setSelectedIndex] = useState<IndexPath>(
-    new IndexPath(0)
-  ); // Default to first item
-  const instruments = ["Instrument 1", "Instrument 2", "Instrument 3"];
+  const [visible, setVisible] = useState(false);
+  const [messageColor, setMessageColor] = useState("");
+  const [message, setMessage] = useState("");
 
+  const handleSubmit = async () => {
+    let visit: visit = {
+      date: dateValue.toDateString(),
+      name: nameValue,
+      site: site,
+      equipment: notesValue,
+      notes: additionalNotesValue
+    }
+
+    const result = await setVisitFile(visit, "Adding site visit");
+    
+    // check to see if the request was ok, give a message based on that
+    if (result.success) {
+        setMessage("File updated successfully!");
+        setMessageColor(customTheme['color-success-700']);
+      } else {
+        setMessage(`Error: ${result.error}`);
+        setMessageColor(customTheme['color-danger-700']);
+      }
+    setVisible(true);
+  }
+  
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -43,6 +66,12 @@ export default function PlanVisit({ navigation }: NavigationType) {
           <Text category="h1" style={{ textAlign: "center" }}>
             {site}
           </Text>
+
+          {/* success/failure popup */}
+          <PopupProp popupText={message} 
+            popupColor={messageColor} 
+            onPress={setVisible} 
+            visible={visible}/>
 
           {/* start date input */}
           <Datepicker
@@ -75,15 +104,15 @@ export default function PlanVisit({ navigation }: NavigationType) {
           {/* notes entry */}
           <TextInput
             labelText="Additional Notes"
-            labelValue={notesValue}
-            onTextChange={setNotesValue}
+            labelValue={additionalNotesValue}
+            onTextChange={setAdditionalNotesValue}
             placeholder="Make sure to download previous site docs"
             style={styles.reasonText}
           />
 
           {/* submit button */}
           <Button
-            onPress={() => alert("submitted request!")}
+            onPress={() => handleSubmit()}
             appearance="filled"
             status="primary"
             style={{ margin: 8 }}
