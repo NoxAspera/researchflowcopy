@@ -1,7 +1,7 @@
 /**
  * Select Site Page
  * @author Blake Stambaugh and Megan Ostlie
- * Updated: 1/27/25 - MO
+ * Updated: 2/6/25 - MO
  * 
  * This page is the lets the user select the site they are currently at. When they
  * choose an action on the home page, they will be directed to this screen to determine
@@ -36,7 +36,7 @@ export default function SelectSite({navigation}: NavigationType) {
       try {
         let names;
         let mobile_names;
-        if (from === 'AddNotes' || from === 'ViewNotes') {
+        if (from === 'AddNotes' || from === 'ViewNotes' || from === 'PlanVisit') {
           names = await getDirectory("site_notes");
           mobile_names = await getDirectory("site_notes/mobile");
         } else if (from === 'BadData') {
@@ -44,8 +44,6 @@ export default function SelectSite({navigation}: NavigationType) {
         } else if (from === 'InstrumentMaintenance' || from === 'InstrumentMaintenanceNotes') {
           names = await getDirectory("instrument_maint");
         } else if (from === 'TankTracker') {
-          //names = getTankList();
-          //console.log(names);
           setSiteNames(getTankList());
         }
         if(names?.success)
@@ -68,24 +66,12 @@ export default function SelectSite({navigation}: NavigationType) {
   // data for buttons
   let buttonData = [];
 
-  if (from == 'AddNotes' || from == 'ViewNotes' || from == 'BadData' || from == 'InstrumentMaintenance' || from == 'TankTracker' || from == 'InstrumentMaintenanceNotes') {
-    if (siteNames) {
-      for (let i = 0; i < siteNames.length; i++) {
-        if (siteNames[i]) {
-          buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});
-        }
+  if (siteNames) {
+    for (let i = 0; i < siteNames.length; i++) {
+      if (siteNames[i]) {
+        buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});
       }
     }
-  } 
-  else {
-    buttonData = [
-      { id: 1, label: 'CSP', onPress: () => handleConfirm('CSP')},
-      { id: 2, label: 'DBK', onPress: () => handleConfirm('DBK')},
-      { id: 3, label: 'FRU', onPress: () => handleConfirm('FRU')},
-      { id: 4, label: 'HDP', onPress: () => handleConfirm('HDP')},
-      { id: 5, label: 'SUG', onPress: () => handleConfirm('SUG')},
-      { id: 6, label: 'WBB', onPress: () => handleConfirm('WBB')}
-    ];
   }
 
   const handleConfirm = (selectedSite: string) => {

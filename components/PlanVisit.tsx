@@ -1,7 +1,7 @@
 /**
  * Tank Tracker
  * @author Blake Stambaugh and David Schiwal
- * 12/5/24
+ * Updated: 2/6/25 - MO
  *
  * This page is responsible for planning visits.
  */
@@ -34,6 +34,9 @@ export default function PlanVisit({ navigation }: NavigationType) {
   const [message, setMessage] = useState("");
 
   const handleSubmit = async () => {
+    if (site.includes("mobile/")) {
+      site = site.replace("mobile/", "");
+    }
     let visit: visit = {
       date: dateValue.toDateString(),
       name: nameValue,
