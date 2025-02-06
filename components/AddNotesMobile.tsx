@@ -1,15 +1,16 @@
 /**
- * Add Notes Page
+ * Add Notes Page for mobile sites
  * @author Blake Stambaugh, Megan Ostlie, August O'Rourke, and David Schiwal
  *  12/4/24
  * This page will take in input from the user, format it, and upload it to the
- * github repo.
+ * github repo. This page is slightly different than the main AddNotes page because
+ * the mobile sites do not have as many tanks as the stationary sites
  */
 import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { buildNotes, Entry } from '../scripts/Parsers';
+import { buildMobileNotes, MobileEntry } from '../scripts/Parsers';
 import { NaviProp } from './types';
 import TextInput from './TextInput'
 import NoteInput from './NoteInput'
@@ -22,19 +23,6 @@ import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
-
-
-function checkValidTime(entry:string)
-{
-  const timeMatch = /^[0-2][0-9]:[0-5][0-9]$/gm
-  return timeMatch.test(entry)
-}
-
-function checkValidNumber(entry:string)
-{
-  const anyNonNumber = /^(\d+)(\.\d+)?$/gm
- return anyNonNumber.test(entry)
-}
 
 /**
  * @author Megan Ostlie
@@ -94,25 +82,11 @@ export default function AddNotes({ navigation }: NavigationType) {
     // these use states to set and store values in the text inputs
     const [timeValue, setTimeValue] = useState("");
     const [nameValue, setNameValue] = useState("");
-    const [ltsId, setLTSId] = useState("");
-    const [ltsValue, setLTSValue] = useState("");
-    const [ltsPressure, setLTSPressure] = useState("");
-    const [lowId, setLowId] = useState("");
-    const [lowValue, setLowValue] = useState("");
-    const [lowPressure, setLowPressure] = useState("");
-    const [midId, setmidId] = useState("");
-    const [midValue, setmidValue] = useState("");
-    const [midPressure, setmidPressure] = useState("");
-    const [highId, setHighId] = useState("");
-    const [highValue, setHighValue] = useState("");
-    const [highPressure, setHighPressure] = useState("");
-    const [n2Value, setN2Value] = useState("");
+    const [tankId, setTankId] = useState("");
+    const [tankValue, setTankValue] = useState("");
+    const [tankPressure, setTankPressure] = useState("");
     const [notesValue, setNotesValue] = useState("");
     const [instrumentInput, setInstrumentInput] = useState("");
-
-    // Use IndexPath for selected index for drop down menu
-    const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
-    const [instruments, setInstruments] = useState<string[]>(['Instrument 1']);
 
     // used for determining if PUT request was successful
     // will set the success/fail notification to visible, aswell as the color and text
@@ -126,19 +100,9 @@ export default function AddNotes({ navigation }: NavigationType) {
     function checkTextEntries(){
         if(timeValue == "" ||
            nameValue == "" ||
-           ltsId == "" ||
-           ltsValue == "" ||
-           ltsPressure == "" ||
-           lowId == "" ||
-           lowValue == "" ||
-           lowPressure == "" ||
-           midId == "" ||
-           midValue == "" ||
-           midPressure == "" ||
-           highId == "" ||
-           highValue == "" ||
-           highPressure == "" ||
-           n2Value == "" ||
+           tankId == "" ||
+           tankValue == "" ||
+           tankPressure == "" ||
            notesValue == ""){
                setVisible2(true);
         }
@@ -151,57 +115,33 @@ export default function AddNotes({ navigation }: NavigationType) {
     // If it is successful it will display a success message
     // if it fails then it will display a failure message
     const handleUpdate = async () => {
-        const LTSignored: boolean = (ltsId == "" && ltsValue == "" && ltsPressure == "")
-
         // get time submitted
         const now = new Date();
-        const year = now.getFullYear().toString()
-        const month = (now.getMonth() + 1).toString() // now.getMonth() is zero-base (i.e. January is 0), likely due to something with Oracle's implementation - August
-        const day = now.getDate().toString()
-        const hours= now.getHours().toString()
-        const minutes = now.getMinutes().toString()
+        const year = now.getUTCFullYear();
+        const month = String(now.getUTCMonth() + 1).padStart(2, "0");
+        const day = String(now.getUTCDate()).padStart(2, "0");
+        const hours = String(now.getUTCHours()).padStart(2, "0");
+        const minutes = String(now.getUTCMinutes()).padStart(2, "0");
         
         // create an entry object data that will be sent off to the repo
-        let data: Entry = 
+        let data: MobileEntry = 
         {
           time_in: `${year}-${month}-${day} ${timeValue}`,
           time_out: `${year}-${month}-${day} ${hours}:${minutes}`,
           names: nameValue,
-          instrument: instrumentInput.trim() ? instrumentInput : (instruments[selectedIndex.row] ? instruments[selectedIndex.row] : null),
-          n2_pressure: n2Value ? n2Value: null,
-          lts: LTSignored ? null:
+          instrument: instrumentInput.trim() ? instrumentInput : null,
+          tank:
           {
-            id: ltsId,
-            value: ltsValue,
+            id: tankId,
+            value: tankValue,
             unit: "ppm",
-            pressure: ltsPressure
-          },
-          low_cal:
-          {
-            id:lowId,
-            value:lowValue,
-            unit:"ppm",
-            pressure: lowPressure
-          },
-          mid_cal:
-          {
-            id:midId,
-            value:midValue,
-            unit: "ppm",
-            pressure: midPressure
-          },
-          high_cal:
-          {
-            id:highId,
-            value:highValue,
-            unit: "ppm",
-            pressure: highPressure
+            pressure: tankPressure
           },
           additional_notes: notesValue 
         };
 
         // send the request
-        const result = await setFile(site, buildNotes(data), "updating notes from researchFlow");
+        const result = await setFile(site, buildMobileNotes(data), "updating notes from researchFlow");
 
         // if the warning popup is visible, remove it
         if(visible2) { setVisible2(false); }
@@ -220,21 +160,9 @@ export default function AddNotes({ navigation }: NavigationType) {
     //Set tank ids, values, and instruments if available in parsed data
     useEffect(() => {
       if (latestEntry) {
-          if (latestEntry.lts) {
-              setLTSId(latestEntry.lts.id || "");
-              setLTSValue(latestEntry.lts.value || "");
-          }
-          if (latestEntry.low_cal) {
-            setLowId(latestEntry.low_cal.id || "");
-            setLowValue(latestEntry.low_cal.value || "");
-          }
-          if (latestEntry.mid_cal) {
-            setmidId(latestEntry.mid_cal.id || "");
-            setmidValue(latestEntry.mid_cal.value || "");
-          }
-          if (latestEntry.high_cal) {
-            setHighId(latestEntry.high_cal.id || "");
-            setHighValue(latestEntry.high_cal.value || "");
+          if (latestEntry.tank) {
+              setTankId(latestEntry.tank.id || "");
+              setTankValue(latestEntry.tank.value || "");
           }
           if (latestEntry.instrument) {
             setInstrumentInput(latestEntry.instrument);
@@ -289,87 +217,21 @@ export default function AddNotes({ navigation }: NavigationType) {
               placeholder='15:00' 
               style={styles.inputText} />
 
-            {/* N2 */}
-            <TextInput labelText='N2 (if needed)' 
-              labelValue={n2Value} 
-              onTextChange={setN2Value} 
-              placeholder='Pressure' 
-              style={styles.inputText} />
-
-            {/* LTS input */}
+            {/* Tank input */}
             <Layout style = {styles.rowContainer}>
-              <TextInput labelText='LTS (if needed)' 
-                labelValue={ltsId} 
-                onTextChange={setLTSId} 
+              <TextInput labelText='Tank (if needed)' 
+                labelValue={tankId} 
+                onTextChange={setTankId} 
                 placeholder='Tank ID' 
                 style={styles.tankInput} />
               <TextInput labelText=' ' 
-                labelValue={ltsValue} 
-                onTextChange={setLTSValue} 
+                labelValue={tankValue} 
+                onTextChange={setTankValue} 
                 placeholder='Value' 
                 style={styles.tankInput} />
               <TextInput labelText=' ' 
-                labelValue={ltsPressure} 
-                onTextChange={setLTSPressure} 
-                placeholder='Pressure' 
-                style={styles.tankInput} />
-            </Layout>
-
-            {/* Note for all tank inputs, the single space labels are there to make sure the other entry fields are alligned well*/}
-
-            {/* Low input */}
-            <Layout style = {styles.rowContainer}>
-              <TextInput labelText='Low' 
-                labelValue={lowId} 
-                onTextChange={setLowId} 
-                placeholder='Tank ID' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={lowValue} 
-                onTextChange={setLowValue} 
-                placeholder='Value' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={lowPressure} 
-                onTextChange={setLowPressure} 
-                placeholder='Pressure' 
-                style={styles.tankInput} />
-            </Layout>
-
-            {/* mid input */}
-            <Layout style = {styles.rowContainer}>
-              <TextInput labelText='Mid' 
-                labelValue={midId} 
-                onTextChange={setmidId} 
-                placeholder='Tank ID' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={midValue} 
-                onTextChange={setmidValue} 
-                placeholder='Value' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={midPressure} 
-                onTextChange={setmidPressure} 
-                placeholder='Pressure' 
-                style={styles.tankInput} />
-            </Layout>
-
-            {/* high input */} 
-            <Layout style = {styles.rowContainer}>
-              <TextInput labelText='High' 
-                labelValue={highId} 
-                onTextChange={setHighId} 
-                placeholder='Tank ID' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={highValue} 
-                onTextChange={setHighValue} 
-                placeholder='Value' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={highPressure} 
-                onTextChange={setHighPressure} 
+                labelValue={tankPressure} 
+                onTextChange={setTankPressure} 
                 placeholder='Pressure' 
                 style={styles.tankInput} />
             </Layout>
