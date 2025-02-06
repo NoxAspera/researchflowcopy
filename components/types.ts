@@ -12,10 +12,13 @@ import { RouteProp } from '@react-navigation/native';
 export type RootStackParamList = {
     // used for home screen
     SelectSite: { from: string }; 
-    SelectInstrument: { from: string};
+    SelectInstrument: { from: string , notes: boolean};
+    SelectTank: { from: string};
+    SelectNotes: { from: string }; 
 
     // used for site select
     AddNotes: { site: string };
+    AddNotesMobile: { site: string };
     ViewNotes: { site: string };
     BadData: { site: string };
     InstrumentMaintenance: { site: string };
@@ -39,5 +42,6 @@ type RouteParams = {
   site: string; 
   info: string; 
   from: string;
+  notes: string;
 };
 export type routeProp = RouteProp<{params: RouteParams}, 'params'>;

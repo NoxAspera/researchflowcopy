@@ -11,6 +11,8 @@ import TankTracker from './components/TankTracker'
 import Auth from './components/Auth'
 import SelectInstrument from './components/SelectInstrument';
 import PlanVisit from './components/PlanVisit';
+import AddNotesMobile from './components/AddNotesMobile';
+import SelectNotes from './components/SelectNotes';
 import { ThemeContext } from './components/ThemeContext'
 import { ApplicationProvider, IconRegistry } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
@@ -53,6 +55,8 @@ export default function App() {
             <Stack.Screen name="SelectInstrument" component={SelectInstrument} options={{ headerRight: () => <SettingsButton/>}}/>
             <Stack.Screen name="PlanVisit" component={PlanVisit} options={{ headerRight: () => <SettingsButton/>}}/>
             <Stack.Screen name="SelectTank" component={SelectTank} options={{ headerRight: () => <SettingsButton/>}}/>
+            <Stack.Screen name="AddNotesMobile" component={AddNotesMobile} options={{ headerRight: () => <SettingsButton/>}}/>
+            <Stack.Screen name="SelectNotes" component={SelectNotes} options={{ headerRight: () => <SettingsButton/>}}/>
           </Stack.Navigator>
         </NavigationContainer>
       </ApplicationProvider>
