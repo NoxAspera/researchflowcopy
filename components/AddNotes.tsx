@@ -16,7 +16,7 @@ import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
-import { setFile, getFileContents } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
@@ -201,7 +201,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         };
 
         // send the request
-        const result = await setFile(site, buildNotes(data), "updating notes from researchFlow");
+        const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
 
         // if the warning popup is visible, remove it
         if(visible2) { setVisible2(false); }
