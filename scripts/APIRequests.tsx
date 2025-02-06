@@ -573,7 +573,7 @@ export async function getDirectory(path: string)
  */
 async function getFile(path: string)
 {
-    path.toLowerCase()
+    //path.toLowerCase()
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}.md`;
 
     const headers = new Headers();
@@ -614,7 +614,7 @@ async function getFile(path: string)
 
 export async function getFileContents(path: string)
 {   
-    path = path.toLowerCase();
+    //path = path.toLowerCase();
     const response = await getFile(path)
     if(response.success)
     {
@@ -643,7 +643,15 @@ export async function setFile(siteName: string, content: string, commitMessage: 
     }
     const hash = pullResponse.data.sha
     const existingContent = atob(pullResponse.data.content)
-    const siteHeader = `# Site id: **${siteName}**`
+    let siteHeader;
+    if (siteName.includes("mobile/")) {
+        const site = siteName.replace("mobile/", "");
+        siteHeader = `# Site id: **${site}** \n`
+        siteHeader += existingContent.split("\n")[1];
+        
+    } else {
+        siteHeader = `# Site id: **${siteName}**`
+    }
     const existingNotes = existingContent.substring(siteHeader.length, existingContent.length -1) 
     const fullDoc = btoa(siteHeader +"\n" + content + existingNotes)
 

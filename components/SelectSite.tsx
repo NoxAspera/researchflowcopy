@@ -35,11 +35,13 @@ export default function SelectSite({navigation}: NavigationType) {
     const fetchSiteNames = async () => {
       try {
         let names;
+        let mobile_names;
         if (from === 'AddNotes' || from === 'ViewNotes') {
           names = await getDirectory("site_notes");
+          mobile_names = await getDirectory("site_notes/mobile");
         } else if (from === 'BadData') {
           names = await getBadDataSites();
-        } else if (from === 'InstrumentMaintenance') {
+        } else if (from === 'InstrumentMaintenance' || from === 'InstrumentMaintenanceNotes') {
           names = await getDirectory("instrument_maint");
         } else if (from === 'TankTracker') {
           //names = getTankList();
@@ -48,6 +50,9 @@ export default function SelectSite({navigation}: NavigationType) {
         }
         if(names?.success)
         {
+          if (mobile_names?.success) {
+            names.data.push(...mobile_names.data.map(item => "mobile/" + item));
+          }
           setSiteNames(names.data);
         } // Set the fetched site names
     }
@@ -63,7 +68,7 @@ export default function SelectSite({navigation}: NavigationType) {
   // data for buttons
   let buttonData = [];
 
-  if (from == 'AddNotes' || from == 'ViewNotes' || from == 'BadData' || from == 'InstrumentMaintenance' || from == 'TankTracker') {
+  if (from == 'AddNotes' || from == 'ViewNotes' || from == 'BadData' || from == 'InstrumentMaintenance' || from == 'TankTracker' || from == 'InstrumentMaintenanceNotes') {
     if (siteNames) {
       for (let i = 0; i < siteNames.length; i++) {
         if (siteNames[i]) {
@@ -86,11 +91,15 @@ export default function SelectSite({navigation}: NavigationType) {
   const handleConfirm = (selectedSite: string) => {
     if(from === 'AddNotes')
     {
-      navigation.navigate('AddNotes', {site: selectedSite}); //{site: selectValue} tells the AddNotes what the selected value is
+      if (selectedSite.includes("mobile/")) {
+        navigation.navigate('AddNotesMobile', {site: selectedSite});
+      } else {
+        navigation.navigate('AddNotes', {site: selectedSite}); //{site: selectValue} tells the AddNotes what the selected value is
+      }
     }
     else if(from === 'ViewNotes')
     {
-      navigation.navigate('ViewNotes', {site: selectedSite}); //{site: selectValue} tells the AddNotes what the selected value is
+      navigation.navigate('ViewNotes', {site: `site_notes/${selectedSite}`}); //{site: selectValue} tells the AddNotes what the selected value is
     }
     else if(from === 'BadData')
     {
@@ -98,7 +107,10 @@ export default function SelectSite({navigation}: NavigationType) {
     }
     else if (from === 'InstrumentMaintenance')
     {
-      navigation.navigate('SelectInstrument', {from: selectedSite});
+      navigation.navigate('SelectInstrument', {from: selectedSite, notes: false});
+    }
+    else if (from === 'InstrumentMaintenanceNotes') {
+      navigation.navigate('SelectInstrument', {from: selectedSite, notes: true});
     }
     else if (from === 'TankTracker')
     {
@@ -146,6 +158,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     borderRadius: 8,
     alignItems: 'center',
-    backgroundColor: "#06b4e0"
+    backgroundColor: "#06b4e0",
+    margin: 8
   },
 });
