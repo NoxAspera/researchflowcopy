@@ -34,7 +34,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior = "padding"
       style={styles.container}
     >
       <ScrollView automaticallyAdjustKeyboardInsets={true}>

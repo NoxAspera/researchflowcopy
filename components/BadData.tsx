@@ -154,7 +154,7 @@ export default function BadData({ navigation }: NavigationType) {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior = "padding"
       style={styles.container}
     >
       <ScrollView automaticallyAdjustKeyboardInsets={true}>
