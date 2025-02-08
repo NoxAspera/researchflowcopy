@@ -244,9 +244,9 @@ export default function AddNotes({ navigation }: NavigationType) {
 
     return (
       <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            behavior = "padding"
             style={styles.container}>
-        <ScrollView>
+        <ScrollView automaticallyAdjustKeyboardInsets={true}>
           <Layout style={styles.container}>
             {/* header */}
             <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
@@ -387,7 +387,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               onPress={() => checkTextEntries()}
               appearance='filled'
               status='primary' 
-              style={{margin: 20, backgroundColor: "#06b4e0"}}>
+              style={styles.submitButton}>
               {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Submit</Text>}
             </Button>
           </Layout>
@@ -428,5 +428,10 @@ export default function AddNotes({ navigation }: NavigationType) {
       flexDirection: 'row',
       alignItems: 'stretch',        // has button fill space horizontally
       justifyContent: 'space-evenly',
+    },
+    submitButton:
+    {
+      margin: 20, 
+      backgroundColor: "#06b4e0",
     },
 });

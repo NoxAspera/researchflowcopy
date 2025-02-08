@@ -60,10 +60,10 @@ export default function PlanVisit({ navigation }: NavigationType) {
   
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior = "padding"
       style={styles.container}
     >
-      <ScrollView>
+      <ScrollView automaticallyAdjustKeyboardInsets={true}>
         <Layout style={styles.container} level="1">
           {/* header */}
           <Text category="h1" style={{ textAlign: "center" }}>
@@ -118,9 +118,9 @@ export default function PlanVisit({ navigation }: NavigationType) {
             onPress={() => handleSubmit()}
             appearance="filled"
             status="primary"
-            style={{ margin: 8 }}
+            style={styles.submitButton}
           >
-            Submit
+          {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Submit</Text>}
           </Button>
         </Layout>
       </ScrollView>
@@ -141,5 +141,9 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     margin: 8,
+  },
+  submitButton:{
+    margin: 20, 
+    backgroundColor: "#06b4e0",
   },
 });
