@@ -204,7 +204,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         const result = await setFile(site, buildNotes(data), "updating notes from researchFlow");
 
         // if the warning popup is visible, remove it
-        if(visible2) { setVisible2(false); }
+        //if(visible2) { setVisible2(false); }
 
         // check to see if the request was ok, give a message based on that
         if (result.success) {
