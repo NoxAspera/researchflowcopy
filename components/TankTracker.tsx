@@ -138,13 +138,18 @@ export default function TankTracker({ navigation }: NavigationType) {
           setMessageColor(customTheme['color-danger-700']);
         }
         setVisible(true);
-      }
+    }
+
+    //method to navigate home to send to popup so it can happen after dismiss button is clicked
+    function navigateHome(){
+      navigation.navigate("Home")
+    }
 
     return (
       <KeyboardAvoidingView
-                  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                  behavior = "padding"
                   style={styles.container}>
-          <ScrollView>
+          <ScrollView automaticallyAdjustKeyboardInsets={true}>
             <Layout style={styles.container} level="1">
               
               {/* header */}
@@ -157,6 +162,7 @@ export default function TankTracker({ navigation }: NavigationType) {
               <PopupProp popupText={message} 
                 popupColor={messageColor} 
                 onPress={setVisible} 
+                navigateHome={navigateHome} 
                 visible={visible}/>
 
             {/* Name input */}
@@ -227,9 +233,9 @@ export default function TankTracker({ navigation }: NavigationType) {
                 onPress={() => handleSubmit()}
                 appearance="filled"
                 status="primary"
-                style={{ margin: 8 }}
+                style={styles.submitButton}
               >
-                Submit
+              {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Submit</Text>}
               </Button>
             </Layout>
           </ScrollView>
@@ -250,5 +256,9 @@ export default function TankTracker({ navigation }: NavigationType) {
     textInput: {
       flex: 1,
       margin: 8
-    }
+    },
+    submitButton:{
+      margin: 20, 
+      backgroundColor: "#06b4e0",
+    },
 });

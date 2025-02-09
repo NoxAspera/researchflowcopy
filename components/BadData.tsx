@@ -47,6 +47,11 @@ export default function BadData({ navigation }: NavigationType) {
   const [fileOptions, setFileOptions] = useState<string[]>([]);
   const [instrument, setInstrument] = useState("");
 
+  //method to navigate home to send to popup so it can happen after dismiss button is clicked
+  function navigateHome(){
+    navigation.navigate("Home")
+  }
+
   useEffect(() => {
     const fetchBadDataFiles = async () => {
       try {
@@ -154,10 +159,10 @@ export default function BadData({ navigation }: NavigationType) {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior = "padding"
       style={styles.container}
     >
-      <ScrollView>
+      <ScrollView automaticallyAdjustKeyboardInsets={true}>
         <Layout style={styles.container} level="1">
           {/* header */}
           <Text category="h1" style={{ textAlign: "center" }}>
@@ -169,6 +174,7 @@ export default function BadData({ navigation }: NavigationType) {
             popupText={message}
             popupColor={messageColor}
             onPress={setVisible}
+            navigateHome={navigateHome} 
             visible={visible}
           />
 
@@ -273,9 +279,9 @@ export default function BadData({ navigation }: NavigationType) {
             onPress={handleSubmit}
             appearance="filled"
             status="primary"
-            style={{ margin: 15 }}
+            style={styles.submitButton}
           >
-            Submit
+          {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Submit</Text>}
           </Button>
         </Layout>
       </ScrollView>
@@ -296,5 +302,9 @@ const styles = StyleSheet.create({
   textInput: {
     margin: 6,
     flex: 1,
+  },
+  submitButton:{
+    margin: 20, 
+    backgroundColor: "#06b4e0",
   },
 });

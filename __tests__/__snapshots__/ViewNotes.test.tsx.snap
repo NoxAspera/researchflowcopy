@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`View Notes renders correctly 1`] = `
+<View
+  style={
+    {
+      "backgroundColor": "#1C2760",
+    }
+  }
+>
+  <View
+    appearance="default"
+    level="1"
+    style={
+      [
+        {
+          "backgroundColor": "#FFFFFF",
+        },
+        {
+          "alignItems": "stretch",
+          "flex": 1,
+          "justifyContent": "space-evenly",
+        },
+      ]
+    }
+  >
+    <Text
+      appearance="default"
+      category="h1"
+      status="basic"
+      style={
+        [
+          {
+            "color": "#222B45",
+            "fontFamily": "System",
+            "fontSize": 36,
+            "fontWeight": "800",
+          },
+          {
+            "textAlign": "center",
+          },
+        ]
+      }
+    />
+    <View
+      appearance="default"
+      level="1"
+      style={
+        [
+          {
+            "backgroundColor": "#FFFFFF",
+          },
+          undefined,
+        ]
+      }
+    />
+  </View>
+</View>
+`;
