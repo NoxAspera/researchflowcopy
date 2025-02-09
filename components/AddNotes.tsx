@@ -217,6 +217,11 @@ export default function AddNotes({ navigation }: NavigationType) {
         setVisible(true);
     };
 
+    //method to navigate home to send to popup so it can happen after dismiss button is clicked
+    function navigateHome(){
+      navigation.navigate("Home")
+    }
+
     //Set tank ids, values, and instruments if available in parsed data
     useEffect(() => {
       if (latestEntry) {
@@ -254,7 +259,8 @@ export default function AddNotes({ navigation }: NavigationType) {
             {/* success/failure popup */}
             <PopupProp popupText={message} 
             popupColor={messageColor} 
-            onPress={setVisible} 
+            onPress={setVisible}
+            navigateHome={navigateHome} 
             visible={visible}/>
 
             {/* popup if user has missing input */}
