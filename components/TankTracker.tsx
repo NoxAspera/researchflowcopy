@@ -138,7 +138,12 @@ export default function TankTracker({ navigation }: NavigationType) {
           setMessageColor(customTheme['color-danger-700']);
         }
         setVisible(true);
-      }
+    }
+
+    //method to navigate home to send to popup so it can happen after dismiss button is clicked
+    function navigateHome(){
+      navigation.navigate("Home")
+    }
 
     return (
       <KeyboardAvoidingView
@@ -157,6 +162,7 @@ export default function TankTracker({ navigation }: NavigationType) {
               <PopupProp popupText={message} 
                 popupColor={messageColor} 
                 onPress={setVisible} 
+                navigateHome={navigateHome} 
                 visible={visible}/>
 
             {/* Name input */}

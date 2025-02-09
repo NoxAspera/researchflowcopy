@@ -47,6 +47,11 @@ export default function BadData({ navigation }: NavigationType) {
   const [fileOptions, setFileOptions] = useState<string[]>([]);
   const [instrument, setInstrument] = useState("");
 
+  //method to navigate home to send to popup so it can happen after dismiss button is clicked
+  function navigateHome(){
+    navigation.navigate("Home")
+  }
+
   useEffect(() => {
     const fetchBadDataFiles = async () => {
       try {
@@ -169,6 +174,7 @@ export default function BadData({ navigation }: NavigationType) {
             popupText={message}
             popupColor={messageColor}
             onPress={setVisible}
+            navigateHome={navigateHome} 
             visible={visible}
           />
 

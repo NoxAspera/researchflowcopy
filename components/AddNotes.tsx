@@ -204,7 +204,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
 
         // if the warning popup is visible, remove it
-        if(visible2) { setVisible2(false); }
+        //if(visible2) { setVisible2(false); }
 
         // check to see if the request was ok, give a message based on that
         if (result.success) {
@@ -216,6 +216,11 @@ export default function AddNotes({ navigation }: NavigationType) {
           }
         setVisible(true);
     };
+
+    //method to navigate home to send to popup so it can happen after dismiss button is clicked
+    function navigateHome(){
+      navigation.navigate("Home")
+    }
 
     //Set tank ids, values, and instruments if available in parsed data
     useEffect(() => {
@@ -254,7 +259,8 @@ export default function AddNotes({ navigation }: NavigationType) {
             {/* success/failure popup */}
             <PopupProp popupText={message}
             popupColor={messageColor} 
-            onPress={setVisible} 
+            onPress={setVisible}
+            navigateHome={navigateHome} 
             visible={visible}/>
 
             {/* popup if user has missing input */}

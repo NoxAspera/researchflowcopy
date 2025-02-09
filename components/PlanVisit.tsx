@@ -33,6 +33,11 @@ export default function PlanVisit({ navigation }: NavigationType) {
   const [messageColor, setMessageColor] = useState("");
   const [message, setMessage] = useState("");
 
+  //method to navigate home to send to popup so it can happen after dismiss button is clicked
+  function navigateHome(){
+    navigation.navigate("Home")
+  }
+  
   const handleSubmit = async () => {
     if (site.includes("mobile/")) {
       site = site.replace("mobile/", "");
@@ -74,6 +79,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
           <PopupProp popupText={message} 
             popupColor={messageColor} 
             onPress={setVisible} 
+            navigateHome={navigateHome} 
             visible={visible}/>
 
           {/* start date input */}

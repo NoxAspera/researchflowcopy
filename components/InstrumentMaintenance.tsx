@@ -116,6 +116,11 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     setVisible(true);
   };
 
+  //method to navigate home to send to popup so it can happen after dismiss button is clicked
+  function navigateHome(){
+    navigation.navigate("Home")
+  }
+
   return (
     <KeyboardAvoidingView
       behavior = "padding"
@@ -133,6 +138,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
           <PopupProp popupText={message} 
             popupColor={messageColor} 
             onPress={setVisible} 
+            navigateHome={navigateHome} 
             visible={visible}/>
             
           {/* Time input */}
