@@ -26,7 +26,7 @@ const PopupProp: React.FC<PUProp> = ({ popupText, popupColor, visible, onPress }
       >
         <Card disabled={true} style={{ backgroundColor: popupColor }}>
           <Text>{popupText}</Text>
-          <Button onPress={() => onPress(false)}>DISMISS</Button>
+          <Button testID="PopupButton" onPress={() => onPress(false)}>DISMISS</Button>
         </Card>
       </Modal>
     </Layout>

@@ -252,7 +252,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
 
             {/* success/failure popup */}
-            <PopupProp popupText={message} 
+            <PopupProp popupText={message}
             popupColor={messageColor} 
             onPress={setVisible} 
             visible={visible}/>
@@ -384,6 +384,7 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* submit button */}
             <Button
+              testID='AddNotesButton'
               onPress={() => checkTextEntries()}
               appearance='filled'
               status='primary' 

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Login page page renders correctly 1`] = `
+exports[`Plan a visit renders correctly 1`] = `
 <View
   onLayout={[Function]}
   style={
@@ -16,22 +16,7 @@ exports[`Login page page renders correctly 1`] = `
     ]
   }
 >
-  <View
-    appearance="default"
-    level="1"
-    style={
-      [
-        {
-          "backgroundColor": "#FFFFFF",
-        },
-        {
-          "alignItems": "stretch",
-          "flex": 1,
-          "justifyContent": "space-evenly",
-        },
-      ]
-    }
-  >
+  <View>
     <View
       appearance="default"
       level="1"
@@ -42,9 +27,8 @@ exports[`Login page page renders correctly 1`] = `
           },
           {
             "alignItems": "stretch",
-            "backgroundColor": "#C8D6F6",
             "flex": 1,
-            "justifyContent": "center",
+            "justifyContent": "space-evenly",
           },
         ]
       }
@@ -66,57 +50,119 @@ exports[`Login page page renders correctly 1`] = `
             },
           ]
         }
-      >
-        Hello
-      </Text>
-      <Text
-        appearance="default"
-        category="h6"
-        status="basic"
+      />
+      <View
         style={
-          [
-            {
-              "color": "#222B45",
-              "fontFamily": "System",
-              "fontSize": 18,
-              "fontWeight": "800",
-            },
-            {
-              "textAlign": "center",
-            },
-          ]
+          {
+            "flex": 1,
+            "margin": 8,
+          }
         }
       >
-        Sign in using your GitHub credentials
-      </Text>
-    </View>
-    <View
-      appearance="default"
-      level="1"
-      style={
-        [
-          {
-            "backgroundColor": "#FFFFFF",
-          },
-          undefined,
-        ]
-      }
-    />
-    <View
-      appearance="default"
-      level="1"
-      style={
-        [
-          {
-            "backgroundColor": "#FFFFFF",
-          },
-          {
-            "flex": 3,
-            "justifyContent": "flex-end",
-          },
-        ]
-      }
-    >
+        <Text
+          appearance="default"
+          category="p1"
+          status="basic"
+          style={
+            [
+              {
+                "color": "#222B45",
+                "fontFamily": "System",
+                "fontSize": 15,
+                "fontWeight": "400",
+              },
+              [
+                {
+                  "color": "#A0A0A0",
+                  "fontFamily": "System",
+                  "fontSize": 12,
+                  "fontWeight": "800",
+                  "marginBottom": 4,
+                },
+                {
+                  "textAlign": "left",
+                },
+              ],
+            ]
+          }
+        >
+          Visit Date
+        </Text>
+        <View>
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onClick={[Function]}
+            onLayout={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#F7F9FC",
+                "borderColor": "#E4E9F2",
+                "borderRadius": 4,
+                "borderWidth": 1,
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+                "minHeight": 40,
+                "opacity": 1,
+                "paddingHorizontal": 8,
+                "paddingVertical": 7,
+              }
+            }
+          >
+            <Text
+              appearance="default"
+              category="p1"
+              ellipsizeMode="tail"
+              numberOfLines={1}
+              status="basic"
+              style={
+                [
+                  {
+                    "color": "#222B45",
+                    "fontFamily": "System",
+                    "fontSize": 15,
+                    "fontWeight": "400",
+                  },
+                  {
+                    "color": "#A0A0A0",
+                    "fontFamily": "System",
+                    "fontSize": 15,
+                    "fontWeight": "normal",
+                    "marginHorizontal": 8,
+                  },
+                ]
+              }
+            >
+              Visit Date
+            </Text>
+          </View>
+        </View>
+      </View>
       <View
         accessibilityState={
           {
@@ -147,7 +193,8 @@ exports[`Login page page renders correctly 1`] = `
         onStartShouldSetResponder={[Function]}
         style={
           {
-            "margin": 15,
+            "flex": 1,
+            "margin": 8,
             "opacity": 1,
           }
         }
@@ -170,7 +217,9 @@ exports[`Login page page renders correctly 1`] = `
               },
             ]
           }
-        />
+        >
+          Name
+        </Text>
         <View
           style={
             [
@@ -200,7 +249,7 @@ exports[`Login page page renders correctly 1`] = `
             onFocus={[Function]}
             onMouseEnter={[Function]}
             onMouseLeave={[Function]}
-            placeholder="Email"
+            placeholder="Jane Doe"
             placeholderTextColor="#A0A0A0"
             secureTextEntry={false}
             size="medium"
@@ -261,7 +310,8 @@ exports[`Login page page renders correctly 1`] = `
         onStartShouldSetResponder={[Function]}
         style={
           {
-            "margin": 15,
+            "flex": 1,
+            "margin": 8,
             "opacity": 1,
           }
         }
@@ -284,7 +334,9 @@ exports[`Login page page renders correctly 1`] = `
               },
             ]
           }
-        />
+        >
+          Items to bring
+        </Text>
         <View
           style={
             [
@@ -314,9 +366,126 @@ exports[`Login page page renders correctly 1`] = `
             onFocus={[Function]}
             onMouseEnter={[Function]}
             onMouseLeave={[Function]}
-            placeholder="Password"
+            placeholder="Instrument 1"
             placeholderTextColor="#A0A0A0"
-            secureTextEntry={true}
+            secureTextEntry={false}
+            size="medium"
+            status="basic"
+            style={
+              [
+                {
+                  "color": "#222B45",
+                  "fontFamily": "System",
+                  "fontSize": 15,
+                  "fontWeight": "normal",
+                  "marginHorizontal": 8,
+                },
+                {
+                  "flexBasis": "auto",
+                  "flexGrow": 1,
+                  "flexShrink": 1,
+                },
+                null,
+                {
+                  "fontSize": 18,
+                  "maxHeight": 24,
+                },
+              ]
+            }
+            testID="@undefined/input"
+            value=""
+          />
+        </View>
+      </View>
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={false}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "flex": 1,
+            "margin": 8,
+            "opacity": 1,
+          }
+        }
+        testID="@undefined/container"
+      >
+        <Text
+          appearance="default"
+          category="p2"
+          status="basic"
+          style={
+            [
+              {
+                "color": "#222B45",
+                "fontFamily": "System",
+                "fontSize": 13,
+                "fontWeight": "400",
+              },
+              {
+                "color": "black",
+              },
+            ]
+          }
+        >
+          Additional Notes
+        </Text>
+        <View
+          style={
+            [
+              {
+                "backgroundColor": "#F7F9FC",
+                "borderColor": "#E4E9F2",
+                "borderRadius": 4,
+                "borderWidth": 1,
+                "minHeight": 40,
+                "paddingHorizontal": 8,
+                "paddingVertical": 7,
+              },
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "width": "100%",
+              },
+            ]
+          }
+        >
+          <TextInput
+            appearance="default"
+            editable={true}
+            multiline={false}
+            onBlur={[Function]}
+            onChangeText={[Function]}
+            onFocus={[Function]}
+            onMouseEnter={[Function]}
+            onMouseLeave={[Function]}
+            placeholder="Make sure to download previous site docs"
+            placeholderTextColor="#A0A0A0"
+            secureTextEntry={false}
             size="medium"
             status="basic"
             style={
@@ -376,13 +545,13 @@ exports[`Login page page renders correctly 1`] = `
         style={
           {
             "alignItems": "center",
-            "backgroundColor": "#06b4e0",
+            "backgroundColor": "#596CA7",
             "borderColor": "#596CA7",
             "borderRadius": 4,
             "borderWidth": 1,
             "flexDirection": "row",
             "justifyContent": "center",
-            "margin": 15,
+            "margin": 8,
             "minHeight": 40,
             "minWidth": 40,
             "opacity": 1,
@@ -390,27 +559,30 @@ exports[`Login page page renders correctly 1`] = `
             "paddingVertical": 12,
           }
         }
-        testID="AuthButton"
       >
         <Text
           appearance="default"
-          category="h5"
+          category="p1"
           status="basic"
           style={
             [
               {
                 "color": "#222B45",
                 "fontFamily": "System",
-                "fontSize": 22,
-                "fontWeight": "800",
+                "fontSize": 15,
+                "fontWeight": "400",
               },
               {
-                "color": "black",
+                "color": "#FFFFFF",
+                "fontFamily": "System",
+                "fontSize": 14,
+                "fontWeight": "bold",
+                "marginHorizontal": 10,
               },
             ]
           }
         >
-          SIGN IN
+          Submit
         </Text>
       </View>
     </View>
