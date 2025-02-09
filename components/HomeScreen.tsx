@@ -17,7 +17,6 @@ import { tankTrackerSpinUp, setVisitFile, getFileContents, visit } from '../scri
 export default function HomeScreen({ navigation }: NavigationType) {
   //setInstrumentFile("instrument_maint/LGR_UGGA/LGR-13-0075", "testing", "updating from research flow", false)
   //setInstrumentFile("instrument_maint/Teledyne/T200", "testing", "updating from research flow", false)
-  //tankTrackerSpinUp()
   
   return (
     <Layout style={styles.container}>

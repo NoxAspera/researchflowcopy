@@ -289,7 +289,7 @@ export async function tankTrackerSpinUp()
     )
     try {
         const response = await fetch(requestOptions);
-        //console.log(response)
+        console.log(response)
         if (response.ok) {
             const data = await response.json();
             tankTrackerSha = data.sha

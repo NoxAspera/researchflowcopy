@@ -2,13 +2,11 @@ import { useEffect } from 'react';
 import * as WebBrowser from 'expo-web-browser';
 import * as config from "../config"
 import { makeRedirectUri, useAuthRequest, AuthSessionResult} from 'expo-auth-session';
-import { generateGithubToken, setGithubToken } from '../scripts/APIRequests';
-import { StyleSheet, View, TouchableOpacity, ScrollView, TouchableWithoutFeedback, ImageBackground, Image } from 'react-native';
+import { generateGithubToken, setGithubToken, tankTrackerSpinUp } from '../scripts/APIRequests';
+import { StyleSheet, ScrollView} from 'react-native';
 import { NavigationType} from './types'
-import * as eva from '@eva-design/eva';
-import { customTheme } from './CustomTheme'
 import React from 'react';
-import { ApplicationProvider, Layout, Text } from '@ui-kitten/components'
+import {Layout} from '@ui-kitten/components'
 import HomeButtonProp from './HomeButtonProp';
 
 
@@ -27,9 +25,8 @@ async function handleResponse(response: AuthSessionResult | null)
     console.log(response)
       const { code } = response.params;
       const {token_type, scopes, access_token} = (await generateGithubToken(code)).data
-      console.log(scopes)
-      console.log(token_type)
       setGithubToken(access_token);
+      tankTrackerSpinUp();
   }
 }
 
@@ -51,18 +48,25 @@ export default function App({navigation}: NavigationType) {
     handleResponse(response)
   }, [response]);
 
+async function handlePress()
+{
+  await promptAsync();
+  navigation.navigate("Home")
+}
+
   return (
-    <ApplicationProvider {...eva} theme={customTheme}>
-      <Layout style={styles.container}>
+    <Layout style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
         <HomeButtonProp
           text="Login With Github"
+          color= "#FFFFFF"
           onPress={() => {
-            promptAsync();
-            navigation.navigate("Home");
+            handlePress()
           }}
         />
-      </Layout>
-    </ApplicationProvider>
+        </ScrollView>
+    </Layout>
+      
   );
 }
 
