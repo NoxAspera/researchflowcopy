@@ -8,14 +8,12 @@
  */
 import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { buildMobileNotes, MobileEntry } from '../scripts/Parsers';
-import { NaviProp } from './types';
 import TextInput from './TextInput'
 import NoteInput from './NoteInput'
-import { IndexPath, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
-import * as eva from '@eva-design/eva';
+import { Layout, Button, Text } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
 import { setFile, getFileContents } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'

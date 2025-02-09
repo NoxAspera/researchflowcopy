@@ -5,10 +5,10 @@
  *
  * This page is responsible for planning visits.
  */
-import { StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
+import { StyleSheet, KeyboardAvoidingView,} from "react-native";
 import React, { useState } from "react";
 import { useRoute } from "@react-navigation/native";
-import { Button, IndexPath, Layout, Datepicker, Text } from "@ui-kitten/components";
+import { Button, Layout, Datepicker, Text } from "@ui-kitten/components";
 import TextInput from "./TextInput";
 import { customTheme } from "./CustomTheme";
 import { NavigationType, routeProp } from "./types";

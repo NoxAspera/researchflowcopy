@@ -6,26 +6,15 @@
  * This is the page for instrument maintenance. It will take in the user input, format
  * it, and send it to the github repo.
  */
-import { StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
+import { StyleSheet, KeyboardAvoidingView } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useRoute } from "@react-navigation/native";
-import {
-  Button,
-  IndexPath,
-  Layout,
-  Select,
-  SelectItem,
-  Text
-} from "@ui-kitten/components";
+import { Button, Layout, Text } from "@ui-kitten/components";
 import TextInput from "./TextInput";
 import NoteInput from "./NoteInput";
 import { customTheme } from "./CustomTheme";
 import { NavigationType, routeProp } from "./types";
-import {
-  getDirectory,
-  setInstrumentFile,
-  getInstrumentSite,
-} from "../scripts/APIRequests";
+import {setInstrumentFile, getInstrumentSite} from "../scripts/APIRequests";
 import { ScrollView } from "react-native-gesture-handler";
 import PopupProp from './Popup';
 

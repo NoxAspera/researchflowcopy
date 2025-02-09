@@ -6,10 +6,10 @@
  * This page is responsible for tracking tank statuses. Will look at previous
  * data and determine when it will most likely run out and need replacement.
  */
-import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import React, { useDebugValue, useEffect, useState } from 'react';
+import { StyleSheet, KeyboardAvoidingView } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
-import { Button, IndexPath, Layout, Select, SelectItem, Text } from '@ui-kitten/components';
+import { Button, IndexPath, Layout, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
 import { NavigationType, routeProp } from './types'
 import { ScrollView } from 'react-native-gesture-handler';

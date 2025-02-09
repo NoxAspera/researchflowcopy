@@ -7,13 +7,12 @@
  * a tank is selected, the page will navigate to the TankTracker.
  */
 import { StyleSheet, KeyboardAvoidingView, Platform, View } from 'react-native';
-import React, { Component, useEffect, useState } from 'react';
-import { RouteProp, useRoute } from '@react-navigation/native';
-import { Layout, Button, Text } from '@ui-kitten/components';
-import PopupProp from './Popup';
+import React, { useEffect, useState } from 'react';
+import { useRoute } from '@react-navigation/native';
+import { Button, Text } from '@ui-kitten/components';
 import { NavigationType, routeProp } from './types'
-import { getBadDataSites, getDirectory, getTankList } from '../scripts/APIRequests';
-import { ScrollView, TextInput, TouchableOpacity } from 'react-native-gesture-handler';
+import { getTankList } from '../scripts/APIRequests';
+import { ScrollView, TextInput} from 'react-native-gesture-handler';
 
 export default function SelectTank({navigation}: NavigationType) {
   const route = useRoute<routeProp>();
