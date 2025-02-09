@@ -180,9 +180,11 @@ export function setGithubToken(token: string) {
  */
 export async function setTankTracker(newEntry: TankRecord)
 {
-    tankDict[newEntry.tankId] = newEntry
+    let tankEntries = tankDict.get(newEntry.tankId);
+    tankEntries.push(newEntry);
+    tankDict.set(newEntry.tankId, tankEntries);
     let temp = Array.from(tankDict.values())
-    let plainfullDoc: TankRecord[]
+    let plainfullDoc: TankRecord[] = []
 
     temp.forEach(value =>
         {
@@ -193,7 +195,7 @@ export async function setTankTracker(newEntry: TankRecord)
         }
     )
 
-    console.log(plainfullDoc)
+    //console.log(plainfullDoc)
     let newContent = csvify(plainfullDoc)
     const fullDoc = btoa(newContent)
 
