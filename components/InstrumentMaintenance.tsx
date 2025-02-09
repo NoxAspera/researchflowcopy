@@ -108,6 +108,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     );
     if (result.success) {
       setMessage("File updated successfully!");
+      navigation.navigate("Home")
       setMessageColor(customTheme["color-success-700"]);
     } else {
       setMessage(`Error: ${result.error}`);

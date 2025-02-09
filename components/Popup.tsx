@@ -16,7 +16,7 @@ interface PUProp {
   onPress: (arg0: boolean) => void;
 }
 
-const PopupProp: React.FC<PUProp> = ({ popupText, popupColor, visible, onPress }) => {
+const PopupProp: React.FC<PUProp> = ({ popupText, popupColor, visible, onPress, navigation }) => {
   return (
     <Layout>
       <Modal
@@ -26,7 +26,7 @@ const PopupProp: React.FC<PUProp> = ({ popupText, popupColor, visible, onPress }
       >
         <Card disabled={true} style={{ backgroundColor: popupColor }}>
           <Text>{popupText}</Text>
-          <Button onPress={() => onPress(false)}>DISMISS</Button>
+          <Button onPress={() => onPress(false) }>DISMISS</Button>
         </Card>
       </Modal>
     </Layout>
