@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react-native'
+import { fireEvent, render, waitFor } from '@testing-library/react-native'
 import { NaviProp } from '../components/types';
 import React from 'react';
 import { MockThemeProvider } from '../components/MockThemeProvider';
@@ -111,14 +111,14 @@ describe('Add Notes', () => {
     expect(popup).toBeTruthy();
   })
 
-  // test('takes user input', () => {
-  //   const { getByTestId } = render(
-  //     <MockThemeProvider>
-  //       <AddNotes navigation={mockNavigation} />
-  //     </MockThemeProvider>
-  //     );
+  test('takes user input', async () => {
+    const { findByTestId } = render(
+      <MockThemeProvider>
+        <AddNotes navigation={mockNavigation} />
+      </MockThemeProvider>
+      );
 
-  //   const instrumentInput = getByTestId('instrumentInput');
-  //   expect(instrumentInput).toBeTruthy();
-  // })
+    const instrumentInput = await findByTestId('instrumentInput');
+    expect(instrumentInput).toBeTruthy();
+  })
 });

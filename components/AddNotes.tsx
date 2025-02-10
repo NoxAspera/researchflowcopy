@@ -13,7 +13,7 @@ import { buildNotes, Entry } from '../scripts/Parsers';
 import { NaviProp } from './types';
 import TextInput from './TextInput'
 import NoteInput from './NoteInput'
-import { IndexPath, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
+import { IndexPath, Layout, Select, SelectItem, Button, Text, Input } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import { setFile, getFileContents } from '../scripts/APIRequests';
@@ -268,13 +268,21 @@ export default function AddNotes({ navigation }: NavigationType) {
             {latestEntry && !latestEntry.instrument ? (
               // Prompt the user to input an instrument if none is parsed
               <TextInput
-                testid ='instrumentInput'
+                testID ='instrumentInput'
                 labelText="Instrument"
                 labelValue={instrumentInput}
                 onTextChange={setInstrumentInput}
                 placeholder="Please enter instrument name"
                 style={styles.inputText}
               />
+              // <Input
+              //   testID="instrumentInput"
+              //   label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>InstrumentInput</Text>}
+              //   placeholder="Please enter instrument name"
+              //   value={instrumentInput}
+              //   onChangeText={setInstrumentInput}
+              //   style={styles.inputText}
+              // />
             ) : (
             <Select label={evaProps => <Text {...evaProps} category="c1" style={{color: isDarkMode ? "white" : "black"}}>Instrument</Text>}
               selectedIndex={selectedIndex}

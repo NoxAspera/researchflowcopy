@@ -25,7 +25,7 @@ interface TIProp {
   style?: ViewStyle;
   secureEntry?: boolean; // used for hiding passwords and other sensitive info
   status?: string;
-  testid?: string;
+  testID?: string;
 }
 
 const AddNotesTextInput: React.FC<TIProp> = ({ 
@@ -37,12 +37,12 @@ const AddNotesTextInput: React.FC<TIProp> = ({
   style = styles.defaultStyle, 
   secureEntry = false, 
   status = 'basic', 
-  testid = '', }) => {
+  testID = '', }) => {
     const themeContext = React.useContext(ThemeContext);
     const isDarkMode = themeContext.theme === 'dark';
     return (
       <Input
-        testID={testid}
+        testID={testID}
         label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>{labelText}</Text>}
         status={status || 'basic'}
         placeholder={placeholder}
