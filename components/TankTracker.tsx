@@ -14,7 +14,7 @@ import TextInput from './TextInput'
 import { NavigationType, routeProp } from './types'
 import { ScrollView } from 'react-native-gesture-handler';
 import PopupProp from './Popup';
-import { getLatestTankEntry, setTankTracker, TankRecord } from '../scripts/APIRequests';
+import { getLatestTankEntry, setTankTracker, TankRecord, addEntrytoTankDictionary } from '../scripts/APIRequests';
 import { Float } from 'react-native/Libraries/Types/CodegenTypes';
 import { customTheme } from './CustomTheme'
 
@@ -129,7 +129,8 @@ export default function TankTracker({ navigation }: NavigationType) {
 
     const handleUpdate = async () => {
       const entry = buildTankEntry();
-      const result = await setTankTracker(entry);
+      addEntrytoTankDictionary(entry);
+      const result = await setTankTracker();
       if (result.success) {
           setMessage("File updated successfully!");
           setMessageColor(customTheme['color-success-700']);

@@ -9,14 +9,14 @@ import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { buildNotes, Entry } from '../scripts/Parsers';
+import { buildNotes, copyTankRecord, Entry } from '../scripts/Parsers';
 import { NaviProp } from './types';
 import TextInput from './TextInput'
 import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, getLatestTankEntry, getTankList } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, getLatestTankEntry, getTankList, TankRecord, setTankTracker, addEntrytoTankDictionary } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
@@ -109,7 +109,10 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [n2Value, setN2Value] = useState("");
     const [notesValue, setNotesValue] = useState("");
     const [instrumentInput, setInstrumentInput] = useState("");
-    const [selectedLTSIndex, setSelectedLTSIndex] = useState<IndexPath | null>(null);
+    const [ltsTankRecord, setLtsTankRecord] = useState<TankRecord>(undefined);
+    const [lowTankRecord, setLowTankRecord] = useState<TankRecord>(undefined);
+    const [midTankRecord, setMidTankRecord] = useState<TankRecord>(undefined);
+    const [highTankRecord, setHighTankRecord] = useState<TankRecord>(undefined);
 
     // Use IndexPath for selected index for drop down menu
     const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
@@ -154,13 +157,14 @@ export default function AddNotes({ navigation }: NavigationType) {
     const handleUpdate = async () => {
         const LTSignored: boolean = (ltsId == "" && ltsValue == "" && ltsPressure == "")
 
-        // get time submitted
-        const now = new Date();
-        const year = now.getFullYear().toString()
-        const month = (now.getMonth() + 1).toString() // now.getMonth() is zero-base (i.e. January is 0), likely due to something with Oracle's implementation - August
-        const day = now.getDate().toString()
-        const hours= now.getHours().toString()
-        const minutes = now.getMinutes().toString()
+      // get time submitted
+      const now = new Date();
+      const year = now.getUTCFullYear();
+      const month = String(now.getUTCMonth() + 1).padStart(2, "0");
+      const day = String(now.getUTCDate()).padStart(2, "0");
+      const hours = String(now.getUTCHours()).padStart(2, "0");
+      const minutes = String(now.getUTCMinutes()).padStart(2, "0");
+      const seconds = String(now.getUTCSeconds()).padStart(2, "0");
         
         // create an entry object data that will be sent off to the repo
         let data: Entry = 
@@ -201,18 +205,52 @@ export default function AddNotes({ navigation }: NavigationType) {
           additional_notes: notesValue 
         };
 
+        const utcTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
+        let ltsTank = copyTankRecord(ltsTankRecord);
+        ltsTank.location = site;
+        ltsTank.updatedAt = utcTime;
+        ltsTank.pressure = parseInt(ltsPressure);
+        ltsTank.userId = nameValue;
+        addEntrytoTankDictionary(ltsTank);
+
+        let lowTank = copyTankRecord(lowTankRecord);
+        lowTank.location = site;
+        lowTank.updatedAt = utcTime;
+        lowTank.pressure = parseInt(lowPressure);
+        lowTank.userId = nameValue;
+        addEntrytoTankDictionary(lowTank);
+
+        let midTank = copyTankRecord(midTankRecord);
+        midTank.location = site;
+        midTank.updatedAt = utcTime;
+        midTank.pressure = parseInt(midPressure);
+        midTank.userId = nameValue;
+        addEntrytoTankDictionary(midTank);
+
+        let highTank = copyTankRecord(highTankRecord);
+        highTank.location = site;
+        highTank.updatedAt = utcTime;
+        highTank.pressure = parseInt(highPressure);
+        highTank.userId = nameValue;
+        addEntrytoTankDictionary(highTank);
+
         // send the request
         const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
+        const tankResult = await setTankTracker();
 
         // if the warning popup is visible, remove it
         //if(visible2) { setVisible2(false); }
 
         // check to see if the request was ok, give a message based on that
-        if (result.success) {
+        if (result.success && tankResult.success) {
             setMessage("File updated successfully!");
             setMessageColor(customTheme['color-success-700']);
           } else {
-            setMessage(`Error: ${result.error}`);
+            if (result.error) {
+              
+            } else if (tankResult.error) {
+              setMessage(`Error: ${tankResult.error}`);
+            }
             setMessageColor(customTheme['color-danger-700']);
           }
         setVisible(true);
@@ -230,6 +268,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           onSelect: (selectedTank) => {
             setLTSId(selectedTank);
             const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+            setLtsTankRecord(entry);
             setLTSValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
           }
         });
@@ -239,6 +278,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           onSelect: (selectedTank) => {
             setLowId(selectedTank);
             const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+            setLowTankRecord(entry);
             setLowValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
           }
         });
@@ -248,6 +288,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           onSelect: (selectedTank) => {
             setmidId(selectedTank);
             const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+            setMidTankRecord(entry);
             setmidValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
           }
         });
@@ -257,6 +298,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           onSelect: (selectedTank) => {
             setHighId(selectedTank);
             const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+            setHighTankRecord(entry);
             setHighValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
           }
         });
@@ -271,6 +313,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               if (ltsID) {
                 const ltsEntry = getLatestTankEntry(ltsID) || getLatestTankEntry(ltsID.toLowerCase());
                 if (ltsEntry) {
+                  setLtsTankRecord(ltsEntry);
                   setLTSId(ltsEntry.tankId)
                   setLTSValue(ltsEntry.co2.toString() + " ~ " + ltsEntry.ch4.toString());
                 }
@@ -281,6 +324,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             if (lowID) {
               const lowEntry = getLatestTankEntry(lowID) || getLatestTankEntry(lowID.toLowerCase());
               if (lowEntry) {
+                setLowTankRecord(lowEntry);
                 setLowId(lowEntry.tankId);
                 setLowValue(lowEntry.co2.toString() + " ~ " + lowEntry.ch4.toString());
               }
@@ -291,6 +335,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             if (midID) {
               const midEntry = getLatestTankEntry(midID) || getLatestTankEntry(midID.toLowerCase());
               if (midEntry) {
+                setMidTankRecord(midEntry);
                 setmidId(midEntry.tankId);
                 setmidValue(midEntry.co2.toString() + " ~ " + midEntry.ch4.toString());
               }
@@ -301,6 +346,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             if (highID) {
               const highEntry = getLatestTankEntry(highID) || getLatestTankEntry(highID.toLowerCase());
               if (highEntry) {
+                setHighTankRecord(highEntry);
                 setHighId(highEntry.tankId);
                 setHighValue(highEntry.co2.toString() + " ~ " + highEntry.ch4.toString());
               }
@@ -371,7 +417,6 @@ export default function AddNotes({ navigation }: NavigationType) {
             <Layout style = {styles.rowContainer}>
               <Select
                   label={"LTS (if applicable)"}
-                  selectedIndex={selectedLTSIndex}
                   onSelect={() => handleTankChange("lts")}
                   placeholder="Select LTS Tank"
                   value={ltsId}
@@ -397,7 +442,6 @@ export default function AddNotes({ navigation }: NavigationType) {
             <Layout style = {styles.rowContainer}>
             <Select
                   label={"Low"}
-                  selectedIndex={selectedLTSIndex}
                   onSelect={() => handleTankChange("low")}
                   placeholder="Select Low Tank"
                   value={lowId}
@@ -421,7 +465,6 @@ export default function AddNotes({ navigation }: NavigationType) {
             <Layout style = {styles.rowContainer}>
             <Select
                   label={"Mid"}
-                  selectedIndex={selectedLTSIndex}
                   onSelect={() => handleTankChange("mid")}
                   placeholder="Select Mid Tank"
                   value={midId}
@@ -445,7 +488,6 @@ export default function AddNotes({ navigation }: NavigationType) {
             <Layout style = {styles.rowContainer}>
             <Select
                   label={"High"}
-                  selectedIndex={selectedLTSIndex}
                   onSelect={() => handleTankChange("high")}
                   placeholder="Select High Tank"
                   value={highId}
