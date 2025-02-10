@@ -16,7 +16,7 @@ import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, getLatestTankEntry, getTankList } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
@@ -109,6 +109,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [n2Value, setN2Value] = useState("");
     const [notesValue, setNotesValue] = useState("");
     const [instrumentInput, setInstrumentInput] = useState("");
+    const [selectedLTSIndex, setSelectedLTSIndex] = useState<IndexPath | null>(null);
 
     // Use IndexPath for selected index for drop down menu
     const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
@@ -222,24 +223,88 @@ export default function AddNotes({ navigation }: NavigationType) {
       navigation.navigate("Home")
     }
 
+    const handleTankChange = (tank: string) => {
+      if (tank == "lts") {
+        navigation.navigate('SelectTank', {
+          from: 'AddNotes',
+          onSelect: (selectedTank) => {
+            setLTSId(selectedTank);
+            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+            setLTSValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+          }
+        });
+      } else if (tank == "low") {
+        navigation.navigate('SelectTank', {
+          from: 'AddNotes',
+          onSelect: (selectedTank) => {
+            setLowId(selectedTank);
+            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+            setLowValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+          }
+        });
+      } else if (tank == "mid") {
+        navigation.navigate('SelectTank', {
+          from: 'AddNotes',
+          onSelect: (selectedTank) => {
+            setmidId(selectedTank);
+            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+            setmidValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+          }
+        });
+      } else if (tank == "high") {
+        navigation.navigate('SelectTank', {
+          from: 'AddNotes',
+          onSelect: (selectedTank) => {
+            setHighId(selectedTank);
+            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+            setHighValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+          }
+        });
+      }
+    };
+
     //Set tank ids, values, and instruments if available in parsed data
     useEffect(() => {
       if (latestEntry) {
           if (latestEntry.lts) {
-              setLTSId(latestEntry.lts.id || "");
-              setLTSValue(latestEntry.lts.value || "");
+              const ltsID = latestEntry.lts.id.split("_").pop();
+              if (ltsID) {
+                const ltsEntry = getLatestTankEntry(ltsID) || getLatestTankEntry(ltsID.toLowerCase());
+                if (ltsEntry) {
+                  setLTSId(ltsEntry.tankId)
+                  setLTSValue(ltsEntry.co2.toString() + " ~ " + ltsEntry.ch4.toString());
+                }
+              }
           }
           if (latestEntry.low_cal) {
-            setLowId(latestEntry.low_cal.id || "");
-            setLowValue(latestEntry.low_cal.value || "");
+            const lowID = latestEntry.low_cal.id.split("_").pop();
+            if (lowID) {
+              const lowEntry = getLatestTankEntry(lowID) || getLatestTankEntry(lowID.toLowerCase());
+              if (lowEntry) {
+                setLowId(lowEntry.tankId);
+                setLowValue(lowEntry.co2.toString() + " ~ " + lowEntry.ch4.toString());
+              }
+            }
           }
           if (latestEntry.mid_cal) {
-            setmidId(latestEntry.mid_cal.id || "");
-            setmidValue(latestEntry.mid_cal.value || "");
+            const midID = latestEntry.mid_cal.id.split("_").pop();
+            if (midID) {
+              const midEntry = getLatestTankEntry(midID) || getLatestTankEntry(midID.toLowerCase());
+              if (midEntry) {
+                setmidId(midEntry.tankId);
+                setmidValue(midEntry.co2.toString() + " ~ " + midEntry.ch4.toString());
+              }
+            } 
           }
           if (latestEntry.high_cal) {
-            setHighId(latestEntry.high_cal.id || "");
-            setHighValue(latestEntry.high_cal.value || "");
+            const highID = latestEntry.high_cal.id.split("_").pop();
+            if (highID) {
+              const highEntry = getLatestTankEntry(highID) || getLatestTankEntry(highID.toLowerCase());
+              if (highEntry) {
+                setHighId(highEntry.tankId);
+                setHighValue(highEntry.co2.toString() + " ~ " + highEntry.ch4.toString());
+              }
+            }
           }
           if (latestEntry.instrument) {
             setInstrumentInput(latestEntry.instrument);
@@ -304,11 +369,16 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* LTS input */}
             <Layout style = {styles.rowContainer}>
-              <TextInput labelText='LTS (if needed)' 
-                labelValue={ltsId} 
-                onTextChange={setLTSId} 
-                placeholder='Tank ID' 
-                style={styles.tankInput} />
+              <Select
+                  label={"LTS (if applicable)"}
+                  selectedIndex={selectedLTSIndex}
+                  onSelect={() => handleTankChange("lts")}
+                  placeholder="Select LTS Tank"
+                  value={ltsId}
+                  style={styles.inputText}
+              >
+              <SelectItem key={0} title={"Change tank"} />
+              </Select>
               <TextInput labelText=' ' 
                 labelValue={ltsValue} 
                 onTextChange={setLTSValue} 
@@ -325,11 +395,16 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* Low input */}
             <Layout style = {styles.rowContainer}>
-              <TextInput labelText='Low' 
-                labelValue={lowId} 
-                onTextChange={setLowId} 
-                placeholder='Tank ID' 
-                style={styles.tankInput} />
+            <Select
+                  label={"Low"}
+                  selectedIndex={selectedLTSIndex}
+                  onSelect={() => handleTankChange("low")}
+                  placeholder="Select Low Tank"
+                  value={lowId}
+                  style={styles.inputText}
+              >
+              <SelectItem key={0} title={"Change tank"} />
+              </Select>
               <TextInput labelText=' ' 
                 labelValue={lowValue} 
                 onTextChange={setLowValue} 
@@ -344,11 +419,16 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* mid input */}
             <Layout style = {styles.rowContainer}>
-              <TextInput labelText='Mid' 
-                labelValue={midId} 
-                onTextChange={setmidId} 
-                placeholder='Tank ID' 
-                style={styles.tankInput} />
+            <Select
+                  label={"Mid"}
+                  selectedIndex={selectedLTSIndex}
+                  onSelect={() => handleTankChange("mid")}
+                  placeholder="Select Mid Tank"
+                  value={midId}
+                  style={styles.inputText}
+              >
+              <SelectItem key={0} title={"Change tank"} />
+              </Select>
               <TextInput labelText=' ' 
                 labelValue={midValue} 
                 onTextChange={setmidValue} 
@@ -363,11 +443,16 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* high input */} 
             <Layout style = {styles.rowContainer}>
-              <TextInput labelText='High' 
-                labelValue={highId} 
-                onTextChange={setHighId} 
-                placeholder='Tank ID' 
-                style={styles.tankInput} />
+            <Select
+                  label={"High"}
+                  selectedIndex={selectedLTSIndex}
+                  onSelect={() => handleTankChange("high")}
+                  placeholder="Select High Tank"
+                  value={highId}
+                  style={styles.inputText}
+              >
+              <SelectItem key={0} title={"Change tank"} />
+              </Select>
               <TextInput labelText=' ' 
                 labelValue={highValue} 
                 onTextChange={setHighValue} 
