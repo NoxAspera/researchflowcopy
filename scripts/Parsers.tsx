@@ -157,7 +157,7 @@ export function buildNotes(data: Entry): string
     {
         result += `- Instrument: ${data.instrument}\n`
     }
-    if(data.n2_pressure != "")
+    if(data.n2_pressure != null)
     {
         result += `- N2: ${data.n2_pressure} psi\n`;
     }
@@ -203,6 +203,13 @@ export function buildMobileNotes(data: MobileEntry): string
     return result
 }
 
+/**
+ * @author Megan Ostlie
+ * 
+ * This method creates a deep copy of a TankRecord
+ * @param record - a TankRecord object that will be copied
+ * @returns TankRecord object
+ */
 export function copyTankRecord(record: TankRecord): TankRecord
 {
     let newRecord: TankRecord = {
