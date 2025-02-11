@@ -110,9 +110,13 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [notesValue, setNotesValue] = useState("");
     const [instrumentInput, setInstrumentInput] = useState("");
     const [ltsTankRecord, setLtsTankRecord] = useState<TankRecord>(undefined);
+    const [originalLts, setOriginalLts] = useState<TankRecord>(undefined);
     const [lowTankRecord, setLowTankRecord] = useState<TankRecord>(undefined);
+    const [originalLow, setOriginalLow] = useState<TankRecord>(undefined);
     const [midTankRecord, setMidTankRecord] = useState<TankRecord>(undefined);
+    const [originalMid, setOriginalMid] = useState<TankRecord>(undefined);
     const [highTankRecord, setHighTankRecord] = useState<TankRecord>(undefined);
+    const [originalHigh, setOriginalHigh] = useState<TankRecord>(undefined);
 
     // Use IndexPath for selected index for drop down menu
     const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
@@ -206,33 +210,53 @@ export default function AddNotes({ navigation }: NavigationType) {
         };
 
         const utcTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
-        let ltsTank = copyTankRecord(ltsTankRecord);
-        ltsTank.location = site;
-        ltsTank.updatedAt = utcTime;
-        ltsTank.pressure = parseInt(ltsPressure);
-        ltsTank.userId = nameValue;
-        addEntrytoTankDictionary(ltsTank);
+        if (ltsTankRecord) {
+          if (originalLts && (originalLts.tankId != ltsTankRecord.tankId)) {
+            removeTankFromSite(originalLts, utcTime);
+          }
+          let ltsTank = copyTankRecord(ltsTankRecord);
+          ltsTank.location = site;
+          ltsTank.updatedAt = utcTime;
+          ltsTank.pressure = parseInt(ltsPressure);
+          ltsTank.userId = nameValue;
+          addEntrytoTankDictionary(ltsTank);
+        }
+        
+        if (lowTankRecord) {
+          if (originalLow && (originalLow.tankId != lowTankRecord.tankId)) {
+            removeTankFromSite(originalLow, utcTime);
+          }
+          let lowTank = copyTankRecord(lowTankRecord);
+          lowTank.location = site;
+          lowTank.updatedAt = utcTime;
+          lowTank.pressure = parseInt(lowPressure);
+          lowTank.userId = nameValue;
+          addEntrytoTankDictionary(lowTank);
+        }
 
-        let lowTank = copyTankRecord(lowTankRecord);
-        lowTank.location = site;
-        lowTank.updatedAt = utcTime;
-        lowTank.pressure = parseInt(lowPressure);
-        lowTank.userId = nameValue;
-        addEntrytoTankDictionary(lowTank);
+        if (midTankRecord) {
+          if (originalMid && (originalMid.tankId != midTankRecord.tankId)) {
+            removeTankFromSite(originalMid, utcTime);
+          }
+          let midTank = copyTankRecord(midTankRecord);
+          midTank.location = site;
+          midTank.updatedAt = utcTime;
+          midTank.pressure = parseInt(midPressure);
+          midTank.userId = nameValue;
+          addEntrytoTankDictionary(midTank);
+        }
 
-        let midTank = copyTankRecord(midTankRecord);
-        midTank.location = site;
-        midTank.updatedAt = utcTime;
-        midTank.pressure = parseInt(midPressure);
-        midTank.userId = nameValue;
-        addEntrytoTankDictionary(midTank);
-
-        let highTank = copyTankRecord(highTankRecord);
-        highTank.location = site;
-        highTank.updatedAt = utcTime;
-        highTank.pressure = parseInt(highPressure);
-        highTank.userId = nameValue;
-        addEntrytoTankDictionary(highTank);
+        if (highTankRecord) {
+          if (originalHigh && (originalHigh.tankId != highTankRecord.tankId)) {
+            removeTankFromSite(originalHigh, utcTime);
+          }
+          let highTank = copyTankRecord(highTankRecord);
+          highTank.location = site;
+          highTank.updatedAt = utcTime;
+          highTank.pressure = parseInt(highPressure);
+          highTank.userId = nameValue;
+          addEntrytoTankDictionary(highTank);
+        }
 
         // send the request
         const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
@@ -259,6 +283,15 @@ export default function AddNotes({ navigation }: NavigationType) {
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
     function navigateHome(){
       navigation.navigate("Home")
+    }
+
+    const removeTankFromSite = (tank: TankRecord, time: string) => {
+      let newTankEntry = copyTankRecord(tank);
+      newTankEntry.location = "ASB279";
+      newTankEntry.pressure = 500;
+      newTankEntry.userId = nameValue;
+      newTankEntry.updatedAt = time;
+      addEntrytoTankDictionary(newTankEntry);
     }
 
     const handleTankChange = (tank: string) => {
@@ -314,6 +347,7 @@ export default function AddNotes({ navigation }: NavigationType) {
                 const ltsEntry = getLatestTankEntry(ltsID) || getLatestTankEntry(ltsID.toLowerCase());
                 if (ltsEntry) {
                   setLtsTankRecord(ltsEntry);
+                  setOriginalLts(ltsEntry);
                   setLTSId(ltsEntry.tankId)
                   setLTSValue(ltsEntry.co2.toString() + " ~ " + ltsEntry.ch4.toString());
                 }
@@ -325,6 +359,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               const lowEntry = getLatestTankEntry(lowID) || getLatestTankEntry(lowID.toLowerCase());
               if (lowEntry) {
                 setLowTankRecord(lowEntry);
+                setOriginalLow(lowEntry);
                 setLowId(lowEntry.tankId);
                 setLowValue(lowEntry.co2.toString() + " ~ " + lowEntry.ch4.toString());
               }
@@ -336,6 +371,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               const midEntry = getLatestTankEntry(midID) || getLatestTankEntry(midID.toLowerCase());
               if (midEntry) {
                 setMidTankRecord(midEntry);
+                setOriginalMid(midEntry);
                 setmidId(midEntry.tankId);
                 setmidValue(midEntry.co2.toString() + " ~ " + midEntry.ch4.toString());
               }
@@ -347,6 +383,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               const highEntry = getLatestTankEntry(highID) || getLatestTankEntry(highID.toLowerCase());
               if (highEntry) {
                 setHighTankRecord(highEntry);
+                setOriginalHigh(highEntry);
                 setHighId(highEntry.tankId);
                 setHighValue(highEntry.co2.toString() + " ~ " + highEntry.ch4.toString());
               }
