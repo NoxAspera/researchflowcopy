@@ -172,17 +172,20 @@ export function setGithubToken(token: string) {
     githubToken = token;
 }
 
+export function addEntrytoTankDictionary(newEntry: TankRecord) {
+    let tankEntries = tankDict.get(newEntry.tankId);
+    tankEntries.push(newEntry);
+    tankDict.set(newEntry.tankId, tankEntries);
+}
+
 /**
  * This method updates the tank tracker csv on the repo
  * @author August O'Rourke
  * @param newEntry the new entry to be added to the tank tracker csv
  * @returns a resopnse containing whether or not adding was successful, and the response data
  */
-export async function setTankTracker(newEntry: TankRecord)
+export async function setTankTracker()
 {
-    let tankEntries = tankDict.get(newEntry.tankId);
-    tankEntries.push(newEntry);
-    tankDict.set(newEntry.tankId, tankEntries);
     let temp = Array.from(tankDict.values())
     let plainfullDoc: TankRecord[] = []
 
