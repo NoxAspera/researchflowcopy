@@ -416,7 +416,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             {/* LTS input */}
             <Layout style = {styles.rowContainer}>
               <Select
-                  label={"LTS (if applicable)"}
+                  label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>LTS (if needed)</Text>}
                   onSelect={() => handleTankChange("lts")}
                   placeholder="Select LTS Tank"
                   value={ltsId}
@@ -441,7 +441,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             {/* Low input */}
             <Layout style = {styles.rowContainer}>
             <Select
-                  label={"Low"}
+                  label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Low</Text>}
                   onSelect={() => handleTankChange("low")}
                   placeholder="Select Low Tank"
                   value={lowId}
@@ -464,7 +464,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             {/* mid input */}
             <Layout style = {styles.rowContainer}>
             <Select
-                  label={"Mid"}
+                  label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Mid</Text>}
                   onSelect={() => handleTankChange("mid")}
                   placeholder="Select Mid Tank"
                   value={midId}
@@ -487,7 +487,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             {/* high input */} 
             <Layout style = {styles.rowContainer}>
             <Select
-                  label={"High"}
+                  label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>High</Text>}
                   onSelect={() => handleTankChange("high")}
                   placeholder="Select High Tank"
                   value={highId}

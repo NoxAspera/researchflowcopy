@@ -84,7 +84,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
 
           {/* start date input */}
           <Datepicker
-            label="Visit Date"
+            label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Visit Date</Text>}
             date={dateValue}
             onSelect={(date) => setDateValue(date as Date)}
             min={new Date(1900, 0, 1)}
