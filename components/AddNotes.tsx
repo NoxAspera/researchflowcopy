@@ -1,7 +1,7 @@
 /**
  * Add Notes Page
  * @author Blake Stambaugh, Megan Ostlie, August O'Rourke, and David Schiwal
- *  12/4/24
+ * Updated: 2/11/25 - MO
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
@@ -110,9 +110,13 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [notesValue, setNotesValue] = useState("");
     const [instrumentInput, setInstrumentInput] = useState("");
     const [ltsTankRecord, setLtsTankRecord] = useState<TankRecord>(undefined);
+    const [originalLts, setOriginalLts] = useState<TankRecord>(undefined);
     const [lowTankRecord, setLowTankRecord] = useState<TankRecord>(undefined);
+    const [originalLow, setOriginalLow] = useState<TankRecord>(undefined);
     const [midTankRecord, setMidTankRecord] = useState<TankRecord>(undefined);
+    const [originalMid, setOriginalMid] = useState<TankRecord>(undefined);
     const [highTankRecord, setHighTankRecord] = useState<TankRecord>(undefined);
+    const [originalHigh, setOriginalHigh] = useState<TankRecord>(undefined);
 
     // Use IndexPath for selected index for drop down menu
     const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
@@ -155,7 +159,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     // If it is successful it will display a success message
     // if it fails then it will display a failure message
     const handleUpdate = async () => {
-        const LTSignored: boolean = (ltsId == "" && ltsValue == "" && ltsPressure == "")
+      const LTSignored: boolean = (ltsId == "" && ltsValue == "" && ltsPressure == "")
 
       // get time submitted
       const now = new Date();
@@ -206,33 +210,53 @@ export default function AddNotes({ navigation }: NavigationType) {
         };
 
         const utcTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
-        let ltsTank = copyTankRecord(ltsTankRecord);
-        ltsTank.location = site;
-        ltsTank.updatedAt = utcTime;
-        ltsTank.pressure = parseInt(ltsPressure);
-        ltsTank.userId = nameValue;
-        addEntrytoTankDictionary(ltsTank);
+        if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
+          removeTankFromSite(originalLts, utcTime);
+        }
+        if (ltsTankRecord) {
+          let ltsTank = copyTankRecord(ltsTankRecord);
+          ltsTank.location = site;
+          ltsTank.updatedAt = utcTime;
+          ltsTank.pressure = parseInt(ltsPressure);
+          ltsTank.userId = nameValue;
+          addEntrytoTankDictionary(ltsTank);
+        }
+        
+        if (originalLow && (!lowTankRecord || (originalLow.tankId != lowTankRecord.tankId))) {
+          removeTankFromSite(originalLow, utcTime);
+        }
+        if (lowTankRecord) {
+          let lowTank = copyTankRecord(lowTankRecord);
+          lowTank.location = site;
+          lowTank.updatedAt = utcTime;
+          lowTank.pressure = parseInt(lowPressure);
+          lowTank.userId = nameValue;
+          addEntrytoTankDictionary(lowTank);
+        }
 
-        let lowTank = copyTankRecord(lowTankRecord);
-        lowTank.location = site;
-        lowTank.updatedAt = utcTime;
-        lowTank.pressure = parseInt(lowPressure);
-        lowTank.userId = nameValue;
-        addEntrytoTankDictionary(lowTank);
+        if (originalMid && (!midTankRecord || (originalMid.tankId != midTankRecord.tankId))) {
+          removeTankFromSite(originalMid, utcTime);
+        }
+        if (midTankRecord) {
+          let midTank = copyTankRecord(midTankRecord);
+          midTank.location = site;
+          midTank.updatedAt = utcTime;
+          midTank.pressure = parseInt(midPressure);
+          midTank.userId = nameValue;
+          addEntrytoTankDictionary(midTank);
+        }
 
-        let midTank = copyTankRecord(midTankRecord);
-        midTank.location = site;
-        midTank.updatedAt = utcTime;
-        midTank.pressure = parseInt(midPressure);
-        midTank.userId = nameValue;
-        addEntrytoTankDictionary(midTank);
-
-        let highTank = copyTankRecord(highTankRecord);
-        highTank.location = site;
-        highTank.updatedAt = utcTime;
-        highTank.pressure = parseInt(highPressure);
-        highTank.userId = nameValue;
-        addEntrytoTankDictionary(highTank);
+        if (originalHigh && (!highTankRecord || (originalHigh.tankId != highTankRecord.tankId))) {
+          removeTankFromSite(originalHigh, utcTime);
+        }
+        if (highTankRecord) {
+          let highTank = copyTankRecord(highTankRecord);
+          highTank.location = site;
+          highTank.updatedAt = utcTime;
+          highTank.pressure = parseInt(highPressure);
+          highTank.userId = nameValue;
+          addEntrytoTankDictionary(highTank);
+        }
 
         // send the request
         const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
@@ -259,6 +283,35 @@ export default function AddNotes({ navigation }: NavigationType) {
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
     function navigateHome(){
       navigation.navigate("Home")
+    }
+
+    const removeTankFromSite = (tank: TankRecord, time: string) => {
+      let newTankEntry = copyTankRecord(tank);
+      newTankEntry.location = "ASB279";
+      newTankEntry.pressure = 500;
+      newTankEntry.userId = nameValue;
+      newTankEntry.updatedAt = time;
+      addEntrytoTankDictionary(newTankEntry);
+    }
+
+    const clearTankEntry = (tank: string) => {
+      if (tank == "lts") {
+        setLTSId("");
+        setLTSValue("");
+        setLtsTankRecord(undefined);
+      } else if (tank == "low") {
+        setLowId("");
+        setLowValue("");
+        setLowTankRecord(undefined);
+      } else if (tank == "mid") {
+        setmidId("");
+        setmidValue("");
+        setMidTankRecord(undefined);
+      } else if (tank == "high") {
+        setHighId("");
+        setHighValue("");
+        setHighTankRecord(undefined);
+      }
     }
 
     const handleTankChange = (tank: string) => {
@@ -314,6 +367,7 @@ export default function AddNotes({ navigation }: NavigationType) {
                 const ltsEntry = getLatestTankEntry(ltsID) || getLatestTankEntry(ltsID.toLowerCase());
                 if (ltsEntry) {
                   setLtsTankRecord(ltsEntry);
+                  setOriginalLts(ltsEntry);
                   setLTSId(ltsEntry.tankId)
                   setLTSValue(ltsEntry.co2.toString() + " ~ " + ltsEntry.ch4.toString());
                 }
@@ -325,6 +379,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               const lowEntry = getLatestTankEntry(lowID) || getLatestTankEntry(lowID.toLowerCase());
               if (lowEntry) {
                 setLowTankRecord(lowEntry);
+                setOriginalLow(lowEntry);
                 setLowId(lowEntry.tankId);
                 setLowValue(lowEntry.co2.toString() + " ~ " + lowEntry.ch4.toString());
               }
@@ -336,6 +391,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               const midEntry = getLatestTankEntry(midID) || getLatestTankEntry(midID.toLowerCase());
               if (midEntry) {
                 setMidTankRecord(midEntry);
+                setOriginalMid(midEntry);
                 setmidId(midEntry.tankId);
                 setmidValue(midEntry.co2.toString() + " ~ " + midEntry.ch4.toString());
               }
@@ -347,6 +403,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               const highEntry = getLatestTankEntry(highID) || getLatestTankEntry(highID.toLowerCase());
               if (highEntry) {
                 setHighTankRecord(highEntry);
+                setOriginalHigh(highEntry);
                 setHighId(highEntry.tankId);
                 setHighValue(highEntry.co2.toString() + " ~ " + highEntry.ch4.toString());
               }
@@ -417,18 +474,21 @@ export default function AddNotes({ navigation }: NavigationType) {
             <Layout style = {styles.rowContainer}>
               <Select
                   label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>LTS (if needed)</Text>}
-                  onSelect={() => handleTankChange("lts")}
+                  onSelect={(indexPath) => {
+                    const index = Array.isArray(indexPath) ? indexPath[0].row : indexPath.row;
+                    if (index === 0) {
+                    handleTankChange("lts");
+                  } else if (index === 1) {
+                    clearTankEntry("lts");
+                  }
+                }}
                   placeholder="Select LTS Tank"
-                  value={ltsId}
+                  value={ltsId && ltsValue ? `${ltsId}: ${ltsValue}` : ""}
                   style={styles.inputText}
               >
               <SelectItem key={0} title={"Change tank"} />
+              <SelectItem key={1} title={"Remove tank"} />
               </Select>
-              <TextInput labelText=' ' 
-                labelValue={ltsValue} 
-                onTextChange={setLTSValue} 
-                placeholder='Value' 
-                style={styles.tankInput} />
               <TextInput labelText=' ' 
                 labelValue={ltsPressure} 
                 onTextChange={setLTSPressure} 
@@ -442,18 +502,21 @@ export default function AddNotes({ navigation }: NavigationType) {
             <Layout style = {styles.rowContainer}>
             <Select
                   label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Low</Text>}
-                  onSelect={() => handleTankChange("low")}
+                  onSelect={(indexPath) => {
+                    const index = Array.isArray(indexPath) ? indexPath[0].row : indexPath.row;
+                    if (index === 0) {
+                    handleTankChange("low");
+                  } else if (index === 1) {
+                    clearTankEntry("low");
+                  }
+                }}
                   placeholder="Select Low Tank"
-                  value={lowId}
+                  value={lowId && lowValue ? `${lowId}: ${lowValue}` : ""}
                   style={styles.inputText}
               >
               <SelectItem key={0} title={"Change tank"} />
+              <SelectItem key={1} title={"Remove tank"} />
               </Select>
-              <TextInput labelText=' ' 
-                labelValue={lowValue} 
-                onTextChange={setLowValue} 
-                placeholder='Value' 
-                style={styles.tankInput} />
               <TextInput labelText=' ' 
                 labelValue={lowPressure} 
                 onTextChange={setLowPressure} 
@@ -465,18 +528,21 @@ export default function AddNotes({ navigation }: NavigationType) {
             <Layout style = {styles.rowContainer}>
             <Select
                   label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Mid</Text>}
-                  onSelect={() => handleTankChange("mid")}
+                  onSelect={(indexPath) => {
+                    const index = Array.isArray(indexPath) ? indexPath[0].row : indexPath.row;
+                    if (index === 0) {
+                    handleTankChange("mid");
+                  } else if (index === 1) {
+                    clearTankEntry("mid");
+                  }
+                }}
                   placeholder="Select Mid Tank"
-                  value={midId}
+                  value={midId && midValue ? `${midId}: ${midValue}` : ""}
                   style={styles.inputText}
               >
               <SelectItem key={0} title={"Change tank"} />
+              <SelectItem key={1} title={"Remove tank"} />
               </Select>
-              <TextInput labelText=' ' 
-                labelValue={midValue} 
-                onTextChange={setmidValue} 
-                placeholder='Value' 
-                style={styles.tankInput} />
               <TextInput labelText=' ' 
                 labelValue={midPressure} 
                 onTextChange={setmidPressure} 
@@ -488,18 +554,21 @@ export default function AddNotes({ navigation }: NavigationType) {
             <Layout style = {styles.rowContainer}>
             <Select
                   label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>High</Text>}
-                  onSelect={() => handleTankChange("high")}
+                  onSelect={(indexPath) => {
+                    const index = Array.isArray(indexPath) ? indexPath[0].row : indexPath.row;
+                    if (index === 0) {
+                    handleTankChange("high");
+                  } else if (index === 1) {
+                    clearTankEntry("high");
+                  }
+                }}
                   placeholder="Select High Tank"
-                  value={highId}
+                  value={highId && highValue ? `${highId}: ${highValue}` : ""}
                   style={styles.inputText}
               >
               <SelectItem key={0} title={"Change tank"} />
+              <SelectItem key={1} title={"Remove tank"} />
               </Select>
-              <TextInput labelText=' ' 
-                labelValue={highValue} 
-                onTextChange={setHighValue} 
-                placeholder='Value' 
-                style={styles.tankInput} />
               <TextInput labelText=' ' 
                 labelValue={highPressure} 
                 onTextChange={setHighPressure} 
@@ -537,7 +606,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       justifyContent: 'space-evenly',
     },
     inputText: {
-      flex: 1,
+      flex: 2,
       margin: 8
     },
     tankInput: {
