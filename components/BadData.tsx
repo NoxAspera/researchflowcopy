@@ -48,8 +48,10 @@ export default function BadData({ navigation }: NavigationType) {
   const [instrument, setInstrument] = useState("");
 
   //method to navigate home to send to popup so it can happen after dismiss button is clicked
-  function navigateHome(){
-    navigation.navigate("Home")
+  function navigateHome(nav:boolean){
+    if(nav){
+      navigation.navigate("Home")
+    }
   }
 
   useEffect(() => {
@@ -111,6 +113,7 @@ export default function BadData({ navigation }: NavigationType) {
   const [messageColor, setMessageColor] = useState("");
   const [message, setMessage] = useState("");
   const [visible2, setVisible2] = useState(false);
+  const [returnHome, retHome] = useState(false);
 
   const handleSubmit = () => {
     if (
@@ -150,6 +153,7 @@ export default function BadData({ navigation }: NavigationType) {
     if (result.success) {
       setMessage("File updated successfully!");
       setMessageColor(customTheme["color-success-700"]);
+      retHome(true);
     } else {
       setMessage(`Error: ${result.error}`);
       setMessageColor(customTheme["color-danger-700"]);
@@ -176,6 +180,7 @@ export default function BadData({ navigation }: NavigationType) {
             onPress={setVisible}
             navigateHome={navigateHome} 
             visible={visible}
+            returnHome={returnHome}
           />
 
           {/* text inputs */}
