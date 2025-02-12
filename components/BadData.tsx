@@ -162,7 +162,7 @@ export default function BadData({ navigation }: NavigationType) {
       behavior = "padding"
       style={styles.container}
     >
-      <ScrollView automaticallyAdjustKeyboardInsets={true}>
+      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
         <Layout style={styles.container} level="1">
           {/* header */}
           <Text category="h1" style={{ textAlign: "center" }}>

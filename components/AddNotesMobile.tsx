@@ -179,7 +179,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.container}>
-        <ScrollView>
+        <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
           <Layout style={styles.container}>
             {/* header */}
             <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>

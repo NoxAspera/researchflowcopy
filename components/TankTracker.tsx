@@ -149,7 +149,7 @@ export default function TankTracker({ navigation }: NavigationType) {
       <KeyboardAvoidingView
                   behavior = "padding"
                   style={styles.container}>
-          <ScrollView automaticallyAdjustKeyboardInsets={true}>
+          <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
             <Layout style={styles.container} level="1">
               
               {/* header */}
