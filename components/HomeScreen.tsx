@@ -65,12 +65,12 @@ export default function HomeScreen({ navigation }: NavigationType) {
           }
         />
 
-        {/* CALENDAR */}
+        {/* PLAN A VISIT */}
         <HomeButtonProp
-          text="CALENDAR"
+          text="PLAN A VISIT"
           color="#FFC581"
           onPress={() =>
-            navigation.navigate('CalendarScreen')
+            navigation.navigate("SelectSite", { from: "PlanVisit" })
           }
         />
       </ScrollView>
