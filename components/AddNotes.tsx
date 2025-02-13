@@ -1,7 +1,7 @@
 /**
  * Add Notes Page
  * @author Blake Stambaugh, Megan Ostlie, August O'Rourke, and David Schiwal
- *  12/4/24
+ * Updated: 2/11/25 - MO
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
@@ -9,14 +9,14 @@ import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { buildNotes, Entry } from '../scripts/Parsers';
+import { buildNotes, copyTankRecord, Entry } from '../scripts/Parsers';
 import { NaviProp } from './types';
 import TextInput from './TextInput'
 import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
-import { setFile, getFileContents } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, getLatestTankEntry, getTankList, TankRecord, setTankTracker, addEntrytoTankDictionary } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
@@ -109,6 +109,14 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [n2Value, setN2Value] = useState("");
     const [notesValue, setNotesValue] = useState("");
     const [instrumentInput, setInstrumentInput] = useState("");
+    const [ltsTankRecord, setLtsTankRecord] = useState<TankRecord>(undefined);
+    const [originalLts, setOriginalLts] = useState<TankRecord>(undefined);
+    const [lowTankRecord, setLowTankRecord] = useState<TankRecord>(undefined);
+    const [originalLow, setOriginalLow] = useState<TankRecord>(undefined);
+    const [midTankRecord, setMidTankRecord] = useState<TankRecord>(undefined);
+    const [originalMid, setOriginalMid] = useState<TankRecord>(undefined);
+    const [highTankRecord, setHighTankRecord] = useState<TankRecord>(undefined);
+    const [originalHigh, setOriginalHigh] = useState<TankRecord>(undefined);
 
     // Use IndexPath for selected index for drop down menu
     const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
@@ -119,8 +127,10 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [visible, setVisible] = useState(false);
     const [messageColor, setMessageColor] = useState("");
     const [message, setMessage] = useState("");
+    const [returnHome, retHome] = useState(false);
     //used for popup if info is missing
     const [visible2, setVisible2] = useState(false);
+    
 
     //method will warn user if fields haven't been input
     function checkTextEntries(){
@@ -151,15 +161,16 @@ export default function AddNotes({ navigation }: NavigationType) {
     // If it is successful it will display a success message
     // if it fails then it will display a failure message
     const handleUpdate = async () => {
-        const LTSignored: boolean = (ltsId == "" && ltsValue == "" && ltsPressure == "")
+      const LTSignored: boolean = (ltsId == "" && ltsValue == "" && ltsPressure == "")
 
-        // get time submitted
-        const now = new Date();
-        const year = now.getFullYear().toString()
-        const month = (now.getMonth() + 1).toString() // now.getMonth() is zero-base (i.e. January is 0), likely due to something with Oracle's implementation - August
-        const day = now.getDate().toString()
-        const hours= now.getHours().toString()
-        const minutes = now.getMinutes().toString()
+      // get time submitted
+      const now = new Date();
+      const year = now.getUTCFullYear();
+      const month = String(now.getUTCMonth() + 1).padStart(2, "0");
+      const day = String(now.getUTCDate()).padStart(2, "0");
+      const hours = String(now.getUTCHours()).padStart(2, "0");
+      const minutes = String(now.getUTCMinutes()).padStart(2, "0");
+      const seconds = String(now.getUTCSeconds()).padStart(2, "0");
         
         // create an entry object data that will be sent off to the repo
         let data: Entry = 
@@ -200,41 +211,208 @@ export default function AddNotes({ navigation }: NavigationType) {
           additional_notes: notesValue 
         };
 
+        const utcTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
+        if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
+          removeTankFromSite(originalLts, utcTime);
+        }
+        if (ltsTankRecord) {
+          let ltsTank = copyTankRecord(ltsTankRecord);
+          ltsTank.location = site;
+          ltsTank.updatedAt = utcTime;
+          ltsTank.pressure = parseInt(ltsPressure);
+          ltsTank.userId = nameValue;
+          addEntrytoTankDictionary(ltsTank);
+        }
+        
+        if (originalLow && (!lowTankRecord || (originalLow.tankId != lowTankRecord.tankId))) {
+          removeTankFromSite(originalLow, utcTime);
+        }
+        if (lowTankRecord) {
+          let lowTank = copyTankRecord(lowTankRecord);
+          lowTank.location = site;
+          lowTank.updatedAt = utcTime;
+          lowTank.pressure = parseInt(lowPressure);
+          lowTank.userId = nameValue;
+          addEntrytoTankDictionary(lowTank);
+        }
+
+        if (originalMid && (!midTankRecord || (originalMid.tankId != midTankRecord.tankId))) {
+          removeTankFromSite(originalMid, utcTime);
+        }
+        if (midTankRecord) {
+          let midTank = copyTankRecord(midTankRecord);
+          midTank.location = site;
+          midTank.updatedAt = utcTime;
+          midTank.pressure = parseInt(midPressure);
+          midTank.userId = nameValue;
+          addEntrytoTankDictionary(midTank);
+        }
+
+        if (originalHigh && (!highTankRecord || (originalHigh.tankId != highTankRecord.tankId))) {
+          removeTankFromSite(originalHigh, utcTime);
+        }
+        if (highTankRecord) {
+          let highTank = copyTankRecord(highTankRecord);
+          highTank.location = site;
+          highTank.updatedAt = utcTime;
+          highTank.pressure = parseInt(highPressure);
+          highTank.userId = nameValue;
+          addEntrytoTankDictionary(highTank);
+        }
+
         // send the request
-        const result = await setFile(site, buildNotes(data), "updating notes from researchFlow");
+        const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
+        const tankResult = await setTankTracker();
 
         // if the warning popup is visible, remove it
-        if(visible2) { setVisible2(false); }
+        //if(visible2) { setVisible2(false); }
 
         // check to see if the request was ok, give a message based on that
-        if (result.success) {
+        if (result.success && tankResult.success) {
             setMessage("File updated successfully!");
             setMessageColor(customTheme['color-success-700']);
+            retHome(true);
           } else {
-            setMessage(`Error: ${result.error}`);
+            if (result.error) {
+              
+            } else if (tankResult.error) {
+              setMessage(`Error: ${tankResult.error}`);
+            }
             setMessageColor(customTheme['color-danger-700']);
           }
         setVisible(true);
+    };
+
+    //method to navigate home to send to popup so it can happen after dismiss button is clicked
+    function navigateHome(nav:boolean){
+      if(nav){
+        navigation.navigate("Home")
+      }
+    }
+
+    const removeTankFromSite = (tank: TankRecord, time: string) => {
+      let newTankEntry = copyTankRecord(tank);
+      newTankEntry.location = "ASB279";
+      newTankEntry.pressure = 500;
+      newTankEntry.userId = nameValue;
+      newTankEntry.updatedAt = time;
+      addEntrytoTankDictionary(newTankEntry);
+    }
+
+    const clearTankEntry = (tank: string) => {
+      if (tank == "lts") {
+        setLTSId("");
+        setLTSValue("");
+        setLtsTankRecord(undefined);
+      } else if (tank == "low") {
+        setLowId("");
+        setLowValue("");
+        setLowTankRecord(undefined);
+      } else if (tank == "mid") {
+        setmidId("");
+        setmidValue("");
+        setMidTankRecord(undefined);
+      } else if (tank == "high") {
+        setHighId("");
+        setHighValue("");
+        setHighTankRecord(undefined);
+      }
+    }
+
+    const handleTankChange = (tank: string) => {
+      if (tank == "lts") {
+        navigation.navigate('SelectTank', {
+          from: 'AddNotes',
+          onSelect: (selectedTank) => {
+            setLTSId(selectedTank);
+            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+            setLtsTankRecord(entry);
+            setLTSValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+          }
+        });
+      } else if (tank == "low") {
+        navigation.navigate('SelectTank', {
+          from: 'AddNotes',
+          onSelect: (selectedTank) => {
+            setLowId(selectedTank);
+            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+            setLowTankRecord(entry);
+            setLowValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+          }
+        });
+      } else if (tank == "mid") {
+        navigation.navigate('SelectTank', {
+          from: 'AddNotes',
+          onSelect: (selectedTank) => {
+            setmidId(selectedTank);
+            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+            setMidTankRecord(entry);
+            setmidValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+          }
+        });
+      } else if (tank == "high") {
+        navigation.navigate('SelectTank', {
+          from: 'AddNotes',
+          onSelect: (selectedTank) => {
+            setHighId(selectedTank);
+            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+            setHighTankRecord(entry);
+            setHighValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+          }
+        });
+      }
     };
 
     //Set tank ids, values, and instruments if available in parsed data
     useEffect(() => {
       if (latestEntry) {
           if (latestEntry.lts) {
-              setLTSId(latestEntry.lts.id || "");
-              setLTSValue(latestEntry.lts.value || "");
+              const ltsID = latestEntry.lts.id.split("_").pop();
+              if (ltsID) {
+                const ltsEntry = getLatestTankEntry(ltsID) || getLatestTankEntry(ltsID.toLowerCase());
+                if (ltsEntry) {
+                  setLtsTankRecord(ltsEntry);
+                  setOriginalLts(ltsEntry);
+                  setLTSId(ltsEntry.tankId)
+                  setLTSValue(ltsEntry.co2.toString() + " ~ " + ltsEntry.ch4.toString());
+                }
+              }
           }
           if (latestEntry.low_cal) {
-            setLowId(latestEntry.low_cal.id || "");
-            setLowValue(latestEntry.low_cal.value || "");
+            const lowID = latestEntry.low_cal.id.split("_").pop();
+            if (lowID) {
+              const lowEntry = getLatestTankEntry(lowID) || getLatestTankEntry(lowID.toLowerCase());
+              if (lowEntry) {
+                setLowTankRecord(lowEntry);
+                setOriginalLow(lowEntry);
+                setLowId(lowEntry.tankId);
+                setLowValue(lowEntry.co2.toString() + " ~ " + lowEntry.ch4.toString());
+              }
+            }
           }
           if (latestEntry.mid_cal) {
-            setmidId(latestEntry.mid_cal.id || "");
-            setmidValue(latestEntry.mid_cal.value || "");
+            const midID = latestEntry.mid_cal.id.split("_").pop();
+            if (midID) {
+              const midEntry = getLatestTankEntry(midID) || getLatestTankEntry(midID.toLowerCase());
+              if (midEntry) {
+                setMidTankRecord(midEntry);
+                setOriginalMid(midEntry);
+                setmidId(midEntry.tankId);
+                setmidValue(midEntry.co2.toString() + " ~ " + midEntry.ch4.toString());
+              }
+            } 
           }
           if (latestEntry.high_cal) {
-            setHighId(latestEntry.high_cal.id || "");
-            setHighValue(latestEntry.high_cal.value || "");
+            const highID = latestEntry.high_cal.id.split("_").pop();
+            if (highID) {
+              const highEntry = getLatestTankEntry(highID) || getLatestTankEntry(highID.toLowerCase());
+              if (highEntry) {
+                setHighTankRecord(highEntry);
+                setOriginalHigh(highEntry);
+                setHighId(highEntry.tankId);
+                setHighValue(highEntry.co2.toString() + " ~ " + highEntry.ch4.toString());
+              }
+            }
           }
           if (latestEntry.instrument) {
             setInstrumentInput(latestEntry.instrument);
@@ -246,7 +424,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       <KeyboardAvoidingView
             behavior = "padding"
             style={styles.container}>
-        <ScrollView automaticallyAdjustKeyboardInsets={true}>
+        <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
           <Layout style={styles.container}>
             {/* header */}
             <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
@@ -254,8 +432,10 @@ export default function AddNotes({ navigation }: NavigationType) {
             {/* success/failure popup */}
             <PopupProp popupText={message}
             popupColor={messageColor} 
-            onPress={setVisible} 
-            visible={visible}/>
+            onPress={setVisible}
+            navigateHome={navigateHome} 
+            visible={visible}
+            returnHome={returnHome}/>
 
             {/* popup if user has missing input */}
             <PopupProp2Button popupText='Missing some input field(s)'
@@ -298,16 +478,23 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* LTS input */}
             <Layout style = {styles.rowContainer}>
-              <TextInput labelText='LTS (if needed)' 
-                labelValue={ltsId} 
-                onTextChange={setLTSId} 
-                placeholder='Tank ID' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={ltsValue} 
-                onTextChange={setLTSValue} 
-                placeholder='Value' 
-                style={styles.tankInput} />
+              <Select
+                  label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>LTS (if needed)</Text>}
+                  onSelect={(indexPath) => {
+                    const index = Array.isArray(indexPath) ? indexPath[0].row : indexPath.row;
+                    if (index === 0) {
+                    handleTankChange("lts");
+                  } else if (index === 1) {
+                    clearTankEntry("lts");
+                  }
+                }}
+                  placeholder="Select LTS Tank"
+                  value={ltsId && ltsValue ? `${ltsId}: ${ltsValue}` : ""}
+                  style={styles.inputText}
+              >
+              <SelectItem key={0} title={"Change tank"} />
+              <SelectItem key={1} title={"Remove tank"} />
+              </Select>
               <TextInput labelText=' ' 
                 labelValue={ltsPressure} 
                 onTextChange={setLTSPressure} 
@@ -319,16 +506,23 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* Low input */}
             <Layout style = {styles.rowContainer}>
-              <TextInput labelText='Low' 
-                labelValue={lowId} 
-                onTextChange={setLowId} 
-                placeholder='Tank ID' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={lowValue} 
-                onTextChange={setLowValue} 
-                placeholder='Value' 
-                style={styles.tankInput} />
+            <Select
+                  label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Low</Text>}
+                  onSelect={(indexPath) => {
+                    const index = Array.isArray(indexPath) ? indexPath[0].row : indexPath.row;
+                    if (index === 0) {
+                    handleTankChange("low");
+                  } else if (index === 1) {
+                    clearTankEntry("low");
+                  }
+                }}
+                  placeholder="Select Low Tank"
+                  value={lowId && lowValue ? `${lowId}: ${lowValue}` : ""}
+                  style={styles.inputText}
+              >
+              <SelectItem key={0} title={"Change tank"} />
+              <SelectItem key={1} title={"Remove tank"} />
+              </Select>
               <TextInput labelText=' ' 
                 labelValue={lowPressure} 
                 onTextChange={setLowPressure} 
@@ -338,16 +532,23 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* mid input */}
             <Layout style = {styles.rowContainer}>
-              <TextInput labelText='Mid' 
-                labelValue={midId} 
-                onTextChange={setmidId} 
-                placeholder='Tank ID' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={midValue} 
-                onTextChange={setmidValue} 
-                placeholder='Value' 
-                style={styles.tankInput} />
+            <Select
+                  label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Mid</Text>}
+                  onSelect={(indexPath) => {
+                    const index = Array.isArray(indexPath) ? indexPath[0].row : indexPath.row;
+                    if (index === 0) {
+                    handleTankChange("mid");
+                  } else if (index === 1) {
+                    clearTankEntry("mid");
+                  }
+                }}
+                  placeholder="Select Mid Tank"
+                  value={midId && midValue ? `${midId}: ${midValue}` : ""}
+                  style={styles.inputText}
+              >
+              <SelectItem key={0} title={"Change tank"} />
+              <SelectItem key={1} title={"Remove tank"} />
+              </Select>
               <TextInput labelText=' ' 
                 labelValue={midPressure} 
                 onTextChange={setmidPressure} 
@@ -357,16 +558,23 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* high input */} 
             <Layout style = {styles.rowContainer}>
-              <TextInput labelText='High' 
-                labelValue={highId} 
-                onTextChange={setHighId} 
-                placeholder='Tank ID' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={highValue} 
-                onTextChange={setHighValue} 
-                placeholder='Value' 
-                style={styles.tankInput} />
+            <Select
+                  label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>High</Text>}
+                  onSelect={(indexPath) => {
+                    const index = Array.isArray(indexPath) ? indexPath[0].row : indexPath.row;
+                    if (index === 0) {
+                    handleTankChange("high");
+                  } else if (index === 1) {
+                    clearTankEntry("high");
+                  }
+                }}
+                  placeholder="Select High Tank"
+                  value={highId && highValue ? `${highId}: ${highValue}` : ""}
+                  style={styles.inputText}
+              >
+              <SelectItem key={0} title={"Change tank"} />
+              <SelectItem key={1} title={"Remove tank"} />
+              </Select>
               <TextInput labelText=' ' 
                 labelValue={highPressure} 
                 onTextChange={setHighPressure} 
@@ -404,7 +612,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       justifyContent: 'space-evenly',
     },
     inputText: {
-      flex: 1,
+      flex: 2,
       margin: 8
     },
     tankInput: {

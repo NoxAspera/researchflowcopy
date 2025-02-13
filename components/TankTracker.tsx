@@ -14,7 +14,7 @@ import TextInput from './TextInput'
 import { NavigationType, routeProp } from './types'
 import { ScrollView } from 'react-native-gesture-handler';
 import PopupProp from './Popup';
-import { getLatestTankEntry, setTankTracker, TankRecord } from '../scripts/APIRequests';
+import { getLatestTankEntry, setTankTracker, TankRecord, addEntrytoTankDictionary } from '../scripts/APIRequests';
 import { Float } from 'react-native/Libraries/Types/CodegenTypes';
 import { customTheme } from './CustomTheme'
 
@@ -32,10 +32,13 @@ export default function TankTracker({ navigation }: NavigationType) {
     const [fillIDValue, setFillIDValue] = useState("");
     const [locationValue, setLocationValue] = useState("");
     const [latestEntry, setLatestEntry] = useState<TankRecord>(undefined);
-
+    
+    // used for determining if PUT request was successful
+    // will set the success/fail notification to visible, aswell as the color and text
     const [visible, setVisible] = useState(false);
     const [messageColor, setMessageColor] = useState("");
     const [message, setMessage] = useState("");
+    const [returnHome, retHome] = useState(false);
 
     useEffect(() => {
       if (tank) {
@@ -129,22 +132,31 @@ export default function TankTracker({ navigation }: NavigationType) {
 
     const handleUpdate = async () => {
       const entry = buildTankEntry();
-      const result = await setTankTracker(entry);
+      addEntrytoTankDictionary(entry);
+      const result = await setTankTracker();
       if (result.success) {
           setMessage("File updated successfully!");
           setMessageColor(customTheme['color-success-700']);
+          retHome(true);
         } else {
           setMessage(`Error: ${result.error}`);
           setMessageColor(customTheme['color-danger-700']);
         }
         setVisible(true);
+    }
+
+    //method to navigate home to send to popup so it can happen after dismiss button is clicked
+    function navigateHome(nav:boolean){
+      if(nav){
+        navigation.navigate("Home")
       }
+    }
 
     return (
       <KeyboardAvoidingView
                   behavior = "padding"
                   style={styles.container}>
-          <ScrollView automaticallyAdjustKeyboardInsets={true}>
+          <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
             <Layout style={styles.container} level="1">
               
               {/* header */}
@@ -157,7 +169,9 @@ export default function TankTracker({ navigation }: NavigationType) {
               <PopupProp popupText={message} 
                 popupColor={messageColor} 
                 onPress={setVisible} 
-                visible={visible}/>
+                navigateHome={navigateHome} 
+                visible={visible}
+                returnHome={returnHome}/>
 
             {/* Name input */}
             <TextInput

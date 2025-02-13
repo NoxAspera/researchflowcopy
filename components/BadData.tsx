@@ -27,10 +27,13 @@ import { ScrollView } from "react-native-gesture-handler";
 import { setBadData, getBadDataFiles } from "../scripts/APIRequests";
 import PopupProp from "./Popup";
 import PopupProp2Button from "./Popup2Button";
+import { ThemeContext } from './ThemeContext';
 
 export default function BadData({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   let site = route.params?.site;
+  const themeContext = React.useContext(ThemeContext);
+  const isDarkMode = themeContext.theme === 'dark';
 
   // these use states to set and store values in the text inputs
   const [oldIDValue, setOldIDValue] = useState("all");
@@ -46,6 +49,13 @@ export default function BadData({ navigation }: NavigationType) {
   >(undefined);
   const [fileOptions, setFileOptions] = useState<string[]>([]);
   const [instrument, setInstrument] = useState("");
+
+  //method to navigate home to send to popup so it can happen after dismiss button is clicked
+  function navigateHome(nav:boolean){
+    if(nav){
+      navigation.navigate("Home")
+    }
+  }
 
   useEffect(() => {
     const fetchBadDataFiles = async () => {
@@ -106,6 +116,7 @@ export default function BadData({ navigation }: NavigationType) {
   const [messageColor, setMessageColor] = useState("");
   const [message, setMessage] = useState("");
   const [visible2, setVisible2] = useState(false);
+  const [returnHome, retHome] = useState(false);
 
   const handleSubmit = () => {
     if (
@@ -145,6 +156,7 @@ export default function BadData({ navigation }: NavigationType) {
     if (result.success) {
       setMessage("File updated successfully!");
       setMessageColor(customTheme["color-success-700"]);
+      retHome(true);
     } else {
       setMessage(`Error: ${result.error}`);
       setMessageColor(customTheme["color-danger-700"]);
@@ -157,7 +169,7 @@ export default function BadData({ navigation }: NavigationType) {
       behavior = "padding"
       style={styles.container}
     >
-      <ScrollView automaticallyAdjustKeyboardInsets={true}>
+      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
         <Layout style={styles.container} level="1">
           {/* header */}
           <Text category="h1" style={{ textAlign: "center" }}>
@@ -169,13 +181,15 @@ export default function BadData({ navigation }: NavigationType) {
             popupText={message}
             popupColor={messageColor}
             onPress={setVisible}
+            navigateHome={navigateHome} 
             visible={visible}
+            returnHome={returnHome}
           />
 
           {/* text inputs */}
           {/* select instrument */}
           <Select
-            label="Instrument"
+            label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Instrument</Text>}
             selectedIndex={selectedFileIndex}
             onSelect={(index) => handleFileSelection(index as IndexPath)}
             placeholder="Choose an instrument"
@@ -211,7 +225,7 @@ export default function BadData({ navigation }: NavigationType) {
 
           {/* start date input */}
           <Datepicker
-            label="Start Date"
+            label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Start Date</Text>}
             date={startDateValue}
             onSelect={(date) => setStartDateValue(date as Date)}
             min={new Date(1900, 0, 1)}
@@ -231,7 +245,7 @@ export default function BadData({ navigation }: NavigationType) {
 
           {/* end date input */}
           <Datepicker
-            label="End Date"
+            label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>End Date</Text>}
             date={endDateValue}
             onSelect={(date) => setEndDateValue(date as Date)}
             min={new Date(1900, 0, 1)}
