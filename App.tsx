@@ -19,8 +19,10 @@ import * as eva from '@eva-design/eva';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
 import SelectTank from './components/SelectTank';
 import customColors from './custom-theme.json'
+import Calendar from './components/Calendar';
 import { useState } from 'react';
 import SettingsButton from './components/SettingsButton';
+import CalendarScreen from './components/Calendar';
 
 const Stack = createStackNavigator();
 type ThemeType = 'light' | 'dark';
@@ -57,6 +59,7 @@ export default function App() {
             <Stack.Screen name="SelectTank" component={SelectTank} options={{ headerRight: () => <SettingsButton/>}}/>
             <Stack.Screen name="AddNotesMobile" component={AddNotesMobile} options={{ headerRight: () => <SettingsButton/>}}/>
             <Stack.Screen name="SelectNotes" component={SelectNotes} options={{ headerRight: () => <SettingsButton/>}}/>
+            <Stack.Screen name ="CalendarScreen" component={CalendarScreen} options={{headerRight: () => <SettingsButton/>}}/>
           </Stack.Navigator>
         </NavigationContainer>
       </ApplicationProvider>
