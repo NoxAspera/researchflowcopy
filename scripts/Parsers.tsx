@@ -141,6 +141,29 @@ export function parseNotes(text: string): ParsedData {
     return jsonData;
 }
 /**
+ * @author David Schiwal, Megan Ostlie, August O'Rourke
+ * @param text the document being parsed
+ * 
+ * @returns a ParsedData object that contains the visits from the visit document
+ */
+export function parseVisits(text: string): VisitList{
+    const visitPattern = /- {(.*?)}/;
+    const datePattern = /- {"date":"(.*?)",/;
+    const equipmentPattern = /- "equipment":"(.*?)",/;
+    const namePattern = /- "name":"(.*?)",/;
+    const notesPattern = /- "notes":"(.*?)",/;
+    const sitePattern = /- "site":"(.*?)"}/;
+    const visitBlocks = text.split("---\n").slice(1);
+    const visits: VisitInfo[] = visitBlocks.map((block) =>{
+        
+    });
+    // Construct final parsed data
+    const jsonData: VisitList = {
+        visits: visits,
+    };
+    return jsonData;
+}
+/**
  * @author August O'Rourke
  * 
  * This method should build a string that makes a valid entry for a document from the repository
@@ -255,4 +278,23 @@ export function copyTankRecord(record: TankRecord): TankRecord
     }
 
     return newRecord
+}
+/**
+ * @author  David schiwal
+ * a small interface to contain list of visits
+ * 
+ */
+export interface VisitList {
+    visits: VisitInfo[];
+}
+/**
+ * @author David Schiwal
+ * a small interface for the visit
+ */
+export interface VisitInfo {
+    date: string;
+    equipment: string | null;
+    name: string;
+    notes: string | null;
+    site: string;
 }
