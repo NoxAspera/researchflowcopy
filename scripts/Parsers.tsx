@@ -141,29 +141,6 @@ export function parseNotes(text: string): ParsedData {
     return jsonData;
 }
 /**
- * @author David Schiwal, Megan Ostlie, August O'Rourke
- * @param text the document being parsed
- * 
- * @returns a ParsedData object that contains the visits from the visit document
- */
-export function parseVisits(text: string): VisitList{
-    const visitPattern = /- {(.*?)}/;
-    const datePattern = /- {"date":"(.*?)",/;
-    const equipmentPattern = /- "equipment":"(.*?)",/;
-    const namePattern = /- "name":"(.*?)",/;
-    const notesPattern = /- "notes":"(.*?)",/;
-    const sitePattern = /- "site":"(.*?)"}/;
-    const visitBlocks = text.split("---\n").slice(1);
-    const visits: VisitInfo[] = visitBlocks.map((block) =>{
-        
-    });
-    // Construct final parsed data
-    const jsonData: VisitList = {
-        visits: visits,
-    };
-    return jsonData;
-}
-/**
  * @author August O'Rourke
  * 
  * This method should build a string that makes a valid entry for a document from the repository
@@ -297,4 +274,48 @@ export interface VisitInfo {
     name: string;
     notes: string | null;
     site: string;
+}
+/**
+ * @author David Schiwal, Megan Ostlie, August O'Rourke
+ * @param text the document being parsed
+ * 
+ * @returns a ParsedData object that contains the visits from the visit document
+ */
+export function parseVisits(text: string): VisitList{
+    //const visitPattern = /- {(.*?)}/;
+    const datePattern = /- {"date":"(.*?)",/;
+    const equipmentPattern = /- "equipment":"(.*?)",/;
+    const namePattern = /- "name":"(.*?)",/;
+    const notesPattern = /- "notes":"(.*?)",/;
+    const sitePattern = /- "site":"(.*?)"}/;
+    const visitBlocks = text.split(" ").slice(1);
+    const visits: VisitInfo[] = visitBlocks.map((block) => {
+        // Parse date
+        const dateMatch = block.match(datePattern);
+        const date = dateMatch ? dateMatch[1] : null;
+        // Parse equipment
+        const equipmentMatch = block.match(equipmentPattern);
+        const equipment = equipmentMatch ? equipmentMatch[1] : null;
+        // Parse name
+        const nameMatch = block.match(namePattern);
+        const name = nameMatch ? nameMatch[1] : null;
+        // Parse notes
+        const notesMatch = block.match(notesPattern);
+        const notes = notesMatch ? notesMatch[1] : null;
+        // Parse site
+        const siteMatch = block.match(sitePattern);
+        const site = siteMatch ? siteMatch[1] : null;
+        return{
+            date: date,
+            equipment: equipment,
+            name: name,
+            notes: notes,
+            site: site,
+        };
+    });
+    // Construct final parsed data
+    const jsonData: VisitList = {
+        visits: visits,
+    };
+    return jsonData;
 }
