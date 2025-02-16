@@ -16,25 +16,12 @@ import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, getLatestTankEntry, getTankList, TankRecord, setTankTracker, addEntrytoTankDictionary } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, getLatestTankEntry, getTankList, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
-
-
-function checkValidTime(entry:string)
-{
-  const timeMatch = /^[0-2][0-9]:[0-5][0-9]$/gm
-  return timeMatch.test(entry)
-}
-
-function checkValidNumber(entry:string)
-{
-  const anyNonNumber = /^(\d+)(\.\d+)?$/gm
- return anyNonNumber.test(entry)
-}
 
 /**
  * @author Megan Ostlie
@@ -85,6 +72,26 @@ export default function AddNotes({ navigation }: NavigationType) {
         fetchData();
     }, [site]); // Re-run if `site` changes
 
+    // Get list of possible instruments
+    useEffect(() => {
+        const fetchInstrumentNames = async () => {
+          try {
+            let names = await getDirectory(`instrument_maint/LGR_UGGA`);
+    
+            if(names?.success)
+            {
+              setInstrumentNames(names.data);
+            }
+        }
+          catch (error)
+          {
+            console.error("Error processing instrument names:", error);
+          }
+        };
+    
+        fetchInstrumentNames();
+      }, [site]);
+
     //Get latest notes entry from site
     let latestEntry = null;
     if (data) {
@@ -117,6 +124,8 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [originalMid, setOriginalMid] = useState<TankRecord>(undefined);
     const [highTankRecord, setHighTankRecord] = useState<TankRecord>(undefined);
     const [originalHigh, setOriginalHigh] = useState<TankRecord>(undefined);
+    const [instrumentNames, setInstrumentNames] = useState<string[]>();
+    const [instrumentIndex, setInstrumentIndex] = useState<IndexPath | IndexPath[]>(new IndexPath(0));
 
     // Use IndexPath for selected index for drop down menu
     const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
@@ -363,6 +372,12 @@ export default function AddNotes({ navigation }: NavigationType) {
       }
     };
 
+    const handleInstrumentUpdate = (index: IndexPath | IndexPath[]) => {
+      const selectedInstrument = instrumentNames[(index as IndexPath).row];
+      setInstrumentIndex(index);
+      setInstrumentInput(selectedInstrument);
+    };
+
     //Set tank ids, values, and instruments if available in parsed data
     useEffect(() => {
       if (latestEntry) {
@@ -444,14 +459,18 @@ export default function AddNotes({ navigation }: NavigationType) {
             removePopup={setVisible2}
             visible={visible2}/>
 
-            {/* text box for instrument */}
-              <TextInput
-                labelText="Instrument"
-                labelValue={instrumentInput}
-                onTextChange={setInstrumentInput}
-                placeholder="Please enter instrument name"
-                style={styles.inputText}
-              />
+            {/* Select for instrument */}
+            <Select
+              label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Instrument</Text>}
+              onSelect={handleInstrumentUpdate}
+              placeholder="Select Instrument"
+              value={instrumentInput}
+              style={styles.inputText}
+            >
+            {(instrumentNames ?? ["No Instruments Available"]).map((instrument, index) => (
+              <SelectItem key={index} title={instrument} />
+            ))}
+            </Select>
 
             {/* text inputs */}
             {/* Name input */}
