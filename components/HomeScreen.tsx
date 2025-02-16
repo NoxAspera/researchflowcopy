@@ -70,7 +70,7 @@ export default function HomeScreen({ navigation }: NavigationType) {
           text="CALENDAR"
           color="#FFC581"
           onPress={() =>
-            navigation.navigate('CalendarScreen')
+            navigation.navigate('Calendar')
           }
         />
       </ScrollView>

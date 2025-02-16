@@ -27,6 +27,7 @@
     "expo-file-system": "~18.0.6",
     "expo-status-bar": "~2.0.0",
     "fs": "0.0.1-security",
+    "gson": "^0.1.5",
     "jest": "^29.7.0",
     "latest": "^0.2.0",
     "node-libs-react-native": "^1.2.1",
