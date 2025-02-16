@@ -16,7 +16,7 @@ import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, getLatestTankEntry, getTankList, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, getLatestTankEntry, getTankList, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
@@ -126,6 +126,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [originalHigh, setOriginalHigh] = useState<TankRecord>(undefined);
     const [instrumentNames, setInstrumentNames] = useState<string[]>();
     const [instrumentIndex, setInstrumentIndex] = useState<IndexPath | IndexPath[]>(new IndexPath(0));
+    const [originalInstrument, setOriginalInstrument] = useState("");
 
     // Use IndexPath for selected index for drop down menu
     const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
@@ -165,6 +166,26 @@ export default function AddNotes({ navigation }: NavigationType) {
             handleUpdate();
            }
     }
+
+    const installedInstrumentNotes = (time: string): string => {
+      let result: string = `- Time in: ${time}\n`;
+  
+      result += `- Name: ${nameValue}\n`;
+      result += `- Notes: Installed at ${site}\n`;
+      result += "---\n";
+  
+      return result;
+    };
+
+    const removedInstrumentNotes = (time: string): string => {
+      let result: string = `- Time in: ${time}\n`;
+  
+      result += `- Name: ${nameValue}\n`;
+      result += `- Notes: Removed from ${site}\n`;
+      result += "---\n";
+  
+      return result;
+    };
 
     // will call setFile to send the PUT request. 
     // If it is successful it will display a success message
@@ -220,7 +241,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           additional_notes: notesValue 
         };
 
-        const utcTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
+        const utcTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}Z`;
         if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
           removeTankFromSite(originalLts, utcTime);
         }
@@ -273,19 +294,40 @@ export default function AddNotes({ navigation }: NavigationType) {
         const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
         const tankResult = await setTankTracker();
 
+        let instMaintResult;
+        let instMaintResult2;
+
+        // If a new instrument was added
+        if (instrumentInput && (!originalInstrument || (originalInstrument != instrumentInput))) {
+          const notes = installedInstrumentNotes(utcTime);
+          instMaintResult = await setInstrumentFile(`instrument_maint/LGR_UGGA/${instrumentInput}`, notes, `Updated ${instrumentInput}.md`, true, site);
+        }
+
+        // If instrument was removed
+        if (originalInstrument && (!instrumentInput || (originalInstrument != instrumentInput))) {
+          if (instrumentNames.includes(originalInstrument)) {
+            const notes = removedInstrumentNotes(utcTime);
+            instMaintResult2 = await setInstrumentFile(`instrument_maint/LGR_UGGA/${originalInstrument}`, notes, `Updated ${originalInstrument}.md`, true, 'WBB - Spare');
+          }
+        }
+
         // if the warning popup is visible, remove it
         //if(visible2) { setVisible2(false); }
 
         // check to see if the request was ok, give a message based on that
-        if (result.success && tankResult.success) {
+        if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success)) {
             setMessage("File updated successfully!");
             setMessageColor(customTheme['color-success-700']);
             retHome(true);
           } else {
             if (result.error) {
-              
+              setMessage(`Error: ${result.error}`);
             } else if (tankResult.error) {
               setMessage(`Error: ${tankResult.error}`);
+            } else if (instMaintResult && instMaintResult.error) {
+              setMessage(`Error: ${instMaintResult.error}`);
+            } else if (instMaintResult2 && instMaintResult2.error) {
+              setMessage(`Error: ${instMaintResult2.error}`);
             }
             setMessageColor(customTheme['color-danger-700']);
           }
@@ -431,6 +473,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           }
           if (latestEntry.instrument) {
             setInstrumentInput(latestEntry.instrument);
+            setOriginalInstrument(latestEntry.instrument);
           }
       }
   }, [latestEntry]);
