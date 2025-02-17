@@ -458,7 +458,7 @@ export async function getInstrumentSite(path: string) {
         return {success: false, error: pullResponse.error}
     }
     const existingContent = atob(pullResponse.data.content)
-    const match = existingContent.match(/Currently at (\w+)/);
+    const match = existingContent.match(/Currently at (.*)/);
     //return match ? match[1] : null;
     return { success: true, data: match ? match[1] : null };
 }

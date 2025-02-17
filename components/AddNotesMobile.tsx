@@ -17,7 +17,7 @@ import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary,setTankTracker } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile } from '../scripts/APIRequests';
 import { parseNotes, ParsedData, copyTankRecord } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
@@ -73,6 +73,24 @@ export default function AddNotes({ navigation }: NavigationType) {
         fetchData();
     }, [site]); // Re-run if `site` changes
 
+    // Get list of possible instruments
+    useEffect(() => {
+      const fetchInstrumentNames = async () => {
+        try {
+          let names = await getDirectory(`instrument_maint/LGR_UGGA`);       
+          if(names?.success)
+          {
+              setInstrumentNames(names.data);
+          }
+        }
+        catch (error)
+        {
+          console.error("Error processing instrument names:", error);
+        }
+      };
+        fetchInstrumentNames();
+      }, [site]);
+
     //Get latest notes entry from site
     let latestEntry = null;
     if (data) {
@@ -89,6 +107,9 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [instrumentInput, setInstrumentInput] = useState("");
     const [tankRecord, setTankRecord] = useState<TankRecord>(undefined);
     const [originalTank, setOriginalTank] = useState<TankRecord>(undefined);
+    const [instrumentNames, setInstrumentNames] = useState<string[]>();
+    const [instrumentIndex, setInstrumentIndex] = useState<IndexPath | IndexPath[]>(new IndexPath(0));
+    const [originalInstrument, setOriginalInstrument] = useState("");
 
     // used for determining if PUT request was successful
     // will set the success/fail notification to visible, aswell as the color and text
@@ -132,6 +153,34 @@ export default function AddNotes({ navigation }: NavigationType) {
       setTankRecord(undefined);
     }
 
+    const handleInstrumentUpdate = (index: IndexPath | IndexPath[]) => {
+      const selectedInstrument = instrumentNames[(index as IndexPath).row];
+      setInstrumentIndex(index);
+      setInstrumentInput(selectedInstrument);
+    };
+
+    const installedInstrumentNotes = (time: string): string => {
+      let siteName = site.replace("mobile/","");
+      let result: string = `- Time in: ${time}\n`;
+  
+      result += `- Name: ${nameValue}\n`;
+      result += `- Notes: Installed at ${siteName}\n`;
+      result += "---\n";
+  
+      return result;
+    };
+
+    const removedInstrumentNotes = (time: string): string => {
+      let siteName = site.replace("mobile/","");
+      let result: string = `- Time in: ${time}\n`;
+  
+      result += `- Name: ${nameValue}\n`;
+      result += `- Notes: Removed from ${siteName}\n`;
+      result += "---\n";
+  
+      return result;
+    };
+
     // will call setFile to send the PUT request. 
     // If it is successful it will display a success message
     // if it fails then it will display a failure message
@@ -164,7 +213,8 @@ export default function AddNotes({ navigation }: NavigationType) {
           additional_notes: notesValue 
         };
 
-        const utcTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
+        const utcTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}Z`;
+        const siteName = site.replace("mobile/","");
         if (originalTank && (!tankRecord || (originalTank.tankId != tankRecord.tankId))) {
           let newTankEntry = copyTankRecord(originalTank);
           newTankEntry.location = "ASB279";
@@ -174,7 +224,6 @@ export default function AddNotes({ navigation }: NavigationType) {
           addEntrytoTankDictionary(newTankEntry);
         }
         if (tankRecord) {
-          const siteName = site.replace("mobile/","");
           let tank = copyTankRecord(tankRecord);
           tank.location = siteName;
           tank.updatedAt = utcTime;
@@ -187,22 +236,43 @@ export default function AddNotes({ navigation }: NavigationType) {
         const result = await setSiteFile(site, buildMobileNotes(data), "updating notes from researchFlow");
         const tankResult = await setTankTracker();
 
+        let instMaintResult;
+        let instMaintResult2;
+        
+        // If a new instrument was added
+        if (instrumentInput && (!originalInstrument || (originalInstrument != instrumentInput))) {
+          const notes = installedInstrumentNotes(utcTime);
+          instMaintResult = await setInstrumentFile(`instrument_maint/LGR_UGGA/${instrumentInput}`, notes, `Updated ${instrumentInput}.md`, true, siteName);
+        }
+        
+        // If instrument was removed
+        if (originalInstrument && (!instrumentInput || (originalInstrument != instrumentInput))) {
+          if (instrumentNames.includes(originalInstrument)) {
+            const notes = removedInstrumentNotes(utcTime);
+            instMaintResult2 = await setInstrumentFile(`instrument_maint/LGR_UGGA/${originalInstrument}`, notes, `Updated ${originalInstrument}.md`, true, 'WBB - Spare');
+          }
+        }
+
         // if the warning popup is visible, remove it
         if(visible2) { setVisible2(false); }
 
         // check to see if the request was ok, give a message based on that
-        if (result.success && tankResult.success) {
-            setMessage("File updated successfully!");
-            setMessageColor(customTheme['color-success-700']);
-            retHome(true);
-          } else {
-            if (result.error) {
-              setMessage(`Error: ${result.error}`);
-            } else if (tankResult.error) {
-              setMessage(`Error: ${tankResult.error}`);
-            }
-            setMessageColor(customTheme['color-danger-700']);
+        if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success)) {
+          setMessage("File updated successfully!");
+          setMessageColor(customTheme['color-success-700']);
+          retHome(true);
+        } else {
+          if (result.error) {
+            setMessage(`Error: ${result.error}`);
+          } else if (tankResult.error) {
+            setMessage(`Error: ${tankResult.error}`);
+          } else if (instMaintResult && instMaintResult.error) {
+            setMessage(`Error: ${instMaintResult.error}`);
+          } else if (instMaintResult2 && instMaintResult2.error) {
+            setMessage(`Error: ${instMaintResult2.error}`);
           }
+            setMessageColor(customTheme['color-danger-700']);
+        }
         setVisible(true);
     };
 
@@ -229,6 +299,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           }
         }
         if (latestEntry.instrument) {
+          setOriginalInstrument(latestEntry.instrument);
           setInstrumentInput(latestEntry.instrument);
         }
       }
@@ -259,13 +330,17 @@ export default function AddNotes({ navigation }: NavigationType) {
             visible={visible2}/>
 
             {/* text box for instrument */}
-              <TextInput
-                labelText="Instrument"
-                labelValue={instrumentInput}
-                onTextChange={setInstrumentInput}
-                placeholder="Please enter instrument name"
-                style={styles.inputText}
-              />
+            <Select
+              label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Instrument</Text>}
+              onSelect={handleInstrumentUpdate}
+              placeholder="Select Instrument"
+              value={instrumentInput}
+              style={styles.inputText}
+            >
+            {(instrumentNames ?? ["No Instruments Available"]).map((instrument, index) => (
+              <SelectItem key={index} title={instrument} />
+            ))}
+            </Select>
 
             {/* text inputs */}
             {/* Name input */}
