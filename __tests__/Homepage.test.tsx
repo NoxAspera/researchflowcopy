@@ -76,7 +76,7 @@ describe('Home page', () => {
     
     // hit button to check for success
     fireEvent.press(viewNotes);
-    expect(mockNavigation.navigate).toHaveBeenCalledWith("SelectSite", { from: "ViewNotes" });
+    expect(mockNavigation.navigate).toHaveBeenCalledWith("SelectNotes", { from: "ViewNotes" });
   })
 
   test('redirects to instrument maintenence', () => {
@@ -106,7 +106,7 @@ describe('Home page', () => {
     
     // hit button to check for success
     fireEvent.press(tankTracker);
-    expect(mockNavigation.navigate).toHaveBeenCalledWith("SelectSite", { from: "TankTracker" });
+    expect(mockNavigation.navigate).toHaveBeenCalledWith("SelectTank", { from: "TankTracker" });
   })
 
   test('redirects to plan a visit', () => {

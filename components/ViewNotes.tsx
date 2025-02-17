@@ -16,12 +16,17 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { NavigationType, routeProp } from './types'
 
 
+function retrieveHeader(site: string)
+{
+  return site.split('/').pop()
+}
+
 
 /**
  * @author Blake Stambaugh, August O'Rourke
  * @returns The view notes page in our app
  */
-export default function ViewNotes({ navigation }: NavigationType) {
+export default function ViewNotes({navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   let site = route.params?.site;
   let from = route.params?.from;
@@ -83,7 +88,7 @@ export default function ViewNotes({ navigation }: NavigationType) {
         <Layout style={styles.container} level="1">
           {/* header */}
           <Text category="h1" style={{ textAlign: "center" }}>
-            {site.split("/").pop()}
+            {retrieveHeader(site)}
           </Text>
 
           {
