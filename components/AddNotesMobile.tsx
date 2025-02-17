@@ -154,9 +154,13 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
 
     const handleInstrumentUpdate = (index: IndexPath | IndexPath[]) => {
-      const selectedInstrument = instrumentNames[(index as IndexPath).row];
-      setInstrumentIndex(index);
-      setInstrumentInput(selectedInstrument);
+      const selectedRow = (index as IndexPath).row;
+      if (selectedRow === instrumentNames?.length) {
+        setInstrumentInput("");
+      } else {
+        const selectedInstrument = instrumentNames?.[selectedRow] ?? "";
+        setInstrumentInput(selectedInstrument);
+      }
     };
 
     const installedInstrumentNotes = (time: string): string => {
@@ -337,9 +341,12 @@ export default function AddNotes({ navigation }: NavigationType) {
               value={instrumentInput}
               style={styles.inputText}
             >
+            <>
             {(instrumentNames ?? ["No Instruments Available"]).map((instrument, index) => (
               <SelectItem key={index} title={instrument} />
             ))}
+            <SelectItem key="remove" title="Remove Instrument" />
+            </>
             </Select>
 
             {/* text inputs */}
