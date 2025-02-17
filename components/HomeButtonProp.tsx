@@ -7,7 +7,7 @@
  */
 import { Layout, Text, Button } from '@ui-kitten/components';
 import React from 'react'
-import { StyleSheet, TouchableWithoutFeedback, Dimensions, ColorValue } from "react-native"
+import { StyleSheet, Dimensions, ColorValue } from "react-native"
 const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
 
 interface HBProp{

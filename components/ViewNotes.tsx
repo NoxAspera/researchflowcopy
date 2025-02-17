@@ -13,18 +13,24 @@ import { getFileContents } from '../scripts/APIRequests';
 import { Entry } from '../scripts/Parsers';
 import { customTheme } from './CustomTheme';
 import { ScrollView } from 'react-native-gesture-handler';
-import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
 
+
+function retrieveHeader(site: string)
+{
+  return site.split('/').pop()
+}
 
 
 /**
  * @author Blake Stambaugh, August O'Rourke
  * @returns The view notes page in our app
  */
-export default function ViewNotes({ navigation }: NavigationType) {
+export default function ViewNotes({navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   let site = route.params?.site;
+  let from = route.params?.from;
+  let visits = route.params?.visits;
   let notes: Entry[] = [];
 
   const [visible, setVisible] = useState(false);
@@ -36,7 +42,7 @@ export default function ViewNotes({ navigation }: NavigationType) {
   // Get current notes for the site
   useEffect(() => {
     async function fetchData() {
-      if (site && !data) {
+      if (site && !data && route) {
         try {
           const parsedData = await getFileContents(site);
           if (parsedData.success) {
@@ -72,39 +78,60 @@ export default function ViewNotes({ navigation }: NavigationType) {
         }
       }
     }
-    fetchData();
+    if(!from){
+      fetchData();
+    }
   }, [site]);
-  return (
-    <ScrollView style={styles.scrollContainer}>
-      <Layout style={styles.container} level="1">
-        {/* header */}
+  if(!from){
+    return (
+      <ScrollView style={styles.scrollContainer}>
+        <Layout style={styles.container} level="1">
+          {/* header */}
+          <Text category="h1" style={{ textAlign: "center" }}>
+            {retrieveHeader(site)}
+          </Text>
+
+          {
+          data?.map((entry) => {
+            const dateMatch = /(\d+)-(\d+)-(\d+)/;
+            const date = entry.match(dateMatch);
+            // not sure why but split leaves a new line sometimes
+            if (entry !== "___" && entry !== "---" && entry !== "\n") {
+              return (
+                <Card>
+                  <Text category="h3">{date?.at(0)}</Text>
+                  <Text category="p1">{entry}</Text>
+                </Card>
+              );
+            }
+          })}
+        </Layout>
+      </ScrollView>
+    );
+  }
+  else
+  {
+    return(
+      <ScrollView style={styles.scrollContainer}>
+        <Layout style={styles.container} level="1">
+
         <Text category="h1" style={{ textAlign: "center" }}>
-          {site.split("/").pop()}
-        </Text>
+            {visits[0].date}
+          </Text>
 
-        <PopupProp
-          popupText={message}
-          popupColor={messageColor}
-          onPress={setVisible}
-          visible={visible}
-        />
-
-        {data?.map((entry) => {
-          const dateMatch = /(\d+)-(\d+)-(\d+)/;
-          const date = entry.match(dateMatch);
-          // not sure why but split leaves a new line sometimes
-          if (entry !== "___" && entry !== "---" && entry !== "\n") {
-            return (
+          {visits.map((entry) => {
+            return(
               <Card>
-                <Text category="h3">{date?.at(0)}</Text>
-                <Text category="p1">{entry}</Text>
+                <Text category="h3">{entry.site}</Text>
+                <Text category="p1">{`Name: ${entry.name}\nEquipment: ${entry.equipment}\nNotes: ${entry.notes}`}</Text>
               </Card>
-            );
-          }
-        })}
-      </Layout>
-    </ScrollView>
-  );
+            )
+          })}
+          
+        </Layout>
+      </ScrollView>
+    )
+  }
 }
 
   const styles = StyleSheet.create({

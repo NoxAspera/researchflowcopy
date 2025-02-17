@@ -7,6 +7,7 @@
  */
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
+import { visit } from '../scripts/APIRequests';
 
 // Define the type for the stack's navigation parameters
 export type RootStackParamList = {
@@ -19,7 +20,7 @@ export type RootStackParamList = {
     // used for site select
     AddNotes: { site: string };
     AddNotesMobile: { site: string };
-    ViewNotes: { site: string };
+    ViewNotes: { site: string, from: string, visits: visit[] };
     BadData: { site: string };
     InstrumentMaintenance: { site: string };
     TankTracker: { site: string };
@@ -44,5 +45,6 @@ type RouteParams = {
   from: string;
   notes: string;
   onSelect?: (selectedTank: string ) => void;
+  visits: visit[];
 };
 export type routeProp = RouteProp<{params: RouteParams}, 'params'>;

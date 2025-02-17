@@ -1,4 +1,5 @@
-import { TankRecord } from "./APIRequests";
+import { json } from "../jest.config";
+import { TankRecord, visit } from "./APIRequests";
 
 /**
  * @author Megan Ostlie
@@ -255,4 +256,76 @@ export function copyTankRecord(record: TankRecord): TankRecord
     }
 
     return newRecord
+}
+
+function formDate(dateString: string)
+{
+    let strings = dateString.split(" ")
+    let month = strings[0]
+    let day = strings[1]
+    let year = strings[2]
+
+    switch(month)
+    {
+        case "Jan":
+            month = "01"
+            break
+        case "Feb":
+            month = "02"
+            break
+        case "Mar":
+            month = "03"
+            break
+        case "Apr":
+            month = "04"
+            break
+        case "May":
+            month = "05"
+            break
+        case "Jun":
+            month = "06"
+            break
+        case "Jul":
+            month = "07"
+            break
+        case "Aug":
+            month = "08"
+            break
+        case "Sep":
+            month = "09"
+            break
+        case "Oct":
+            month = "10"
+            break
+        case "Nov":
+            month = "11"
+            break
+        case "Dec":
+            month = "12"
+            break
+    }
+    return `${year}-${month}-${day}`
+}
+
+export function processVisits(jsonString: string)
+{
+    let result: visit[] = []
+    jsonString.split("\n").forEach((value) => {
+        if (value === "")
+        {
+            return
+        }
+        let date = formDate(value.substring(value.indexOf("date\":\"")+11,value.indexOf("\",\"")))
+        let temp = value.substring(value.indexOf("\",\"") + 3)
+        let name = temp.substring(7, temp.indexOf("\",\""))
+        temp = temp.substring(temp.indexOf("\",\"")+3)
+        let site = temp.substring(7,temp.indexOf("\",\""))
+        temp = temp.substring(temp.indexOf("\",\"")+3)
+        let equipment = temp.substring(12,temp.indexOf("\",\"") )
+        temp = temp.substring(temp.indexOf("\",\""))
+        let note = temp.substring(11, temp.length -2)
+        let visit: visit = {date: date, name: name, site: site, equipment: equipment, notes: note }
+        result.push(visit)
+    })
+    return result
 }

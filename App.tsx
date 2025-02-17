@@ -57,6 +57,7 @@ export default function App() {
             <Stack.Screen name="SelectTank" component={SelectTank} options={{ headerRight: () => <SettingsButton/>}}/>
             <Stack.Screen name="AddNotesMobile" component={AddNotesMobile} options={{ headerRight: () => <SettingsButton/>}}/>
             <Stack.Screen name="SelectNotes" component={SelectNotes} options={{ headerRight: () => <SettingsButton/>}}/>
+            <Stack.Screen name ="Calendar" component={Calendar} options={{headerRight: () => <SettingsButton/>}}/>
           </Stack.Navigator>
         </NavigationContainer>
       </ApplicationProvider>

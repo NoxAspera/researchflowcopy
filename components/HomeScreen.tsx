@@ -11,8 +11,8 @@ import HomeButtonProp from "./HomeButtonProp";
 import { Layout } from "@ui-kitten/components";
 import React from "react";
 import { NavigationType } from "./types";
-const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
-import { tankTrackerSpinUp, setVisitFile, getFileContents, visit } from '../scripts/APIRequests';
+//const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
+import { tankTrackerSpinUp} from '../scripts/APIRequests';
 
 export default function HomeScreen({ navigation }: NavigationType) {
   //setInstrumentFile("instrument_maint/LGR_UGGA/LGR-13-0075", "testing", "updating from research flow", false)
@@ -70,7 +70,7 @@ export default function HomeScreen({ navigation }: NavigationType) {
           text="PLAN A VISIT"
           color="#FFC581"
           onPress={() =>
-            navigation.navigate("SelectSite", { from: "PlanVisit" })
+            navigation.navigate('Calendar')
           }
         />
       </ScrollView>
