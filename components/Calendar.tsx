@@ -18,7 +18,6 @@ import { processVisits } from "../scripts/Parsers";
 import { DateData, LocaleConfig} from 'react-native-calendars'
 import { Calendar, CalendarList,Agenda } from "react-native-calendars";
 import { customTheme } from './CustomTheme';
-import PopupProp from './Popup';
 import PlanVisit from "./PlanVisit";
 import ViewNotes from "./ViewNotes";
 
@@ -86,13 +85,6 @@ export default function CalendarScreen({ navigation }: NavigationType) {
 
   return (
     <Layout style={styles.container}>
-        {/*If you add a new navigation point you have to add it in types.ts, and App.tsx*/}
-        <PopupProp
-          popupText={message}
-          popupColor={messageColor}
-          onPress={setVisible}
-          visible={visible}
-        />
         {/* Plan a Visit */}
         <HomeButtonProp
           text="PLAN A VISIT"
@@ -104,7 +96,7 @@ export default function CalendarScreen({ navigation }: NavigationType) {
         <Calendar
           onDayPress={Date => {
             if (visitDict.has(Date.dateString)){
-              navigation.push("ViewNotes", {from: "Calendar", visits: visitDict.get(Date.dateString)})
+              navigation.push("ViewNotes", {site: "", from: "Calendar", visits: visitDict.get(Date.dateString)})
             }
           }}
           markedDates={markedDates}

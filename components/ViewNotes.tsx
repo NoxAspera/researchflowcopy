@@ -13,7 +13,6 @@ import { getFileContents } from '../scripts/APIRequests';
 import { Entry } from '../scripts/Parsers';
 import { customTheme } from './CustomTheme';
 import { ScrollView } from 'react-native-gesture-handler';
-import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
 
 
@@ -27,7 +26,6 @@ export default function ViewNotes({ navigation }: NavigationType) {
   let site = route.params?.site;
   let from = route.params?.from;
   let visits = route.params?.visits;
-  console.log(visits[0].name)
   let notes: Entry[] = [];
 
   const [visible, setVisible] = useState(false);
@@ -87,13 +85,6 @@ export default function ViewNotes({ navigation }: NavigationType) {
           <Text category="h1" style={{ textAlign: "center" }}>
             {site.split("/").pop()}
           </Text>
-
-          <PopupProp
-            popupText={message}
-            popupColor={messageColor}
-            onPress={setVisible}
-            visible={visible}
-          />
 
           {
           data?.map((entry) => {
