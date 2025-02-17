@@ -11,8 +11,8 @@ import HomeButtonProp from "./HomeButtonProp";
 import { Layout } from "@ui-kitten/components";
 import React from "react";
 import { NavigationType } from "./types";
-const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
-import { tankTrackerSpinUp, setVisitFile, getFileContents, visit } from '../scripts/APIRequests';
+//const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
+import { tankTrackerSpinUp} from '../scripts/APIRequests';
 
 export default function HomeScreen({ navigation }: NavigationType) {
 
