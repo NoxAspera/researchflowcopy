@@ -20,12 +20,19 @@ import { Calendar, CalendarList,Agenda } from "react-native-calendars";
 import { customTheme } from './CustomTheme';
 import PopupProp from './Popup';
 import PlanVisit from "./PlanVisit";
+import ViewNotes from "./ViewNotes";
 
-let visitDict: Map<Date, visit>
+let visitDict: Map<string, visit[]>
 
 function handlePress(date: DateData)
 {
+  let temp = visitDict.get(date.dateString)
+  
+}
 
+export function getVisitDictionary()
+{
+  return visitDict.get()
 }
 
 export default function CalendarScreen({ navigation }: NavigationType) {
@@ -43,14 +50,24 @@ export default function CalendarScreen({ navigation }: NavigationType) {
           visitDict = new Map()
           let visits: visit[] = processVisits(response.data)
           visits.forEach((value) => {
-            console.log(value.date)
-            let date: Date = new Date (Date.parse(value.date))
-            visitDict.set(date, value)
+            if(visitDict.has(value.date))
+            {
+              let temp = visitDict.get(value.date)
+              temp.push(value)
+              visitDict.set(value.date,temp)
+              console.log("overlap")
+            }
+            else
+            {
+              visitDict.set(value.date,[value])
+            }
+
             if(markedDates)
             {
               setMarkedDates(prevmarkedDates => ({...prevmarkedDates,[value.date] :{marked: true, dotColor: 'blue'}}))
             }
           })
+          console.log(visitDict.size)
         }
         else
         {
@@ -81,11 +98,15 @@ export default function CalendarScreen({ navigation }: NavigationType) {
           text="PLAN A VISIT"
           color="#4DD7FA"
           onPress={() =>
-            navigation.navigate("SelectSite", {from: "PlanVisit"})
+            navigation.push("SelectSite", {from: "PlanVisit"})
           }
         />
         <Calendar
-          onDayPress={Date => {handlePress(Date)}}
+          onDayPress={Date => {
+            if (visitDict.has(Date.dateString)){
+              navigation.push("ViewNotes", {from: "Calendar", visits: visitDict.get(Date.dateString)})
+            }
+          }}
           markedDates={markedDates}
         />
     </Layout>
