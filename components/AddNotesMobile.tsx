@@ -1,7 +1,7 @@
 /**
  * Add Notes Page for mobile sites
  * @author Blake Stambaugh, Megan Ostlie, August O'Rourke, and David Schiwal
- *  12/4/24
+ * Updated: 2/11/25 - MO
  * This page will take in input from the user, format it, and upload it to the
  * github repo. This page is slightly different than the main AddNotes page because
  * the mobile sites do not have as many tanks as the stationary sites
@@ -15,8 +15,8 @@ import TextInput from './TextInput'
 import NoteInput from './NoteInput'
 import { Layout, Button, Text } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
-import { setFile, getFileContents } from '../scripts/APIRequests';
-import { parseNotes, ParsedData } from '../scripts/Parsers'
+import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary,setTankTracker } from '../scripts/APIRequests';
+import { parseNotes, ParsedData, copyTankRecord } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
@@ -85,12 +85,15 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [tankPressure, setTankPressure] = useState("");
     const [notesValue, setNotesValue] = useState("");
     const [instrumentInput, setInstrumentInput] = useState("");
+    const [tankRecord, setTankRecord] = useState<TankRecord>(undefined);
+    const [originalTank, setOriginalTank] = useState<TankRecord>(undefined);
 
     // used for determining if PUT request was successful
     // will set the success/fail notification to visible, aswell as the color and text
     const [visible, setVisible] = useState(false);
     const [messageColor, setMessageColor] = useState("");
     const [message, setMessage] = useState("");
+    const [returnHome, retHome] = useState(false);
     //used for popup if info is missing
     const [visible2, setVisible2] = useState(false);
 
@@ -109,10 +112,30 @@ export default function AddNotes({ navigation }: NavigationType) {
            }
     }
 
+    const handleTankChange = () => {
+      navigation.navigate('SelectTank', {
+        from: 'AddNotesMobile',
+          onSelect: (selectedTank) => {
+            setTankId(selectedTank);
+            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+            setTankRecord(entry);
+            setTankValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+          }
+      });
+    }
+
+    const clearTankEntry = () => {
+      setTankId("");
+      setTankValue("");
+      setTankRecord(undefined);
+    }
+
     // will call setFile to send the PUT request. 
     // If it is successful it will display a success message
     // if it fails then it will display a failure message
     const handleUpdate = async () => {
+      const Tankignored: boolean = (tankId == "" && tankValue == "" && tankPressure == "")
+
         // get time submitted
         const now = new Date();
         const year = now.getUTCFullYear();
@@ -120,6 +143,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         const day = String(now.getUTCDate()).padStart(2, "0");
         const hours = String(now.getUTCHours()).padStart(2, "0");
         const minutes = String(now.getUTCMinutes()).padStart(2, "0");
+        const seconds = String(now.getUTCSeconds()).padStart(2, "0");
         
         // create an entry object data that will be sent off to the repo
         let data: MobileEntry = 
@@ -128,7 +152,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           time_out: `${year}-${month}-${day} ${hours}:${minutes}`,
           names: nameValue,
           instrument: instrumentInput.trim() ? instrumentInput : null,
-          tank:
+          tank: Tankignored ? null:
           {
             id: tankId,
             value: tankValue,
@@ -138,33 +162,73 @@ export default function AddNotes({ navigation }: NavigationType) {
           additional_notes: notesValue 
         };
 
+        const utcTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
+        if (originalTank && (!tankRecord || (originalTank.tankId != tankRecord.tankId))) {
+          let newTankEntry = copyTankRecord(originalTank);
+          newTankEntry.location = "ASB279";
+          newTankEntry.pressure = 500;
+          newTankEntry.userId = nameValue;
+          newTankEntry.updatedAt = utcTime;
+          addEntrytoTankDictionary(newTankEntry);
+        }
+        if (tankRecord) {
+          const siteName = site.replace("mobile/","");
+          let tank = copyTankRecord(tankRecord);
+          tank.location = siteName;
+          tank.updatedAt = utcTime;
+          tank.pressure = parseInt(tankPressure);
+          tank.userId = nameValue;
+          addEntrytoTankDictionary(tank);
+        }
+
         // send the request
-        const result = await setFile(site, buildMobileNotes(data), "updating notes from researchFlow");
+        const result = await setSiteFile(site, buildMobileNotes(data), "updating notes from researchFlow");
+        const tankResult = await setTankTracker();
 
         // if the warning popup is visible, remove it
         if(visible2) { setVisible2(false); }
 
         // check to see if the request was ok, give a message based on that
-        if (result.success) {
+        if (result.success && tankResult.success) {
             setMessage("File updated successfully!");
             setMessageColor(customTheme['color-success-700']);
+            retHome(true);
           } else {
-            setMessage(`Error: ${result.error}`);
+            if (result.error) {
+              setMessage(`Error: ${result.error}`);
+            } else if (tankResult.error) {
+              setMessage(`Error: ${tankResult.error}`);
+            }
             setMessageColor(customTheme['color-danger-700']);
           }
         setVisible(true);
     };
 
+    //method to navigate home to send to popup so it can happen after dismiss button is clicked
+    function navigateHome(nav:boolean){
+      if(nav){
+        navigation.navigate("Home")
+      }
+    }
+
     //Set tank ids, values, and instruments if available in parsed data
     useEffect(() => {
       if (latestEntry) {
-          if (latestEntry.tank) {
-              setTankId(latestEntry.tank.id || "");
-              setTankValue(latestEntry.tank.value || "");
+        if (latestEntry.tank) {
+          const tankID = latestEntry.tank.id.split("_").pop();
+          if (tankID) {
+            const tankEntry = getLatestTankEntry(tankID) || getLatestTankEntry(tankID.toLowerCase());
+            if (tankEntry) {
+              setTankRecord(tankEntry);
+              setOriginalTank(tankEntry);
+              setTankId(tankEntry.tankId)
+              setTankValue(tankEntry.co2.toString() + " ~ " + tankEntry.ch4.toString());
+            }
           }
-          if (latestEntry.instrument) {
-            setInstrumentInput(latestEntry.instrument);
-          }
+        }
+        if (latestEntry.instrument) {
+          setInstrumentInput(latestEntry.instrument);
+        }
       }
   }, [latestEntry]);
 
@@ -172,7 +236,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.container}>
-        <ScrollView>
+        <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
           <Layout style={styles.container}>
             {/* header */}
             <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
@@ -181,7 +245,9 @@ export default function AddNotes({ navigation }: NavigationType) {
             <PopupProp popupText={message} 
             popupColor={messageColor} 
             onPress={setVisible} 
-            visible={visible}/>
+            navigateHome={navigateHome} 
+            visible={visible}
+            returnHome={returnHome}/>
 
             {/* popup if user has missing input */}
             <PopupProp2Button popupText='Missing some input field(s)'
@@ -217,16 +283,23 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* Tank input */}
             <Layout style = {styles.rowContainer}>
-              <TextInput labelText='Tank (if needed)' 
-                labelValue={tankId} 
-                onTextChange={setTankId} 
-                placeholder='Tank ID' 
-                style={styles.tankInput} />
-              <TextInput labelText=' ' 
-                labelValue={tankValue} 
-                onTextChange={setTankValue} 
-                placeholder='Value' 
-                style={styles.tankInput} />
+              <Select
+                label={"Tank (if needed)"}
+                onSelect={(indexPath) => {
+                  const index = Array.isArray(indexPath) ? indexPath[0].row : indexPath.row;
+                  if (index === 0) {
+                    handleTankChange();
+                  } else if (index === 1) {
+                    clearTankEntry();
+                  }
+                  }}
+                  placeholder="Select Tank"
+                  value={tankId && tankValue ? `${tankId}: ${tankValue}` : ""}
+                  style={styles.inputText}
+                >
+                <SelectItem key={0} title={"Change tank"} />
+                <SelectItem key={1} title={"Remove tank"} />
+                </Select>
               <TextInput labelText=' ' 
                 labelValue={tankPressure} 
                 onTextChange={setTankPressure} 
@@ -263,7 +336,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       justifyContent: 'space-evenly',
     },
     inputText: {
-      flex: 1,
+      flex: 2,
       margin: 8
     },
     tankInput: {

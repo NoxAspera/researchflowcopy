@@ -13,7 +13,7 @@ export type RootStackParamList = {
     // used for home screen
     SelectSite: { from: string }; 
     SelectInstrument: { from: string , notes: boolean};
-    SelectTank: { from: string};
+    SelectTank: { from: string, onSelect?: (selectedTank: string) => void };
     SelectNotes: { from: string }; 
 
     // used for site select
@@ -43,5 +43,6 @@ type RouteParams = {
   info: string; 
   from: string;
   notes: string;
+  onSelect?: (selectedTank: string ) => void;
 };
 export type routeProp = RouteProp<{params: RouteParams}, 'params'>;

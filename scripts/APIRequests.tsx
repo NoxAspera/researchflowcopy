@@ -10,6 +10,7 @@ export interface siteResponse
     git_url: string
     name: string
 }
+
 /**
  * @author August O'Rourke
  * This method turns an array of tankRecords into a csv string
@@ -29,6 +30,7 @@ function csvify( object: TankRecord[])
 
     return returnString
 }
+
 /**
  * This interface is taken from this public repository https://github.com/benfasoli/tank-tracker,
 */
@@ -89,6 +91,53 @@ let tankDict: Map<string, TankRecord[]>;
 
 let tankTrackerSha = ""
 
+/**
+ * 
+ * @author August O'Rourke
+ *  This is a small helper method to facilitate changing files on the git repository
+ * @param bodyString - The string containing the body of the put request
+ * @param url - The api enpoint's URL
+ * @returns A json object containing a success field, and the response sent back, or an error message
+ */
+async function setFile(bodyString: string, url: string)
+{
+    const headers = new Headers();
+    headers.append("User-Agent", "ResearchFlow");
+    headers.append("Accept", "application/vnd.github+json");
+    headers.append("Authorization", `Bearer ${githubToken}`);
+    headers.append("X-GitHub-Api-Version", "2022-11-28");
+
+    const requestOptions: RequestInfo = new Request(url, 
+        {
+            method: "PUT",
+            headers: headers,
+            body: bodyString,
+            redirect: "follow"
+        }
+    )
+    
+    try {
+        const response = await fetch(requestOptions);
+        console.log(response)
+        if (response.ok) {
+            const data = await response.json();
+            return { success: true, data };
+        } else {
+            const errorData = await response.json();
+            return { success: false, error: errorData.message };
+        }
+    } catch (error) {
+        return { success: false, error: error };
+    }
+    
+}
+
+/**
+ * This method sets the plan a visit file
+ * @param visit - the visit we are uploading
+ * @param commitMessage - a commit message for this change
+ * @returns A json object containing a success field, and the response sent back, or an error message
+ */
 export async function setVisitFile(visit: visit, commitMessage: string)
 {
     const pullResponse = (await getFile(`researchflow_data/visits`))
@@ -97,8 +146,7 @@ export async function setVisitFile(visit: visit, commitMessage: string)
     if(pullResponse.success)
     {
         hash = pullResponse.data.sha
-        existingContent = atob(pullResponse.data.content) + "\n"
-        
+        existingContent = atob(pullResponse.data.content) + "\n"       
     }
     const fullDoc = btoa(existingContent + JSON.stringify(visit))
 
@@ -108,37 +156,13 @@ export async function setVisitFile(visit: visit, commitMessage: string)
     {
         bodyString+= `,"sha":"${hash}"}`
     }
-    console.log(bodyString)
-    const headers = new Headers();
-    headers.append("User-Agent", "ResearchFlow");
-    headers.append("Accept", "application/vnd.github+json");
-    headers.append("Authorization", `Bearer ${githubToken}`);
-    headers.append("X-GitHub-Api-Version", "2022-11-28");
-
-    const requestOptions: RequestInfo = new Request(url, 
-        {
-            method: "PUT",
-            headers: headers,
-            body: bodyString,
-            redirect: "follow"
-        }
-    )
-    
-    try {
-        const response = await fetch(requestOptions);
-        console.log(response)
-        if (response.ok) {
-            const data = await response.json();
-            return { success: true, data };
-        } else {
-            const errorData = await response.json();
-            return { success: false, error: errorData.message };
-        }
-    } catch (error) {
-        return { success: false, error: error };
+    else
+    {
+        bodyString += '}'
     }
+    //console.log(bodyString)
+    return setFile(bodyString, url)   
 }
-
 
 /**
  * Sets the GitHub token for subsequent API requests.
@@ -147,58 +171,40 @@ export async function setVisitFile(visit: visit, commitMessage: string)
 export function setGithubToken(token: string) {
     githubToken = token;
 }
+
+export function addEntrytoTankDictionary(newEntry: TankRecord) {
+    let tankEntries = tankDict.get(newEntry.tankId);
+    tankEntries.push(newEntry);
+    tankDict.set(newEntry.tankId, tankEntries);
+}
+
 /**
  * This method updates the tank tracker csv on the repo
  * @author August O'Rourke
  * @param newEntry the new entry to be added to the tank tracker csv
  * @returns a resopnse containing whether or not adding was successful, and the response data
  */
-export async function setTankTracker(newEntry: TankRecord)
+export async function setTankTracker()
 {
     let temp = Array.from(tankDict.values())
-    let plainfullDoc: TankRecord[] = [newEntry]
+    let plainfullDoc: TankRecord[] = []
+
     temp.forEach(value =>
-    {
-        value.forEach(value =>
         {
-            plainfullDoc.push(value)
-        })
-    }
+            value.forEach(value =>
+            {
+                plainfullDoc.push(value)
+            })
+        }
     )
-    console.log(plainfullDoc)
+
+    //console.log(plainfullDoc)
     let newContent = csvify(plainfullDoc)
     const fullDoc = btoa(newContent)
 
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
     const bodyString = `{"message":"updating from research flow","content":"${fullDoc}","sha":"${tankTrackerSha}"}`
-    const headers = new Headers();
-    headers.append("User-Agent", "ResearchFlow");
-    headers.append("Accept", "application/vnd.github+json");
-    headers.append("Authorization", `Bearer ${githubToken}`);
-    headers.append("X-GitHub-Api-Version", "2022-11-28");
-
-    const requestOptions: RequestInfo = new Request(url, 
-        {
-            method: "PUT",
-            headers: headers,
-            body: bodyString,
-            redirect: "follow"
-        }
-    )
-    
-    try {
-        const response = await fetch(requestOptions);
-        console.log(response)
-        if (response.ok) {
-            const data = await response.json();
-            return { success: true, data };
-        } else {
-            const errorData = await response.json();
-            return { success: false, error: errorData.message };
-        }
-    } catch (error) {
-        return { success: false, error: error };
-    }
+    return setFile(bodyString, url)
 }
 /**
  * This method returns a list of Tank Entries for a specific tank 
@@ -233,6 +239,7 @@ export function getTankList()
     return Array.from(tankDict.keys())
 }
 /**
+ * @author August O'Rourke, Megan Ostlie
  * This method prepares the code to run other various methods relating to the tank tracker, it needs to be called during the main menu, after authorization has already occured
  * 
  * @returns a success response, it probably isn't needed though 
@@ -294,7 +301,11 @@ export async function tankTrackerSpinUp()
         return {sucess: false, error: error}
     }
 }
-
+/**
+ * @author August O'Rourke, Megan Ostlie
+ * This method returns all the sites in the Bad Data folder
+ * @returns A json object containing a success field, and the response sent back, or an error message
+ */
 export async function getBadDataSites()
 {
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad`;
@@ -333,7 +344,12 @@ export async function getBadDataSites()
         return { success: false, error: error };
     }
 }
-
+/**
+ * @author August O'Rourke, Megan Ostlie
+ * This method gets the data files from this site
+ * @param siteName - the name of the site we are getting the data from
+ * @returns A json object containing a success field, and the response sent back, or an error message
+ */
 export async function getBadDataFiles(siteName: string)
 {
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad/${siteName}`;
@@ -372,7 +388,15 @@ export async function getBadDataFiles(siteName: string)
         return { success: false, error: error };
     }
 }
-
+/**
+ * @author - August O'Rourke 
+ * This method sets a Bad Data file
+ * @param siteName The site name the data is from 
+ * @param instrument The instrument the data is collected from
+ * @param newEntry The new entry in the bad data file
+ * @param commitMessage the commit message for github
+ * @returns A json object containing a success field, and the response sent back, or an error message
+ */
 export async function setBadData(siteName: string, instrument: string, newEntry: string, commitMessage: string)
 {
     siteName = siteName.toLowerCase();
@@ -418,35 +442,15 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
     }
 
     const bodyString = `{"message":"${commitMessage}","content":"${newFile}","sha":"${sha}"}`
-    headers = new Headers();
-    headers.append("User-Agent", "ResearchFlow");
-    headers.append("Accept", "application/vnd.github+json");
-    headers.append("Authorization", `Bearer ${githubToken}`);
-    headers.append("X-GitHub-Api-Version", "2022-11-28");
 
-    requestOptions = new Request(url, 
-        {
-            method: "PUT",
-            headers: headers,
-            body: bodyString,
-            redirect: "follow"
-        }
-    )
-    try {
-        const response = await fetch(requestOptions);
-
-        if (response.ok) {
-            const data = await response.json();
-            return { success: true, data };
-        } else {
-            const errorData = await response.json();
-            return { success: false, error: errorData.message };
-        }
-    } catch (error) {
-        return { success: false, error: error };
-    }
+    return setFile(bodyString, url)
 }
-
+/**
+ * This method gets the site of the Instrument specified
+ * @author Megan Ostlie
+ * @param path the instrument specified
+ * @returns A json object containing a success field, and the response sent back, or an error message
+ */
 export async function getInstrumentSite(path: string) {
     const pullResponse = (await getFile(path))
     if(pullResponse.error)
@@ -493,34 +497,7 @@ export async function setInstrumentFile(path: string, content: string, commitMes
 
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}.md`;
     const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`
-    const headers = new Headers();
-    headers.append("User-Agent", "ResearchFlow");
-    headers.append("Accept", "application/vnd.github+json");
-    headers.append("Authorization", `Bearer ${githubToken}`);
-    headers.append("X-GitHub-Api-Version", "2022-11-28");
-
-    const requestOptions: RequestInfo = new Request(url, 
-        {
-            method: "PUT",
-            headers: headers,
-            body: bodyString,
-            redirect: "follow"
-        }
-    )
-    
-    try {
-        const response = await fetch(requestOptions);
-        //console.log(response)
-        if (response.ok) {
-            const data = await response.json();
-            return { success: true, data };
-        } else {
-            const errorData = await response.json();
-            return { success: false, error: errorData.message };
-        }
-    } catch (error) {
-        return { success: false, error: error };
-    }
+    return setFile(bodyString, url)
 }
 
 /**
@@ -634,7 +611,7 @@ export async function getFileContents(path: string)
  * @param commitMessage the commit message that will go on gitHub
  * @returns the contents of the file as a string
  */
-export async function setFile(siteName: string, content: string, commitMessage: string) {
+export async function setSiteFile(siteName: string, content: string, commitMessage: string) {
     siteName = siteName.toLowerCase();
     const pullResponse = (await getFile(`site_notes/${siteName}`))
     if(pullResponse.error)
@@ -657,32 +634,5 @@ export async function setFile(siteName: string, content: string, commitMessage: 
 
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/site_notes/${siteName}.md`;
     const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`
-    const headers = new Headers();
-    headers.append("User-Agent", "ResearchFlow");
-    headers.append("Accept", "application/vnd.github+json");
-    headers.append("Authorization", `Bearer ${githubToken}`);
-    headers.append("X-GitHub-Api-Version", "2022-11-28");
-
-    const requestOptions: RequestInfo = new Request(url, 
-        {
-            method: "PUT",
-            headers: headers,
-            body: bodyString,
-            redirect: "follow"
-        }
-    )
-    
-    try {
-        const response = await fetch(requestOptions);
-
-        if (response.ok) {
-            const data = await response.json();
-            return { success: true, data };
-        } else {
-            const errorData = await response.json();
-            return { success: false, error: errorData.message };
-        }
-    } catch (error) {
-        return { success: false, error: error };
-    }
+    return setFile(bodyString, url)
 }

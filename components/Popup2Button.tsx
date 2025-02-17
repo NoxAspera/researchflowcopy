@@ -29,7 +29,7 @@ const PopupProp2Button: React.FC<PUProp> = ({ popupText, popupColor, visible, se
         >
           <Card disabled={true} style={{ backgroundColor: popupColor }}>
             <Text style={{ flex: 1 }}>{popupText}</Text>
-            <Button onPress={() => sendData()}>SUBMIT ANYWAYS</Button>
+            <Button onPress={() => {removePopup(false), sendData()}}>SUBMIT ANYWAYS</Button>
             <Button
               onPress={() => removePopup(false)}
               style={{ marginTop: 15 }}

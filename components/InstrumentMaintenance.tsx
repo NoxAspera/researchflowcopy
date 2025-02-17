@@ -35,6 +35,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   const [visible, setVisible] = useState(false);
   const [messageColor, setMessageColor] = useState("");
   const [message, setMessage] = useState("");
+  const [returnHome, retHome] = useState(false);
 
   useEffect(() => {
     const fetchSite = async () => {
@@ -98,6 +99,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     if (result.success) {
       setMessage("File updated successfully!");
       setMessageColor(customTheme["color-success-700"]);
+      retHome(true);
     } else {
       setMessage(`Error: ${result.error}`);
       setMessageColor(customTheme["color-danger-700"]);
@@ -105,12 +107,19 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     setVisible(true);
   };
 
+  //method to navigate home to send to popup so it can happen after dismiss button is clicked
+  function navigateHome(nav:boolean){
+    if(nav){
+      navigation.navigate("Home")
+    }
+  }
+
   return (
     <KeyboardAvoidingView
       behavior = "padding"
       style={styles.container}
     >
-      <ScrollView automaticallyAdjustKeyboardInsets={true}>
+      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
         <Layout style={styles.container} level="1">
           {/* header */}
           <Text category="h1" style={{ textAlign: "center" }}>
@@ -122,7 +131,9 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
           <PopupProp popupText={message} 
             popupColor={messageColor} 
             onPress={setVisible} 
-            visible={visible}/>
+            navigateHome={navigateHome} 
+            visible={visible}
+            returnHome={returnHome}/>
             
           {/* Time input */}
           {needsLocation && (

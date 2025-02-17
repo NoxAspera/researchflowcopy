@@ -16,6 +16,7 @@ import { ScrollView, TextInput} from 'react-native-gesture-handler';
 
 export default function SelectTank({navigation}: NavigationType) {
   const route = useRoute<routeProp>();
+  const onSelect = route.params?.onSelect; // Get the onSelect function if passed
 
   // previous buttons hit, used to know where to go next
   let from = route.params?.from;
@@ -53,8 +54,13 @@ export default function SelectTank({navigation}: NavigationType) {
     }
   };
 
-  const handleConfirm = (selectedSite: string) => {
-    navigation.navigate('TankTracker', {site: selectedSite});
+  const handleConfirm = (selectedTank: string) => {
+    if (onSelect) {
+      onSelect(selectedTank); // Call the callback function
+      navigation.goBack(); // Return to the AddNotes screen
+    } else {
+      navigation.navigate('TankTracker', {site: selectedTank});
+    }
   };
 
   return (

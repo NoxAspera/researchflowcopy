@@ -29,11 +29,29 @@ export default function PlanVisit({ navigation }: NavigationType) {
   const [notesValue, setNotesValue] = useState("");
   const [additionalNotesValue, setAdditionalNotesValue] = useState("");
 
+  // used for determining if PUT request was successful
+  // will set the success/fail notification to visible, aswell as the color and text
   const [visible, setVisible] = useState(false);
   const [messageColor, setMessageColor] = useState("");
   const [message, setMessage] = useState("");
+  const [returnHome, retHome] = useState(false);
 
-  const handleSubmit = async () => {
+  //method to navigate home to send to popup so it can happen after dismiss button is clicked
+  function navigateHome(nav:boolean){
+    if(nav){
+      navigation.navigate("Home")
+    }
+  }
+  const handleSubmit = () => {
+        if (!nameValue || !dateValue) {
+          setMessage("Please make sure Name and Date are filled out before submitting.");
+          setMessageColor(customTheme['color-danger-700']);
+          setVisible(true);
+          return;
+        }
+        handleUpdate()
+  }
+  const handleUpdate = async () => {
     if (site.includes("mobile/")) {
       site = site.replace("mobile/", "");
     }
@@ -51,6 +69,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
     if (result.success) {
         setMessage("File updated successfully!");
         setMessageColor(customTheme['color-success-700']);
+        retHome(true);
       } else {
         setMessage(`Error: ${result.error}`);
         setMessageColor(customTheme['color-danger-700']);
@@ -63,7 +82,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
       behavior = "padding"
       style={styles.container}
     >
-      <ScrollView automaticallyAdjustKeyboardInsets={true}>
+      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
         <Layout style={styles.container} level="1">
           {/* header */}
           <Text category="h1" style={{ textAlign: "center" }}>
@@ -74,11 +93,13 @@ export default function PlanVisit({ navigation }: NavigationType) {
           <PopupProp popupText={message} 
             popupColor={messageColor} 
             onPress={setVisible} 
-            visible={visible}/>
+            navigateHome={navigateHome} 
+            visible={visible}
+            returnHome={returnHome}/>
 
           {/* start date input */}
           <Datepicker
-            label="Visit Date"
+            label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Visit Date</Text>}
             date={dateValue}
             onSelect={(date) => setDateValue(date as Date)}
             min={new Date(1900, 0, 1)}
