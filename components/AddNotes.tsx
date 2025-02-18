@@ -253,12 +253,14 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* success/failure popup */}
             <PopupProp popupText={message}
+            testid='SuccessFailurePopup'
             popupColor={messageColor} 
             onPress={setVisible} 
             visible={visible}/>
 
             {/* popup if user has missing input */}
             <PopupProp2Button popupText='Missing some input field(s)'
+            testid='MissingInputPopup'
             popupColor={customTheme['color-danger-700']}
             sendData={handleUpdate}
             removePopup={setVisible2}
@@ -275,14 +277,6 @@ export default function AddNotes({ navigation }: NavigationType) {
                 placeholder="Please enter instrument name"
                 style={styles.inputText}
               />
-              // <Input
-              //   testID="instrumentInput"
-              //   label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>InstrumentInput</Text>}
-              //   placeholder="Please enter instrument name"
-              //   value={instrumentInput}
-              //   onChangeText={setInstrumentInput}
-              //   style={styles.inputText}
-              // />
             ) : (
             <Select label={evaProps => <Text {...evaProps} category="c1" style={{color: isDarkMode ? "white" : "black"}}>Instrument</Text>}
               selectedIndex={selectedIndex}
@@ -301,6 +295,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             {/* text inputs */}
             {/* Name input */}
             <TextInput labelText='Name' 
+              testID='NameInput'
               labelValue={nameValue} 
               onTextChange={setNameValue} 
               placeholder='ResearchFlow' 
@@ -309,6 +304,7 @@ export default function AddNotes({ navigation }: NavigationType) {
 
               {/* Time input */}
             <TextInput labelText='Time Started' 
+              testID='TimeInput'
               labelValue={timeValue} 
               onTextChange={setTimeValue} 
               placeholder='15:00' 
@@ -316,6 +312,7 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* N2 */}
             <TextInput labelText='N2 (if needed)' 
+              testID='N2Input'
               labelValue={n2Value} 
               onTextChange={setN2Value} 
               placeholder='Pressure' 
@@ -324,16 +321,19 @@ export default function AddNotes({ navigation }: NavigationType) {
             {/* LTS input */}
             <Layout style = {styles.rowContainer}>
               <TextInput labelText='LTS (if needed)' 
+                testID='LTSIDInput'
                 labelValue={ltsId} 
                 onTextChange={setLTSId} 
                 placeholder='Tank ID' 
                 style={styles.tankInput} />
               <TextInput labelText=' ' 
+                testID='LTSValueInput'
                 labelValue={ltsValue} 
                 onTextChange={setLTSValue} 
                 placeholder='Value' 
                 style={styles.tankInput} />
               <TextInput labelText=' ' 
+                testID='LTSPressureInput'
                 labelValue={ltsPressure} 
                 onTextChange={setLTSPressure} 
                 placeholder='Pressure' 
@@ -345,16 +345,19 @@ export default function AddNotes({ navigation }: NavigationType) {
             {/* Low input */}
             <Layout style = {styles.rowContainer}>
               <TextInput labelText='Low' 
+                testID='LowIDInput'
                 labelValue={lowId} 
                 onTextChange={setLowId} 
                 placeholder='Tank ID' 
                 style={styles.tankInput} />
               <TextInput labelText=' ' 
+                testID='LowValueInput'
                 labelValue={lowValue} 
                 onTextChange={setLowValue} 
                 placeholder='Value' 
                 style={styles.tankInput} />
               <TextInput labelText=' ' 
+                testID='LowPressureInput'
                 labelValue={lowPressure} 
                 onTextChange={setLowPressure} 
                 placeholder='Pressure' 
@@ -364,16 +367,19 @@ export default function AddNotes({ navigation }: NavigationType) {
             {/* mid input */}
             <Layout style = {styles.rowContainer}>
               <TextInput labelText='Mid' 
+                testID='MidIDInput'
                 labelValue={midId} 
                 onTextChange={setmidId} 
                 placeholder='Tank ID' 
                 style={styles.tankInput} />
               <TextInput labelText=' ' 
+                testID='MidValueInput'
                 labelValue={midValue} 
                 onTextChange={setmidValue} 
                 placeholder='Value' 
                 style={styles.tankInput} />
               <TextInput labelText=' ' 
+                testID='MidPressureInput'
                 labelValue={midPressure} 
                 onTextChange={setmidPressure} 
                 placeholder='Pressure' 
@@ -383,16 +389,19 @@ export default function AddNotes({ navigation }: NavigationType) {
             {/* high input */} 
             <Layout style = {styles.rowContainer}>
               <TextInput labelText='High' 
+                testID='HighIDInput'
                 labelValue={highId} 
                 onTextChange={setHighId} 
                 placeholder='Tank ID' 
                 style={styles.tankInput} />
               <TextInput labelText=' ' 
+                testID='HighValueInput'
                 labelValue={highValue} 
                 onTextChange={setHighValue} 
                 placeholder='Value' 
                 style={styles.tankInput} />
               <TextInput labelText=' ' 
+                testID='HighPressureInput'
                 labelValue={highPressure} 
                 onTextChange={setHighPressure} 
                 placeholder='Pressure' 
@@ -401,6 +410,7 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* notes entry */}
             <NoteInput labelText='Notes' 
+              testid='NotesInput'
               labelValue={notesValue} 
               onTextChange={setNotesValue} 
               placeholder='All Good.' 

@@ -112,13 +112,54 @@ describe('Add Notes', () => {
   })
 
   test('takes user input', async () => {
-    const { findByTestId } = render(
+    const { findByTestId, queryByTestId } = render(
       <MockThemeProvider>
         <AddNotes navigation={mockNavigation} />
       </MockThemeProvider>
-      );
+    );
 
-    const instrumentInput = await findByTestId('instrumentInput');
-    expect(instrumentInput).toBeTruthy();
+    // get all text inputs
+    const instrumentInput = findByTestId('instrumentInput');
+    const nameInput = findByTestId('NameInput');
+    const timeInput = findByTestId('TimeInput');
+    const n2Input = findByTestId('N2Input');
+    const ltsIDInput = findByTestId('LTSIDInput');
+    const ltsValInput = findByTestId('LTSValueInput');
+    const ltsPressInput = findByTestId('LTSPressureInput');
+    const lowIDInput = findByTestId('LowIDInput');
+    const lowValInput = findByTestId('LowValueInput');
+    const lowPressInput = findByTestId('LowPressureInput');
+    const midIDInput = findByTestId('MidIDInput');
+    const midValInput = findByTestId('MidValueInput');
+    const midPressInput = findByTestId('MidPressureInput');
+    const highIDInput = findByTestId('HighIDInput');
+    const highValInput = findByTestId('HighValueInput');
+    const highPressInput = findByTestId('HighPressureInput');
+    const notesInput = findByTestId('NotesInput');
+    const submitButton = findByTestId('AddNotesButton');
+
+    // add inputs
+    fireEvent.changeText(instrumentInput, '1');
+    fireEvent.changeText(nameInput, 'test');
+    fireEvent.changeText(timeInput, '1:00');
+    fireEvent.changeText(n2Input, '1');
+    fireEvent.changeText(ltsIDInput, '1');
+    fireEvent.changeText(ltsValInput, '1');
+    fireEvent.changeText(ltsPressInput, '1');
+    fireEvent.changeText(lowIDInput, '1');
+    fireEvent.changeText(lowValInput, '1');
+    fireEvent.changeText(lowPressInput, '1');
+    fireEvent.changeText(midIDInput, '1');
+    fireEvent.changeText(midValInput, '1');
+    fireEvent.changeText(midPressInput, '1');
+    fireEvent.changeText(highIDInput, '1');
+    fireEvent.changeText(highValInput, '1');
+    fireEvent.changeText(highPressInput, '1');
+    fireEvent.changeText(notesInput, 'this is a test');
+
+    // submit content and see if it sends
+    fireEvent.press(submitButton);
+    expect(findByTestId("SuccessFailurePopup")).toBeTruthy();
+    
   })
 });

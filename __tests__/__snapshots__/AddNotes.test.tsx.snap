@@ -62,7 +62,7 @@ exports[`Add Notes renders correctly 1`] = `
             undefined,
           ]
         }
-        testID=""
+        testID="SuccessFailurePopup"
       />
       <View
         appearance="default"
@@ -75,7 +75,7 @@ exports[`Add Notes renders correctly 1`] = `
             undefined,
           ]
         }
-        testID=""
+        testID="MissingInputPopup"
       />
       <View
         style={
@@ -326,7 +326,7 @@ exports[`Add Notes renders correctly 1`] = `
             "opacity": 1,
           }
         }
-        testID="@/container"
+        testID="@NameInput/container"
       >
         <Text
           appearance="default"
@@ -403,7 +403,7 @@ exports[`Add Notes renders correctly 1`] = `
                 },
               ]
             }
-            testID="@/input"
+            testID="@NameInput/input"
             value=""
           />
         </View>
@@ -443,7 +443,7 @@ exports[`Add Notes renders correctly 1`] = `
             "opacity": 1,
           }
         }
-        testID="@/container"
+        testID="@TimeInput/container"
       >
         <Text
           appearance="default"
@@ -520,7 +520,7 @@ exports[`Add Notes renders correctly 1`] = `
                 },
               ]
             }
-            testID="@/input"
+            testID="@TimeInput/input"
             value=""
           />
         </View>
@@ -560,7 +560,7 @@ exports[`Add Notes renders correctly 1`] = `
             "opacity": 1,
           }
         }
-        testID="@/container"
+        testID="@N2Input/container"
       >
         <Text
           appearance="default"
@@ -637,7 +637,7 @@ exports[`Add Notes renders correctly 1`] = `
                 },
               ]
             }
-            testID="@/input"
+            testID="@N2Input/input"
             value=""
           />
         </View>
@@ -694,7 +694,7 @@ exports[`Add Notes renders correctly 1`] = `
               "opacity": 1,
             }
           }
-          testID="@/container"
+          testID="@LTSIDInput/container"
         >
           <Text
             appearance="default"
@@ -771,7 +771,7 @@ exports[`Add Notes renders correctly 1`] = `
                   },
                 ]
               }
-              testID="@/input"
+              testID="@LTSIDInput/input"
               value=""
             />
           </View>
@@ -811,7 +811,7 @@ exports[`Add Notes renders correctly 1`] = `
               "opacity": 1,
             }
           }
-          testID="@/container"
+          testID="@LTSValueInput/container"
         >
           <Text
             appearance="default"
@@ -888,7 +888,7 @@ exports[`Add Notes renders correctly 1`] = `
                   },
                 ]
               }
-              testID="@/input"
+              testID="@LTSValueInput/input"
               value=""
             />
           </View>
@@ -928,7 +928,7 @@ exports[`Add Notes renders correctly 1`] = `
               "opacity": 1,
             }
           }
-          testID="@/container"
+          testID="@LTSPressureInput/container"
         >
           <Text
             appearance="default"
@@ -1005,7 +1005,7 @@ exports[`Add Notes renders correctly 1`] = `
                   },
                 ]
               }
-              testID="@/input"
+              testID="@LTSPressureInput/input"
               value=""
             />
           </View>
@@ -1063,7 +1063,7 @@ exports[`Add Notes renders correctly 1`] = `
               "opacity": 1,
             }
           }
-          testID="@/container"
+          testID="@LowIDInput/container"
         >
           <Text
             appearance="default"
@@ -1140,7 +1140,7 @@ exports[`Add Notes renders correctly 1`] = `
                   },
                 ]
               }
-              testID="@/input"
+              testID="@LowIDInput/input"
               value=""
             />
           </View>
@@ -1180,7 +1180,7 @@ exports[`Add Notes renders correctly 1`] = `
               "opacity": 1,
             }
           }
-          testID="@/container"
+          testID="@LowValueInput/container"
         >
           <Text
             appearance="default"
@@ -1257,7 +1257,7 @@ exports[`Add Notes renders correctly 1`] = `
                   },
                 ]
               }
-              testID="@/input"
+              testID="@LowValueInput/input"
               value=""
             />
           </View>
@@ -1297,7 +1297,7 @@ exports[`Add Notes renders correctly 1`] = `
               "opacity": 1,
             }
           }
-          testID="@/container"
+          testID="@LowPressureInput/container"
         >
           <Text
             appearance="default"
@@ -1374,7 +1374,7 @@ exports[`Add Notes renders correctly 1`] = `
                   },
                 ]
               }
-              testID="@/input"
+              testID="@LowPressureInput/input"
               value=""
             />
           </View>
@@ -1432,7 +1432,7 @@ exports[`Add Notes renders correctly 1`] = `
               "opacity": 1,
             }
           }
-          testID="@/container"
+          testID="@MidIDInput/container"
         >
           <Text
             appearance="default"
@@ -1509,7 +1509,7 @@ exports[`Add Notes renders correctly 1`] = `
                   },
                 ]
               }
-              testID="@/input"
+              testID="@MidIDInput/input"
               value=""
             />
           </View>
@@ -1549,7 +1549,7 @@ exports[`Add Notes renders correctly 1`] = `
               "opacity": 1,
             }
           }
-          testID="@/container"
+          testID="@MidValueInput/container"
         >
           <Text
             appearance="default"
@@ -1626,7 +1626,7 @@ exports[`Add Notes renders correctly 1`] = `
                   },
                 ]
               }
-              testID="@/input"
+              testID="@MidValueInput/input"
               value=""
             />
           </View>
@@ -1666,7 +1666,7 @@ exports[`Add Notes renders correctly 1`] = `
               "opacity": 1,
             }
           }
-          testID="@/container"
+          testID="@MidPressureInput/container"
         >
           <Text
             appearance="default"
@@ -1743,7 +1743,7 @@ exports[`Add Notes renders correctly 1`] = `
                   },
                 ]
               }
-              testID="@/input"
+              testID="@MidPressureInput/input"
               value=""
             />
           </View>
@@ -1801,7 +1801,7 @@ exports[`Add Notes renders correctly 1`] = `
               "opacity": 1,
             }
           }
-          testID="@/container"
+          testID="@HighIDInput/container"
         >
           <Text
             appearance="default"
@@ -1878,7 +1878,7 @@ exports[`Add Notes renders correctly 1`] = `
                   },
                 ]
               }
-              testID="@/input"
+              testID="@HighIDInput/input"
               value=""
             />
           </View>
@@ -1918,7 +1918,7 @@ exports[`Add Notes renders correctly 1`] = `
               "opacity": 1,
             }
           }
-          testID="@/container"
+          testID="@HighValueInput/container"
         >
           <Text
             appearance="default"
@@ -1995,7 +1995,7 @@ exports[`Add Notes renders correctly 1`] = `
                   },
                 ]
               }
-              testID="@/input"
+              testID="@HighValueInput/input"
               value=""
             />
           </View>
@@ -2035,7 +2035,7 @@ exports[`Add Notes renders correctly 1`] = `
               "opacity": 1,
             }
           }
-          testID="@/container"
+          testID="@HighPressureInput/container"
         >
           <Text
             appearance="default"
@@ -2112,7 +2112,7 @@ exports[`Add Notes renders correctly 1`] = `
                   },
                 ]
               }
-              testID="@/input"
+              testID="@HighPressureInput/input"
               value=""
             />
           </View>
@@ -2153,7 +2153,7 @@ exports[`Add Notes renders correctly 1`] = `
             "opacity": 1,
           }
         }
-        testID="@/container"
+        testID="@NotesInput/container"
       >
         <Text
           appearance="default"
@@ -2230,7 +2230,7 @@ exports[`Add Notes renders correctly 1`] = `
                 },
               ]
             }
-            testID="@/input"
+            testID="@NotesInput/input"
             value=""
           />
         </View>
