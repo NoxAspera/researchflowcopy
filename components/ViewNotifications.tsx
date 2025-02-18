@@ -23,7 +23,7 @@ import { parseVisits, VisitList } from '../scripts/Parsers'
  * @author Blake Stambaugh, August O'Rourke
  * @returns The view notes page in our app
  */
-export default function ViewNotes({ navigation }: NavigationType) {
+export default function ViewNotifications({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   let site = route.params?.site;
   let notes: Entry[] = [];
@@ -33,11 +33,11 @@ export default function ViewNotes({ navigation }: NavigationType) {
   const [message, setMessage] = useState("");
 
   // State to hold parsed data
-  const [data, setData] = useState<VisitList | null>(null);
+  const [data, setData] = useState<VisitList>(null);
   // Get current visits
   useEffect(() => {
       async function fetchData() {
-          if (!data) {
+          if (data == null) {
               try {
                   const parsedData = await processVisits();
                   setData(parsedData); // Update state with the latest entry
@@ -53,14 +53,17 @@ export default function ViewNotes({ navigation }: NavigationType) {
 
   // data for buttons
   let visitData = [];
-  if(data.visits){
-    for(let i = 0; i < data.visits.length; i++){
-        if(data.visits[i]){
-            const visit = data.visits[i]
-            visitData.push({visit: visit})
-        }
+  if(data){
+    if(data.visits){
+      for(let i = 0; i < data.visits.length; i++){
+          if(data.visits[i]){
+              const visit = data.visits[i]
+              visitData.push({id: i+1, label: "Anything", visit: visit})
+          }
+      }
     }
   }
+  
   return (
     <ScrollView style={styles.scrollContainer}>
       <Layout style={styles.container} level="1">
@@ -75,11 +78,11 @@ export default function ViewNotes({ navigation }: NavigationType) {
         />
         {visitData.map((visit) => (
             <Card>
-                <Text category="h3">{visit.date}</Text>
-                <Text category="p1">{visit.name}</Text>
-                <Text category="p1">{visit.site}</Text>
-                <Text category="p1">{visit.equipment}</Text>
-                <Text category="p1">{visit.notes}</Text>
+                <Text category="h3">{visit.visit.date}</Text>
+                <Text category="p1">{visit.visit.name}</Text>
+                <Text category="p1">{visit.visit.site}</Text>
+                <Text category="p1">{visit.visit.equipment}</Text>
+                <Text category="p1">{visit.visit.notes}</Text>
             </Card>
         ))}
       </Layout>
