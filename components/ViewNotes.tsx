@@ -87,6 +87,8 @@ export default function ViewNotes({ navigation }: NavigationType) {
           popupColor={messageColor}
           onPress={setVisible}
           visible={visible}
+          navigateHome={null} 
+          returnHome={false}
         />
 
         {data?.map((entry) => {

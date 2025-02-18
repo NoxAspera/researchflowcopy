@@ -62,7 +62,9 @@ export default function Login({ navigation }: NavigationType) {
           <PopupProp popupText='Missing Login Credentials' 
             popupColor={customTheme['color-danger-700']} 
             onPress={setVisible} 
-            visible={visible}/>
+            visible={visible}
+            navigateHome={null} 
+            returnHome={false}/>
 
           {/* text inputs */}
           <Layout style={styles.textInputContainer}>

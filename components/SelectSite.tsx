@@ -116,6 +116,8 @@ export default function SelectSite({navigation}: NavigationType) {
         popupColor={messageColor}
         onPress={setVisible}
         visible={visible}
+        navigateHome={null} 
+        returnHome={false}
       />
 
         {buttonData.map((button) => (
