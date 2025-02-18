@@ -19,6 +19,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { setBadData, getBadDataFiles } from "../scripts/APIRequests";
 import PopupProp from "./Popup"
 import { ThemeContext } from './ThemeContext';
+import LoadingScreen from "./LoadingScreen";
 
 export default function BadData({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -40,6 +41,9 @@ export default function BadData({ navigation }: NavigationType) {
   >(undefined);
   const [fileOptions, setFileOptions] = useState<string[]>([]);
   const [instrument, setInstrument] = useState("");
+
+  // used for loading screen
+  const [loadingValue, setLoadingValue] = useState(false);
 
   //method to navigate home to send to popup so it can happen after dismiss button is clicked
   function navigateHome(nav:boolean){
@@ -137,6 +141,9 @@ export default function BadData({ navigation }: NavigationType) {
   };
 
   const handleUpdate = async () => {
+    // show loading screen
+    setLoadingValue(true);
+
     const badDataString = buildBadDataString();
     const result = await setBadData(
       site,
@@ -144,6 +151,10 @@ export default function BadData({ navigation }: NavigationType) {
       badDataString,
       `Update ${instrument}.csv`
     );
+
+    // hide loading screen when we recieve results
+    setLoadingValue(false);
+    
     if (result.success) {
       setMessage("File updated successfully!");
       setMessageColor(customTheme["color-success-700"]);
@@ -176,6 +187,9 @@ export default function BadData({ navigation }: NavigationType) {
             visible={visible}
             returnHome={returnHome}
           />
+
+          {/* loading screen */}
+          <LoadingScreen visible={loadingValue} />
 
           {/* text inputs */}
           {/* select instrument */}

@@ -17,6 +17,7 @@ import { NavigationType, routeProp } from "./types";
 import {setInstrumentFile, getInstrumentSite} from "../scripts/APIRequests";
 import { ScrollView } from "react-native-gesture-handler";
 import PopupProp from './Popup';
+import LoadingScreen from "./LoadingScreen";
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -36,6 +37,9 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   const [messageColor, setMessageColor] = useState("");
   const [message, setMessage] = useState("");
   const [returnHome, retHome] = useState(false);
+
+  // used for loading screen
+    const [loadingValue, setLoadingValue] = useState(false);
 
   useEffect(() => {
     const fetchSite = async () => {
@@ -88,6 +92,9 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   };
 
   const handleUpdate = async () => {
+    // display loading screen while while awaiting for results
+    setLoadingValue(true);
+
     const instrumentNotes = buildInstrumentNotes();
     const result = await setInstrumentFile(
       site,
@@ -96,6 +103,10 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
       needsLocation,
       siteValue
     );
+
+    // hide loading screen when we have results
+    setLoadingValue(false);
+
     if (result.success) {
       setMessage("File updated successfully!");
       setMessageColor(customTheme["color-success-700"]);
@@ -134,6 +145,9 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
             navigateHome={navigateHome} 
             visible={visible}
             returnHome={returnHome}/>
+
+          {/* loading screen */}
+          <LoadingScreen visible={loadingValue}/>
             
           {/* Time input */}
           {needsLocation && (

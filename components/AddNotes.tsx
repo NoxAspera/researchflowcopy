@@ -20,6 +20,7 @@ import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
+import LoadingScreen from './LoadingScreen';
 
 
 function checkValidTime(entry:string)
@@ -126,8 +127,12 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [messageColor, setMessageColor] = useState("");
     const [message, setMessage] = useState("");
     const [returnHome, retHome] = useState(false);
-    //used for popup if info is missing
+
+    // used for popup if info is missing
     const [visible2, setVisible2] = useState(false);
+
+    // used for loading screen
+    const [loadingValue, setLoadingValue] = useState(false);
     
 
     //method will warn user if fields haven't been input
@@ -159,6 +164,9 @@ export default function AddNotes({ navigation }: NavigationType) {
     // If it is successful it will display a success message
     // if it fails then it will display a failure message
     const handleUpdate = async () => {
+      // show spinner while submitting
+      setLoadingValue(true);
+
       const LTSignored: boolean = (ltsId == "" && ltsValue == "" && ltsPressure == "")
 
       // get time submitted
@@ -264,6 +272,9 @@ export default function AddNotes({ navigation }: NavigationType) {
 
         // if the warning popup is visible, remove it
         //if(visible2) { setVisible2(false); }
+
+        // remove spinner once we have results back
+        setLoadingValue(false);
 
         // check to see if the request was ok, give a message based on that
         if (result.success && tankResult.success) {
@@ -441,6 +452,9 @@ export default function AddNotes({ navigation }: NavigationType) {
             sendData={handleUpdate}
             removePopup={setVisible2}
             visible={visible2}/>
+
+            {/* loading screen */}
+            <LoadingScreen visible={loadingValue} />
 
             {/* text box for instrument */}
               <TextInput

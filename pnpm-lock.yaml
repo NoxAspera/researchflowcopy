@@ -50,6 +50,12 @@ importers:
       expo-status-bar:
         specifier: ~2.0.0
         version: 2.0.0(react-native@0.76.3(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@13.6.9)(@types/react@18.3.18)(react@18.3.1))(react@18.3.1)
+      fs:
+        specifier: 0.0.1-security
+        version: 0.0.1-security
+      gson:
+        specifier: ^0.1.5
+        version: 0.1.5
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@22.10.5)
@@ -1829,6 +1835,9 @@ packages:
     resolution: {integrity: sha512-3Ek9H3X6pj5TgenXYtNWdaBon1tgYCaebd+XPg0keyjEbEfkD4KkmAxkQ/i1vYvxdcT5nscLBfq9VJRmCBcFSw==}
     engines: {node: '>= 0.10'}
 
+  circularjs@0.1.3:
+    resolution: {integrity: sha512-RVp6t82JlYMz6CxtGJVoncK7StrDuAIaihiE3dC4T3gE/Pko3ZGxoDibOctjcJKxAIb4C2avHOFA9mDxCKGbbw==}
+
   cjs-module-lexer@1.4.1:
     resolution: {integrity: sha512-cuSVIHi9/9E/+821Qjdvngor+xpnlwnuwIyZOaLmHBVdXL+gP+I6QQB9VkO7RI77YIcTV+S1W9AreJ5eN63JBA==}
 
@@ -2510,6 +2519,9 @@ packages:
   fs.realpath@1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
 
+  fs@0.0.1-security:
+    resolution: {integrity: sha512-3XY9e1pP0CVEUCdj5BmfIZxRBTSDycnbqhIOGec9QYtmVH2fbLpj86CFWkrNOkt/Fvty4KZG5lTglL9j/gJ87w==}
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -2587,6 +2599,9 @@ packages:
   graphql@15.8.0:
     resolution: {integrity: sha512-5gghUc24tP9HRznNpV2+FIoq3xKkj5dTQqf4v0CpdPbFVwFkWoxOM+o+2OC9ZSvjEMTjfmG9QT+gcvggTwW1zw==}
     engines: {node: '>= 10.x'}
+
+  gson@0.1.5:
+    resolution: {integrity: sha512-EK+P+vGnmekaPMEg9qC23hTNgRaJ6GfQFS73sYgzvFoVYLMX7dVOUVDbPXRnNtnr99rf6DpOn4wlSbS0puN8AQ==}
 
   has-flag@3.0.0:
     resolution: {integrity: sha512-sKJf1+ceQBr4SMkvQnBDNDtf4TXpVhVGateu0t918bl30FnbE2m4vNLX+VWe/dpjlb+HugGYzW7uQXH98HPEYw==}
@@ -4645,6 +4660,9 @@ packages:
   ua-parser-js@1.0.40:
     resolution: {integrity: sha512-z6PJ8Lml+v3ichVojCiB8toQJBuwR42ySM4ezjXIqXK3M0HczmKQ3LF4rhU55PfD99KEEXQG6yb7iOMyvYuHew==}
     hasBin: true
+
+  underscore@1.6.0:
+    resolution: {integrity: sha512-z4o1fvKUojIWh9XuaVLUDdf86RQiq13AC1dmHbTpoyuu+bquHms76v16CjycCbec87J7z0k//SiQVk0sMdFmpQ==}
 
   undici-types@6.20.0:
     resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
@@ -7478,6 +7496,10 @@ snapshots:
       inherits: 2.0.4
       safe-buffer: 5.2.1
 
+  circularjs@0.1.3:
+    dependencies:
+      underscore: 1.6.0
+
   cjs-module-lexer@1.4.1: {}
 
   clean-stack@2.2.0: {}
@@ -8210,6 +8232,8 @@ snapshots:
 
   fs.realpath@1.0.0: {}
 
+  fs@0.0.1-security: {}
+
   fsevents@2.3.3:
     optional: true
 
@@ -8290,6 +8314,10 @@ snapshots:
 
   graphql@15.8.0:
     optional: true
+
+  gson@0.1.5:
+    dependencies:
+      circularjs: 0.1.3
 
   has-flag@3.0.0: {}
 
@@ -10693,6 +10721,8 @@ snapshots:
   typescript@5.3.3: {}
 
   ua-parser-js@1.0.40: {}
+
+  underscore@1.6.0: {}
 
   undici-types@6.20.0: {}
 
