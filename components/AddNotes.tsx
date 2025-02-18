@@ -12,7 +12,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { buildNotes, copyTankRecord, Entry } from '../scripts/Parsers';
 import TextInput from './TextInput'
 import NoteInput from './NoteInput'
-import { IndexPath, Layout, Button, Text } from '@ui-kitten/components';
+import { IndexPath, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
 import { setSiteFile, getFileContents, getLatestTankEntry, getTankList, TankRecord, setTankTracker, addEntrytoTankDictionary } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
