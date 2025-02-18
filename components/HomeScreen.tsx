@@ -13,51 +13,11 @@ import React, { useState, useEffect } from 'react';
 import { NavigationType } from "./types";
 const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
 import { tankTrackerSpinUp, setVisitFile, getFileContents, visit } from '../scripts/APIRequests';
-import { parseVisits, VisitList } from '../scripts/Parsers'
 import NoteInput from './NoteInput'
 
 export default function HomeScreen({ navigation }: NavigationType) {
 
   tankTrackerSpinUp()
-  // State to hold parsed data
-  const [data, setData] = useState<VisitList | null>(null);
-  // Get current visits
-  useEffect(() => {
-      async function fetchData() {
-          if (!data) {
-              try {
-                  const parsedData = await processVisits();
-                  setData(parsedData); // Update state with the latest entry
-                  console.log("data variable set")
-              } catch (error) {
-                  console.error("Error processing notes:", error);
-              }
-          }
-      }
-      fetchData();
-  },[]);
-  //Get latest notes entry from site
-  let latestEntry = null;
-  if (data) {
-    console.log("data exists")
-    latestEntry = data.visits[0];
-    console.log("data[0] is: " + latestEntry)
-  }
-  const [dateValue, setDate] = useState("");
-  //Set tank ids, values, and instruments if available in parsed data
-    useEffect(() => {
-      if (latestEntry) {
-        console.log("latestEntry exists")
-        if (latestEntry.date) {
-          console.log("latestEntry has a date")
-          const date = latestEntry.date;
-          if (date) {
-            setDate(date)
-            console.log("set date too:" + date)
-          }
-        }
-      }
-    }, [latestEntry]);
   return (
     <Layout style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -110,38 +70,14 @@ export default function HomeScreen({ navigation }: NavigationType) {
           text="PLAN A VISIT"
           color="#FFC581"
           onPress={() =>
-            navigation.navigate("SelectSite", { from: "PlanVisit" })
-          }
+          navigation.navigate("SelectSite", { from: "PlanVisit" })
+        }
         />
-        {/* notes entry */}
-        <NoteInput labelText='Notes' 
-              labelValue={dateValue} 
-              onTextChange={setDate} 
-              placeholder='All Good.' 
-              multiplelines={true} 
-              style={styles.notesInput}/>
       </ScrollView>
     </Layout>
   );
 }
 
-/**
- * @author David Ostlie
- *  a function that pulls the current note document for the specified site from GitHub
- *  @param siteName the name of the site
- * 
- * @returns a VisitsList object that contains the information of the given document
- */
-async function processVisits() {
-  const fileContents = await getFileContents(`researchflow_data/visits`);
-  if(fileContents.data){
-    return parseVisits(fileContents.data)
-  }
-  else
-  {
-    return null
-  }
-}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
