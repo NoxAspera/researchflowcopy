@@ -16,7 +16,9 @@ exports[`Instrument Maintenance renders correctly 1`] = `
     ]
   }
 >
-  <View>
+  <View
+    automaticallyAdjustKeyboardInsets={true}
+  >
     <View
       appearance="default"
       level="1"
@@ -48,6 +50,18 @@ exports[`Instrument Maintenance renders correctly 1`] = `
             {
               "textAlign": "center",
             },
+          ]
+        }
+      />
+      <View
+        appearance="default"
+        level="1"
+        style={
+          [
+            {
+              "backgroundColor": "#FFFFFF",
+            },
+            undefined,
           ]
         }
       />
@@ -433,13 +447,13 @@ exports[`Instrument Maintenance renders correctly 1`] = `
         style={
           {
             "alignItems": "center",
-            "backgroundColor": "#596CA7",
+            "backgroundColor": "#06b4e0",
             "borderColor": "#596CA7",
             "borderRadius": 4,
             "borderWidth": 1,
             "flexDirection": "row",
             "justifyContent": "center",
-            "margin": 15,
+            "margin": 20,
             "minHeight": 40,
             "minWidth": 40,
             "opacity": 1,
@@ -450,22 +464,18 @@ exports[`Instrument Maintenance renders correctly 1`] = `
       >
         <Text
           appearance="default"
-          category="p1"
+          category="h6"
           status="basic"
           style={
             [
               {
                 "color": "#222B45",
                 "fontFamily": "System",
-                "fontSize": 15,
-                "fontWeight": "400",
+                "fontSize": 18,
+                "fontWeight": "800",
               },
               {
-                "color": "#FFFFFF",
-                "fontFamily": "System",
-                "fontSize": 14,
-                "fontWeight": "bold",
-                "marginHorizontal": 10,
+                "color": "black",
               },
             ]
           }

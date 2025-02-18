@@ -10,11 +10,9 @@ import React, { useState, useEffect } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { buildNotes, copyTankRecord, Entry } from '../scripts/Parsers';
-import { NaviProp } from './types';
 import TextInput from './TextInput'
 import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
-import * as eva from '@eva-design/eva';
 import { customTheme } from './CustomTheme'
 import { setSiteFile, getFileContents, getLatestTankEntry, getTankList, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
