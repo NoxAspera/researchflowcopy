@@ -7,16 +7,20 @@
  */
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
+import { visit } from '../scripts/APIRequests';
 
 // Define the type for the stack's navigation parameters
 export type RootStackParamList = {
     // used for home screen
     SelectSite: { from: string }; 
-    SelectInstrument: { from: string};
+    SelectInstrument: { from: string , notes: boolean};
+    SelectTank: { from: string, onSelect?: (selectedTank: string) => void };
+    SelectNotes: { from: string }; 
 
     // used for site select
     AddNotes: { site: string };
-    ViewNotes: { site: string };
+    AddNotesMobile: { site: string };
+    ViewNotes: { site: string, from: string, visits: visit[] };
     BadData: { site: string };
     InstrumentMaintenance: { site: string };
     TankTracker: { site: string };
@@ -39,5 +43,8 @@ type RouteParams = {
   site: string; 
   info: string; 
   from: string;
+  notes: string;
+  onSelect?: (selectedTank: string ) => void;
+  visits: visit[];
 };
 export type routeProp = RouteProp<{params: RouteParams}, 'params'>;

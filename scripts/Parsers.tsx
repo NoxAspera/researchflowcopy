@@ -1,3 +1,6 @@
+import { json } from "../jest.config";
+import { TankRecord, visit } from "./APIRequests";
+
 /**
  * @author Megan Ostlie
  * a small interface for the tank information
@@ -27,6 +30,18 @@ export interface Entry {
 }
 /**
  * @author Megan Ostlie
+ *  an interface for the information inside mobile sites
+ */
+export interface MobileEntry {
+    time_in: string | null;
+    time_out: string | null;
+    names: string | null;
+    instrument: string | null;
+    tank: TankInfo | null;
+    additional_notes: string | null;
+}
+/**
+ * @author Megan Ostlie
  * a small inteface to contain the entire document
  * 
  */
@@ -46,7 +61,7 @@ export function parseNotes(text: string): ParsedData {
     const namePattern = /- Name: (.*?)\n/;
     const instrumentPattern = /- Instrument: (.*?)\n/;
     const n2Pattern = /- N2: (.*?) psi\n/;
-    const tankPattern = /- (LTS|Low Cal|Mid Cal|High Cal): (.*?) value (.*?) ppm (\d+ psi)/g;
+    const tankPattern = /- (LTS|Low Cal|Mid Cal|High Cal|Tank): (.*?) value (.*?) ppm (\d+ psi)/g;
     const additionalNotesPattern = /- (?!Time|Name|Instrument|N2|LTS|Low cal|Mid cal|High cal)(.*)/g;
 
     // Parse site ID
@@ -84,6 +99,7 @@ export function parseNotes(text: string): ParsedData {
             low_cal: null,
             mid_cal: null,
             high_cal: null,
+            tank: null,
         };
         let tankMatch;
         while ((tankMatch = tankPattern.exec(block)) !== null) {
@@ -112,6 +128,7 @@ export function parseNotes(text: string): ParsedData {
             low_cal: tanks.low_cal,
             mid_cal: tanks.mid_cal,
             high_cal: tanks.high_cal,
+            tank: tanks.tank,
             additional_notes: additionalNotes,
         };
     });
@@ -141,7 +158,7 @@ export function buildNotes(data: Entry): string
     {
         result += `- Instrument: ${data.instrument}\n`
     }
-    if(data.n2_pressure != "")
+    if(data.n2_pressure != null)
     {
         result += `- N2: ${data.n2_pressure} psi\n`;
     }
@@ -156,5 +173,159 @@ export function buildNotes(data: Entry): string
     {
         result += `- ${data.additional_notes}\n`;
     }
+    return result
+}
+
+/**
+ * @author August O'Rourke
+ * 
+ * This method should build a string that makes a valid entry for a document from the repository for mobile sites
+ * @param data - the data for the new entry in the document
+ */
+export function buildMobileNotes(data: MobileEntry): string
+{
+    let result:string = "---\n"
+
+    result += `- Time in: ${data.time_in}Z\n`;
+    result += `- Time out: ${data.time_out}Z\n`;
+    result += `- Name: ${data.names}\n`;
+    if(data.instrument != null)
+    {
+        result += `- Instrument: ${data.instrument}\n`
+    }
+    if(data.tank != null)
+    {
+        result += `- Tank: ${data.tank?.id} value ${data.tank?.value} ppm ${data.tank?.pressure} psi\n`;
+    }
+    if(data.additional_notes != "")
+    {
+        result += `- ${data.additional_notes}\n`;
+    }
+    return result
+}
+
+/**
+ * @author Megan Ostlie
+ * 
+ * This method creates a deep copy of a TankRecord
+ * @param record - a TankRecord object that will be copied
+ * @returns TankRecord object
+ */
+export function copyTankRecord(record: TankRecord): TankRecord
+{
+    let newRecord: TankRecord = {
+        serial: record.serial,
+        ch4: record.ch4,
+        ch4CalibrationFile: record.ch4CalibrationFile,
+        ch4InstrumentId: record.ch4InstrumentId,
+        ch4N: record.ch4N,
+        ch4RelativeTo: record.ch4RelativeTo,
+        ch4Stdev: record.ch4Stdev,
+        ch4Sterr: record.ch4Sterr,
+        co: record.co,
+        co2: record.co2,
+        co2CalibrationFile: record.co2CalibrationFile,
+        co2InstrumentId: record.co2InstrumentId,
+        co2N: record.co2N,
+        co2RelativeTo: record.co2RelativeTo,
+        co2Stdev: record.co2Stdev,
+        co2Sterr: record.co2Sterr,
+        coCalibrationFile: record.coCalibrationFile,
+        coInstrumentId: record.coInstrumentId,
+        coN: record.coN,
+        coRelativeTo: record.coRelativeTo,
+        coStdev: record.coStdev,
+        coSterr: record.coSterr,
+        comment: record.comment,
+        d13c: record.d13c,
+        d13cN: record.d13cN,
+        d13cStdev: record.d13cStdev,
+        d13cSterr: record.d13cSterr,
+        d18o: record.d18o,
+        d18oN: record.d18oN,
+        d18oStdev: record.d18oStdev,
+        d18oSterr: record.d18oSterr,
+        location: record.location,
+        ottoCalibrationFile: record.ottoCalibrationFile,
+        owner: record.owner,
+        pressure: record.pressure,
+        tankId: record.tankId,
+        updatedAt: record.updatedAt,
+        userId: record.userId,
+        fillId: record.fillId
+    }
+
+    return newRecord
+}
+
+function formDate(dateString: string)
+{
+    let strings = dateString.split(" ")
+    let month = strings[0]
+    let day = strings[1]
+    let year = strings[2]
+
+    switch(month)
+    {
+        case "Jan":
+            month = "01"
+            break
+        case "Feb":
+            month = "02"
+            break
+        case "Mar":
+            month = "03"
+            break
+        case "Apr":
+            month = "04"
+            break
+        case "May":
+            month = "05"
+            break
+        case "Jun":
+            month = "06"
+            break
+        case "Jul":
+            month = "07"
+            break
+        case "Aug":
+            month = "08"
+            break
+        case "Sep":
+            month = "09"
+            break
+        case "Oct":
+            month = "10"
+            break
+        case "Nov":
+            month = "11"
+            break
+        case "Dec":
+            month = "12"
+            break
+    }
+    return `${year}-${month}-${day}`
+}
+
+export function processVisits(jsonString: string)
+{
+    let result: visit[] = []
+    jsonString.split("\n").forEach((value) => {
+        if (value === "")
+        {
+            return
+        }
+        let date = formDate(value.substring(value.indexOf("date\":\"")+11,value.indexOf("\",\"")))
+        let temp = value.substring(value.indexOf("\",\"") + 3)
+        let name = temp.substring(7, temp.indexOf("\",\""))
+        temp = temp.substring(temp.indexOf("\",\"")+3)
+        let site = temp.substring(7,temp.indexOf("\",\""))
+        temp = temp.substring(temp.indexOf("\",\"")+3)
+        let equipment = temp.substring(12,temp.indexOf("\",\"") )
+        temp = temp.substring(temp.indexOf("\",\""))
+        let note = temp.substring(11, temp.length -2)
+        let visit: visit = {date: date, name: name, site: site, equipment: equipment, notes: note }
+        result.push(visit)
+    })
     return result
 }

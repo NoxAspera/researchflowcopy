@@ -6,15 +6,15 @@
  * This page is responsible for tracking tank statuses. Will look at previous
  * data and determine when it will most likely run out and need replacement.
  */
-import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import React, { useDebugValue, useEffect, useState } from 'react';
+import { StyleSheet, KeyboardAvoidingView } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
-import { Button, IndexPath, Layout, Select, SelectItem, Text } from '@ui-kitten/components';
+import { Button, IndexPath, Layout, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
 import { NavigationType, routeProp } from './types'
 import { ScrollView } from 'react-native-gesture-handler';
 import PopupProp from './Popup';
-import { getLatestTankEntry, setTankTracker, TankRecord } from '../scripts/APIRequests';
+import { getLatestTankEntry, setTankTracker, TankRecord, addEntrytoTankDictionary } from '../scripts/APIRequests';
 import { Float } from 'react-native/Libraries/Types/CodegenTypes';
 import { customTheme } from './CustomTheme'
 
@@ -32,10 +32,13 @@ export default function TankTracker({ navigation }: NavigationType) {
     const [fillIDValue, setFillIDValue] = useState("");
     const [locationValue, setLocationValue] = useState("");
     const [latestEntry, setLatestEntry] = useState<TankRecord>(undefined);
-
+    
+    // used for determining if PUT request was successful
+    // will set the success/fail notification to visible, aswell as the color and text
     const [visible, setVisible] = useState(false);
     const [messageColor, setMessageColor] = useState("");
     const [message, setMessage] = useState("");
+    const [returnHome, retHome] = useState(false);
 
     useEffect(() => {
       if (tank) {
@@ -129,22 +132,31 @@ export default function TankTracker({ navigation }: NavigationType) {
 
     const handleUpdate = async () => {
       const entry = buildTankEntry();
-      const result = await setTankTracker(entry);
+      addEntrytoTankDictionary(entry);
+      const result = await setTankTracker();
       if (result.success) {
           setMessage("File updated successfully!");
           setMessageColor(customTheme['color-success-700']);
+          retHome(true);
         } else {
           setMessage(`Error: ${result.error}`);
           setMessageColor(customTheme['color-danger-700']);
         }
         setVisible(true);
+    }
+
+    //method to navigate home to send to popup so it can happen after dismiss button is clicked
+    function navigateHome(nav:boolean){
+      if(nav){
+        navigation.navigate("Home")
       }
+    }
 
     return (
       <KeyboardAvoidingView
-                  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                  behavior = "padding"
                   style={styles.container}>
-          <ScrollView>
+          <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
             <Layout style={styles.container} level="1">
               
               {/* header */}
@@ -157,7 +169,9 @@ export default function TankTracker({ navigation }: NavigationType) {
               <PopupProp popupText={message} 
                 popupColor={messageColor} 
                 onPress={setVisible} 
-                visible={visible}/>
+                navigateHome={navigateHome} 
+                visible={visible}
+                returnHome={returnHome}/>
 
             {/* Name input */}
             <TextInput
@@ -227,9 +241,9 @@ export default function TankTracker({ navigation }: NavigationType) {
                 onPress={() => handleSubmit()}
                 appearance="filled"
                 status="primary"
-                style={{ margin: 8 }}
+                style={styles.submitButton}
               >
-                Submit
+              {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Submit</Text>}
               </Button>
             </Layout>
           </ScrollView>
@@ -250,5 +264,9 @@ export default function TankTracker({ navigation }: NavigationType) {
     textInput: {
       flex: 1,
       margin: 8
-    }
+    },
+    submitButton:{
+      margin: 20, 
+      backgroundColor: "#06b4e0",
+    },
 });

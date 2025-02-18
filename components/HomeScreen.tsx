@@ -11,13 +11,11 @@ import HomeButtonProp from "./HomeButtonProp";
 import { Layout } from "@ui-kitten/components";
 import React from "react";
 import { NavigationType } from "./types";
-const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
-import { setInstrumentFile } from "../scripts/APIRequests";
-import { tankTrackerSpinUp } from '../scripts/APIRequests';
+//const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
+import { tankTrackerSpinUp} from '../scripts/APIRequests';
 
 export default function HomeScreen({ navigation }: NavigationType) {
-  //setInstrumentFile("instrument_maint/LGR_UGGA/LGR-13-0075", "testing", "updating from research flow", false)
-  //setInstrumentFile("instrument_maint/Teledyne/T200", "testing", "updating from research flow", false)
+
   tankTrackerSpinUp()
   
   return (
@@ -38,7 +36,7 @@ export default function HomeScreen({ navigation }: NavigationType) {
           text="VIEW NOTES"
           color="#EBEBEB"
           onPress={() =>
-            navigation.navigate("SelectSite", { from: "ViewNotes" })
+            navigation.navigate("SelectNotes", { from: "ViewNotes" })
           }
         />
 
@@ -63,16 +61,16 @@ export default function HomeScreen({ navigation }: NavigationType) {
           text="TANK TRACKER"
           color="#4DD7FA"
           onPress={() =>
-            navigation.navigate("SelectSite", { from: "TankTracker" })
+            navigation.navigate("SelectTank", { from: "TankTracker" })
           }
         />
 
-        {/* PLAN A VISIT */}
+        {/* CALENDAR */}
         <HomeButtonProp
-          text="PLAN A VISIT"
+          text="CALENDAR"
           color="#FFC581"
           onPress={() =>
-            navigation.navigate("SelectSite", { from: "PlanVisit" })
+            navigation.navigate('Calendar')
           }
         />
       </ScrollView>

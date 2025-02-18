@@ -13,10 +13,12 @@ interface PUProp {
   popupText: string;
   popupColor: ColorValue;
   visible: boolean;
+  returnHome: boolean;
   onPress: (arg0: boolean) => void;
+  navigateHome: (arg0: boolean) => void;
 }
 
-const PopupProp: React.FC<PUProp> = ({ popupText, popupColor, visible, onPress }) => {
+const PopupProp: React.FC<PUProp> = ({ popupText, popupColor, visible, returnHome, onPress, navigateHome }) => {
   return (
     <Layout>
       <Modal
@@ -26,7 +28,7 @@ const PopupProp: React.FC<PUProp> = ({ popupText, popupColor, visible, onPress }
       >
         <Card disabled={true} style={{ backgroundColor: popupColor }}>
           <Text>{popupText}</Text>
-          <Button testID="PopupButton" onPress={() => onPress(false)}>DISMISS</Button>
+          <Button testID="PopupButton" onPress={() => {onPress(false), navigateHome(returnHome)}}>DISMISS</Button>
         </Card>
       </Modal>
     </Layout>

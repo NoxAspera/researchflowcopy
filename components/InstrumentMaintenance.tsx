@@ -6,26 +6,15 @@
  * This is the page for instrument maintenance. It will take in the user input, format
  * it, and send it to the github repo.
  */
-import { StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
+import { StyleSheet, KeyboardAvoidingView } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useRoute } from "@react-navigation/native";
-import {
-  Button,
-  IndexPath,
-  Layout,
-  Select,
-  SelectItem,
-  Text
-} from "@ui-kitten/components";
+import { Button, Layout, Text } from "@ui-kitten/components";
 import TextInput from "./TextInput";
 import NoteInput from "./NoteInput";
 import { customTheme } from "./CustomTheme";
 import { NavigationType, routeProp } from "./types";
-import {
-  getDirectory,
-  setInstrumentFile,
-  getInstrumentSite,
-} from "../scripts/APIRequests";
+import {setInstrumentFile, getInstrumentSite} from "../scripts/APIRequests";
 import { ScrollView } from "react-native-gesture-handler";
 import PopupProp from './Popup';
 
@@ -46,6 +35,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   const [visible, setVisible] = useState(false);
   const [messageColor, setMessageColor] = useState("");
   const [message, setMessage] = useState("");
+  const [returnHome, retHome] = useState(false);
 
   useEffect(() => {
     const fetchSite = async () => {
@@ -66,7 +56,14 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   }, [site]);
 
   const buildInstrumentNotes = (): string => {
-    let result: string = `- Time in: ${dateValue}Z\n`;
+    const now = new Date();
+    const year = now.getFullYear().toString()
+    const month = (now.getMonth() + 1).toString() // now.getMonth() is zero-base (i.e. January is 0), likely due to something with Oracle's implementation - August
+    const day = now.getDate().toString()
+    const hours= now.getHours().toString()
+    const minutes = now.getMinutes().toString()
+
+    let result: string = `- Time in: ${year}-${month}-${day} ${dateValue}\n`;
 
     result += `- Name: ${nameValue}\n`;
     result += `- Notes: ${notesValue}\n`;
@@ -102,6 +99,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     if (result.success) {
       setMessage("File updated successfully!");
       setMessageColor(customTheme["color-success-700"]);
+      retHome(true);
     } else {
       setMessage(`Error: ${result.error}`);
       setMessageColor(customTheme["color-danger-700"]);
@@ -109,12 +107,19 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     setVisible(true);
   };
 
+  //method to navigate home to send to popup so it can happen after dismiss button is clicked
+  function navigateHome(nav:boolean){
+    if(nav){
+      navigation.navigate("Home")
+    }
+  }
+
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior = "padding"
       style={styles.container}
     >
-      <ScrollView>
+      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
         <Layout style={styles.container} level="1">
           {/* header */}
           <Text category="h1" style={{ textAlign: "center" }}>
@@ -126,7 +131,9 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
           <PopupProp popupText={message} 
             popupColor={messageColor} 
             onPress={setVisible} 
-            visible={visible}/>
+            navigateHome={navigateHome} 
+            visible={visible}
+            returnHome={returnHome}/>
             
           {/* Time input */}
           {needsLocation && (
@@ -170,9 +177,9 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
             onPress={() => handleSubmit()}
             appearance="filled"
             status="primary"
-            style={{ margin: 15 }}
+            style={styles.submitButton}
           >
-            Submit
+          {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Submit</Text>}
           </Button>
         </Layout>
       </ScrollView>
@@ -193,5 +200,9 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     margin: 15,
+  },
+  submitButton:{
+    margin: 20, 
+    backgroundColor: "#06b4e0",
   },
 });

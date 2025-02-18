@@ -1,7 +1,7 @@
 /**
  * Select Site Page
  * @author Blake Stambaugh and Megan Ostlie
- * Updated: 1/27/25 - MO
+ * Updated: 2/6/25 - MO
  * 
  * This page is the lets the user select the site they are currently at. When they
  * choose an action on the home page, they will be directed to this screen to determine
@@ -9,8 +9,8 @@
  * and all info for that site will be given.
  */
 import { StyleSheet } from 'react-native';
-import React, { Component, useEffect, useState } from 'react';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { useRoute } from '@react-navigation/native';
 import { Layout, Button, Text } from '@ui-kitten/components';
 import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
@@ -35,19 +35,22 @@ export default function SelectSite({navigation}: NavigationType) {
     const fetchSiteNames = async () => {
       try {
         let names;
-        if (from === 'AddNotes' || from === 'ViewNotes') {
+        let mobile_names;
+        if (from === 'AddNotes' || from === 'ViewNotes' || from === 'PlanVisit') {
           names = await getDirectory("site_notes");
+          mobile_names = await getDirectory("site_notes/mobile");
         } else if (from === 'BadData') {
           names = await getBadDataSites();
-        } else if (from === 'InstrumentMaintenance') {
+        } else if (from === 'InstrumentMaintenance' || from === 'InstrumentMaintenanceNotes') {
           names = await getDirectory("instrument_maint");
         } else if (from === 'TankTracker') {
-          //names = getTankList();
-          //console.log(names);
           setSiteNames(getTankList());
         }
         if(names?.success)
         {
+          if (mobile_names?.success) {
+            names.data.push(...mobile_names.data.map(item => "mobile/" + item));
+          }
           setSiteNames(names.data);
         } // Set the fetched site names
     }
@@ -63,34 +66,26 @@ export default function SelectSite({navigation}: NavigationType) {
   // data for buttons
   let buttonData = [];
 
-  if (from == 'AddNotes' || from == 'ViewNotes' || from == 'BadData' || from == 'InstrumentMaintenance' || from == 'TankTracker') {
-    if (siteNames) {
-      for (let i = 0; i < siteNames.length; i++) {
-        if (siteNames[i]) {
-          buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});
-        }
+  if (siteNames) {
+    for (let i = 0; i < siteNames.length; i++) {
+      if (siteNames[i]) {
+        buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});
       }
     }
-  } 
-  else {
-    buttonData = [
-      { id: 1, label: 'CSP', onPress: () => handleConfirm('CSP')},
-      { id: 2, label: 'DBK', onPress: () => handleConfirm('DBK')},
-      { id: 3, label: 'FRU', onPress: () => handleConfirm('FRU')},
-      { id: 4, label: 'HDP', onPress: () => handleConfirm('HDP')},
-      { id: 5, label: 'SUG', onPress: () => handleConfirm('SUG')},
-      { id: 6, label: 'WBB', onPress: () => handleConfirm('WBB')}
-    ];
   }
 
   const handleConfirm = (selectedSite: string) => {
     if(from === 'AddNotes')
     {
-      navigation.navigate('AddNotes', {site: selectedSite}); //{site: selectValue} tells the AddNotes what the selected value is
+      if (selectedSite.includes("mobile/")) {
+        navigation.navigate('AddNotesMobile', {site: selectedSite});
+      } else {
+        navigation.navigate('AddNotes', {site: selectedSite}); //{site: selectValue} tells the AddNotes what the selected value is
+      }
     }
     else if(from === 'ViewNotes')
     {
-      navigation.navigate('ViewNotes', {site: selectedSite}); //{site: selectValue} tells the AddNotes what the selected value is
+      navigation.navigate('ViewNotes', {site: `site_notes/${selectedSite}`}); //{site: selectValue} tells the AddNotes what the selected value is
     }
     else if(from === 'BadData')
     {
@@ -98,7 +93,10 @@ export default function SelectSite({navigation}: NavigationType) {
     }
     else if (from === 'InstrumentMaintenance')
     {
-      navigation.navigate('SelectInstrument', {from: selectedSite});
+      navigation.navigate('SelectInstrument', {from: selectedSite, notes: false});
+    }
+    else if (from === 'InstrumentMaintenanceNotes') {
+      navigation.navigate('SelectInstrument', {from: selectedSite, notes: true});
     }
     else if (from === 'TankTracker')
     {
@@ -146,6 +144,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     borderRadius: 8,
     alignItems: 'center',
-    backgroundColor: "#06b4e0"
+    backgroundColor: "#06b4e0",
+    margin: 8
   },
 });
