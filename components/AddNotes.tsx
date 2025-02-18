@@ -5,7 +5,7 @@
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
-import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, KeyboardAvoidingView, Platform, Modal, View } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -127,6 +127,8 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [instrumentNames, setInstrumentNames] = useState<string[]>();
     const [instrumentIndex, setInstrumentIndex] = useState<IndexPath | IndexPath[]>(new IndexPath(0));
     const [originalInstrument, setOriginalInstrument] = useState("");
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
+    const [customInstrument, setCustomInstrument] = useState<string>("");
 
     // Use IndexPath for selected index for drop down menu
     const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
@@ -208,7 +210,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           time_in: `${year}-${month}-${day} ${timeValue}`,
           time_out: `${year}-${month}-${day} ${hours}:${minutes}`,
           names: nameValue,
-          instrument: instrumentInput.trim() ? instrumentInput : (instruments[selectedIndex.row] ? instruments[selectedIndex.row] : null),
+          instrument: instrumentInput ? instrumentInput: null,
           n2_pressure: n2Value ? n2Value: null,
           lts: LTSignored ? null:
           {
@@ -299,8 +301,10 @@ export default function AddNotes({ navigation }: NavigationType) {
 
         // If a new instrument was added
         if (instrumentInput && (!originalInstrument || (originalInstrument != instrumentInput))) {
-          const notes = installedInstrumentNotes(utcTime);
-          instMaintResult = await setInstrumentFile(`instrument_maint/LGR_UGGA/${instrumentInput}`, notes, `Updated ${instrumentInput}.md`, true, site);
+          if (instrumentNames.includes(instrumentInput)) {
+            const notes = installedInstrumentNotes(utcTime);
+            instMaintResult = await setInstrumentFile(`instrument_maint/LGR_UGGA/${instrumentInput}`, notes, `Updated ${instrumentInput}.md`, true, site);
+          }
         }
 
         // If instrument was removed
@@ -418,11 +422,21 @@ export default function AddNotes({ navigation }: NavigationType) {
       const selectedRow = (index as IndexPath).row;
       if (selectedRow === instrumentNames?.length) {
         setInstrumentInput("");
+      } else if (selectedRow === instrumentNames.length + 1) {
+        setModalVisible(true);
       } else {
         const selectedInstrument = instrumentNames?.[selectedRow] ?? "";
         setInstrumentInput(selectedInstrument);
       }
     };
+
+    const addCustomInstrument = () => {
+      if (customInstrument.trim() !== "") {
+        setInstrumentInput(customInstrument);
+        setCustomInstrument("");
+      }
+      setModalVisible(false);
+    }
 
     //Set tank ids, values, and instruments if available in parsed data
     useEffect(() => {
@@ -519,6 +533,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               <SelectItem key={index} title={instrument} />
             ))}
             <SelectItem key="remove" title="Remove Instrument" />
+            <SelectItem key="custom" title="Enter Instrument Name Manually" />
             </>
             </Select>
 
@@ -668,6 +683,30 @@ export default function AddNotes({ navigation }: NavigationType) {
               style={styles.submitButton}>
               {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Submit</Text>}
             </Button>
+
+            {/* Modal for entering a custom instrument */}
+            <Modal visible={modalVisible} transparent animationType="slide">
+            <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <TextInput
+              style={styles.modalInput}
+              placeholder="Enter Instrument Name"
+              labelValue={customInstrument}
+              onTextChange={setCustomInstrument}
+              />
+              <Button appearance='filled' onPress={addCustomInstrument} style={styles.modalButton}> 
+                <Text category="h6" style={{ color: "black" }}>
+                Add Instrument
+                </Text> 
+                </Button>
+              <Button appearance='filled' onPress={() => setModalVisible(false)} style={styles.modalButton}>
+              <Text category="h6" style={{ color: "red" }}>
+                Cancel
+              </Text> 
+              </Button>
+              </View>
+              </View>
+            </Modal>
           </Layout>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -679,6 +718,19 @@ export default function AddNotes({ navigation }: NavigationType) {
       flex: 1,
       alignItems: 'stretch',        // has button fill space horizontally
       justifyContent: 'space-evenly',
+    },
+    modalContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    modalContent: {
+      width: 300,
+      padding: 20,
+      backgroundColor: "white",
+      borderRadius: 10,
+      alignItems: "center",
     },
     inputText: {
       flex: 2,
@@ -711,5 +763,15 @@ export default function AddNotes({ navigation }: NavigationType) {
     {
       margin: 20, 
       backgroundColor: "#06b4e0",
+    },
+    modalButton:
+    {
+      backgroundColor: "#06b4e0",
+    },
+    modalInput: {
+      width: "100%",
+      borderBottomWidth: 1,
+      marginBottom: 10,
+      padding: 5,
     },
 });

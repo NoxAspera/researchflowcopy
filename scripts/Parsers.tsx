@@ -168,9 +168,9 @@ export function buildNotes(data: Entry): string
     result += `- Low Cal: ${data.low_cal?.id} value ${data.low_cal?.value} ${data.low_cal?.unit} ${data.low_cal?.pressure} psi\n`;
     result += `- Mid Cal: ${data.mid_cal?.id} value ${data.mid_cal?.value} ${data.mid_cal?.unit} ${data.mid_cal?.pressure} psi\n`;
     result += `- High Cal: ${data.high_cal?.id} value ${data.high_cal?.value} ${data.high_cal?.unit} ${data.high_cal?.pressure} psi\n`;
-    if(data.additional_notes != "")
+    if(data.additional_notes.trim() != "")
     {
-        result += `- ${data.additional_notes}\n`;
+        result += `- ${data.additional_notes.replace(/\n/g, "\n- ")}\n`;
     }
     return result
 }
@@ -196,9 +196,9 @@ export function buildMobileNotes(data: MobileEntry): string
     {
         result += `- Tank: ${data.tank?.id} value ${data.tank?.value} ppm ${data.tank?.pressure} psi\n`;
     }
-    if(data.additional_notes != "")
+    if(data.additional_notes.trim() != "")
     {
-        result += `- ${data.additional_notes}\n`;
+        result += `- ${data.additional_notes.replace(/\n/g, "\n- ")}\n`;
     }
     return result
 }

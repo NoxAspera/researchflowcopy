@@ -6,7 +6,7 @@
  * github repo. This page is slightly different than the main AddNotes page because
  * the mobile sites do not have as many tanks as the stationary sites
  */
-import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, KeyboardAvoidingView, Platform, Modal, View } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -110,6 +110,8 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [instrumentNames, setInstrumentNames] = useState<string[]>();
     const [instrumentIndex, setInstrumentIndex] = useState<IndexPath | IndexPath[]>(new IndexPath(0));
     const [originalInstrument, setOriginalInstrument] = useState("");
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
+    const [customInstrument, setCustomInstrument] = useState<string>("");
 
     // used for determining if PUT request was successful
     // will set the success/fail notification to visible, aswell as the color and text
@@ -157,6 +159,8 @@ export default function AddNotes({ navigation }: NavigationType) {
       const selectedRow = (index as IndexPath).row;
       if (selectedRow === instrumentNames?.length) {
         setInstrumentInput("");
+      } else if (selectedRow === instrumentNames?.length + 1) {
+        setModalVisible(true);
       } else {
         const selectedInstrument = instrumentNames?.[selectedRow] ?? "";
         setInstrumentInput(selectedInstrument);
@@ -184,6 +188,14 @@ export default function AddNotes({ navigation }: NavigationType) {
   
       return result;
     };
+
+    const addCustomInstrument = () => {
+      if (customInstrument.trim() !== "") {
+        setInstrumentInput(customInstrument);
+        setCustomInstrument("");
+      }
+      setModalVisible(false);
+    }
 
     // will call setFile to send the PUT request. 
     // If it is successful it will display a success message
@@ -245,8 +257,10 @@ export default function AddNotes({ navigation }: NavigationType) {
         
         // If a new instrument was added
         if (instrumentInput && (!originalInstrument || (originalInstrument != instrumentInput))) {
-          const notes = installedInstrumentNotes(utcTime);
-          instMaintResult = await setInstrumentFile(`instrument_maint/LGR_UGGA/${instrumentInput}`, notes, `Updated ${instrumentInput}.md`, true, siteName);
+          if (instrumentNames.includes(instrumentInput)) {
+            const notes = installedInstrumentNotes(utcTime);
+            instMaintResult = await setInstrumentFile(`instrument_maint/LGR_UGGA/${instrumentInput}`, notes, `Updated ${instrumentInput}.md`, true, siteName);
+          }
         }
         
         // If instrument was removed
@@ -346,6 +360,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               <SelectItem key={index} title={instrument} />
             ))}
             <SelectItem key="remove" title="Remove Instrument" />
+            <SelectItem key="custom" title="Enter Instrument Name Manually" />
             </>
             </Select>
 
@@ -407,6 +422,28 @@ export default function AddNotes({ navigation }: NavigationType) {
               style={{margin: 20, backgroundColor: "#06b4e0"}}>
               {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Submit</Text>}
             </Button>
+            <Modal visible={modalVisible} transparent animationType="slide">
+            <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <TextInput
+              style={styles.modalInput}
+              placeholder="Enter Instrument Name"
+              labelValue={customInstrument}
+              onTextChange={setCustomInstrument}
+              />
+              <Button appearance='filled' onPress={addCustomInstrument} style={styles.modalButton}> 
+                <Text category="h6" style={{ color: "black" }}>
+                Add Instrument
+                </Text> 
+                </Button>
+              <Button appearance='filled' onPress={() => setModalVisible(false)} style={styles.modalButton}>
+              <Text category="h6" style={{ color: "red" }}>
+                Cancel
+              </Text> 
+              </Button>
+              </View>
+              </View>
+            </Modal>
           </Layout>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -418,6 +455,19 @@ export default function AddNotes({ navigation }: NavigationType) {
       flex: 1,
       alignItems: 'stretch',        // has button fill space horizontally
       justifyContent: 'space-evenly',
+    },
+    modalContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    modalContent: {
+      width: 300,
+      padding: 20,
+      backgroundColor: "white",
+      borderRadius: 10,
+      alignItems: "center",
     },
     inputText: {
       flex: 2,
@@ -445,5 +495,15 @@ export default function AddNotes({ navigation }: NavigationType) {
       flexDirection: 'row',
       alignItems: 'stretch',        // has button fill space horizontally
       justifyContent: 'space-evenly',
+    },
+    modalButton:
+    {
+      backgroundColor: "#06b4e0",
+    },
+    modalInput: {
+      width: "100%",
+      borderBottomWidth: 1,
+      marginBottom: 10,
+      padding: 5,
     },
 });
