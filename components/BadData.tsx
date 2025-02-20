@@ -8,7 +8,7 @@
  * submit that request to the github repo.
  */
 import { StyleSheet, KeyboardAvoidingView} from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRoute } from "@react-navigation/native";
 import TextInput from "./TextInput";
 import NoteInput from "./NoteInput";
@@ -112,6 +112,7 @@ export default function BadData({ navigation }: NavigationType) {
   const [message, setMessage] = useState("");
   const [visible2, setVisible2] = useState(false);
   const [returnHome, retHome] = useState(false);
+  const visibleRef = useRef(false);
 
   const handleSubmit = () => {
     if (
@@ -163,7 +164,10 @@ export default function BadData({ navigation }: NavigationType) {
       setMessage(`Error: ${result.error}`);
       setMessageColor(customTheme["color-danger-700"]);
     }
-    setVisible(true);
+    setTimeout(() => {
+      setVisible(true);
+      visibleRef.current = true;
+    }, 100);
   };
 
   return (

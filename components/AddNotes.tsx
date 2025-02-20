@@ -6,7 +6,7 @@
  * github repo.
  */
 import { StyleSheet, KeyboardAvoidingView } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { buildNotes, copyTankRecord, Entry } from '../scripts/Parsers';
@@ -127,6 +127,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [messageColor, setMessageColor] = useState("");
     const [message, setMessage] = useState("");
     const [returnHome, retHome] = useState(false);
+    const visibleRef = useRef(false);
 
     // used for popup if info is missing
     const [visible2, setVisible2] = useState(false);
@@ -289,7 +290,10 @@ export default function AddNotes({ navigation }: NavigationType) {
             }
             setMessageColor(customTheme['color-danger-700']);
           }
-        setVisible(true);
+          setTimeout(() => {
+            setVisible(true);
+            visibleRef.current = true;
+          }, 100);
     };
 
     //method to navigate home to send to popup so it can happen after dismiss button is clicked

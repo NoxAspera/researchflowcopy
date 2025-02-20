@@ -7,7 +7,7 @@
  * it, and send it to the github repo.
  */
 import { StyleSheet, KeyboardAvoidingView } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRoute } from "@react-navigation/native";
 import { Button, Layout, Text } from "@ui-kitten/components";
 import TextInput from "./TextInput";
@@ -37,6 +37,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   const [messageColor, setMessageColor] = useState("");
   const [message, setMessage] = useState("");
   const [returnHome, retHome] = useState(false);
+  const visibleRef = useRef(false);
 
   // used for loading screen
     const [loadingValue, setLoadingValue] = useState(false);
@@ -115,7 +116,10 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
       setMessage(`Error: ${result.error}`);
       setMessageColor(customTheme["color-danger-700"]);
     }
-    setVisible(true);
+    setTimeout(() => {
+      setVisible(true);
+      visibleRef.current = true;
+  }, 100);
   };
 
   //method to navigate home to send to popup so it can happen after dismiss button is clicked
@@ -141,7 +145,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
           {/* success/failure popup */}
           <PopupProp popupText={message} 
             popupColor={messageColor} 
-            onPress={setVisible} 
+            onPress={() => setVisible(false)} 
             navigateHome={navigateHome} 
             visible={visible}
             returnHome={returnHome}/>
