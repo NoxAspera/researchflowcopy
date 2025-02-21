@@ -14,7 +14,7 @@ import TextInput from "./TextInput";
 import NoteInput from "./NoteInput";
 import { customTheme } from "./CustomTheme";
 import { NavigationType, routeProp } from "./types";
-import {setInstrumentFile, getInstrumentSite} from "../scripts/APIRequests";
+import {setInstrumentFile, getInstrumentSite, setBadData} from "../scripts/APIRequests";
 import { ScrollView } from "react-native-gesture-handler";
 import PopupProp from './Popup';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -78,6 +78,15 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     return result;
   };
 
+  const buildBadDataString = (): string => {
+    const startTime = startDateValue.toISOString().split(".")[0] + "Z";
+    const endTime = endDateValue.toISOString().split(".")[0] + "Z";
+    const currentTime = (new Date()).toISOString().split(".")[0] + "Z";
+    let result: string = `${startTime},${endTime},all,NA,${currentTime},${nameValue},${badDataReason}`;
+
+    return result;
+  };
+
   const handleSubmit = () => {
     if (
       !nameValue ||
@@ -97,6 +106,27 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
   const handleUpdate = async () => {
     const instrumentNotes = buildInstrumentNotes();
+
+    let badResult;
+    if (addToBadData) {
+      const badDataString = buildBadDataString();
+      let location;
+      let instrument;
+      if (needsLocation) {
+        location = siteValue.toLowerCase();
+        instrument = "lgr_ugga";
+      } else {
+        location = "wbb";
+        instrument = "teledyne_" + instrumentName.toLowerCase();
+      }
+      badResult = await setBadData(
+        location,
+        instrument,
+        badDataString,
+        `Update ${instrument}.csv`
+      );
+    }
+
     const result = await setInstrumentFile(
       site,
       instrumentNotes,
@@ -104,13 +134,18 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
       needsLocation,
       siteValue
     );
-    if (result.success) {
+    if (result.success && badResult.success) {
       setMessage("File updated successfully!");
       setMessageColor(customTheme["color-success-700"]);
       retHome(true);
     } else {
-      setMessage(`Error: ${result.error}`);
-      setMessageColor(customTheme["color-danger-700"]);
+      if (result.error) {
+        setMessage(`Error: ${result.error}`);
+        setMessageColor(customTheme["color-danger-700"]);
+      } else if (badResult.error) {
+        setMessage(`Error: ${badResult.error}`);
+        setMessageColor(customTheme["color-danger-700"]);
+      }
     }
     setVisible(true);
   };
