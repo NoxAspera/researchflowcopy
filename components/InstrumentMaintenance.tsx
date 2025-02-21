@@ -6,10 +6,10 @@
  * This is the page for instrument maintenance. It will take in the user input, format
  * it, and send it to the github repo.
  */
-import { StyleSheet, KeyboardAvoidingView } from "react-native";
+import { StyleSheet, KeyboardAvoidingView, TouchableOpacity, View } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useRoute } from "@react-navigation/native";
-import { Button, Layout, Text } from "@ui-kitten/components";
+import { Button, Layout, Text, CheckBox, Icon } from "@ui-kitten/components";
 import TextInput from "./TextInput";
 import NoteInput from "./NoteInput";
 import { customTheme } from "./CustomTheme";
@@ -17,6 +17,7 @@ import { NavigationType, routeProp } from "./types";
 import {setInstrumentFile, getInstrumentSite} from "../scripts/APIRequests";
 import { ScrollView } from "react-native-gesture-handler";
 import PopupProp from './Popup';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -26,9 +27,14 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
   // used for setting and remembering the input values
   const [nameValue, setNameValue] = useState("");
-  const [dateValue, setDateValue] = useState("");
+  const [startDateValue, setStartDateValue] = useState(new Date());
+  const [endDateValue, setEndDateValue] = useState(new Date());
   const [notesValue, setNotesValue] = useState("");
   const [siteValue, setSiteValue] = useState("");
+  const [addToBadData, setAddToBadData] = useState(false);
+  const [badDataReason, setBadDataReason] = useState("");
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
 
   // used for determining if PUT request was successful
   // will set the success/fail notification to visible, aswell as the color and text
@@ -63,7 +69,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     const hours= now.getHours().toString()
     const minutes = now.getMinutes().toString()
 
-    let result: string = `- Time in: ${year}-${month}-${day} ${dateValue}\n`;
+    let result: string = `- Time in: ${year}-${month}-${day} ${startDateValue}\n`;
 
     result += `- Name: ${nameValue}\n`;
     result += `- Notes: ${notesValue}\n`;
@@ -75,9 +81,11 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   const handleSubmit = () => {
     if (
       !nameValue ||
-      !dateValue ||
+      !startDateValue ||
+      (addToBadData && !endDateValue) ||
       !notesValue ||
-      (needsLocation && !siteValue.trim())
+      (needsLocation && !siteValue.trim()) ||
+      (addToBadData && !badDataReason.trim())
     ) {
       setMessage("Please fill out all fields before submitting.");
       setMessageColor(customTheme["color-danger-700"]);
@@ -105,6 +113,13 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
       setMessageColor(customTheme["color-danger-700"]);
     }
     setVisible(true);
+  };
+
+  const handleChecked = (checked: boolean) => {
+    setAddToBadData(checked);
+    if (showEndPicker) {
+      setShowEndPicker(false);
+    }
   };
 
   //method to navigate home to send to popup so it can happen after dismiss button is clicked
@@ -145,13 +160,73 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
               style={styles.textInput}
             />
           )}
-          <TextInput
-            labelText="Time"
-            labelValue={dateValue}
-            onTextChange={setDateValue}
-            placeholder="17:00"
-            style={styles.textInput}
+
+          <Text category="p2" style={{ marginTop: 15, marginLeft: 15 }}>Start Time (MT):</Text>
+          <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.datePicker}>
+            <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
+            <Text>{startDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {startDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+          </TouchableOpacity>
+
+          {showStartPicker && (
+          <View>
+          <DateTimePicker
+            value={startDateValue}
+            mode="datetime"
+            display="spinner"
+            onChange={(event, selectedDate) => {
+            if (selectedDate) setStartDateValue(selectedDate);
+          }}
           />
+          <Button style={styles.submitButton} onPress={() => setShowStartPicker(false)}> 
+          {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Confirm Date/Time</Text>}
+          </Button>
+          </View>
+        )}
+
+        <CheckBox
+          checked={addToBadData}
+          onChange={(checked) => {handleChecked(checked)}}
+          style={{ margin: 15 }}
+        >
+        {evaProps => <Text {...evaProps} category="p2">Add this time period to Bad Data?</Text>}
+        </CheckBox>
+
+        {addToBadData && (
+          <View>
+          <Text category="p2" style={{ marginTop: 15, marginLeft: 15 }}>End Time (MT):</Text>
+          <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.datePicker}>
+            <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
+            <Text>{endDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {endDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+          </TouchableOpacity>
+          </View>
+          )}
+
+          {showEndPicker && addToBadData && (
+          <View>
+          <DateTimePicker
+            value={endDateValue}
+            mode="datetime"
+            display="spinner"
+            onChange={(event, selectedDate) => {
+            if (selectedDate) setEndDateValue(selectedDate);
+          }}
+          />
+          <Button style={styles.submitButton} onPress={() => setShowEndPicker(false)}> 
+          {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Confirm Date/Time</Text>}
+          </Button>
+          </View>
+        )}
+
+        {/* Conditionally render reason input if checkbox is checked */}
+        {addToBadData && (
+        <TextInput
+          labelText="Reason for Bad Data"
+          labelValue={badDataReason}
+          onTextChange={setBadDataReason}
+          placeholder="Describe why this data is invalid"
+          style={styles.textInput}
+        />
+      )}
 
           {/* Name input */}
           <TextInput
@@ -164,7 +239,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
           {/* notes entry */}
           <NoteInput
-            labelText="Request"
+            labelText="Maintenance Performed"
             labelValue={notesValue}
             onTextChange={setNotesValue}
             placeholder="Giving bad reading."
@@ -205,4 +280,17 @@ const styles = StyleSheet.create({
     margin: 20, 
     backgroundColor: "#06b4e0",
   },
+  datePicker: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 0,
+    marginBottom: 15,
+    marginRight: 15,
+    marginLeft: 15,
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: '#d3d3d3',
+    backgroundColor: '#f9f9f9',
+  }
 });
