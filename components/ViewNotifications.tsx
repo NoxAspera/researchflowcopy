@@ -41,7 +41,6 @@ export default function ViewNotifications({ navigation }: NavigationType) {
               try {
                   const parsedData = await processVisits();
                   setData(parsedData); // Update state with the latest entry
-                  console.log("data variable set")
               } catch (error) {
                   console.error("Error processing notes:", error);
               }
@@ -58,12 +57,23 @@ export default function ViewNotifications({ navigation }: NavigationType) {
       for(let i = 0; i < data.visits.length; i++){
           if(data.visits[i]){
               const visit = data.visits[i]
-              visitData.push({id: i+1, label: "Anything", visit: visit})
+              visitData.push({visit: visit})
           }
       }
     }
   }
-  
+  //sort visitData by date
+  visitData = visitData.sort((a, b) => {
+    if(a.visit.date){
+      const dateA = new Date(a.visit.date);
+      if(b.visit.date){
+        const dateB = new Date(b.visit.date);
+        return dateA.getTime() - dateB.getTime();
+      }
+    }
+  })
+
+
   return (
     <ScrollView style={styles.scrollContainer}>
       <Layout style={styles.container} level="1">
