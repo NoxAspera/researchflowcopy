@@ -208,7 +208,6 @@ export default function AddNotes({ navigation }: NavigationType) {
       const startDay = String(start.getUTCDate()).padStart(2, "0");
       const startHours = String(start.getUTCHours()).padStart(2, "0");
       const startMinutes = String(start.getUTCMinutes()).padStart(2, "0");
-      const startSeconds = String(start.getUTCSeconds()).padStart(2, "0");
 
       const end = new Date(endDateValue);
       const endYear = end.getUTCFullYear();
