@@ -92,11 +92,11 @@ export default function ViewNotifications({ navigation }: NavigationType) {
         />
         {visitData.map((visit) => (
             <Card>
-                <Text category="h3">{"Upcoming visit: " + visit.visit.date}</Text>
-                <Text category="p1">{visit.visit.name}</Text>
-                <Text category="p1">{visit.visit.site}</Text>
-                <Text category="p1">{visit.visit.equipment}</Text>
-                <Text category="p1">{visit.visit.notes}</Text>
+                <Text category="h5">{"Upcoming visit: " + visit.visit.date}</Text>
+                <Text category="p1">{"Person: " + visit.visit.name}</Text>
+                <Text category="p1">{"Site: " + visit.visit.site}</Text>
+                <Text category="p1">{"Equipment: " + visit.visit.equipment}</Text>
+                <Text category="p1">{"Notes: " + visit.visit.notes}</Text>
             </Card>
         ))}
       </Layout>
