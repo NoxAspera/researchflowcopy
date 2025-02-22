@@ -5,7 +5,7 @@
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
-import { StyleSheet, KeyboardAvoidingView } from 'react-native';
+import { StyleSheet, KeyboardAvoidingView, Platform, Modal, View  } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -14,26 +14,13 @@ import TextInput from './TextInput'
 import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, getLatestTankEntry, getTankList, TankRecord, setTankTracker, addEntrytoTankDictionary } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, getLatestTankEntry, getTankList, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
-
-
-function checkValidTime(entry:string)
-{
-  const timeMatch = /^[0-2][0-9]:[0-5][0-9]$/gm
-  return timeMatch.test(entry)
-}
-
-function checkValidNumber(entry:string)
-{
-  const anyNonNumber = /^(\d+)(\.\d+)?$/gm
- return anyNonNumber.test(entry)
-}
 
 /**
  * @author Megan Ostlie
@@ -84,6 +71,26 @@ export default function AddNotes({ navigation }: NavigationType) {
         fetchData();
     }, [site]); // Re-run if `site` changes
 
+    // Get list of possible instruments
+    useEffect(() => {
+        const fetchInstrumentNames = async () => {
+          try {
+            let names = await getDirectory(`instrument_maint/LGR_UGGA`);
+    
+            if(names?.success)
+            {
+              setInstrumentNames(names.data);
+            }
+        }
+          catch (error)
+          {
+            console.error("Error processing instrument names:", error);
+          }
+        };
+    
+        fetchInstrumentNames();
+      }, [site]);
+
     //Get latest notes entry from site
     let latestEntry = null;
     if (data) {
@@ -116,6 +123,11 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [originalMid, setOriginalMid] = useState<TankRecord>(undefined);
     const [highTankRecord, setHighTankRecord] = useState<TankRecord>(undefined);
     const [originalHigh, setOriginalHigh] = useState<TankRecord>(undefined);
+    const [instrumentNames, setInstrumentNames] = useState<string[]>();
+    const [instrumentIndex, setInstrumentIndex] = useState<IndexPath | IndexPath[]>(new IndexPath(0));
+    const [originalInstrument, setOriginalInstrument] = useState("");
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
+    const [customInstrument, setCustomInstrument] = useState<string>("");
 
     // Use IndexPath for selected index for drop down menu
     const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
@@ -161,6 +173,26 @@ export default function AddNotes({ navigation }: NavigationType) {
            }
     }
 
+    const installedInstrumentNotes = (time: string): string => {
+      let result: string = `- Time in: ${time}\n`;
+  
+      result += `- Name: ${nameValue}\n`;
+      result += `- Notes: Installed at ${site}\n`;
+      result += "---\n";
+  
+      return result;
+    };
+
+    const removedInstrumentNotes = (time: string): string => {
+      let result: string = `- Time in: ${time}\n`;
+  
+      result += `- Name: ${nameValue}\n`;
+      result += `- Notes: Removed from ${site}\n`;
+      result += "---\n";
+  
+      return result;
+    };
+
     // will call setFile to send the PUT request. 
     // If it is successful it will display a success message
     // if it fails then it will display a failure message
@@ -185,7 +217,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           time_in: `${year}-${month}-${day} ${timeValue}`,
           time_out: `${year}-${month}-${day} ${hours}:${minutes}`,
           names: nameValue,
-          instrument: instrumentInput.trim() ? instrumentInput : (instruments[selectedIndex.row] ? instruments[selectedIndex.row] : null),
+          instrument: instrumentInput ? instrumentInput: null,
           n2_pressure: n2Value ? n2Value: null,
           lts: LTSignored ? null:
           {
@@ -218,7 +250,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           additional_notes: notesValue 
         };
 
-        const utcTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
+        const utcTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}Z`;
         if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
           removeTankFromSite(originalLts, utcTime);
         }
@@ -271,6 +303,25 @@ export default function AddNotes({ navigation }: NavigationType) {
         const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
         const tankResult = await setTankTracker();
 
+        let instMaintResult;
+        let instMaintResult2;
+
+        // If a new instrument was added
+        if (instrumentInput && (!originalInstrument || (originalInstrument != instrumentInput))) {
+          if (instrumentNames.includes(instrumentInput)) {
+            const notes = installedInstrumentNotes(utcTime);
+            instMaintResult = await setInstrumentFile(`instrument_maint/LGR_UGGA/${instrumentInput}`, notes, `Updated ${instrumentInput}.md`, true, site);
+          }
+        }
+
+        // If instrument was removed
+        if (originalInstrument && (!instrumentInput || (originalInstrument != instrumentInput))) {
+          if (instrumentNames.includes(originalInstrument)) {
+            const notes = removedInstrumentNotes(utcTime);
+            instMaintResult2 = await setInstrumentFile(`instrument_maint/LGR_UGGA/${originalInstrument}`, notes, `Updated ${originalInstrument}.md`, true, 'WBB - Spare');
+          }
+        }
+
         // if the warning popup is visible, remove it
         //if(visible2) { setVisible2(false); }
 
@@ -278,15 +329,19 @@ export default function AddNotes({ navigation }: NavigationType) {
         setLoadingValue(false);
 
         // check to see if the request was ok, give a message based on that
-        if (result.success && tankResult.success) {
+        if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success)) {
             setMessage("File updated successfully!");
             setMessageColor(customTheme['color-success-700']);
             retHome(true);
           } else {
             if (result.error) {
-              
+              setMessage(`Error: ${result.error}`);
             } else if (tankResult.error) {
               setMessage(`Error: ${tankResult.error}`);
+            } else if (instMaintResult && instMaintResult.error) {
+              setMessage(`Error: ${instMaintResult.error}`);
+            } else if (instMaintResult2 && instMaintResult2.error) {
+              setMessage(`Error: ${instMaintResult2.error}`);
             }
             setMessageColor(customTheme['color-danger-700']);
           }
@@ -376,6 +431,26 @@ export default function AddNotes({ navigation }: NavigationType) {
       }
     };
 
+    const handleInstrumentUpdate = (index: IndexPath | IndexPath[]) => {
+      const selectedRow = (index as IndexPath).row;
+      if (selectedRow === instrumentNames?.length) {
+        setInstrumentInput("");
+      } else if (selectedRow === instrumentNames.length + 1) {
+        setModalVisible(true);
+      } else {
+        const selectedInstrument = instrumentNames?.[selectedRow] ?? "";
+        setInstrumentInput(selectedInstrument);
+      }
+    };
+
+    const addCustomInstrument = () => {
+      if (customInstrument.trim() !== "") {
+        setInstrumentInput(customInstrument);
+        setCustomInstrument("");
+      }
+      setModalVisible(false);
+    }
+
     //Set tank ids, values, and instruments if available in parsed data
     useEffect(() => {
       if (latestEntry) {
@@ -429,6 +504,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           }
           if (latestEntry.instrument) {
             setInstrumentInput(latestEntry.instrument);
+            setOriginalInstrument(latestEntry.instrument);
           }
       }
   }, [latestEntry]);
@@ -460,14 +536,22 @@ export default function AddNotes({ navigation }: NavigationType) {
             {/* loading screen */}
             <LoadingScreen visible={loadingValue} />
 
-            {/* text box for instrument */}
-              <TextInput
-                labelText="Instrument"
-                labelValue={instrumentInput}
-                onTextChange={setInstrumentInput}
-                placeholder="Please enter instrument name"
-                style={styles.inputText}
-              />
+            {/* Select for instrument */}
+            <Select
+              label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Instrument</Text>}
+              onSelect={handleInstrumentUpdate}
+              placeholder="Select Instrument"
+              value={instrumentInput}
+              style={styles.inputText}
+            >
+            <>
+            {(instrumentNames ?? ["No Instruments Available"]).map((instrument, index) => (
+              <SelectItem key={index} title={instrument} />
+            ))}
+            <SelectItem key="remove" title="Remove Instrument" />
+            <SelectItem key="custom" title="Enter Instrument Name Manually" />
+            </>
+            </Select>
 
             {/* text inputs */}
             {/* Name input */}
@@ -615,6 +699,30 @@ export default function AddNotes({ navigation }: NavigationType) {
               style={styles.submitButton}>
               {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Submit</Text>}
             </Button>
+
+            {/* Modal for entering a custom instrument */}
+            <Modal visible={modalVisible} transparent animationType="slide">
+            <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <TextInput
+              style={styles.modalInput}
+              placeholder="Enter Instrument Name"
+              labelValue={customInstrument}
+              onTextChange={setCustomInstrument}
+              />
+              <Button appearance='filled' onPress={addCustomInstrument} style={styles.modalButton}> 
+                <Text category="h6" style={{ color: "black" }}>
+                Add Instrument
+                </Text> 
+                </Button>
+              <Button appearance='filled' onPress={() => setModalVisible(false)} style={styles.modalButton}>
+              <Text category="h6" style={{ color: "red" }}>
+                Cancel
+              </Text> 
+              </Button>
+              </View>
+              </View>
+            </Modal>
           </Layout>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -626,6 +734,19 @@ export default function AddNotes({ navigation }: NavigationType) {
       flex: 1,
       alignItems: 'stretch',        // has button fill space horizontally
       justifyContent: 'space-evenly',
+    },
+    modalContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    modalContent: {
+      width: 300,
+      padding: 20,
+      backgroundColor: "white",
+      borderRadius: 10,
+      alignItems: "center",
     },
     inputText: {
       flex: 2,
@@ -658,5 +779,15 @@ export default function AddNotes({ navigation }: NavigationType) {
     {
       margin: 20, 
       backgroundColor: "#06b4e0",
+    },
+    modalButton:
+    {
+      backgroundColor: "#06b4e0",
+    },
+    modalInput: {
+      width: "100%",
+      borderBottomWidth: 1,
+      marginBottom: 10,
+      padding: 5,
     },
 });
