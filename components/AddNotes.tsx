@@ -578,7 +578,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             />
 
               {/* Time input */}
-              <Text category="p2" style={{ marginTop: 15, marginLeft: 15 }}>Time Arrived (MT):</Text>
+              <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Arrived (MT):</Text>
               <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.datePicker}>
                 <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
                 <Text>{startDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {startDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
@@ -600,7 +600,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           </View>
         )}
 
-        <Text category="p2" style={{ marginTop: 15, marginLeft: 15 }}>Time Departed (MT):</Text>
+        <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Departed (MT):</Text>
           <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.datePicker}>
             <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
             <Text>{endDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {endDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
@@ -865,9 +865,9 @@ export default function AddNotes({ navigation }: NavigationType) {
       flexDirection: 'row',
       alignItems: 'center',
       marginTop: 0,
-      marginBottom: 15,
-      marginRight: 15,
-      marginLeft: 15,
+      marginBottom: 8,
+      marginRight: 8,
+      marginLeft: 8,
       padding: 10,
       borderWidth: 1,
       borderRadius: 5,
