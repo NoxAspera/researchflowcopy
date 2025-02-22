@@ -62,14 +62,14 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   }, [site]);
 
   const buildInstrumentNotes = (): string => {
-    const now = new Date();
-    const year = now.getFullYear().toString()
-    const month = (now.getMonth() + 1).toString() // now.getMonth() is zero-base (i.e. January is 0), likely due to something with Oracle's implementation - August
-    const day = now.getDate().toString()
-    const hours= now.getHours().toString()
-    const minutes = now.getMinutes().toString()
+    const time = new Date(startDateValue);
+    const year = time.getFullYear().toString()
+    const month = (time.getMonth() + 1).toString() // now.getMonth() is zero-base (i.e. January is 0), likely due to something with Oracle's implementation - August
+    const day = time.getDate().toString()
+    const hours= time.getHours().toString()
+    const minutes = time.getMinutes().toString()
 
-    let result: string = `- Time in: ${year}-${month}-${day} ${startDateValue}\n`;
+    let result: string = `- Time in: ${year}-${month}-${day} ${hours}:${minutes}Z\n`;
 
     result += `- Name: ${nameValue}\n`;
     result += `- Notes: ${notesValue}\n`;
@@ -134,7 +134,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
       needsLocation,
       siteValue
     );
-    if (result.success && badResult.success) {
+    if (result.success && (!badResult || badResult.success)) {
       setMessage("File updated successfully!");
       setMessageColor(customTheme["color-success-700"]);
       retHome(true);
@@ -143,8 +143,9 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
         setMessage(`Error: ${result.error}`);
         setMessageColor(customTheme["color-danger-700"]);
       } else if (badResult.error) {
-        setMessage(`Error: ${badResult.error}`);
+        setMessage(`Instrument maintenance notes updated successfully.\nUnable to update Bad Data. Please update Bad Data manually.`);
         setMessageColor(customTheme["color-danger-700"]);
+        retHome(true);
       }
     }
     setVisible(true);
