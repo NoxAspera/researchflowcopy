@@ -55,10 +55,15 @@ export default function ViewNotifications({ navigation }: NavigationType) {
   if(data){
     if(data.visits){
       for(let i = 0; i < data.visits.length; i++){
-          if(data.visits[i]){
-              const visit = data.visits[i]
+        if(data.visits[i]){
+            const visit = data.visits[i]
+            //need to check if current visit date is prior to current date, if so don't add it to list
+            const visitDate = new Date(visit.date)
+            const now = new Date();
+            if(visitDate.getDate() >= now.getDate()){
               visitData.push({visit: visit})
-          }
+            }
+        }
       }
     }
   }
@@ -72,7 +77,6 @@ export default function ViewNotifications({ navigation }: NavigationType) {
       }
     }
   })
-
 
   return (
     <ScrollView style={styles.scrollContainer}>
@@ -88,7 +92,7 @@ export default function ViewNotifications({ navigation }: NavigationType) {
         />
         {visitData.map((visit) => (
             <Card>
-                <Text category="h3">{visit.visit.date}</Text>
+                <Text category="h3">{"Upcoming visit: " + visit.visit.date}</Text>
                 <Text category="p1">{visit.visit.name}</Text>
                 <Text category="p1">{visit.visit.site}</Text>
                 <Text category="p1">{visit.visit.equipment}</Text>
