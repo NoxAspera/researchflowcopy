@@ -5,7 +5,7 @@
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
-import { StyleSheet, KeyboardAvoidingView, Platform, Modal, View, TouchableOpacity  } from 'react-native';
+import { StyleSheet, KeyboardAvoidingView, Modal, View, TouchableOpacity  } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -133,6 +133,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [badDataReason, setBadDataReason] = useState("");
     const [showStartPicker, setShowStartPicker] = useState(false);
     const [showEndPicker, setShowEndPicker] = useState(false);
+    const [selectedTank, setSelectedTank] = useState("");
 
     // used for determining if PUT request was successful
     // will set the success/fail notification to visible, aswell as the color and text
@@ -421,47 +422,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
 
     const handleTankChange = (tank: string) => {
-      if (tank == "lts") {
-        navigation.navigate('SelectTank', {
-          from: 'AddNotes',
-          onSelect: (selectedTank) => {
-            setLTSId(selectedTank);
-            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
-            setLtsTankRecord(entry);
-            setLTSValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
-          }
-        });
-      } else if (tank == "low") {
-        navigation.navigate('SelectTank', {
-          from: 'AddNotes',
-          onSelect: (selectedTank) => {
-            setLowId(selectedTank);
-            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
-            setLowTankRecord(entry);
-            setLowValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
-          }
-        });
-      } else if (tank == "mid") {
-        navigation.navigate('SelectTank', {
-          from: 'AddNotes',
-          onSelect: (selectedTank) => {
-            setmidId(selectedTank);
-            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
-            setMidTankRecord(entry);
-            setmidValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
-          }
-        });
-      } else if (tank == "high") {
-        navigation.navigate('SelectTank', {
-          from: 'AddNotes',
-          onSelect: (selectedTank) => {
-            setHighId(selectedTank);
-            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
-            setHighTankRecord(entry);
-            setHighValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
-          }
-        });
-      }
+      setSelectedTank(tank);
     };
 
     const handleInstrumentUpdate = (index: IndexPath | IndexPath[]) => {
@@ -483,6 +444,61 @@ export default function AddNotes({ navigation }: NavigationType) {
       }
       setModalVisible(false);
     }
+
+    useEffect(() => {
+      if (selectedTank) {
+        if (selectedTank == "lts") {
+          setTimeout(() => {
+            navigation.navigate('SelectTank', {
+              from: 'AddNotes',
+              onSelect: (tank) => {
+                  setLTSId(tank);
+                  const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+                  setLtsTankRecord(entry);
+                  setLTSValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+              }
+            });
+          }, 10);
+        } else if (selectedTank == "low") {
+          setTimeout(() => {
+            navigation.navigate('SelectTank', {
+              from: 'AddNotes',
+              onSelect: (tank) => {
+                setLowId(tank);
+                const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+                setLowTankRecord(entry);
+                setLowValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+              }
+            });
+          }, 10);
+        } else if (selectedTank == "mid") {
+          setTimeout(() => {
+            navigation.navigate('SelectTank', {
+              from: 'AddNotes',
+              onSelect: (tank) => {
+                setmidId(tank);
+                const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+                setMidTankRecord(entry);
+                setmidValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+              }
+            });
+          } , 10);
+        } else if (selectedTank == "high") {
+          setTimeout(() => {
+            navigation.navigate('SelectTank', {
+              from: 'AddNotes',
+              onSelect: (tank) => {
+                setHighId(tank);
+                const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+                setHighTankRecord(entry);
+                setHighValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+              }
+            });
+          }, 10);
+        }
+        setSelectedTank("");
+      }
+    }, [selectedTank]);
 
     //Set tank ids, values, and instruments if available in parsed data
     useEffect(() => {

@@ -120,6 +120,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [badDataReason, setBadDataReason] = useState("");
     const [showStartPicker, setShowStartPicker] = useState(false);
     const [showEndPicker, setShowEndPicker] = useState(false);
+    const [selectedTank, setSelectedTank] = useState("");
 
     // used for determining if PUT request was successful
     // will set the success/fail notification to visible, aswell as the color and text
@@ -145,16 +146,25 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
 
     const handleTankChange = () => {
-      navigation.navigate('SelectTank', {
-        from: 'AddNotesMobile',
-          onSelect: (selectedTank) => {
-            setTankId(selectedTank);
-            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+      setSelectedTank("tank");
+    }
+
+    useEffect(() => {
+      if (selectedTank) {
+        setTimeout(() => {
+          navigation.navigate('SelectTank', {
+          from: 'AddNotes',
+          onSelect: (tank) => {
+            setTankId(tank);
+            const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
             setTankRecord(entry);
             setTankValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
           }
-      });
-    }
+        });
+        }, 10);
+      }
+      setSelectedTank("");
+    }, [selectedTank]);
 
     const clearTankEntry = () => {
       setTankId("");
@@ -335,11 +345,11 @@ export default function AddNotes({ navigation }: NavigationType) {
             setMessage(`Error: ${badDataResult.error}`);
           }
           setMessageColor(customTheme['color-danger-700']);
-          setTimeout(() => {
-            setVisible(true);
-            visibleRef.current = true;
-          }, 100);
         }
+        setTimeout(() => {
+          setVisible(true);
+          visibleRef.current = true;
+        }, 100);
     };
 
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
