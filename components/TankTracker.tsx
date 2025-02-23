@@ -7,7 +7,7 @@
  * data and determine when it will most likely run out and need replacement.
  */
 import { StyleSheet, KeyboardAvoidingView } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { Button, IndexPath, Layout, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
@@ -17,6 +17,7 @@ import PopupProp from './Popup';
 import { getLatestTankEntry, setTankTracker, TankRecord, addEntrytoTankDictionary } from '../scripts/APIRequests';
 import { Float } from 'react-native/Libraries/Types/CodegenTypes';
 import { customTheme } from './CustomTheme'
+import LoadingScreen from "./LoadingScreen";
 
 export default function TankTracker({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
@@ -39,6 +40,10 @@ export default function TankTracker({ navigation }: NavigationType) {
     const [messageColor, setMessageColor] = useState("");
     const [message, setMessage] = useState("");
     const [returnHome, retHome] = useState(false);
+    const visibleRef = useRef(false);
+
+    // used for loading screen
+        const [loadingValue, setLoadingValue] = useState(false);
 
     useEffect(() => {
       if (tank) {
@@ -131,9 +136,13 @@ export default function TankTracker({ navigation }: NavigationType) {
     }
 
     const handleUpdate = async () => {
+      // show spinner while submitting
+      setLoadingValue(true);
       const entry = buildTankEntry();
       addEntrytoTankDictionary(entry);
       const result = await setTankTracker();
+      // remove spinner once we have results back
+      setLoadingValue(false);
       if (result.success) {
           setMessage("File updated successfully!");
           setMessageColor(customTheme['color-success-700']);
@@ -142,7 +151,10 @@ export default function TankTracker({ navigation }: NavigationType) {
           setMessage(`Error: ${result.error}`);
           setMessageColor(customTheme['color-danger-700']);
         }
-        setVisible(true);
+        setTimeout(() => {
+          setVisible(true);
+          visibleRef.current = true;
+        }, 100);
     }
 
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
@@ -163,6 +175,9 @@ export default function TankTracker({ navigation }: NavigationType) {
               <Text category="h1" style={{ textAlign: "center" }}>
                 {tank}
               </Text>
+
+              {/* loading screen */}
+              <LoadingScreen visible={loadingValue} />
 
               {/* text inputs */}
               {/* success/failure popup */}

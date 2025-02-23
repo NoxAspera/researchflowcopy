@@ -5,8 +5,8 @@
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
-import { StyleSheet, KeyboardAvoidingView, Platform, Modal, View, TouchableOpacity } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import { StyleSheet, KeyboardAvoidingView, Platform, Modal, View, TouchableOpacity  } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { buildNotes, copyTankRecord, Entry } from '../scripts/Parsers';
@@ -20,6 +20,7 @@ import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
+import LoadingScreen from './LoadingScreen';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 /**
@@ -139,8 +140,13 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [messageColor, setMessageColor] = useState("");
     const [message, setMessage] = useState("");
     const [returnHome, retHome] = useState(false);
-    //used for popup if info is missing
+    const visibleRef = useRef(false);
+
+    // used for popup if info is missing
     const [visible2, setVisible2] = useState(false);
+
+    // used for loading screen
+    const [loadingValue, setLoadingValue] = useState(false);
     
 
     //method will warn user if fields haven't been input
@@ -200,6 +206,9 @@ export default function AddNotes({ navigation }: NavigationType) {
     // If it is successful it will display a success message
     // if it fails then it will display a failure message
     const handleUpdate = async () => {
+      // show spinner while submitting
+      setLoadingValue(true);
+
       const LTSignored: boolean = (ltsId == "" && ltsValue == "" && ltsPressure == "")
 
       const start = new Date(startDateValue);
@@ -347,6 +356,9 @@ export default function AddNotes({ navigation }: NavigationType) {
           );
         }
 
+        // remove spinner once we have results back
+        setLoadingValue(false);
+
         // check to see if the request was ok, give a message based on that
         if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success) && (!badDataResult || badDataResult.success)) {
             setMessage("File updated successfully!");
@@ -366,7 +378,10 @@ export default function AddNotes({ navigation }: NavigationType) {
             }
             setMessageColor(customTheme['color-danger-700']);
           }
-        setVisible(true);
+          setTimeout(() => {
+            setVisible(true);
+            visibleRef.current = true;
+          }, 100);
     };
 
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
@@ -550,6 +565,9 @@ export default function AddNotes({ navigation }: NavigationType) {
             sendData={handleUpdate}
             removePopup={setVisible2}
             visible={visible2}/>
+
+            {/* loading screen */}
+            <LoadingScreen visible={loadingValue} />
 
             {/* Select for instrument */}
             <Select

@@ -14,6 +14,7 @@ import { Entry } from '../scripts/Parsers';
 import { customTheme } from './CustomTheme';
 import { ScrollView } from 'react-native-gesture-handler';
 import { NavigationType, routeProp } from './types'
+import LoadingScreen from './LoadingScreen';
 
 
 function retrieveHeader(site: string)
@@ -114,20 +115,21 @@ export default function ViewNotes({navigation }: NavigationType) {
     return(
       <ScrollView style={styles.scrollContainer}>
         <Layout style={styles.container} level="1">
-
-        <Text category="h1" style={{ textAlign: "center" }}>
-            {visits[0].date}
+          {/* header */}
+          <Text category="h1" style={{ textAlign: "center" }}>
+              {visits[0].date}
           </Text>
 
-          {visits.map((entry) => {
-            return(
-              <Card>
-                <Text category="h3">{entry.site}</Text>
-                <Text category="p1">{`Name: ${entry.name}\nEquipment: ${entry.equipment}\nNotes: ${entry.notes}`}</Text>
-              </Card>
-            )
-          })}
-          
+            {/* notes */}
+            {visits.map((entry) => {
+              return(
+                <Card>
+                  <Text category="h3">{entry.site}</Text>
+                  <Text category="p1">{`Name: ${entry.name}\nEquipment: ${entry.equipment}\nNotes: ${entry.notes}`}</Text>
+                </Card>
+              )
+            })}
+            
         </Layout>
       </ScrollView>
     )

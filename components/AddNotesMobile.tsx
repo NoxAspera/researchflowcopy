@@ -7,7 +7,7 @@
  * the mobile sites do not have as many tanks as the stationary sites
  */
 import { StyleSheet, KeyboardAvoidingView, Platform, Modal, View, TouchableOpacity } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { buildMobileNotes, MobileEntry } from '../scripts/Parsers';
@@ -21,6 +21,7 @@ import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
+import LoadingScreen from "./LoadingScreen";
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 /**
@@ -56,6 +57,10 @@ export default function AddNotes({ navigation }: NavigationType) {
 
     // State to hold parsed data
     const [data, setData] = useState<ParsedData | null>(null);
+    const visibleRef = useRef(false);
+    
+      // used for loading screen
+        const [loadingValue, setLoadingValue] = useState(false);
 
     // Get current notes for the site
     useEffect(() => {
@@ -214,6 +219,9 @@ export default function AddNotes({ navigation }: NavigationType) {
     const handleUpdate = async () => {
       const Tankignored: boolean = (tankId == "" && tankValue == "" && tankPressure == "")
 
+      // show loading screen
+      setLoadingValue(true);
+
       const start = new Date(startDateValue);
       const startYear = start.getUTCFullYear();
       const startMonth = String(start.getUTCMonth() + 1).padStart(2, "0");
@@ -306,6 +314,9 @@ export default function AddNotes({ navigation }: NavigationType) {
         // if the warning popup is visible, remove it
         if(visible2) { setVisible2(false); }
 
+        // hide loading screen when we have results
+        setLoadingValue(false);
+
         // check to see if the request was ok, give a message based on that
         if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success) && (!badDataResult || badDataResult.success)) {
           setMessage("File updated successfully!");
@@ -323,9 +334,12 @@ export default function AddNotes({ navigation }: NavigationType) {
           } else if (badDataResult && badDataResult.error) {
             setMessage(`Error: ${badDataResult.error}`);
           }
-            setMessageColor(customTheme['color-danger-700']);
+          setMessageColor(customTheme['color-danger-700']);
+          setTimeout(() => {
+            setVisible(true);
+            visibleRef.current = true;
+          }, 100);
         }
-        setVisible(true);
     };
 
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
@@ -365,6 +379,9 @@ export default function AddNotes({ navigation }: NavigationType) {
           <Layout style={styles.container}>
             {/* header */}
             <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
+
+          {/* loading screen */}
+          <LoadingScreen visible={loadingValue}/>
 
             {/* success/failure popup */}
             <PopupProp popupText={message} 

@@ -6,7 +6,7 @@
  * This page is responsible for planning visits.
  */
 import { StyleSheet, KeyboardAvoidingView,} from "react-native";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useRoute } from "@react-navigation/native";
 import { Button, Layout, Datepicker, Text } from "@ui-kitten/components";
 import TextInput from "./TextInput";
@@ -16,6 +16,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { ThemeContext } from "./ThemeContext";
 import { visit, setVisitFile } from "../scripts/APIRequests";
 import PopupProp from './Popup';
+import LoadingScreen from "./LoadingScreen";
 
 export default function PlanVisit({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -35,6 +36,10 @@ export default function PlanVisit({ navigation }: NavigationType) {
   const [messageColor, setMessageColor] = useState("");
   const [message, setMessage] = useState("");
   const [returnHome, retHome] = useState(false);
+  const visibleRef = useRef(false);
+
+  // used for loading screen
+  const [loadingValue, setLoadingValue] = useState(false);
 
   //method to navigate home to send to popup so it can happen after dismiss button is clicked
   function navigateHome(nav:boolean){
@@ -52,6 +57,9 @@ export default function PlanVisit({ navigation }: NavigationType) {
         handleUpdate()
   }
   const handleUpdate = async () => {
+    // show loading screen while waiting for results
+    setLoadingValue(true);
+
     if (site.includes("mobile/")) {
       site = site.replace("mobile/", "");
     }
@@ -65,6 +73,9 @@ export default function PlanVisit({ navigation }: NavigationType) {
 
     const result = await setVisitFile(visit, "Adding site visit");
     
+    // hide loading screen when we recieve results
+    setLoadingValue(false);
+
     // check to see if the request was ok, give a message based on that
     if (result.success) {
         setMessage("File updated successfully!");
@@ -74,7 +85,10 @@ export default function PlanVisit({ navigation }: NavigationType) {
         setMessage(`Error: ${result.error}`);
         setMessageColor(customTheme['color-danger-700']);
       }
-    setVisible(true);
+      setTimeout(() => {
+        setVisible(true);
+        visibleRef.current = true;
+      }, 100);
   }
   
   return (
@@ -96,6 +110,9 @@ export default function PlanVisit({ navigation }: NavigationType) {
             navigateHome={navigateHome} 
             visible={visible}
             returnHome={returnHome}/>
+
+          {/* loading screen */}
+          <LoadingScreen visible={loadingValue} />
 
           {/* start date input */}
           <Datepicker

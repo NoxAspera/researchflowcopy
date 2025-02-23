@@ -7,7 +7,7 @@
  * it, and send it to the github repo.
  */
 import { StyleSheet, KeyboardAvoidingView, TouchableOpacity, View } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRoute } from "@react-navigation/native";
 import { Button, Layout, Text, CheckBox, Icon } from "@ui-kitten/components";
 import TextInput from "./TextInput";
@@ -17,6 +17,7 @@ import { NavigationType, routeProp } from "./types";
 import {setInstrumentFile, getInstrumentSite, setBadData} from "../scripts/APIRequests";
 import { ScrollView } from "react-native-gesture-handler";
 import PopupProp from './Popup';
+import LoadingScreen from "./LoadingScreen";
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
@@ -42,6 +43,10 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   const [messageColor, setMessageColor] = useState("");
   const [message, setMessage] = useState("");
   const [returnHome, retHome] = useState(false);
+  const visibleRef = useRef(false);
+
+  // used for loading screen
+    const [loadingValue, setLoadingValue] = useState(false);
 
   useEffect(() => {
     const fetchSite = async () => {
@@ -105,6 +110,9 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   };
 
   const handleUpdate = async () => {
+    // display loading screen while while awaiting for results
+    setLoadingValue(true);
+
     const instrumentNotes = buildInstrumentNotes();
 
     let badResult;
@@ -134,6 +142,10 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
       needsLocation,
       siteValue
     );
+
+    // hide loading screen when we have results
+    setLoadingValue(false);
+
     if (result.success && (!badResult || badResult.success)) {
       setMessage("File updated successfully!");
       setMessageColor(customTheme["color-success-700"]);
@@ -148,7 +160,10 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
         retHome(true);
       }
     }
-    setVisible(true);
+    setTimeout(() => {
+      setVisible(true);
+      visibleRef.current = true;
+  }, 100);
   };
 
   const handleChecked = (checked: boolean) => {
@@ -181,10 +196,13 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
           {/* success/failure popup */}
           <PopupProp popupText={message} 
             popupColor={messageColor} 
-            onPress={setVisible} 
+            onPress={() => setVisible(false)} 
             navigateHome={navigateHome} 
             visible={visible}
             returnHome={returnHome}/>
+
+          {/* loading screen */}
+          <LoadingScreen visible={loadingValue}/>
             
           {/* Time input */}
           {needsLocation && (
