@@ -18,6 +18,7 @@ import { getLatestTankEntry, setTankTracker, TankRecord, addEntrytoTankDictionar
 import { Float } from 'react-native/Libraries/Types/CodegenTypes';
 import { customTheme } from './CustomTheme'
 import LoadingScreen from "./LoadingScreen";
+import VisitPopupProp from './VisitPopup';
 
 export default function TankTracker({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
@@ -42,8 +43,13 @@ export default function TankTracker({ navigation }: NavigationType) {
     const [returnHome, retHome] = useState(false);
     const visibleRef = useRef(false);
 
+    // tank predictor
+    let prevDate = "";
+    let prevPressure = 0;
+    const [tankPredictorVisibility, setTankPredictorVisibility] = useState(false);
+
     // used for loading screen
-        const [loadingValue, setLoadingValue] = useState(false);
+    const [loadingValue, setLoadingValue] = useState(false);
 
     useEffect(() => {
       if (tank) {
@@ -57,6 +63,10 @@ export default function TankTracker({ navigation }: NavigationType) {
           setFillIDValue(entry.fillId);
           setPSIValue(entry.pressure);
           setLatestEntry(entry);
+
+          // save previous date and pressure for tank predictor
+          prevDate = entry.updatedAt;
+          prevPressure = entry.pressure;
         }
       }
     }, [tank]);
@@ -135,32 +145,75 @@ export default function TankTracker({ navigation }: NavigationType) {
       handleUpdate()
     }
 
+    function daysUntilEmpty(currPress: Float, currDate: string, prevPress: Float, prevDate: string) {
+      // account for edge case where tank is replaced, so its prev pressure is at 0
+      if (prevPress == 0) {
+        return 365;
+      }
+      // get change of pressure over time, assume it is linear
+      let changeOfPress = currPress - prevPress;
+
+      // if change of pressure is positive, then it got replaced, no need to check date
+      if (changeOfPress > 0) {
+        return 365;
+      }
+
+      // get date difference
+      let currTime = new Date(currDate).getTime();
+      let prevTime = new Date(prevDate).getTime();
+      let changeOfDate = (currTime - prevTime) / (864000000); // get the difference of time in days
+
+      let rateOfDecay = changeOfPress / changeOfDate; // measured in psi lost per day
+
+      // solve for when the tank should be empty or near empty
+      let days = 2100 / rateOfDecay;
+      console.log(days);
+      return days;
+    }
+
+    function checkIfRefillIsNeeded() {
+      // compare pressure from prev entry to current entry to see if tank will be empty soon
+      console.log("checking tank algo");
+      let days = daysUntilEmpty(PSIValue, dateValue, prevPressure, prevDate);
+      if (days <= 80) {
+        setTankPredictorVisibility(true);
+      }
+    }
+
     const handleUpdate = async () => {
       // show spinner while submitting
       setLoadingValue(true);
+
       const entry = buildTankEntry();
       addEntrytoTankDictionary(entry);
       const result = await setTankTracker();
+
       // remove spinner once we have results back
       setLoadingValue(false);
       if (result.success) {
-          setMessage("File updated successfully!");
-          setMessageColor(customTheme['color-success-700']);
-          retHome(true);
-        } else {
-          setMessage(`Error: ${result.error}`);
-          setMessageColor(customTheme['color-danger-700']);
-        }
-        setTimeout(() => {
-          setVisible(true);
-          visibleRef.current = true;
-        }, 100);
+        setMessage("File updated successfully!");
+        setMessageColor(customTheme['color-success-700']);
+        retHome(true);
+      } else {
+        setMessage(`Error: ${result.error}`);
+        setMessageColor(customTheme['color-danger-700']);
+      }
+      setTimeout(() => {
+        setVisible(true);
+        visibleRef.current = true;
+      }, 100);
     }
 
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
     function navigateHome(nav:boolean){
       if(nav){
         navigation.navigate("Home")
+      }
+    }
+    
+    function navigatePlanVisit(nav:boolean){
+      if(nav){
+        navigation.navigate("PlanVisit")
       }
     }
 
@@ -179,23 +232,33 @@ export default function TankTracker({ navigation }: NavigationType) {
               {/* loading screen */}
               <LoadingScreen visible={loadingValue} />
 
-              {/* text inputs */}
               {/* success/failure popup */}
               <PopupProp popupText={message} 
                 popupColor={messageColor} 
                 onPress={setVisible} 
                 navigateHome={navigateHome} 
                 visible={visible}
-                returnHome={returnHome}/>
+                returnHome={returnHome}
+              />
 
-            {/* Name input */}
-            <TextInput
-              labelText="Name"
-              labelValue={nameValue}
-              onTextChange={setNameValue}
-              placeholder="Jane Doe"
-              style={styles.textInput}
-            />
+              {/* tank is low popup */}
+              <VisitPopupProp
+                daysRemaining = "999"
+                visible = {tankPredictorVisibility}
+                removePopup = {setTankPredictorVisibility}
+                navigateHome = {navigateHome}
+                navigatePlanVisit = {navigatePlanVisit}
+              />
+
+              {/* text inputs */}
+              {/* Name input */}
+              <TextInput
+                labelText="Name"
+                labelValue={nameValue}
+                onTextChange={setNameValue}
+                placeholder="Jane Doe"
+                style={styles.textInput}
+              />
 
               {/* FillID input */}
               <TextInput
@@ -242,14 +305,14 @@ export default function TankTracker({ navigation }: NavigationType) {
                 style={styles.textInput}
               />
 
-            {/* notes entry */}
-            <TextInput
-              labelText="Notes"
-              labelValue={notesValue}
-              onTextChange={setNotesValue}
-              placeholder="Tank draining at normal rate."
-              style={styles.reasonText}
-            />
+              {/* notes entry */}
+              <TextInput
+                labelText="Notes"
+                labelValue={notesValue}
+                onTextChange={setNotesValue}
+                placeholder="Tank draining at normal rate."
+                style={styles.reasonText}
+              />
 
               {/* submit button */}
               <Button
