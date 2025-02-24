@@ -1,4 +1,6 @@
 import csv from 'csvtojson';
+import * as FileSystem from 'expo-file-system'
+import * as Network from 'expo-network'
 
 /**
  * @author August O'Rourke
@@ -140,6 +142,7 @@ async function setFile(bodyString: string, url: string)
  */
 export async function setVisitFile(visit: visit, commitMessage: string)
 {
+
     const pullResponse = (await getFile(`researchflow_data/visits`))
     let existingContent = ""
     let hash = ""
