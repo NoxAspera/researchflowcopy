@@ -17,6 +17,7 @@ import PopupProp from './Popup';
 import { setGithubToken } from '../scripts/APIRequests';
 import { NavigationType } from './types'
 import { ThemeContext } from './ThemeContext';
+import LoadingScreen from './LoadingScreen';
 
 export default function Login({ navigation }: NavigationType) {
     const route = useRoute();
