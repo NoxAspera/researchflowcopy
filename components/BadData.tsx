@@ -7,26 +7,17 @@
  * a date range, the data, and why it is bad. The code will format and
  * submit that request to the github repo.
  */
-import { StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
+import { StyleSheet, KeyboardAvoidingView} from "react-native";
 import React, { useState, useEffect } from "react";
 import { useRoute } from "@react-navigation/native";
 import TextInput from "./TextInput";
 import NoteInput from "./NoteInput";
-import {
-  Button,
-  Layout,
-  Text,
-  Datepicker,
-  Select,
-  SelectItem,
-  IndexPath,
-} from "@ui-kitten/components";
+import { Button, Layout, Text, Datepicker, Select, SelectItem, IndexPath,} from "@ui-kitten/components";
 import { customTheme } from "./CustomTheme";
 import { NavigationType, routeProp } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
 import { setBadData, getBadDataFiles } from "../scripts/APIRequests";
-import PopupProp from "./Popup";
-import PopupProp2Button from "./Popup2Button";
+import PopupProp from "./Popup"
 import { ThemeContext } from './ThemeContext';
 
 export default function BadData({ navigation }: NavigationType) {

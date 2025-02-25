@@ -11,8 +11,8 @@ import HomeButtonProp from "./HomeButtonProp";
 import { Layout } from "@ui-kitten/components";
 import React, { useState, useEffect } from 'react';
 import { NavigationType } from "./types";
-const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
-import { tankTrackerSpinUp, setVisitFile, getFileContents, visit } from '../scripts/APIRequests';
+//const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
+import { tankTrackerSpinUp} from '../scripts/APIRequests';
 import NoteInput from './NoteInput'
 
 export default function HomeScreen({ navigation }: NavigationType) {
@@ -65,13 +65,13 @@ export default function HomeScreen({ navigation }: NavigationType) {
           }
         />
 
-        {/* PLAN A VISIT */}
+        {/* CALENDAR */}
         <HomeButtonProp
-          text="PLAN A VISIT"
+          text="CALENDAR"
           color="#FFC581"
           onPress={() =>
-          navigation.navigate("SelectSite", { from: "PlanVisit" })
-        }
+            navigation.navigate('Calendar')
+          }
         />
       </ScrollView>
     </Layout>

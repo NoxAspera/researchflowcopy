@@ -10,11 +10,11 @@
  */
 import { StyleSheet } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 import { Layout, Button, Text } from '@ui-kitten/components';
 import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
-import { getBadDataSites, getDirectory } from '../scripts/APIRequests';
+import { getDirectory } from '../scripts/APIRequests';
 import { ScrollView } from 'react-native-gesture-handler';
 
 

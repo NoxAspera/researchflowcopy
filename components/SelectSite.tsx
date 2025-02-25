@@ -9,8 +9,8 @@
  * and all info for that site will be given.
  */
 import { StyleSheet } from 'react-native';
-import React, { Component, useEffect, useState } from 'react';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { useRoute } from '@react-navigation/native';
 import { Layout, Button, Text } from '@ui-kitten/components';
 import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'

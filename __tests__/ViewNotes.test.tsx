@@ -1,10 +1,7 @@
-import { fireEvent, render } from '@testing-library/react-native'
+import { render } from '@testing-library/react-native'
 import { NaviProp } from '../components/types';
 import React from 'react';
 import { MockThemeProvider } from '../components/MockThemeProvider';
-import HomeScreen from '../components/HomeScreen';
-import AddNotes from '../components/AddNotes';
-import InstrumentMaintenance from '../components/InstrumentMaintenance';
 import ViewNotes from '../components/ViewNotes';
 
 const mockNavigation: NaviProp = {
@@ -76,9 +73,10 @@ jest.mock('react-native-gesture-handler', () => {
 
 describe('View Notes', () => {
   test('renders correctly', () => {
+    let route = {params: {site: 'site_notes/csp'}}
     const { toJSON } = render(
     <MockThemeProvider>
-      <ViewNotes navigation={mockNavigation} />
+      <ViewNotes route ={route} navigation={mockNavigation} />
     </MockThemeProvider>
   );
   expect(toJSON()).toMatchSnapshot();

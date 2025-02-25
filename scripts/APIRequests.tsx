@@ -143,6 +143,7 @@ export async function setVisitFile(visit: visit, commitMessage: string)
     const pullResponse = (await getFile(`researchflow_data/visits`))
     let existingContent = ""
     let hash = ""
+    
     if(pullResponse.success)
     {
         hash = pullResponse.data.sha

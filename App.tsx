@@ -19,6 +19,7 @@ import * as eva from '@eva-design/eva';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
 import SelectTank from './components/SelectTank';
 import customColors from './custom-theme.json'
+import Calendar from './components/Calendar';
 import { useState } from 'react';
 import SettingsButton from './components/SettingsButton';
 import ViewNotifications from './components/ViewNotifications';
