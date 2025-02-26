@@ -93,6 +93,18 @@ let tankDict: Map<string, TankRecord[]>;
 
 let tankTrackerSha = ""
 
+export async function updateDirectories(path: string)
+{
+    let response = (await getDirectory(path))
+    if(response.success)
+    {
+        response.data.forEach(element => {
+            FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + path + `/${element}`)
+            updateDirectories(path + `/${element}`)
+        });
+    }
+}
+
 /**
  * 
  * @author August O'Rourke
@@ -546,7 +558,7 @@ export async function getDirectory(path: string)
         //console.log(response)
         const data: siteResponse[] = await response.json();
         let options;
-        if (path === "instrument_maint") {
+        if (path === "instrument_maint" || path === "") {
             options = data
                 .filter((item: any) => item.type === "dir")
                 .map((item: any) => item.name); 
