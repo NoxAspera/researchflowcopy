@@ -170,6 +170,16 @@ export default function App() {
                 <SettingsButton/>]
               ),
             })}/>
+            <Stack.Screen name="Calendar" component={Calendar} options={({ navigation }) => ({
+              headerRight: () => (
+                [<Button testID='notificationsButton'
+                    onPress={() => navigation.navigate('ViewNotifications')} 
+                    appearance="ghost"
+                    accessoryLeft={bellIcon} 
+                    size='large'/>,
+                <SettingsButton/>]
+              ),
+            })}/>
             <Stack.Screen name="ViewNotifications" component={ViewNotifications} options={{ headerRight: () => <SettingsButton/>}}/>
           </Stack.Navigator>
         </NavigationContainer>
