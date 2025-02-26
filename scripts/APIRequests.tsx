@@ -296,11 +296,27 @@ export async function tankTrackerSpinUp()
         }
     )
     try {
-        const response = await fetch(requestOptions);
-        console.log(response)
+        let response = await fetch(requestOptions);
+        //console.log(response)
         if (response.ok) {
-            const data = await response.json();
+            let data = await response.json();
             tankTrackerSha = data.sha
+
+            if(data._links)
+                {
+                   let url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/git/blobs/${tankTrackerSha}`
+                   const requestOptions: RequestInfo = new Request(url, 
+                    {
+                        method: "GET",
+                        headers: headers,
+                        redirect: "follow"
+                    })
+    
+                    response = await fetch(requestOptions)
+                    data = await response.json();
+                    //console.log("success")
+                }
+
             // Decode base64 content
             let decodedContent = atob(data.content);
             console.log(decodedContent.charCodeAt(0));
@@ -491,7 +507,7 @@ export async function getInstrumentSite(path: string) {
         return {success: false, error: pullResponse.error}
     }
     const existingContent = atob(pullResponse.data.content)
-    const match = existingContent.match(/Currently at (\w+)/);
+    const match = existingContent.match(/Currently at (.*)/);
     //return match ? match[1] : null;
     return { success: true, data: match ? match[1] : null };
 }

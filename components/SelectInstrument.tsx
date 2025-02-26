@@ -12,7 +12,6 @@ import { StyleSheet } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { Layout, Button, Text } from '@ui-kitten/components';
-import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
 import { getDirectory } from '../scripts/APIRequests';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -23,9 +22,6 @@ export default function SelectInstrument({navigation}: NavigationType) {
 
   let from = route.params?.from;
   let notes = route.params?.notes;
-  const [visible, setVisible] = useState(false);
-  const [messageColor, setMessageColor] = useState("");
-  const [message, setMessage] = useState("");
   // State to hold the list of site names
   const [instrumentNames, setInstrumentNames] = useState<string[]>();
 
@@ -71,12 +67,6 @@ export default function SelectInstrument({navigation}: NavigationType) {
   return (
     <ScrollView>
     <Layout style={styles.container}>
-      <PopupProp
-        popupText={message}
-        popupColor={messageColor}
-        onPress={setVisible}
-        visible={visible}
-      />
 
       {buttonData.map((button) => (
         <Button key={button.id} style={styles.button} onPress={button.onPress}>
