@@ -6,21 +6,23 @@
  * github repo. This page is slightly different than the main AddNotes page because
  * the mobile sites do not have as many tanks as the stationary sites
  */
-import { StyleSheet, KeyboardAvoidingView, Platform, Modal, View } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import { StyleSheet, KeyboardAvoidingView, Platform, Modal, View, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { buildMobileNotes, MobileEntry } from '../scripts/Parsers';
 import TextInput from './TextInput'
 import NoteInput from './NoteInput'
-import { Layout, Button, Text, Select, SelectItem, IndexPath } from '@ui-kitten/components';
+import { Layout, Button, Text, Select, SelectItem, IndexPath, CheckBox, Icon } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile, setBadData } from '../scripts/APIRequests';
 import { parseNotes, ParsedData, copyTankRecord } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
+import LoadingScreen from "./LoadingScreen";
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 /**
  * @author Megan Ostlie
@@ -55,6 +57,10 @@ export default function AddNotes({ navigation }: NavigationType) {
 
     // State to hold parsed data
     const [data, setData] = useState<ParsedData | null>(null);
+    const visibleRef = useRef(false);
+    
+      // used for loading screen
+        const [loadingValue, setLoadingValue] = useState(false);
 
     // Get current notes for the site
     useEffect(() => {
@@ -96,7 +102,8 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
     
     // these use states to set and store values in the text inputs
-    const [timeValue, setTimeValue] = useState("");
+    const [startDateValue, setStartDateValue] = useState(new Date());
+    const [endDateValue, setEndDateValue] = useState(new Date());
     const [nameValue, setNameValue] = useState("");
     const [tankId, setTankId] = useState("");
     const [tankValue, setTankValue] = useState("");
@@ -106,10 +113,14 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [tankRecord, setTankRecord] = useState<TankRecord>(undefined);
     const [originalTank, setOriginalTank] = useState<TankRecord>(undefined);
     const [instrumentNames, setInstrumentNames] = useState<string[]>();
-    const [instrumentIndex, setInstrumentIndex] = useState<IndexPath | IndexPath[]>(new IndexPath(0));
     const [originalInstrument, setOriginalInstrument] = useState("");
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [customInstrument, setCustomInstrument] = useState<string>("");
+    const [addToBadData, setAddToBadData] = useState(false);
+    const [badDataReason, setBadDataReason] = useState("");
+    const [showStartPicker, setShowStartPicker] = useState(false);
+    const [showEndPicker, setShowEndPicker] = useState(false);
+    const [selectedTank, setSelectedTank] = useState("");
 
     // used for determining if PUT request was successful
     // will set the success/fail notification to visible, aswell as the color and text
@@ -122,8 +133,7 @@ export default function AddNotes({ navigation }: NavigationType) {
 
     //method will warn user if fields haven't been input
     function checkTextEntries(){
-        if(timeValue == "" ||
-           nameValue == "" ||
+        if(nameValue == "" ||
            tankId == "" ||
            tankValue == "" ||
            tankPressure == "" ||
@@ -136,16 +146,25 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
 
     const handleTankChange = () => {
-      navigation.navigate('SelectTank', {
-        from: 'AddNotesMobile',
-          onSelect: (selectedTank) => {
-            setTankId(selectedTank);
-            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+      setSelectedTank("tank");
+    }
+
+    useEffect(() => {
+      if (selectedTank) {
+        setTimeout(() => {
+          navigation.navigate('SelectTank', {
+          from: 'AddNotes',
+          onSelect: (tank) => {
+            setTankId(tank);
+            const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
             setTankRecord(entry);
             setTankValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
           }
-      });
-    }
+        });
+        }, 10);
+      }
+      setSelectedTank("");
+    }, [selectedTank]);
 
     const clearTankEntry = () => {
       setTankId("");
@@ -193,7 +212,16 @@ export default function AddNotes({ navigation }: NavigationType) {
         setCustomInstrument("");
       }
       setModalVisible(false);
-    }
+    };
+
+    const buildBadDataString = (): string => {
+      const startTime = startDateValue.toISOString().split(".")[0] + "Z";
+      const endTime = endDateValue.toISOString().split(".")[0] + "Z";
+      const currentTime = (new Date()).toISOString().split(".")[0] + "Z";
+      let result: string = `${startTime},${endTime},all,NA,${currentTime},${nameValue},${badDataReason}`;
+  
+      return result;
+    };
 
     // will call setFile to send the PUT request. 
     // If it is successful it will display a success message
@@ -201,20 +229,29 @@ export default function AddNotes({ navigation }: NavigationType) {
     const handleUpdate = async () => {
       const Tankignored: boolean = (tankId == "" && tankValue == "" && tankPressure == "")
 
-        // get time submitted
-        const now = new Date();
-        const year = now.getUTCFullYear();
-        const month = String(now.getUTCMonth() + 1).padStart(2, "0");
-        const day = String(now.getUTCDate()).padStart(2, "0");
-        const hours = String(now.getUTCHours()).padStart(2, "0");
-        const minutes = String(now.getUTCMinutes()).padStart(2, "0");
-        const seconds = String(now.getUTCSeconds()).padStart(2, "0");
+      // show loading screen
+      setLoadingValue(true);
+
+      const start = new Date(startDateValue);
+      const startYear = start.getUTCFullYear();
+      const startMonth = String(start.getUTCMonth() + 1).padStart(2, "0");
+      const startDay = String(start.getUTCDate()).padStart(2, "0");
+      const startHours = String(start.getUTCHours()).padStart(2, "0");
+      const startMinutes = String(start.getUTCMinutes()).padStart(2, "0");
+
+      const end = new Date(endDateValue);
+      const endYear = end.getUTCFullYear();
+      const endMonth = String(end.getUTCMonth() + 1).padStart(2, "0");
+      const endDay = String(end.getUTCDate()).padStart(2, "0");
+      const endHours = String(end.getUTCHours()).padStart(2, "0");
+      const endMinutes = String(end.getUTCMinutes()).padStart(2, "0");
+      const endSeconds = String(end.getUTCSeconds()).padStart(2, "0");
         
         // create an entry object data that will be sent off to the repo
         let data: MobileEntry = 
         {
-          time_in: `${year}-${month}-${day} ${timeValue}`,
-          time_out: `${year}-${month}-${day} ${hours}:${minutes}`,
+          time_in: `${startYear}-${startMonth}-${startDay} ${startHours}:${startMinutes}`,
+          time_out: `${endYear}-${endMonth}-${endDay} ${endHours}:${endMinutes}`,
           names: nameValue,
           instrument: instrumentInput.trim() ? instrumentInput : null,
           tank: Tankignored ? null:
@@ -227,7 +264,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           additional_notes: notesValue 
         };
 
-        const utcTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}Z`;
+        const utcTime = `${endYear}-${endMonth}-${endDay} ${endHours}:${endMinutes}:${endSeconds}Z`;
         const siteName = site.replace("mobile/","");
         if (originalTank && (!tankRecord || (originalTank.tankId != tankRecord.tankId))) {
           let newTankEntry = copyTankRecord(originalTank);
@@ -252,6 +289,7 @@ export default function AddNotes({ navigation }: NavigationType) {
 
         let instMaintResult;
         let instMaintResult2;
+        let badDataResult;
         
         // If a new instrument was added
         if (instrumentInput && (!originalInstrument || (originalInstrument != instrumentInput))) {
@@ -269,11 +307,28 @@ export default function AddNotes({ navigation }: NavigationType) {
           }
         }
 
+        if (addToBadData) {
+          let instrument = "";
+          const badDataString = buildBadDataString();
+          if (instrumentInput.includes("LGR")) {
+            instrument = "lgr_ugga";
+          }
+          badDataResult = await setBadData(
+            siteName,
+            instrument,
+            badDataString,
+            `Update ${instrument}.csv`
+          );
+        }
+
         // if the warning popup is visible, remove it
         if(visible2) { setVisible2(false); }
 
+        // hide loading screen when we have results
+        setLoadingValue(false);
+
         // check to see if the request was ok, give a message based on that
-        if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success)) {
+        if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success) && (!badDataResult || badDataResult.success)) {
           setMessage("File updated successfully!");
           setMessageColor(customTheme['color-success-700']);
           retHome(true);
@@ -286,10 +341,15 @@ export default function AddNotes({ navigation }: NavigationType) {
             setMessage(`Error: ${instMaintResult.error}`);
           } else if (instMaintResult2 && instMaintResult2.error) {
             setMessage(`Error: ${instMaintResult2.error}`);
+          } else if (badDataResult && badDataResult.error) {
+            setMessage(`Error: ${badDataResult.error}`);
           }
-            setMessageColor(customTheme['color-danger-700']);
+          setMessageColor(customTheme['color-danger-700']);
         }
-        setVisible(true);
+        setTimeout(() => {
+          setVisible(true);
+          visibleRef.current = true;
+        }, 100);
     };
 
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
@@ -329,6 +389,9 @@ export default function AddNotes({ navigation }: NavigationType) {
           <Layout style={styles.container}>
             {/* header */}
             <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
+
+          {/* loading screen */}
+          <LoadingScreen visible={loadingValue}/>
 
             {/* success/failure popup */}
             <PopupProp popupText={message} 
@@ -372,11 +435,67 @@ export default function AddNotes({ navigation }: NavigationType) {
             />
 
               {/* Time input */}
-            <TextInput labelText='Time Started' 
-              labelValue={timeValue} 
-              onTextChange={setTimeValue} 
-              placeholder='15:00' 
-              style={styles.inputText} />
+              <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Arrived (MT):</Text>
+              <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.datePicker}>
+                <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
+                <Text>{startDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {startDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+              </TouchableOpacity>
+
+          {showStartPicker && (
+          <View>
+          <DateTimePicker
+            value={startDateValue}
+            mode="datetime"
+            display="spinner"
+            onChange={(event, selectedDate) => {
+            if (selectedDate) setStartDateValue(selectedDate);
+          }}
+          />
+          <Button style={styles.submitButton} onPress={() => setShowStartPicker(false)}> 
+          {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Confirm Date/Time</Text>}
+          </Button>
+          </View>
+        )}
+
+        <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Departed (MT):</Text>
+          <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.datePicker}>
+            <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
+            <Text>{endDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {endDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+          </TouchableOpacity>
+
+          {showEndPicker && (
+          <View>
+          <DateTimePicker
+            value={endDateValue}
+            mode="datetime"
+            display="spinner"
+            onChange={(event, selectedDate) => {
+            if (selectedDate) setEndDateValue(selectedDate);
+          }}
+          />
+          <Button style={styles.submitButton} onPress={() => setShowEndPicker(false)}> 
+          {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Confirm Date/Time</Text>}
+          </Button>
+          </View>
+        )}
+
+        <CheckBox
+          checked={addToBadData}
+          onChange={setAddToBadData}
+          style={{ margin: 15 }}
+        >
+        {evaProps => <Text {...evaProps} category="p2">Add this time period to Bad Data?</Text>}
+        </CheckBox>
+
+        {addToBadData && (
+        <TextInput
+          labelText="Reason for Bad Data"
+          labelValue={badDataReason}
+          onTextChange={setBadDataReason}
+          placeholder="Describe why this data is invalid"
+          style={styles.inputText}
+        />
+      )}
 
             {/* Tank input */}
             <Layout style = {styles.rowContainer}>
@@ -504,4 +623,22 @@ export default function AddNotes({ navigation }: NavigationType) {
       marginBottom: 10,
       padding: 5,
     },
+    submitButton:
+    {
+      margin: 20, 
+      backgroundColor: "#06b4e0",
+    },
+    datePicker: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 0,
+      marginBottom: 8,
+      marginRight: 8,
+      marginLeft: 8,
+      padding: 10,
+      borderWidth: 1,
+      borderRadius: 5,
+      borderColor: '#d3d3d3',
+      backgroundColor: '#f9f9f9',
+    }
 });

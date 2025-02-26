@@ -9,15 +9,15 @@
 import { StyleSheet, ScrollView, Dimensions } from "react-native";
 import HomeButtonProp from "./HomeButtonProp";
 import { Layout } from "@ui-kitten/components";
-import React from "react";
+import React, { useState, useEffect } from 'react';
 import { NavigationType } from "./types";
 //const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
 import { tankTrackerSpinUp} from '../scripts/APIRequests';
+import NoteInput from './NoteInput'
 
 export default function HomeScreen({ navigation }: NavigationType) {
-  //setInstrumentFile("instrument_maint/LGR_UGGA/LGR-13-0075", "testing", "updating from research flow", false)
-  //setInstrumentFile("instrument_maint/Teledyne/T200", "testing", "updating from research flow", false)
-  
+
+  tankTrackerSpinUp()
   return (
     <Layout style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -87,5 +87,10 @@ const styles = StyleSheet.create({
   scrollContainer: {
     paddingVertical: 16,
     alignItems: "center", // Center cards horizontally
+  },
+  notesInput:
+  {
+    flex: 1,
+    margin: 8,
   },
 });
