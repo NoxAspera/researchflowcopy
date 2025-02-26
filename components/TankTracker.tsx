@@ -193,7 +193,7 @@ export default function TankTracker({ navigation }: NavigationType) {
               labelText="Name"
               labelValue={nameValue}
               onTextChange={setNameValue}
-              placeholder="Jane Doe"
+              placeholder="First Last"
               style={styles.textInput}
             />
 
@@ -202,7 +202,7 @@ export default function TankTracker({ navigation }: NavigationType) {
                 labelText="Fill ID"
                 labelValue={fillIDValue}
                 onTextChange={setFillIDValue}
-                placeholder="240124_M1"
+                placeholder="ID"
                 style={styles.textInput}
               />
 
@@ -220,7 +220,7 @@ export default function TankTracker({ navigation }: NavigationType) {
                 labelText="PSI"
                 labelValue={PSIValue !== undefined ? PSIValue.toString() : ""}
                 onTextChange={(text) => setPSIValue(parseFloat(text) || undefined)}
-                placeholder="100"
+                placeholder="PSI"
                 style={styles.textInput}
               />
 
@@ -229,7 +229,7 @@ export default function TankTracker({ navigation }: NavigationType) {
                 labelText="CO2"
                 labelValue={CO2Value !== undefined ? CO2Value.toString() : ""}
                 onTextChange={(text) => setCO2Value(parseFloat(text) || undefined)}
-                placeholder="100"
+                placeholder="CO2"
                 style={styles.textInput}
               />
 
@@ -238,7 +238,7 @@ export default function TankTracker({ navigation }: NavigationType) {
                 labelText="CH4"
                 labelValue={CH4Value !== undefined ? CH4Value.toString() : ""}
                 onTextChange={(text) => setCH4Value(parseFloat(text) || undefined)}
-                placeholder="100"
+                placeholder="CH4"
                 style={styles.textInput}
               />
 
@@ -247,7 +247,7 @@ export default function TankTracker({ navigation }: NavigationType) {
               labelText="Notes"
               labelValue={notesValue}
               onTextChange={setNotesValue}
-              placeholder="Tank draining at normal rate."
+              placeholder="Notes"
               style={styles.reasonText}
             />
 

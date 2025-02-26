@@ -430,7 +430,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             <TextInput labelText='Name' 
               labelValue={nameValue} 
               onTextChange={setNameValue} 
-              placeholder='ResearchFlow' 
+              placeholder='First Last' 
               style={styles.inputText}
             />
 
@@ -519,7 +519,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               <TextInput labelText=' ' 
                 labelValue={tankPressure} 
                 onTextChange={setTankPressure} 
-                placeholder='Pressure' 
+                placeholder='psi' 
                 style={styles.tankInput} />
             </Layout>
 
@@ -527,7 +527,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             <NoteInput labelText='Notes' 
               labelValue={notesValue} 
               onTextChange={setNotesValue} 
-              placeholder='All Good.' 
+              placeholder='Notes' 
               multiplelines={true} 
               style={styles.notesInput}/>
 
