@@ -277,7 +277,7 @@ export default function BadData({ navigation }: NavigationType) {
             labelText="Name"
             labelValue={nameValue}
             onTextChange={setNameValue}
-            placeholder="John Doe"
+            placeholder="First Last"
             style={styles.textInput}
           />
 
@@ -286,7 +286,7 @@ export default function BadData({ navigation }: NavigationType) {
             labelText="Reason for Bad Data"
             labelValue={reasonValue}
             onTextChange={setReasonValue}
-            placeholder="Its wack."
+            placeholder="Reason"
             multiplelines={true}
             style={styles.reasonText}
           />

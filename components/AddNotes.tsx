@@ -607,7 +607,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             <TextInput labelText='Name' 
               labelValue={nameValue} 
               onTextChange={setNameValue} 
-              placeholder='ResearchFlow' 
+              placeholder='First Last' 
               style={styles.inputText}
             />
 
@@ -678,7 +678,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             <TextInput labelText='N2 (if needed)' 
               labelValue={n2Value} 
               onTextChange={setN2Value} 
-              placeholder='Pressure' 
+              placeholder='psi' 
               style={styles.inputText} />
 
             {/* LTS input */}
@@ -703,7 +703,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               <TextInput labelText=' ' 
                 labelValue={ltsPressure} 
                 onTextChange={setLTSPressure} 
-                placeholder='Pressure' 
+                placeholder='psi' 
                 style={styles.tankInput} />
             </Layout>
 
@@ -731,7 +731,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               <TextInput labelText=' ' 
                 labelValue={lowPressure} 
                 onTextChange={setLowPressure} 
-                placeholder='Pressure' 
+                placeholder='psi' 
                 style={styles.tankInput} />
             </Layout>
 
@@ -757,7 +757,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               <TextInput labelText=' ' 
                 labelValue={midPressure} 
                 onTextChange={setmidPressure} 
-                placeholder='Pressure' 
+                placeholder='psi' 
                 style={styles.tankInput} />
             </Layout>
 
@@ -783,7 +783,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               <TextInput labelText=' ' 
                 labelValue={highPressure} 
                 onTextChange={setHighPressure} 
-                placeholder='Pressure' 
+                placeholder='psi' 
                 style={styles.tankInput} />
             </Layout>
 
@@ -791,7 +791,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             <NoteInput labelText='Notes' 
               labelValue={notesValue} 
               onTextChange={setNotesValue} 
-              placeholder='All Good.' 
+              placeholder='Notes' 
               multiplelines={true} 
               style={styles.notesInput}/>
 

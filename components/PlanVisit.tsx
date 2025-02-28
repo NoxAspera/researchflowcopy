@@ -130,7 +130,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
             labelText="Name"
             labelValue={nameValue}
             onTextChange={setNameValue}
-            placeholder="Jane Doe"
+            placeholder="First Last"
             style={styles.textInput}
           />
           {/* list of items entry */}
@@ -138,7 +138,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
             labelText="Items to bring"
             labelValue={notesValue}
             onTextChange={setNotesValue}
-            placeholder="Instrument 1"
+            placeholder="Item1"
             style={styles.reasonText}
           />
 
@@ -147,7 +147,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
             labelText="Additional Notes"
             labelValue={additionalNotesValue}
             onTextChange={setAdditionalNotesValue}
-            placeholder="Make sure to download previous site docs"
+            placeholder="Notes"
             style={styles.reasonText}
           />
 

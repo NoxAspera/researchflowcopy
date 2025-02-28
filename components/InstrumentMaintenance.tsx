@@ -287,7 +287,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
             labelText="Name"
             labelValue={nameValue}
             onTextChange={setNameValue}
-            placeholder="Jane Doe"
+            placeholder="First Last"
             style={styles.textInput}
           />
 
@@ -296,7 +296,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
             labelText="Maintenance Performed"
             labelValue={notesValue}
             onTextChange={setNotesValue}
-            placeholder="Giving bad reading."
+            placeholder="Maintenance"
             multiplelines={true}
             style={styles.requestText}
           />
