@@ -21,6 +21,7 @@ import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
+import VisitPopupProp from './VisitPopup';
 
 /**
  * @author Megan Ostlie
@@ -147,6 +148,72 @@ export default function AddNotes({ navigation }: NavigationType) {
     // used for loading screen
     const [loadingValue, setLoadingValue] = useState(false);
     
+    // tank predictor
+    let prevDate = "";
+    let prevPressure = 0;
+    const [tankPredictorVisibility, setTankPredictorVisibility] = useState(false);
+    const [lowTank, setLowTank] = useState("");
+    const [lowDaysRemaining, setLowDaysRemaining] = useState(-1);
+    const [midTank, setMidTank] = useState("");
+    const [midDaysRemaining, setMidDaysRemaining] = useState(-1);
+    const [highTank, setHighTank] = useState("");
+    const [highDaysRemaining, setHighDaysRemaining] = useState(-1);
+
+    function daysUntilEmpty(currPress, currDate, prevPress, prevDate) {
+      // account for edge case where tank is replaced, so its prev pressure is at 0
+      if (prevPress == 0) {
+        return 365;
+      }
+      // get change of pressure over time, assume it is linear
+      let changeOfPress = currPress - prevPress;
+
+      // if change of pressure is positive, then it got replaced, no need to check date
+      if (changeOfPress > 0) {
+        return 365;
+      }
+
+      // get date difference
+      let currTime = new Date(currDate).getTime();
+      let prevTime = new Date(prevDate).getTime();
+      let changeOfDate = (currTime - prevTime) / (864000000); // get the difference of time in days
+
+      let rateOfDecay = changeOfPress / changeOfDate; // measured in psi lost per day
+
+      // solve for when the tank should be under 500 psi
+      let days = -1600 / rateOfDecay;
+      console.log(`Days left: ${days}`);
+      return days;
+    }
+
+    function checkIfRefillIsNeeded() {
+      // get tank values from previous entries
+      console.log("checking tank algo");
+      // need to get previous values before this gets called since it is being checked after the current values are pushed
+      const low = getLatestTankEntry(lowId)
+      const mid = getLatestTankEntry(midId)
+      const high = getLatestTankEntry(highId)
+
+      // compare pressure from prev entry to current entry to see if tank will be empty soon
+      // parameters need to be swpapped
+      let lowDays = daysUntilEmpty(low.pressure, low.updatedAt, prevPressure, prevDate);
+      let midDays = daysUntilEmpty(mid.pressure, mid.updatedAt, prevPressure, prevDate);
+      let highDays = daysUntilEmpty(high.pressure, high.updatedAt, prevPressure, prevDate);
+      if (lowDays <= 90) {
+        setLowTank(low.tankId);
+        setLowDaysRemaining(lowDays);
+        setTankPredictorVisibility(true);
+      }
+      if (midDays <= 90) {
+        setMidTank(mid.tankId);
+        setMidDaysRemaining(midDays);
+        setTankPredictorVisibility(true);
+      }
+      if (highDays <= 90) {
+        setHighTank(high.tankId);
+        setHighDaysRemaining(highDays);
+        setTankPredictorVisibility(true);
+      }
+    }
 
     //method will warn user if fields haven't been input
     function checkTextEntries(){
@@ -330,31 +397,38 @@ export default function AddNotes({ navigation }: NavigationType) {
 
         // check to see if the request was ok, give a message based on that
         if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success)) {
-            setMessage("File updated successfully!");
-            setMessageColor(customTheme['color-success-700']);
-            retHome(true);
-          } else {
-            if (result.error) {
-              setMessage(`Error: ${result.error}`);
-            } else if (tankResult.error) {
-              setMessage(`Error: ${tankResult.error}`);
-            } else if (instMaintResult && instMaintResult.error) {
-              setMessage(`Error: ${instMaintResult.error}`);
-            } else if (instMaintResult2 && instMaintResult2.error) {
-              setMessage(`Error: ${instMaintResult2.error}`);
-            }
-            setMessageColor(customTheme['color-danger-700']);
+          setMessage("File updated successfully!");
+          setMessageColor(customTheme['color-success-700']);
+          retHome(true);
+        } else {
+          if (result.error) {
+            setMessage(`Error: ${result.error}`);
+          } else if (tankResult.error) {
+            setMessage(`Error: ${tankResult.error}`);
+          } else if (instMaintResult && instMaintResult.error) {
+            setMessage(`Error: ${instMaintResult.error}`);
+          } else if (instMaintResult2 && instMaintResult2.error) {
+            setMessage(`Error: ${instMaintResult2.error}`);
           }
-          setTimeout(() => {
-            setVisible(true);
-            visibleRef.current = true;
-          }, 100);
+          setMessageColor(customTheme['color-danger-700']);
+        }
+        setTimeout(() => {
+          setVisible(true);
+          visibleRef.current = true;
+        }, 100);
     };
 
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
     function navigateHome(nav:boolean){
       if(nav){
         navigation.navigate("Home")
+      }
+      setTimeout(checkIfRefillIsNeeded, 100);
+    }
+
+    function navigatePlanVisit(nav:boolean){
+      if(nav){
+        navigation.navigate("PlanVisit")
       }
     }
 
@@ -532,6 +606,19 @@ export default function AddNotes({ navigation }: NavigationType) {
             sendData={handleUpdate}
             removePopup={setVisible2}
             visible={visible2}/>
+
+            {/* tank is low popup */}
+            <VisitPopupProp
+              lowTank={lowValue}
+              lowDays={lowDaysRemaining}
+              midTank={midValue}
+              midDays={midDaysRemaining}
+              highTank={highValue}
+              highDays={highDaysRemaining}
+              visible={tankPredictorVisibility}
+              removePopup={setTankPredictorVisibility}
+              navigateHome={navigateHome}
+              navigatePlanVisit={navigatePlanVisit} />
 
             {/* loading screen */}
             <LoadingScreen visible={loadingValue} />

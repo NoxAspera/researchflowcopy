@@ -142,7 +142,7 @@ export default function TankTracker({ navigation }: NavigationType) {
         setVisible(true);
         return;
       }
-      handleUpdate()
+      handleUpdate();
     }
 
     function daysUntilEmpty(currPress: Float, currDate: string, prevPress: Float, prevDate: string) {
@@ -165,8 +165,8 @@ export default function TankTracker({ navigation }: NavigationType) {
 
       let rateOfDecay = changeOfPress / changeOfDate; // measured in psi lost per day
 
-      // solve for when the tank should be empty or near empty
-      let days = 2100 / rateOfDecay;
+      // solve for when the tank should be under 500 psi
+      let days = -1600 / rateOfDecay;
       console.log(days);
       return days;
     }
@@ -175,7 +175,7 @@ export default function TankTracker({ navigation }: NavigationType) {
       // compare pressure from prev entry to current entry to see if tank will be empty soon
       console.log("checking tank algo");
       let days = daysUntilEmpty(PSIValue, dateValue, prevPressure, prevDate);
-      if (days <= 80) {
+      if (days <= 90) {
         setTankPredictorVisibility(true);
       }
     }
@@ -242,13 +242,13 @@ export default function TankTracker({ navigation }: NavigationType) {
               />
 
               {/* tank is low popup */}
-              <VisitPopupProp
+              {/* <VisitPopupProp
                 daysRemaining = "999"
                 visible = {tankPredictorVisibility}
                 removePopup = {setTankPredictorVisibility}
                 navigateHome = {navigateHome}
                 navigatePlanVisit = {navigatePlanVisit}
-              />
+              /> */}
 
               {/* text inputs */}
               {/* Name input */}

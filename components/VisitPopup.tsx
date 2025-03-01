@@ -12,39 +12,50 @@ import { StyleSheet, ColorValue } from "react-native"
 import { NavigationType } from './types';
 
 interface VisitPUProp {
-    // navigation: NavigationType; 
-    daysRemaining: String;
-    // popupColor: ColorValue;
-    visible: boolean;
-    // sendData: () => Promise<void>;
-    removePopup: (arg1: boolean) => void;
-    navigateHome: (arg0: boolean) => void;
-    navigatePlanVisit: (arg0: boolean) => void;
+  visible: boolean; 
+  lowTank: String;
+  midTank: String;
+  highTank: String;
+  lowDays: number;
+  midDays: number;
+  highDays: number;
+  removePopup: (arg1: boolean) => void;
+  navigateHome: (arg0: boolean) => void;
+  navigatePlanVisit: (arg0: boolean) => void;
 }
 
 
 // need to have both of these buttons navigate to different pages
-const VisitPopupProp: React.FC<VisitPUProp> = ({ daysRemaining, visible, removePopup, navigateHome, navigatePlanVisit }) => {
-    const days = daysRemaining;
+const VisitPopupProp: React.FC<VisitPUProp> = ({ lowTank, lowDays, midTank, midDays, highTank, highDays, visible, removePopup, navigateHome, navigatePlanVisit }) => {
     return (
       <Layout>
         <Modal
           visible={visible}
           backdropStyle={styles.backdrop}
-          onBackdropPress={() => removePopup(false)}
+          // onBackdropPress={() => removePopup(false)}
         >
           <Card disabled={true} style={styles.card}>
-            <Text style={{ flex: 1 }}>{`This tank will be empty in ${daysRemaining} days. Do you want to plan a visit for this tank?`}</Text>
+            <Text style={{ flex: 1 }}>{`${(() => {
+                let tanks = [lowTank, midTank, highTank].filter(tank => tank != "");
+                if (tanks.length === 1)  { return `${tanks[0]}`}
+                else if (tanks.length === 2)  { return `${tanks[0]} and ${tanks[1]}`}
+                else if (tanks.length === 3)  { return `${tanks[0]}, ${tanks[1]}, and ${tanks[2]}`}
+              })()} may be empty in ${(() => {
+                let days = [lowDays, midDays, highDays].filter(val => val >= 0);
+                if (days.length === 1)  { return `${days[0]}`}
+                else if (days.length === 2)  { return `${days[0]} and ${days[1]}`}
+                else if (days.length === 3)  { return `${days[0]}, ${days[1]}, and ${days[2]}`}
+              })()} days respectivly. Do you want to plan a visit?`}</Text>
             <Button 
               onPress={() => {removePopup(false), navigatePlanVisit(true)}}
             >
                 PLAN NEXT VISIT
             </Button>
             <Button
-              onPress={() => {removePopup(false), navigateHome(true)}}
+              onPress={() => removePopup(false)}
               style={{ marginTop: 15 }}
             >
-              GO HOME
+              NO, GO HOME
             </Button>
           </Card>
         </Modal>
