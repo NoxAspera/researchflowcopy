@@ -12,31 +12,33 @@ import { Layout } from "@ui-kitten/components";
 import React from "react";
 import { NavigationType } from "./types";
 //const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
-import { tankTrackerSpinUp, updateDirectories} from '../scripts/APIRequests';
-import * as Permissions from "expo-permissions";
-import * as FileSystem from 'expo-file-system'
+import {updateDirectories, tankTrackerOffline} from '../scripts/APIRequests';
+import * as Network from 'expo-network'
 
 async function readUpdates()
 {
-  if(Platform.OS == "android"){
-    const permsissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync()
+ 
+}
 
-    if (!permsissions.granted)
+async function startup()
+{
+  let check = await Network.useNetworkState()
+  //console.log(!check.isConnected)
+  if(check.isConnected)
     {
-      const permsissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync()
-      if(!permsissions.granted)
-      {
-        alert("ResearchFlow needs your permission to update files offline. Please restart and grant permissions to use the app offline, or to finalize offline updates")
-      }
+      readUpdates();
+      updateDirectories();
+      return 
     }
-  }
+  else
+  {
+    tankTrackerOffline()
+  } 
 }
 
 export default function HomeScreen({ navigation }: NavigationType) {
 
-  tankTrackerSpinUp()
-  readUpdates();
-  updateDirectories("");
+  startup()
   
   return (
     <Layout style={styles.container}>

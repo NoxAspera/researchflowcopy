@@ -93,16 +93,55 @@ let tankDict: Map<string, TankRecord[]>;
 
 let tankTrackerSha = ""
 
-export async function updateDirectories(path: string)
+async function loop(path: string)
 {
+    FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + path)
+    //console.log("here")
     let response = (await getDirectory(path))
     if(response.success)
     {
         response.data.forEach(element => {
-            FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + path + `/${element}`)
-            updateDirectories(path + `/${element}`)
+            //console.log(FileSystem.documentDirectory + path + `/${element}`)
+            loop(path + `/${element}`)
         });
     }
+}
+
+export async function tankTrackerOffline()
+{
+    let string = await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "tank_tracker/names")
+    let names = string.split("\n")
+    tankDict = new Map()
+    names.forEach(element => {
+        tankDict.set(element, undefined)
+    })
+}
+
+export async function updateDirectories()
+{
+    let response = (await getDirectory(""))
+    if(response.success)
+    {
+        response.data.forEach(element => {
+            loop(`${element}`)
+        });
+    }
+    loop("site_notes/mobile")
+    await tankTrackerSpinUp()
+    let list = getTankList()
+    let names = ""
+    list.forEach(value => {
+        names += (value + "\n")
+    })
+    await FileSystem.writeAsStringAsync(FileSystem.documentDirectory + "tank_tracker/names", names)
+
+    FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + "bad_data")
+    response = await getBadDataSites()
+    let entries = response.data
+    entries.forEach(element => {
+        loop(`bad_data/${element}`)
+    });
+
 }
 
 /**
@@ -132,7 +171,6 @@ async function setFile(bodyString: string, url: string)
     
     try {
         const response = await fetch(requestOptions);
-        console.log(response)
         if (response.ok) {
             const data = await response.json();
             return { success: true, data };
@@ -176,7 +214,6 @@ export async function setVisitFile(visit: visit, commitMessage: string)
     {
         bodyString += '}'
     }
-    //console.log(bodyString)
     return setFile(bodyString, url)   
 }
 
@@ -214,7 +251,6 @@ export async function setTankTracker()
         }
     )
 
-    //console.log(plainfullDoc)
     let newContent = csvify(plainfullDoc)
     const fullDoc = btoa(newContent)
 
@@ -230,7 +266,6 @@ export async function setTankTracker()
  */
 export function getTankEntries(key:string)
 {
-    //console.log(tankDict.get(key))
     return tankDict.get(key)
 }
 
@@ -250,8 +285,7 @@ export function getLatestTankEntry(key:string): TankRecord | undefined {
  */
 export function getTankList()
 {   
-    let id_array = []
-    console.log(Array.from(tankDict.keys()))
+    //console.log(tankDict)
     return Array.from(tankDict.keys())
 }
 /**
@@ -280,7 +314,6 @@ export async function tankTrackerSpinUp()
     )
     try {
         let response = await fetch(requestOptions);
-        //console.log(response)
         if (response.ok) {
             let data = await response.json();
             tankTrackerSha = data.sha
@@ -297,19 +330,16 @@ export async function tankTrackerSpinUp()
     
                     response = await fetch(requestOptions)
                     data = await response.json();
-                    //console.log("success")
+                
                 }
-
             // Decode base64 content
             let decodedContent = atob(data.content);
-            console.log(decodedContent.charCodeAt(0));
             // Remove UTF-8 BOM if it exists (0xEF, 0xBB, 0xBF)
             if (decodedContent.charCodeAt(0) === 0xEF && decodedContent.charCodeAt(1) === 0xBB && decodedContent.charCodeAt(2) === 0xBF) {
                 // Remove the BOM (first 3 characters)
                 decodedContent = decodedContent.slice(3);
             }
             let tankData = await csv().fromString(decodedContent);
-            //console.log(tankData)
             let id_array: string[] =[]
             
             tankData.forEach(value => 
@@ -340,6 +370,13 @@ export async function tankTrackerSpinUp()
  */
 export async function getBadDataSites()
 {
+    let check = await Network.getNetworkStateAsync()
+
+    if(!check.isConnected)
+        {
+           return {success: true, data: await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + "bad_data")}
+        }
+
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad`;
 
     let headers = new Headers();
@@ -451,7 +488,6 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
     let sha = ""
     try {
         const response = await fetch(requestOptions);
-        //console.log(response)
         if (response.ok) {
             const data = await response.json();
             let plainContent = atob(data.content);
@@ -460,8 +496,6 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
             sha = data.sha
             newFile = headers + entries + '\n' + newEntry
             newFile = btoa(newFile)
-            //console.log(headers);
-            //console.log(entries);
         } 
         else {
             const errorData = await response.json();
@@ -505,13 +539,11 @@ export async function getInstrumentSite(path: string) {
  * @returns the contents of the file as a string
  */
 export async function setInstrumentFile(path: string, content: string, commitMessage: string, mobile:boolean, site?: string) {
-    //console.log("here")
     const pullResponse = (await getFile(path))
     if(pullResponse.error)
     {
         return {success: false, error: pullResponse.error}
     }
-    //console.log(pullResponse)
     const hash = pullResponse.data.sha
     const existingContent = atob(pullResponse.data.content)
     const maintenanceHeader = `Maintenance Log\n---`
@@ -523,8 +555,6 @@ export async function setInstrumentFile(path: string, content: string, commitMes
         staticHeader = staticHeaderNoLocation + locationHeader
     }
     const existingNotes = existingContent.substring(existingContent.indexOf(maintenanceHeader) + maintenanceHeader.length) 
-    //console.log(existingNotes)
-    //console.log(staticHeader)
     const fullDoc = btoa(staticHeader +"\n" + content + existingNotes)
 
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}.md`;
@@ -539,6 +569,13 @@ export async function setInstrumentFile(path: string, content: string, commitMes
  */
 export async function getDirectory(path: string)
 {
+    let check = await Network.getNetworkStateAsync()
+
+    if(!check.isConnected)
+    {
+       return {success: true, data: await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + path)}
+    }
+
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}`
     const headers = new Headers();
     headers.append("User-Agent", "ResearchFlow");
@@ -600,7 +637,7 @@ async function getFile(path: string)
     )
     try {
         const response = await fetch(requestOptions);
-        console.log(response)
+        //console.log(response)
         if (response.ok) {
             const data = await response.json();
             return { success: true, data };
