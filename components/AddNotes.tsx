@@ -5,7 +5,7 @@
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
-import { StyleSheet, KeyboardAvoidingView, Platform, Modal, View } from 'react-native';
+
 import React, { useState, useEffect } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -20,6 +20,7 @@ import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
+import * as Network from 'expo-network'
 
 /**
  * @author Megan Ostlie
@@ -29,9 +30,19 @@ import { ThemeContext } from './ThemeContext';
  * @returns a ParsedData object that contains the information of the given document
  */
 async function processNotes(siteName: string) {
-  const fileContents = await getFileContents(`site_notes/${siteName}`);
-  if(fileContents.data){
-    return parseNotes(fileContents.data)
+  let check = await Network.useNetworkState()
+
+  if(check.isConnected)
+  {
+    const fileContents = await getFileContents(`site_notes/${siteName}`);
+    if(fileContents.data)
+    {
+      return parseNotes(fileContents.data)
+    }
+    else
+    {
+      return null
+    }
   }
   else
   {

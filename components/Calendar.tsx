@@ -20,19 +20,11 @@ import { Calendar, CalendarList,Agenda } from "react-native-calendars";
 import { customTheme } from './CustomTheme';
 import PlanVisit from "./PlanVisit";
 import ViewNotes from "./ViewNotes";
+import Network from "expo-network"
 
 let visitDict: Map<string, visit[]>
 
-function handlePress(date: DateData)
-{
-  let temp = visitDict.get(date.dateString)
-  
-}
-
-export function getVisitDictionary()
-{
-  return visitDict.get()
-}
+let online = false
 
 export default function CalendarScreen({ navigation }: NavigationType) {
   const [markedDates, setMarkedDates] = useState({});
@@ -43,36 +35,41 @@ export default function CalendarScreen({ navigation }: NavigationType) {
   useEffect(() => {
     async function fetchData() {
       try{
-        let response = await getFileContents("researchflow_data/visits")
-        if (response.success)
+        let check = await  Network.useNetworkState()
+        online = check.isConnected
+        if(check.isConnected)
         {
-          visitDict = new Map()
-          let visits: visit[] = processVisits(response.data)
-          visits.forEach((value) => {
-            if(visitDict.has(value.date))
-            {
-              let temp = visitDict.get(value.date)
-              temp.push(value)
-              visitDict.set(value.date,temp)
-              console.log("overlap")
-            }
-            else
-            {
-              visitDict.set(value.date,[value])
-            }
+          let response = await getFileContents("researchflow_data/visits")
+          if (response.success)
+          {
+            visitDict = new Map()
+            let visits: visit[] = processVisits(response.data)
+            visits.forEach((value) => {
+              if(visitDict.has(value.date))
+              {
+                let temp = visitDict.get(value.date)
+                temp.push(value)
+                visitDict.set(value.date,temp)
+                console.log("overlap")
+              }
+              else
+              {
+                visitDict.set(value.date,[value])
+              }
 
-            if(markedDates)
-            {
-              setMarkedDates(prevmarkedDates => ({...prevmarkedDates,[value.date] :{marked: true, dotColor: 'blue'}}))
-            }
-          })
-          console.log(visitDict.size)
-        }
-        else
-        {
-          setMessage(`Error: ${response.error}`);
-          setMessageColor(customTheme["color-danger-700"]);
-          setVisible(true);
+              if(markedDates)
+              {
+                setMarkedDates(prevmarkedDates => ({...prevmarkedDates,[value.date] :{marked: true, dotColor: 'blue'}}))
+              }
+            })
+            //console.log(visitDict.size)
+          }
+          else
+          {
+            setMessage(`Error: ${response.error}`);
+            setMessageColor(customTheme["color-danger-700"]);
+            setVisible(true);
+          }
         }
       }
       catch(error)
@@ -95,7 +92,7 @@ export default function CalendarScreen({ navigation }: NavigationType) {
         />
         <Calendar
           onDayPress={Date => {
-            if (visitDict.has(Date.dateString)){
+            if (online && visitDict.has(Date.dateString)){
               navigation.push("ViewNotes", {site: "", from: "Calendar", visits: visitDict.get(Date.dateString)})
             }
           }}

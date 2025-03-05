@@ -17,6 +17,7 @@ import { NavigationType, routeProp } from "./types";
 import {setInstrumentFile, getInstrumentSite} from "../scripts/APIRequests";
 import { ScrollView } from "react-native-gesture-handler";
 import PopupProp from './Popup';
+import Network from 'expo-network'
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -39,7 +40,8 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
   useEffect(() => {
     const fetchSite = async () => {
-      if (site.includes("LGR")) {
+      let check = await Network.useNetworkState()
+      if (site.includes("LGR") && check.isConnected) {
         try {
           const response = await getInstrumentSite(site);
           if (response.success) {

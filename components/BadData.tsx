@@ -19,6 +19,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { setBadData, getBadDataFiles } from "../scripts/APIRequests";
 import PopupProp from "./Popup"
 import { ThemeContext } from './ThemeContext';
+import Network from 'expo-network'
 
 export default function BadData({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -35,9 +36,7 @@ export default function BadData({ navigation }: NavigationType) {
   const [endDateValue, setEndDateValue] = useState<Date | null>(null);
   const [nameValue, setNameValue] = useState("");
   const [reasonValue, setReasonValue] = useState("");
-  const [selectedFileIndex, setSelectedFileIndex] = useState<
-    IndexPath | undefined
-  >(undefined);
+  const [selectedFileIndex, setSelectedFileIndex] = useState<IndexPath | undefined>(undefined);
   const [fileOptions, setFileOptions] = useState<string[]>([]);
   const [instrument, setInstrument] = useState("");
 
@@ -50,15 +49,20 @@ export default function BadData({ navigation }: NavigationType) {
 
   useEffect(() => {
     const fetchBadDataFiles = async () => {
-      try {
-        const response = await getBadDataFiles(site);
-        if (response.success) {
-          setFileOptions(response.data || []); // Set the file names as options
-        } else {
-          alert(`Error fetching files: ${response.error}`);
+      let check = await  Network.useNetworkState()
+      if(check.isConnected)
+      {
+        try {
+          
+          const response = await getBadDataFiles(site);
+          if (response.success) {
+            setFileOptions(response.data || []); // Set the file names as options
+          } else {
+            alert(`Error fetching files: ${response.error}`);
+          }
+        } catch (error) {
+          console.error("Error fetching bad data files:", error);
         }
-      } catch (error) {
-        console.error("Error fetching bad data files:", error);
       }
     };
 
