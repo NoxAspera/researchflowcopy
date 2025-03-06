@@ -30,6 +30,7 @@ export type RootStackParamList = {
     Home: undefined;
     ViewNotifications: undefined;
     NotificationsButton: undefined;
+    Calendar: undefined;
 };
 
 // Type for the navigation prop for the HomeScreen
