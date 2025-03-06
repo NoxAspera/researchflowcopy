@@ -25,6 +25,7 @@ import ViewNotifications from './components/ViewNotifications';
 import { NavigationType } from './components/types';
 import { Button, Icon, IconElement } from '@ui-kitten/components';
 import CalendarScreen from './components/Calendar';
+import { LogBox } from "react-native";
 
 const Stack = createStackNavigator();
 type ThemeType = 'light' | 'dark';
@@ -32,6 +33,7 @@ type ThemeType = 'light' | 'dark';
 export default function App() {
   // used for swapping between light and dark mode
   // Initialize state with a type
+  LogBox.ignoreAllLogs(true)
   const [theme, setTheme] = useState<ThemeType>('light');
 
   // Merge custom theme with Eva's base theme
