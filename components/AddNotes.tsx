@@ -12,6 +12,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { buildNotes, copyTankRecord, Entry } from '../scripts/Parsers';
 import TextInput from './TextInput'
 import NoteInput from './NoteInput'
+import { KeyboardAvoidingView, StyleSheet, Modal,  View, TouchableOpacity } from 'react-native';
 import { IndexPath, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
 import { setSiteFile, getFileContents, getLatestTankEntry, getTankList, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile } from '../scripts/APIRequests';
@@ -32,17 +33,15 @@ import * as Network from 'expo-network'
 async function processNotes(siteName: string) {
   let check = await Network.useNetworkState()
 
-  if(check.isConnected)
+  if(!check.isConnected)
   {
-    const fileContents = await getFileContents(`site_notes/${siteName}`);
-    if(fileContents.data)
-    {
-      return parseNotes(fileContents.data)
-    }
-    else
-    {
-      return null
-    }
+    return
+  }
+
+  const fileContents = await getFileContents(`site_notes/${siteName}`);
+  if(fileContents.data)
+  {
+    return parseNotes(fileContents.data)
   }
   else
   {
