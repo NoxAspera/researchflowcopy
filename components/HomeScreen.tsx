@@ -87,11 +87,13 @@ export default function HomeScreen({ navigation }: NavigationType) {
           }
         />
 
-        {/* CALENDAR */}
+        {/* DIAGNOSTICS */}
         <HomeButtonProp
           text="DIAGNOSTICS"
           color="#C3A2E4"
-          onPress={openURL}
+          onPress={() =>
+            navigation.navigate("SelectSite", { from: "Diagnostics" })
+          }
         />
       </ScrollView>
     </Layout>

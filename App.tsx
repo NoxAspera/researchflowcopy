@@ -25,6 +25,7 @@ import SettingsButton from './components/SettingsButton';
 import ViewNotifications from './components/ViewNotifications';
 import { NavigationType } from './components/types';
 import { Button, Icon, IconElement } from '@ui-kitten/components';
+import Diagnostics from './components/Diagnostics';
 
 const Stack = createStackNavigator();
 type ThemeType = 'light' | 'dark';
@@ -171,6 +172,16 @@ export default function App() {
               ),
             })}/>
             <Stack.Screen name="Calendar" component={Calendar} options={({ navigation }) => ({
+              headerRight: () => (
+                [<Button testID='notificationsButton'
+                    onPress={() => navigation.navigate('ViewNotifications')} 
+                    appearance="ghost"
+                    accessoryLeft={bellIcon} 
+                    size='large'/>,
+                <SettingsButton/>]
+              ),
+            })}/>
+            <Stack.Screen name="Diagnostics" component={Diagnostics} options={({ navigation }) => ({
               headerRight: () => (
                 [<Button testID='notificationsButton'
                     onPress={() => navigation.navigate('ViewNotifications')} 
