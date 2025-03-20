@@ -34,7 +34,7 @@ const VisitPopupProp: React.FC<VisitPUProp> = ({ lowTank, lowDays, midTank, midD
           visible={visible}
           backdropStyle={styles.backdrop}
         >
-          <Card disabled={true} style={styles.card} status='danger'>
+          <Card disabled={true} style={styles.card} status='warning'>
             <Text style={{ flex: 1 }}>{`${(() => {
                 let tanks = [lowTank, midTank, highTank].filter(tank => tank != "");
                 if (tanks.length === 1)  { return `${tanks[0]}`}
@@ -48,7 +48,7 @@ const VisitPopupProp: React.FC<VisitPUProp> = ({ lowTank, lowDays, midTank, midD
               })()} days respectivly. Do you want to plan a visit?`}</Text>
             <Button 
               onPress={() => {removePopup(false), navigatePlanVisit(true)}}
-              style={{ marginTop: 15, backgroundColor: customTheme["color-danger-500"] }}
+              style={{ marginTop: 15, backgroundColor: "#fcba00" }}
             >
                 YES, PLAN NEXT VISIT
             </Button>

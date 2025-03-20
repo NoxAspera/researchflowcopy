@@ -154,11 +154,8 @@ export default function AddNotes({ navigation }: NavigationType) {
     const mid = useRef<any>(null);
     const high = useRef<any>(null);
     const [tankPredictorVisibility, setTankPredictorVisibility] = useState(false);
-    const [lowTank, setLowTank] = useState("");
     const [lowDaysRemaining, setLowDaysRemaining] = useState(-1);
-    const [midTank, setMidTank] = useState("");
     const [midDaysRemaining, setMidDaysRemaining] = useState(-1);
-    const [highTank, setHighTank] = useState("");
     const [highDaysRemaining, setHighDaysRemaining] = useState(-1);
 
     function daysUntilEmpty(prevPress, prevDate, currPress) {
@@ -191,8 +188,6 @@ export default function AddNotes({ navigation }: NavigationType) {
 
     function checkIfRefillIsNeeded() {
       // get tank values from previous entries
-      console.log("checking tank algo");
-      // need to get previous values before this gets called since it is being checked after the current values are pushed
       let prevlow = low.current
       let prevmid = mid.current
       let prevhigh = high.current
@@ -202,18 +197,21 @@ export default function AddNotes({ navigation }: NavigationType) {
       let midDays = daysUntilEmpty(parseInt(prevmid.pressure), prevmid.updatedAt, parseInt(midPressure));
       let highDays = daysUntilEmpty(parseInt(prevhigh.pressure), prevhigh.updatedAt, parseInt(highPressure));
 
+      // console.log(`
+      //   Low Days: ${lowDays}
+      //   Mid Days: ${midDays}
+      //   highDays: ${highDays}`);
+
+      // if any of the tanks are predicted to be empty in 90 days or less, send a warning
       if (lowDays <= 90) {
-        setLowTank(prevlow.tankId);
         setLowDaysRemaining(lowDays);
         setTankPredictorVisibility(true);
       }
       if (midDays <= 90) {
-        setMidTank(prevmid.tankId);
         setMidDaysRemaining(midDays);
         setTankPredictorVisibility(true);
       }
       if (highDays <= 90) {
-        setHighTank(prevhigh.tankId);
         setHighDaysRemaining(highDays);
         setTankPredictorVisibility(true);
       }
@@ -623,7 +621,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               midDays={midDaysRemaining}
               highTank={highId}
               highDays={highDaysRemaining}
-              visible={true}
+              visible={tankPredictorVisibility}
               removePopup={setTankPredictorVisibility}
               navigateHome={navigateHome}
               navigatePlanVisit={navigatePlanVisit} />
