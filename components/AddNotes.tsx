@@ -53,7 +53,6 @@ export default function AddNotes({ navigation }: NavigationType) {
     const { site, info } = route.params || {}
     const themeContext = React.useContext(ThemeContext);
     const isDarkMode = themeContext.theme === 'dark';
-    var prevTanks = [];
 
     // State to hold parsed data
     const [data, setData] = useState<ParsedData | null>(null);
@@ -92,11 +91,6 @@ export default function AddNotes({ navigation }: NavigationType) {
     
         fetchInstrumentNames();
       }, [site]);
-
-    // get previous tank info
-    // useEffect(() => {
-    //   prevTanks = getPreviousTanks();
-    // }, [site]);  
 
     //Get latest notes entry from site
     let latestEntry = null;
@@ -155,10 +149,6 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [loadingValue, setLoadingValue] = useState(false);
     
     // tank predictor
-    // current date and pressures
-    // let currLow = 0;
-    // let currMid = 0;
-    // let currHigh = 0;
     // pressures from previous date
     const low = useRef<any>(null);
     const mid = useRef<any>(null);
@@ -173,9 +163,7 @@ export default function AddNotes({ navigation }: NavigationType) {
 
     function daysUntilEmpty(prevPress, prevDate, currPress) {
       // get change of pressure over time, assume it is linear
-      // currPress and prevPress are most likely wrong
       let changeOfPress = currPress - prevPress;
-      console.log(`${currPress} - ${prevPress} = ${changeOfPress}`);
 
       // if change of pressure is positive, then it got replaced, no need to check date
       if (changeOfPress > 0) {
@@ -188,18 +176,16 @@ export default function AddNotes({ navigation }: NavigationType) {
       // let prevTime = new Date(prevDate).getTime();
       let prevTime = new Date("2027-01-01").getTime(); // use far away date for testing purposes
       let changeOfDate = (currTime - prevTime) / (86400000); // get the difference of time in days
-      console.log(`change of date: ${changeOfDate}`);
+
       // if changeOfDate is 0, then the previous entry was also made today
       if (changeOfDate == 0) {
         return 365;
       }
       
       let rateOfDecay = changeOfPress / changeOfDate; // measured in psi lost per day
-      console.log(`Rate of decay: ${rateOfDecay}`);
 
       // solve for when the tank should be under 500 psi
       let days = Math.trunc((-prevPress / rateOfDecay) - changeOfDate);
-      // console.log(`Days left: ${days}`);
       return days;
     }
 
@@ -211,17 +197,10 @@ export default function AddNotes({ navigation }: NavigationType) {
       let prevmid = mid.current
       let prevhigh = high.current
 
-      // console.log(`Low: ${low}`);
       // compare pressure from prev entry to current entry to see if tank will be empty soon
-      // last parameter is wrong
       let lowDays = daysUntilEmpty(parseInt(prevlow.pressure), prevlow.updatedAt, parseInt(lowPressure));
       let midDays = daysUntilEmpty(parseInt(prevmid.pressure), prevmid.updatedAt, parseInt(midPressure));
       let highDays = daysUntilEmpty(parseInt(prevhigh.pressure), prevhigh.updatedAt, parseInt(highPressure));
-
-      console.log(`
-        lowDays: ${lowDays}
-        midDays: ${midDays}
-        highDays: ${highDays}`);
 
       if (lowDays <= 90) {
         setLowTank(prevlow.tankId);
@@ -239,14 +218,6 @@ export default function AddNotes({ navigation }: NavigationType) {
         setTankPredictorVisibility(true);
       }
     }
-
-    // grab the previous entries low, medium, and high data
-    // function getPreviousTanks() {
-    //   console.log(`Lowid at page load: ${lowid}`);
-    //   return [getLatestTankEntry(lowId),
-    //     getLatestTankEntry(midId),
-    //     getLatestTankEntry(highId)]
-    // }
 
     //method will warn user if fields haven't been input
     function checkTextEntries(){
@@ -646,13 +617,13 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* tank is low popup */}
             <VisitPopupProp
-              lowTank={lowValue}
+              lowTank={lowId}
               lowDays={lowDaysRemaining}
-              midTank={midValue}
+              midTank={midId}
               midDays={midDaysRemaining}
-              highTank={highValue}
+              highTank={highId}
               highDays={highDaysRemaining}
-              visible={tankPredictorVisibility}
+              visible={true}
               removePopup={setTankPredictorVisibility}
               navigateHome={navigateHome}
               navigatePlanVisit={navigatePlanVisit} />

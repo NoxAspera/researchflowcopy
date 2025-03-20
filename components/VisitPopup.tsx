@@ -10,6 +10,7 @@ import { Button, Card, Layout, Modal, Text } from '@ui-kitten/components';
 import React from 'react'
 import { StyleSheet, ColorValue } from "react-native"
 import { NavigationType } from './types';
+import { customTheme } from './CustomTheme';
 
 interface VisitPUProp {
   visible: boolean; 
@@ -28,13 +29,12 @@ interface VisitPUProp {
 // need to have both of these buttons navigate to different pages
 const VisitPopupProp: React.FC<VisitPUProp> = ({ lowTank, lowDays, midTank, midDays, highTank, highDays, visible, removePopup, navigateHome, navigatePlanVisit }) => {
     return (
-      <Layout>
+      <Layout style={{flex: 1}}>
         <Modal
           visible={visible}
           backdropStyle={styles.backdrop}
-          // onBackdropPress={() => removePopup(false)}
         >
-          <Card disabled={true} style={styles.card}>
+          <Card disabled={true} style={styles.card} status='danger'>
             <Text style={{ flex: 1 }}>{`${(() => {
                 let tanks = [lowTank, midTank, highTank].filter(tank => tank != "");
                 if (tanks.length === 1)  { return `${tanks[0]}`}
@@ -48,12 +48,13 @@ const VisitPopupProp: React.FC<VisitPUProp> = ({ lowTank, lowDays, midTank, midD
               })()} days respectivly. Do you want to plan a visit?`}</Text>
             <Button 
               onPress={() => {removePopup(false), navigatePlanVisit(true)}}
+              style={{ marginTop: 15, backgroundColor: customTheme["color-danger-500"] }}
             >
-                PLAN NEXT VISIT
+                YES, PLAN NEXT VISIT
             </Button>
             <Button
               onPress={() => removePopup(false)}
-              style={{ marginTop: 15 }}
+              style={{ marginTop: 15, backgroundColor: "#9c9c9c" }}
             >
               NO, GO HOME
             </Button>
@@ -65,10 +66,11 @@ const VisitPopupProp: React.FC<VisitPUProp> = ({ lowTank, lowDays, midTank, midD
 
 const styles = StyleSheet.create({
     backdrop: {
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     card: {
-      backgroundColor: 'blue',
+      margin: 15,
+      backgroundColor: "#e3e3e3",
     }
     });
 
