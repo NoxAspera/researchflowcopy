@@ -53,6 +53,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     const { site, info } = route.params || {}
     const themeContext = React.useContext(ThemeContext);
     const isDarkMode = themeContext.theme === 'dark';
+    var prevTanks = [];
 
     // State to hold parsed data
     const [data, setData] = useState<ParsedData | null>(null);
@@ -91,6 +92,11 @@ export default function AddNotes({ navigation }: NavigationType) {
     
         fetchInstrumentNames();
       }, [site]);
+
+    // get previous tank info
+    // useEffect(() => {
+    //   prevTanks = getPreviousTanks();
+    // }, [site]);  
 
     //Get latest notes entry from site
     let latestEntry = null;
@@ -149,8 +155,14 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [loadingValue, setLoadingValue] = useState(false);
     
     // tank predictor
-    let prevDate = "";
-    let prevPressure = 0;
+    // current date and pressures
+    // let currLow = 0;
+    // let currMid = 0;
+    // let currHigh = 0;
+    // pressures from previous date
+    const low = useRef<any>(null);
+    const mid = useRef<any>(null);
+    const high = useRef<any>(null);
     const [tankPredictorVisibility, setTankPredictorVisibility] = useState(false);
     const [lowTank, setLowTank] = useState("");
     const [lowDaysRemaining, setLowDaysRemaining] = useState(-1);
@@ -159,13 +171,11 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [highTank, setHighTank] = useState("");
     const [highDaysRemaining, setHighDaysRemaining] = useState(-1);
 
-    function daysUntilEmpty(currPress, currDate, prevPress, prevDate) {
-      // account for edge case where tank is replaced, so its prev pressure is at 0
-      if (prevPress == 0) {
-        return 365;
-      }
+    function daysUntilEmpty(prevPress, prevDate, currPress) {
       // get change of pressure over time, assume it is linear
+      // currPress and prevPress are most likely wrong
       let changeOfPress = currPress - prevPress;
+      console.log(`${currPress} - ${prevPress} = ${changeOfPress}`);
 
       // if change of pressure is positive, then it got replaced, no need to check date
       if (changeOfPress > 0) {
@@ -173,15 +183,23 @@ export default function AddNotes({ navigation }: NavigationType) {
       }
 
       // get date difference
-      let currTime = new Date(currDate).getTime();
-      let prevTime = new Date(prevDate).getTime();
-      let changeOfDate = (currTime - prevTime) / (864000000); // get the difference of time in days
-
+      // let currTime = new Date().getTime();
+      let currTime = new Date("2027-04-04").getTime(); // use far away date for testing purposes
+      // let prevTime = new Date(prevDate).getTime();
+      let prevTime = new Date("2027-01-01").getTime(); // use far away date for testing purposes
+      let changeOfDate = (currTime - prevTime) / (86400000); // get the difference of time in days
+      console.log(`change of date: ${changeOfDate}`);
+      // if changeOfDate is 0, then the previous entry was also made today
+      if (changeOfDate == 0) {
+        return 365;
+      }
+      
       let rateOfDecay = changeOfPress / changeOfDate; // measured in psi lost per day
+      console.log(`Rate of decay: ${rateOfDecay}`);
 
       // solve for when the tank should be under 500 psi
-      let days = -1600 / rateOfDecay;
-      console.log(`Days left: ${days}`);
+      let days = Math.trunc((-prevPress / rateOfDecay) - changeOfDate);
+      // console.log(`Days left: ${days}`);
       return days;
     }
 
@@ -189,31 +207,46 @@ export default function AddNotes({ navigation }: NavigationType) {
       // get tank values from previous entries
       console.log("checking tank algo");
       // need to get previous values before this gets called since it is being checked after the current values are pushed
-      const low = getLatestTankEntry(lowId)
-      const mid = getLatestTankEntry(midId)
-      const high = getLatestTankEntry(highId)
+      let prevlow = low.current
+      let prevmid = mid.current
+      let prevhigh = high.current
 
+      // console.log(`Low: ${low}`);
       // compare pressure from prev entry to current entry to see if tank will be empty soon
-      // parameters need to be swpapped
-      let lowDays = daysUntilEmpty(low.pressure, low.updatedAt, prevPressure, prevDate);
-      let midDays = daysUntilEmpty(mid.pressure, mid.updatedAt, prevPressure, prevDate);
-      let highDays = daysUntilEmpty(high.pressure, high.updatedAt, prevPressure, prevDate);
+      // last parameter is wrong
+      let lowDays = daysUntilEmpty(parseInt(prevlow.pressure), prevlow.updatedAt, parseInt(lowPressure));
+      let midDays = daysUntilEmpty(parseInt(prevmid.pressure), prevmid.updatedAt, parseInt(midPressure));
+      let highDays = daysUntilEmpty(parseInt(prevhigh.pressure), prevhigh.updatedAt, parseInt(highPressure));
+
+      console.log(`
+        lowDays: ${lowDays}
+        midDays: ${midDays}
+        highDays: ${highDays}`);
+
       if (lowDays <= 90) {
-        setLowTank(low.tankId);
+        setLowTank(prevlow.tankId);
         setLowDaysRemaining(lowDays);
         setTankPredictorVisibility(true);
       }
       if (midDays <= 90) {
-        setMidTank(mid.tankId);
+        setMidTank(prevmid.tankId);
         setMidDaysRemaining(midDays);
         setTankPredictorVisibility(true);
       }
       if (highDays <= 90) {
-        setHighTank(high.tankId);
+        setHighTank(prevhigh.tankId);
         setHighDaysRemaining(highDays);
         setTankPredictorVisibility(true);
       }
     }
+
+    // grab the previous entries low, medium, and high data
+    // function getPreviousTanks() {
+    //   console.log(`Lowid at page load: ${lowid}`);
+    //   return [getLatestTankEntry(lowId),
+    //     getLatestTankEntry(midId),
+    //     getLatestTankEntry(highId)]
+    // }
 
     //method will warn user if fields haven't been input
     function checkTextEntries(){
@@ -277,145 +310,145 @@ export default function AddNotes({ navigation }: NavigationType) {
       const hours = String(now.getUTCHours()).padStart(2, "0");
       const minutes = String(now.getUTCMinutes()).padStart(2, "0");
       const seconds = String(now.getUTCSeconds()).padStart(2, "0");
-        
-        // create an entry object data that will be sent off to the repo
-        let data: Entry = 
+      
+      // create an entry object data that will be sent off to the repo
+      let data: Entry = 
+      {
+        time_in: `${year}-${month}-${day} ${timeValue}`,
+        time_out: `${year}-${month}-${day} ${hours}:${minutes}`,
+        names: nameValue,
+        instrument: instrumentInput ? instrumentInput: null,
+        n2_pressure: n2Value ? n2Value: null,
+        lts: LTSignored ? null:
         {
-          time_in: `${year}-${month}-${day} ${timeValue}`,
-          time_out: `${year}-${month}-${day} ${hours}:${minutes}`,
-          names: nameValue,
-          instrument: instrumentInput ? instrumentInput: null,
-          n2_pressure: n2Value ? n2Value: null,
-          lts: LTSignored ? null:
-          {
-            id: ltsId,
-            value: ltsValue,
-            unit: "ppm",
-            pressure: ltsPressure
-          },
-          low_cal:
-          {
-            id:lowId,
-            value:lowValue,
-            unit:"ppm",
-            pressure: lowPressure
-          },
-          mid_cal:
-          {
-            id:midId,
-            value:midValue,
-            unit: "ppm",
-            pressure: midPressure
-          },
-          high_cal:
-          {
-            id:highId,
-            value:highValue,
-            unit: "ppm",
-            pressure: highPressure
-          },
-          additional_notes: notesValue 
-        };
+          id: ltsId,
+          value: ltsValue,
+          unit: "ppm",
+          pressure: ltsPressure
+        },
+        low_cal:
+        {
+          id:lowId,
+          value:lowValue,
+          unit:"ppm",
+          pressure: lowPressure
+        },
+        mid_cal:
+        {
+          id:midId,
+          value:midValue,
+          unit: "ppm",
+          pressure: midPressure
+        },
+        high_cal:
+        {
+          id:highId,
+          value:highValue,
+          unit: "ppm",
+          pressure: highPressure
+        },
+        additional_notes: notesValue 
+      };
 
-        const utcTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}Z`;
-        if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
-          removeTankFromSite(originalLts, utcTime);
-        }
-        if (ltsTankRecord) {
-          let ltsTank = copyTankRecord(ltsTankRecord);
-          ltsTank.location = site;
-          ltsTank.updatedAt = utcTime;
-          ltsTank.pressure = parseInt(ltsPressure);
-          ltsTank.userId = nameValue;
-          addEntrytoTankDictionary(ltsTank);
-        }
-        
-        if (originalLow && (!lowTankRecord || (originalLow.tankId != lowTankRecord.tankId))) {
-          removeTankFromSite(originalLow, utcTime);
-        }
-        if (lowTankRecord) {
-          let lowTank = copyTankRecord(lowTankRecord);
-          lowTank.location = site;
-          lowTank.updatedAt = utcTime;
-          lowTank.pressure = parseInt(lowPressure);
-          lowTank.userId = nameValue;
-          addEntrytoTankDictionary(lowTank);
-        }
+      const utcTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}Z`;
+      if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
+        removeTankFromSite(originalLts, utcTime);
+      }
+      if (ltsTankRecord) {
+        let ltsTank = copyTankRecord(ltsTankRecord);
+        ltsTank.location = site;
+        ltsTank.updatedAt = utcTime;
+        ltsTank.pressure = parseInt(ltsPressure);
+        ltsTank.userId = nameValue;
+        addEntrytoTankDictionary(ltsTank);
+      }
+      
+      if (originalLow && (!lowTankRecord || (originalLow.tankId != lowTankRecord.tankId))) {
+        removeTankFromSite(originalLow, utcTime);
+      }
+      if (lowTankRecord) {
+        let lowTank = copyTankRecord(lowTankRecord);
+        lowTank.location = site;
+        lowTank.updatedAt = utcTime;
+        lowTank.pressure = parseInt(lowPressure);
+        lowTank.userId = nameValue;
+        addEntrytoTankDictionary(lowTank);
+      }
 
-        if (originalMid && (!midTankRecord || (originalMid.tankId != midTankRecord.tankId))) {
-          removeTankFromSite(originalMid, utcTime);
+      if (originalMid && (!midTankRecord || (originalMid.tankId != midTankRecord.tankId))) {
+        removeTankFromSite(originalMid, utcTime);
+      }
+      if (midTankRecord) {
+        let midTank = copyTankRecord(midTankRecord);
+        midTank.location = site;
+        midTank.updatedAt = utcTime;
+        midTank.pressure = parseInt(midPressure);
+        midTank.userId = nameValue;
+        addEntrytoTankDictionary(midTank);
+      }
+
+      if (originalHigh && (!highTankRecord || (originalHigh.tankId != highTankRecord.tankId))) {
+        removeTankFromSite(originalHigh, utcTime);
+      }
+      if (highTankRecord) {
+        let highTank = copyTankRecord(highTankRecord);
+        highTank.location = site;
+        highTank.updatedAt = utcTime;
+        highTank.pressure = parseInt(highPressure);
+        highTank.userId = nameValue;
+        addEntrytoTankDictionary(highTank);
+      }
+
+      // send the request
+      const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
+      const tankResult = await setTankTracker();
+
+      let instMaintResult;
+      let instMaintResult2;
+
+      // If a new instrument was added
+      if (instrumentInput && (!originalInstrument || (originalInstrument != instrumentInput))) {
+        if (instrumentNames.includes(instrumentInput)) {
+          const notes = installedInstrumentNotes(utcTime);
+          instMaintResult = await setInstrumentFile(`instrument_maint/LGR_UGGA/${instrumentInput}`, notes, `Updated ${instrumentInput}.md`, true, site);
         }
-        if (midTankRecord) {
-          let midTank = copyTankRecord(midTankRecord);
-          midTank.location = site;
-          midTank.updatedAt = utcTime;
-          midTank.pressure = parseInt(midPressure);
-          midTank.userId = nameValue;
-          addEntrytoTankDictionary(midTank);
+      }
+
+      // If instrument was removed
+      if (originalInstrument && (!instrumentInput || (originalInstrument != instrumentInput))) {
+        if (instrumentNames.includes(originalInstrument)) {
+          const notes = removedInstrumentNotes(utcTime);
+          instMaintResult2 = await setInstrumentFile(`instrument_maint/LGR_UGGA/${originalInstrument}`, notes, `Updated ${originalInstrument}.md`, true, 'WBB - Spare');
         }
+      }
 
-        if (originalHigh && (!highTankRecord || (originalHigh.tankId != highTankRecord.tankId))) {
-          removeTankFromSite(originalHigh, utcTime);
+      // if the warning popup is visible, remove it
+      //if(visible2) { setVisible2(false); }
+
+      // remove spinner once we have results back
+      setLoadingValue(false);
+
+      // check to see if the request was ok, give a message based on that
+      if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success)) {
+        setMessage("File updated successfully!");
+        setMessageColor(customTheme['color-success-700']);
+        retHome(true);
+      } else {
+        if (result.error) {
+          setMessage(`Error: ${result.error}`);
+        } else if (tankResult.error) {
+          setMessage(`Error: ${tankResult.error}`);
+        } else if (instMaintResult && instMaintResult.error) {
+          setMessage(`Error: ${instMaintResult.error}`);
+        } else if (instMaintResult2 && instMaintResult2.error) {
+          setMessage(`Error: ${instMaintResult2.error}`);
         }
-        if (highTankRecord) {
-          let highTank = copyTankRecord(highTankRecord);
-          highTank.location = site;
-          highTank.updatedAt = utcTime;
-          highTank.pressure = parseInt(highPressure);
-          highTank.userId = nameValue;
-          addEntrytoTankDictionary(highTank);
-        }
-
-        // send the request
-        const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
-        const tankResult = await setTankTracker();
-
-        let instMaintResult;
-        let instMaintResult2;
-
-        // If a new instrument was added
-        if (instrumentInput && (!originalInstrument || (originalInstrument != instrumentInput))) {
-          if (instrumentNames.includes(instrumentInput)) {
-            const notes = installedInstrumentNotes(utcTime);
-            instMaintResult = await setInstrumentFile(`instrument_maint/LGR_UGGA/${instrumentInput}`, notes, `Updated ${instrumentInput}.md`, true, site);
-          }
-        }
-
-        // If instrument was removed
-        if (originalInstrument && (!instrumentInput || (originalInstrument != instrumentInput))) {
-          if (instrumentNames.includes(originalInstrument)) {
-            const notes = removedInstrumentNotes(utcTime);
-            instMaintResult2 = await setInstrumentFile(`instrument_maint/LGR_UGGA/${originalInstrument}`, notes, `Updated ${originalInstrument}.md`, true, 'WBB - Spare');
-          }
-        }
-
-        // if the warning popup is visible, remove it
-        //if(visible2) { setVisible2(false); }
-
-        // remove spinner once we have results back
-        setLoadingValue(false);
-
-        // check to see if the request was ok, give a message based on that
-        if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success)) {
-          setMessage("File updated successfully!");
-          setMessageColor(customTheme['color-success-700']);
-          retHome(true);
-        } else {
-          if (result.error) {
-            setMessage(`Error: ${result.error}`);
-          } else if (tankResult.error) {
-            setMessage(`Error: ${tankResult.error}`);
-          } else if (instMaintResult && instMaintResult.error) {
-            setMessage(`Error: ${instMaintResult.error}`);
-          } else if (instMaintResult2 && instMaintResult2.error) {
-            setMessage(`Error: ${instMaintResult2.error}`);
-          }
-          setMessageColor(customTheme['color-danger-700']);
-        }
-        setTimeout(() => {
-          setVisible(true);
-          visibleRef.current = true;
-        }, 100);
+        setMessageColor(customTheme['color-danger-700']);
+      }
+      setTimeout(() => {
+        setVisible(true);
+        visibleRef.current = true;
+      }, 100);
     };
 
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
@@ -549,6 +582,8 @@ export default function AddNotes({ navigation }: NavigationType) {
                 setOriginalLow(lowEntry);
                 setLowId(lowEntry.tankId);
                 setLowValue(lowEntry.co2.toString() + " ~ " + lowEntry.ch4.toString());
+                low.current = lowEntry;
+                // console.log(`lowEntry: ${low.current.pressure}`);
               }
             }
           }
@@ -561,6 +596,7 @@ export default function AddNotes({ navigation }: NavigationType) {
                 setOriginalMid(midEntry);
                 setmidId(midEntry.tankId);
                 setmidValue(midEntry.co2.toString() + " ~ " + midEntry.ch4.toString());
+                mid.current = midEntry;
               }
             } 
           }
@@ -573,6 +609,7 @@ export default function AddNotes({ navigation }: NavigationType) {
                 setOriginalHigh(highEntry);
                 setHighId(highEntry.tankId);
                 setHighValue(highEntry.co2.toString() + " ~ " + highEntry.ch4.toString());
+                high.current = highEntry;
               }
             }
           }
