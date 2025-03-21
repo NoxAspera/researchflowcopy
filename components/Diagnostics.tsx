@@ -1,7 +1,7 @@
 /**
  * Diagnostics
  * @author Megan Ostlie
- * 3/20/25
+ * 3/21/25
  *
  * This page is used for plotting up tank values and connecting to air.utah.edu diagnostics
  */
@@ -23,10 +23,25 @@ export default function Diagnostics({ navigation }: NavigationType) {
   let site = route.params?.site;
   const themeContext = React.useContext(ThemeContext);
   const isDarkMode = themeContext.theme === 'dark';
+  let siteName = site;
+  if (site.includes("mobile/")) {
+    siteName = site.replace("mobile/", "");
+  }
+  let date = new Date();
+  let year = date.getFullYear();
+  let month = String(date.getMonth() + 1).padStart(2, '0');
+  let day = String(date.getDate()).padStart(2, '0');
+  let today = `${year}-${month}-${day}`;
+
+  date.setDate(date.getDate() - 7);
+  year = date.getFullYear();
+  month = String(date.getMonth() + 1).padStart(2, '0');
+  day = String(date.getDate()).padStart(2, '0');
+  let lastWeek = `${year}-${month}-${day}`;
 
   const openURL = async () => {
       const url =
-      "https://air.utah.edu/s/diagnostics/?_inputs_&remove_failed_qc=false&color_by=%22QAQC_Flag%22&dates=%5B%222025-02-20%22%2C%222025-03-06%22%5D&column=%22%22&lvl=%22%22&instrument=%22%22&stid=%22%22&submit=0&sidebarCollapsed=false&sidebarItemExpanded=null";
+      `https://air.utah.edu/s/diagnostics/?_inputs_&remove_failed_qc=false&color_by=%22QAQC_Flag%22&dates=%5B%22${lastWeek}%22%2C%22${today}%22%5D&column=%22%22&lvl=%22%22&instrument=%22%22&stid=%22${siteName}%22&submit=0&sidebarCollapsed=false&sidebarItemExpanded=null`;
   
       const supported = await Linking.canOpenURL(url);
       if (supported) {
