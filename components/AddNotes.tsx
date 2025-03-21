@@ -15,31 +15,13 @@ import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text, Icon, CheckBox } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
 import { setSiteFile, getFileContents, getLatestTankEntry, getTankList, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData } from '../scripts/APIRequests';
-import { parseNotes, ParsedData } from '../scripts/Parsers'
+import { processNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
 import DateTimePicker from '@react-native-community/datetimepicker';
-
-/**
- * @author Megan Ostlie
- *  a function that pulls the current note document for the specified site from GitHub
- *  @param siteName the name of the site
- * 
- * @returns a ParsedData object that contains the information of the given document
- */
-async function processNotes(siteName: string) {
-  const fileContents = await getFileContents(`site_notes/${siteName}`);
-  if(fileContents.data){
-    return parseNotes(fileContents.data)
-  }
-  else
-  {
-    return null
-  }
-}
 
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie

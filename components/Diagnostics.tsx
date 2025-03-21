@@ -6,7 +6,7 @@
  * This page is used for plotting up tank values and connecting to air.utah.edu diagnostics
  */
 import { StyleSheet, KeyboardAvoidingView, Linking} from "react-native";
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRoute } from "@react-navigation/native";
 import { Button, Layout, Datepicker, Text } from "@ui-kitten/components";
 import TextInput from "./TextInput";
@@ -17,6 +17,7 @@ import { ThemeContext } from "./ThemeContext";
 import { visit, setVisitFile } from "../scripts/APIRequests";
 import PopupProp from './Popup';
 import LoadingScreen from "./LoadingScreen";
+import { processNotes, ParsedData, Entry } from "../scripts/Parsers";
 
 export default function Diagnostics({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -50,6 +51,70 @@ export default function Diagnostics({ navigation }: NavigationType) {
         alert("Cannot open the URL");
       }
     };
+
+  // State to hold parsed data
+  const [data, setData] = useState<ParsedData | null>(null);
+  const [lowPressures, setLowPressures] = useState<number[] | null>(null);
+  const [midPressures, setMidPressures] = useState<number[] | null>(null);
+  const [highPressures, setHighPressures] = useState<number[] | null>(null);
+  const [ltsPressures, setLTSPressures] = useState<number[] | null>(null);
+  const [n2Pressures, setN2Pressures] = useState<number[] | null>(null);
+  
+  // Get current notes for the site
+  useEffect(() => {
+    async function fetchData() {
+      if (site && !data) {
+        try {
+            const parsedData = await processNotes(site);
+            setData(parsedData); // Update state with the latest entry
+          } catch (error) {
+              console.error("Error processing notes:", error);
+          }
+      }
+    }
+    fetchData();
+  }, [site]); // Re-run if `site` changes
+
+  const extractNumericValue = (pressure: string | null): number | null => {
+    if (!pressure) return null; // Handle null or undefined
+    const match = pressure.match(/\d+(\.\d+)?/); // Match integer or decimal numbers
+    return match ? parseFloat(match[0]) : null; // Return the matched number as a string
+  };
+
+  const getTankPressures = (entries: Entry[]) => {
+    return {
+      low_cal: entries
+      .map(entry => extractNumericValue(entry.low_cal?.pressure)) // Extract low_cal.pressure values (or undefined if null)
+      .filter(pressure => pressure !== undefined && pressure !== null), // Remove null/undefined values
+      mid_cal: entries
+      .map(entry => extractNumericValue(entry.mid_cal?.pressure)) // Extract mid_cal.pressure values (or undefined if null)
+      .filter(pressure => pressure !== undefined && pressure !== null), // Remove null/undefined values
+      high_cal: entries
+      .map(entry => extractNumericValue(entry.high_cal?.pressure)) // Extract high_cal.pressure values (or undefined if null)
+      .filter(pressure => pressure !== undefined && pressure !== null), // Remove null/undefined values
+      lts: entries
+      .map(entry => extractNumericValue(entry.lts?.pressure)) // Extract lts.pressure values (or undefined if null)
+      .filter(pressure => pressure !== undefined && pressure !== null), // Remove null/undefined values
+      n2: entries
+      .map(entry => extractNumericValue(entry?.n2_pressure)) // Extract n2_pressure values (or undefined if null)
+      .filter(pressure => pressure !== undefined && pressure !== null), // Remove null/undefined values
+    };
+  };
+
+  useEffect(() => {
+    function getPressures() {
+      if (data) {
+        const pressures = getTankPressures(data.entries);
+        setLowPressures(pressures.low_cal);
+        setMidPressures(pressures.mid_cal);
+        setHighPressures(pressures.high_cal);
+        setLTSPressures(pressures.lts);
+        setN2Pressures(pressures.n2);
+      }
+    }
+    getPressures();
+  }, [data]);
+  console.log(midPressures);
   
   return (
     <KeyboardAvoidingView
