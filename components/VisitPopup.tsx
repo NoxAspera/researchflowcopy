@@ -17,9 +17,13 @@ interface VisitPUProp {
   lowTank: String;
   midTank: String;
   highTank: String;
+  ltsTank: String;
+  n2Tank: String;
   lowDays: number;
   midDays: number;
   highDays: number;
+  ltsDays: number;
+  n2Days: number;
   removePopup: (arg1: boolean) => void;
   navigateHome: (arg0: boolean) => void;
   navigatePlanVisit: (arg0: boolean) => void;
@@ -27,7 +31,20 @@ interface VisitPUProp {
 
 
 // need to have both of these buttons navigate to different pages
-const VisitPopupProp: React.FC<VisitPUProp> = ({ lowTank, lowDays, midTank, midDays, highTank, highDays, visible, removePopup, navigateHome, navigatePlanVisit }) => {
+const VisitPopupProp: React.FC<VisitPUProp> = ({ 
+  lowTank, 
+  lowDays, 
+  midTank, 
+  midDays, 
+  highTank, 
+  highDays, 
+  ltsTank,
+  ltsDays,
+  n2Tank,
+  n2Days,
+  visible, 
+  removePopup,
+  navigatePlanVisit }) => {
     return (
       <Layout style={{flex: 1}}>
         <Modal
@@ -36,15 +53,19 @@ const VisitPopupProp: React.FC<VisitPUProp> = ({ lowTank, lowDays, midTank, midD
         >
           <Card disabled={true} style={styles.card} status='warning'>
             <Text style={{ flex: 1 }}>{`${(() => {
-                let tanks = [lowTank, midTank, highTank].filter(tank => tank != "");
+                let tanks = [lowTank, midTank, highTank, ltsTank, n2Tank].filter(tank => tank != "");
                 if (tanks.length === 1)  { return `${tanks[0]}`}
                 else if (tanks.length === 2)  { return `${tanks[0]} and ${tanks[1]}`}
                 else if (tanks.length === 3)  { return `${tanks[0]}, ${tanks[1]}, and ${tanks[2]}`}
+                else if (tanks.length === 4)  { return `${tanks[0]}, ${tanks[1]}, ${tanks[2]}, and ${tanks[3]}`}
+                else if (tanks.length === 5)  { return `${tanks[0]}, ${tanks[1]}, ${tanks[2]}, ${tanks[3]}, and ${tanks[4]}`}
               })()} may be empty in ${(() => {
-                let days = [lowDays, midDays, highDays].filter(val => val >= 0);
+                let days = [lowDays, midDays, highDays, ltsDays, n2Days].filter(val => val >= 0);
                 if (days.length === 1)  { return `${days[0]}`}
                 else if (days.length === 2)  { return `${days[0]} and ${days[1]}`}
                 else if (days.length === 3)  { return `${days[0]}, ${days[1]}, and ${days[2]}`}
+                else if (days.length === 4)  { return `${days[0]}, ${days[1]}, ${days[2]}, and ${days[3]}`}
+                else if (days.length === 5)  { return `${days[0]}, ${days[1]}, ${days[2]}, ${days[3]}, and ${days[4]}`}
               })()} days respectivly. Do you want to plan a visit?`}</Text>
             <Button 
               onPress={() => {removePopup(false), navigatePlanVisit(true)}}

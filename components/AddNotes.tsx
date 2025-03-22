@@ -153,17 +153,27 @@ export default function AddNotes({ navigation }: NavigationType) {
     const low = useRef<any>(null);
     const mid = useRef<any>(null);
     const high = useRef<any>(null);
+    const lts = useRef<any>(null);
     const [tankPredictorVisibility, setTankPredictorVisibility] = useState(false);
+    const [lowTankName, setLowTankName] = useState("");
     const [lowDaysRemaining, setLowDaysRemaining] = useState(-1);
     const [midDaysRemaining, setMidDaysRemaining] = useState(-1);
+    const [midTankName, setMidTankName] = useState("");
     const [highDaysRemaining, setHighDaysRemaining] = useState(-1);
+    const [highTankName, setHighTankName] = useState("");
+    const [ltsDaysRemaining, setLtsDaysRemaining] = useState(-1);
+    const [ltsTankName, setLtsTankName] = useState("");
+    const [n2DaysRemaining, setN2DaysRemaining] = useState(-1);
+    const [n2TankName, setN2TankName] = useState("");
 
     function daysUntilEmpty(prevPress, prevDate, currPress) {
       // get change of pressure over time, assume it is linear
       let changeOfPress = currPress - prevPress;
+      // console.log(`${currPress} - ${prevPress} = ${changeOfPress}`);
 
       // if change of pressure is positive, then it got replaced, no need to check date
-      if (changeOfPress > 0) {
+      // if change of pressure is 0, then there is no need to check date bc nothing has changed
+      if (changeOfPress >= 0) {
         return 365;
       }
 
@@ -180,6 +190,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       }
       
       let rateOfDecay = changeOfPress / changeOfDate; // measured in psi lost per day
+      // console.log(`Rate of decay: ${rateOfDecay}`);
 
       // solve for when the tank should be under 500 psi
       let days = Math.trunc((-prevPress / rateOfDecay) - changeOfDate);
@@ -188,31 +199,49 @@ export default function AddNotes({ navigation }: NavigationType) {
 
     function checkIfRefillIsNeeded() {
       // get tank values from previous entries
-      let prevlow = low.current
-      let prevmid = mid.current
-      let prevhigh = high.current
+      let prevlow = low.current;
+      let prevmid = mid.current;
+      let prevhigh = high.current;
+      let prevLts = lts.current;
 
       // compare pressure from prev entry to current entry to see if tank will be empty soon
       let lowDays = daysUntilEmpty(parseInt(prevlow.pressure), prevlow.updatedAt, parseInt(lowPressure));
       let midDays = daysUntilEmpty(parseInt(prevmid.pressure), prevmid.updatedAt, parseInt(midPressure));
       let highDays = daysUntilEmpty(parseInt(prevhigh.pressure), prevhigh.updatedAt, parseInt(highPressure));
+      let ltsDays = daysUntilEmpty(parseInt(prevLts.pressure), prevLts.updatedAt, parseInt(ltsPressure));
+      let n2Days = daysUntilEmpty(parseInt(data.entries[0].n2_pressure), data.entries[0].time_out, parseInt(n2Value));
 
       // console.log(`
       //   Low Days: ${lowDays}
       //   Mid Days: ${midDays}
-      //   highDays: ${highDays}`);
+      //   highDays: ${highDays}
+      //   lts Days: ${ltsDays}
+      //   n2 Days:  ${n2Days}`);
 
       // if any of the tanks are predicted to be empty in 90 days or less, send a warning
       if (lowDays <= 90) {
         setLowDaysRemaining(lowDays);
+        setLowTankName(lowId);
         setTankPredictorVisibility(true);
       }
       if (midDays <= 90) {
         setMidDaysRemaining(midDays);
+        setMidTankName(midId);
         setTankPredictorVisibility(true);
       }
       if (highDays <= 90) {
         setHighDaysRemaining(highDays);
+        setHighTankName(highId);
+        setTankPredictorVisibility(true);
+      }
+      if (ltsDays <= 90) {
+        setLtsDaysRemaining(ltsDays);
+        setLtsTankName(ltsId);
+        setTankPredictorVisibility(true);
+      }
+      if (n2Days <= 90) {
+        setN2DaysRemaining(n2Days);
+        setN2TankName("N2");
         setTankPredictorVisibility(true);
       }
     }
@@ -539,6 +568,7 @@ export default function AddNotes({ navigation }: NavigationType) {
                   setOriginalLts(ltsEntry);
                   setLTSId(ltsEntry.tankId)
                   setLTSValue(ltsEntry.co2.toString() + " ~ " + ltsEntry.ch4.toString());
+                  lts.current = ltsEntry;
                 }
               }
           }
@@ -615,16 +645,24 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* tank is low popup */}
             <VisitPopupProp
-              lowTank={lowId}
+              lowTank={lowTankName}
               lowDays={lowDaysRemaining}
-              midTank={midId}
+              midTank={midTankName}
               midDays={midDaysRemaining}
-              highTank={highId}
+              highTank={highTankName}
               highDays={highDaysRemaining}
+              ltsTank={ltsTankName}
+              ltsDays={ltsDaysRemaining}
+              n2Tank={n2TankName}
+              n2Days={n2DaysRemaining}
               visible={tankPredictorVisibility}
               removePopup={setTankPredictorVisibility}
               navigateHome={navigateHome}
               navigatePlanVisit={navigatePlanVisit} />
+              {/* ltsTankName
+              highTankName
+              midTankName
+              lowTankName */}
 
             {/* loading screen */}
             <LoadingScreen visible={loadingValue} />
