@@ -1,9 +1,9 @@
 /**
  * View Notes
- * @author Blake Stambaugh, August O'Rourke, Megan Ostlie
+ * @author David Schiwal
  * Updated: 2/4/25 - MO
  * 
- * View notes page. Will pull in data from the github repo and display it for the user in cards.
+ * View notifications page. Will pull in data from the github repo and display it for the user in cards.
  */
 import { useRoute } from '@react-navigation/native';
 import { Card, Layout, Text } from '@ui-kitten/components';
@@ -20,8 +20,8 @@ import { parseVisits, VisitList } from '../scripts/Parsers'
 
 
 /**
- * @author Blake Stambaugh, August O'Rourke
- * @returns The view notes page in our app
+ * @author David Schiwal
+ * @returns The view notifications page in our app
  */
 export default function ViewNotifications({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -60,8 +60,28 @@ export default function ViewNotifications({ navigation }: NavigationType) {
             //need to check if current visit date is prior to current date, if so don't add it to list
             const visitDate = new Date(visit.date)
             const now = new Date();
-            if(visitDate.getDate() >= now.getDate()){
+            const day = now.getDate();
+            const month = now.getMonth() + 1;
+            const year = now.getFullYear();
+            console.log("current date")
+            console.log("day: " + day + " month: " + month + " year: " + year)
+            console.log("visit date")
+            console.log("day: " + visitDate.getDate() + " month: " + (visitDate.getMonth() + 1) + " year: " + visitDate.getFullYear())
+            if(visitDate.getFullYear() > year){
               visitData.push({visit: visit})
+              console.log("visit added")
+            }
+            else if(visitDate.getFullYear() == year){
+              if((visitDate.getMonth() + 1) > month){
+                visitData.push({visit: visit})
+                console.log("visit added")
+              }
+              else if((visitDate.getMonth() + 1) == month){
+                if(visitDate.getDate() >= now.getDate()){
+                  visitData.push({visit: visit})
+                  console.log("visit added")
+                }
+              }
             }
         }
       }
