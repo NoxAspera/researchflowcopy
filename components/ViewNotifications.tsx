@@ -1,7 +1,7 @@
 /**
  * View Notes
- * @author David Schiwal
- * Updated: 2/4/25 - MO
+ * @author David Schiwal, Megan Ostlie
+ * Updated: 3/23/25 - DS
  * 
  * View notifications page. Will pull in data from the github repo and display it for the user in cards.
  */
@@ -50,39 +50,35 @@ export default function ViewNotifications({ navigation }: NavigationType) {
   },[]);
 
 
-  // data for buttons
+  // checks if visit is today or later and adds it to list to display if so
   let visitData = [];
   if(data){
     if(data.visits){
       for(let i = 0; i < data.visits.length; i++){
-        if(data.visits[i]){
-            const visit = data.visits[i]
-            //need to check if current visit date is prior to current date, if so don't add it to list
-            const visitDate = new Date(visit.date)
-            const now = new Date();
-            const day = now.getDate();
-            const month = now.getMonth() + 1;
-            const year = now.getFullYear();
-            console.log("current date")
-            console.log("day: " + day + " month: " + month + " year: " + year)
-            console.log("visit date")
-            console.log("day: " + visitDate.getDate() + " month: " + (visitDate.getMonth() + 1) + " year: " + visitDate.getFullYear())
-            if(visitDate.getFullYear() > year){
+        if(data.visits[i]){        
+          const visit = data.visits[i]
+          const visitDate = new Date(visit.date)
+          const now = new Date();
+          //apparently getDate only gets the day of the month not the whole date so you have to check things individually
+          const day = now.getDate();
+          const month = now.getMonth() + 1;
+          const year = now.getFullYear();
+          //if year greater add visit            
+          if(visitDate.getFullYear() > year){
+            visitData.push({visit: visit})
+          }
+          else if(visitDate.getFullYear() == year){
+            //if year equal but month greater add visit
+            if((visitDate.getMonth() + 1) > month){
               visitData.push({visit: visit})
-              console.log("visit added")
             }
-            else if(visitDate.getFullYear() == year){
-              if((visitDate.getMonth() + 1) > month){
+            else if((visitDate.getMonth() + 1) == month){
+              //if year and month equal but day equal or greater add visit
+              if(visitDate.getDate() >= now.getDate()){
                 visitData.push({visit: visit})
-                console.log("visit added")
-              }
-              else if((visitDate.getMonth() + 1) == month){
-                if(visitDate.getDate() >= now.getDate()){
-                  visitData.push({visit: visit})
-                  console.log("visit added")
-                }
               }
             }
+          }
         }
       }
     }
@@ -124,7 +120,7 @@ export default function ViewNotifications({ navigation }: NavigationType) {
   );
 }
 /**
- * @author David Ostlie
+ * @author Megan Ostlie
  *  a function that pulls the current note document for the specified site from GitHub
  *  @param siteName the name of the site
  * 
