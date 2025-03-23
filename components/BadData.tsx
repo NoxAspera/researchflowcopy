@@ -1,7 +1,7 @@
 /**
  * Bad Data Page
  * @author David Schiwal, Blake Stambaugh, Megan Ostlie
- * Updated: 1/10/25
+ * Updated: 3/23/25 - DS
  *
  * This page allows the user to mark data as bad. They will enter in
  * a date range, the data, and why it is bad. The code will format and
