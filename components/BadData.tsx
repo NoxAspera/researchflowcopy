@@ -32,8 +32,10 @@ export default function BadData({ navigation }: NavigationType) {
   const [newIDValue, setNewIDValue] = useState("NA");
   const [startTimeValue, setStartTimeValue] = useState("");
   const [startDateValue, setStartDateValue] = useState<Date | null>(null);
+  const [startStatusValue, setStartStatusValue] = useState("basic");
   const [endTimeValue, setEndTimeValue] = useState("");
   const [endDateValue, setEndDateValue] = useState<Date | null>(null);
+  const [endStatusValue, setEndStatusValue] = useState("basic");
   const [nameValue, setNameValue] = useState("");
   const [reasonValue, setReasonValue] = useState("");
   const [selectedFileIndex, setSelectedFileIndex] = useState<
@@ -236,11 +238,13 @@ export default function BadData({ navigation }: NavigationType) {
           <Datepicker
             label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Start Date</Text>}
             date={startDateValue}
-            onSelect={(date) => setStartDateValue(date as Date)}
+            //onSelect={(date) => setStartDateValue(date as Date)}
+            onSelect={(date) => {setStartDateValue(date as Date); setStartStatusValue("primary")}}
             min={new Date(1900, 0, 1)}
             max={new Date(2500, 12, 31)}
             placeholder="Start Date"
             style={styles.textInput}
+            status={startStatusValue}
           />
 
           {/* start time input */}
@@ -256,11 +260,13 @@ export default function BadData({ navigation }: NavigationType) {
           <Datepicker
             label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>End Date</Text>}
             date={endDateValue}
-            onSelect={(date) => setEndDateValue(date as Date)}
+            //onSelect={(date) => setEndDateValue(date as Date)}
+            onSelect={(date) => {setEndDateValue(date as Date); setEndStatusValue("primary")}}
             min={new Date(1900, 0, 1)}
             max={new Date(2500, 12, 31)}
             placeholder="End Date"
             style={styles.textInput}
+            status={endStatusValue}
           />
 
           {/* end time input */}
