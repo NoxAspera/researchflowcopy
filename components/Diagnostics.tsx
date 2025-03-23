@@ -23,22 +23,41 @@ import { LineChart } from "react-native-chart-kit";
 const extractNumericValue = (pressure: string | null): number | null => {
   if (!pressure) return null; // Handle null or undefined
   const match = pressure.match(/\d+(\.\d+)?/); // Match integer or decimal numbers
-  return match ? parseFloat(match[0]) : null; // Return the matched number as a string
+  return match ? parseInt(match[0]) : null; // Return the matched number as a string
 };
 
 const groupTankData = (entries: Entry[]) => {
-  const tankMap: Record<string, { time: string; pressure: number }[]> = {};
+  const latestTankByType: Record<string, string> = {}; // Stores latest tank ID per type
+  const tankTimestamps: Record<string, string> = {}; // Stores the latest timestamp per tank type
+  const tankMap: Record<string, { time: string; pressure: number }[]> = {}; // Stores all pressures for latest tank ID
 
+  // First pass: Identify the most recent tank ID for each type
   entries.forEach((entry) => {
     ["low_cal", "mid_cal", "high_cal", "lts"].forEach((tankType) => {
       const tank = entry[tankType as keyof Entry] as TankInfo | null;
       if (tank) {
+        const time = entry.time_in || "Unknown";
+
+        // Update if it's the most recent entry
+        if (!tankTimestamps[tankType] || new Date(time) > new Date(tankTimestamps[tankType])) {
+          latestTankByType[tankType] = tank.id;
+          tankTimestamps[tankType] = time;
+        }
+      }
+    });
+  });
+
+  // Second pass: Collect all pressures for the most recent tank ID per type
+  entries.forEach((entry) => {
+    ["low_cal", "mid_cal", "high_cal", "lts"].forEach((tankType) => {
+      const tank = entry[tankType as keyof Entry] as TankInfo | null;
+      if (tank && tank.id === latestTankByType[tankType]) {
         const pressure = extractNumericValue(tank.pressure);
         if (pressure !== null) {
-          if (!tankMap[tank.id]) {
-            tankMap[tank.id] = [];
+          if (!tankMap[latestTankByType[tankType]]) {
+            tankMap[latestTankByType[tankType]] = [];
           }
-          tankMap[tank.id].push({ time: entry.time_in || "Unknown", pressure });
+          tankMap[latestTankByType[tankType]].push({ time: entry.time_in || "Unknown", pressure });
         }
       }
     });
@@ -102,62 +121,6 @@ export default function Diagnostics({ navigation }: NavigationType) {
     }
     fetchData();
   }, [site]); // Re-run if `site` changes
-
-  /*
-  const getTankLists = (entries: Entry[]) => {
-    return {
-      low_cal: entries
-      .map(entry => entry.low_cal ? { 
-        id: entry.low_cal.id, 
-        pressure: extractNumericValue(entry.low_cal.pressure), 
-        time_in: entry.time_in 
-      } : null)
-      .filter((val): val is { id: string; pressure: number; time_in: string | null } => val !== null && val.pressure !== null),
-    mid_cal: entries
-      .map(entry => entry.mid_cal ? { 
-        id: entry.mid_cal.id, 
-        pressure: extractNumericValue(entry.mid_cal.pressure), 
-        time_in: entry.time_in 
-      } : null)
-      .filter((val): val is { id: string; pressure: number; time_in: string | null } => val !== null && val.pressure !== null),
-    high_cal: entries
-      .map(entry => entry.high_cal ? { 
-        id: entry.high_cal.id, 
-        pressure: extractNumericValue(entry.high_cal.pressure), 
-        time_in: entry.time_in 
-      } : null)
-      .filter((val): val is { id: string; pressure: number; time_in: string | null } => val !== null && val.pressure !== null),
-    lts: entries
-      .map(entry => entry.lts ? { 
-        id: entry.lts.id, 
-        pressure: extractNumericValue(entry.lts.pressure), 
-        time_in: entry.time_in 
-      } : null)
-      .filter((val): val is { id: string; pressure: number; time_in: string | null } => val !== null && val.pressure !== null),
-    n2: entries
-      .map(entry => entry.n2_pressure ? { 
-        id: "n2", 
-        pressure: extractNumericValue(entry.n2_pressure), 
-        time_in: entry.time_in 
-      } : null)
-      .filter((val): val is { id: string; pressure: number; time_in: string | null } => val !== null && val.pressure !== null),
-    };
-  };
-
-  useEffect(() => {
-    function getPressures() {
-      if (data) {
-        const lists = getTankLists(data.entries);
-        setLowCalList(lists.low_cal);
-        setMidCalList(lists.mid_cal);
-        setHighCalList(lists.high_cal);
-        setLtsList(lists.lts);
-        setN2List(lists.n2);
-      }
-    }
-    getPressures();
-  }, [data]);
-  */
 
   const [tankData, setTankData] = useState<Record<string, { time: string; pressure: number }[]>>({});
 
