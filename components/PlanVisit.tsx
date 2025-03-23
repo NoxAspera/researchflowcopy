@@ -119,6 +119,8 @@ export default function PlanVisit({ navigation }: NavigationType) {
           <Datepicker
             label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Visit Date</Text>}
             date={dateValue}
+            //changing the status here works because the mapping.json file (researchflow\node_modules\@eva-design\eva\mapping.json)
+            //has a different textColor in the primary field for Datepicker 
             onSelect={(date) => {setDateValue(date as Date); setStatusValue("primary")}}
             min={new Date(1900, 0, 1)}
             max={new Date(2500, 12, 31)}

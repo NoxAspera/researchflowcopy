@@ -238,7 +238,8 @@ export default function BadData({ navigation }: NavigationType) {
           <Datepicker
             label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Start Date</Text>}
             date={startDateValue}
-            //onSelect={(date) => setStartDateValue(date as Date)}
+            //changing the status here works because the mapping.json file (researchflow\node_modules\@eva-design\eva\mapping.json)
+            //has a different textColor in the primary field for Datepicker
             onSelect={(date) => {setStartDateValue(date as Date); setStartStatusValue("primary")}}
             min={new Date(1900, 0, 1)}
             max={new Date(2500, 12, 31)}
@@ -260,7 +261,8 @@ export default function BadData({ navigation }: NavigationType) {
           <Datepicker
             label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>End Date</Text>}
             date={endDateValue}
-            //onSelect={(date) => setEndDateValue(date as Date)}
+            //changing the status here works because the mapping.json file (researchflow\node_modules\@eva-design\eva\mapping.json)
+            //has a different textColor in the primary field for Datepicker
             onSelect={(date) => {setEndDateValue(date as Date); setEndStatusValue("primary")}}
             min={new Date(1900, 0, 1)}
             max={new Date(2500, 12, 31)}
