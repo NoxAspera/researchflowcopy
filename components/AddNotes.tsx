@@ -1,7 +1,7 @@
 /**
  * Add Notes Page
  * @author Blake Stambaugh, Megan Ostlie, August O'Rourke, and David Schiwal
- * Updated: 2/11/25 - MO
+ * Updated: 3/23/25 - DS
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
@@ -611,12 +611,14 @@ export default function AddNotes({ navigation }: NavigationType) {
               style={styles.inputText}
             />
 
-              {/* Time input */}
-              <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Arrived (MT):</Text>
-              <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.datePicker}>
-                <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
-                <Text>{startDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {startDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-              </TouchableOpacity>
+            {/* Time input */}
+            <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Arrived (MT):</Text>
+            {/*light mode colors came from researchflow\node_modules\@eva-design\eva\themes\light.json */}
+            {/*dark mode colors came from researchflow\node_modules\@eva-design\eva\themes\dark.json*/}
+            <TouchableOpacity onPress={() => setShowStartPicker(true)} style={[styles.datePicker, {borderColor: isDarkMode ? "#101426" : "#E4E9F2"}, {backgroundColor: isDarkMode ? "#1A2138" : "#F7F9FC"}]}>
+              <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
+              <Text>{startDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {startDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+            </TouchableOpacity>
 
           {showStartPicker && (
           <View>
@@ -635,7 +637,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         )}
 
         <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Departed (MT):</Text>
-          <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.datePicker}>
+          <TouchableOpacity onPress={() => setShowEndPicker(true)} style={[styles.datePicker, {borderColor: isDarkMode ? "#101426" : "#E4E9F2"}, {backgroundColor: isDarkMode ? "#1A2138" : "#F7F9FC"}]}>
             <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
             <Text>{endDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {endDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
           </TouchableOpacity>
@@ -904,8 +906,8 @@ export default function AddNotes({ navigation }: NavigationType) {
       marginLeft: 8,
       padding: 10,
       borderWidth: 1,
-      borderRadius: 5,
-      borderColor: '#d3d3d3',
-      backgroundColor: '#f9f9f9',
+      borderRadius: 5,      
+      //borderColor: '#d3d3d3',
+      //backgroundColor: '#f9f9f9',
     }
 });
