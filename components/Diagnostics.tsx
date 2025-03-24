@@ -19,6 +19,7 @@ import PopupProp from './Popup';
 import LoadingScreen from "./LoadingScreen";
 import { processNotes, ParsedData, Entry, TankInfo } from "../scripts/Parsers";
 import { LineChart } from "react-native-chart-kit";
+import { Svg, Circle } from 'react-native-svg';
 
 const extractNumericValue = (pressure: string | null): number | null => {
   if (!pressure) return null; // Handle null or undefined
@@ -26,19 +27,17 @@ const extractNumericValue = (pressure: string | null): number | null => {
   return match ? parseInt(match[0]) : null; // Return the matched number as a string
 };
 
-const groupTankData = (entries: Entry[]) => {
-  const latestTankByType: Record<string, string> = {}; // Stores latest tank ID per type
-  const tankTimestamps: Record<string, string> = {}; // Stores the latest timestamp per tank type
-  const tankMap: Record<string, { time: string; pressure: number }[]> = {}; // Stores all pressures for latest tank ID
+const prepareComparisonData = (entries: Entry[]) => {
+  const latestTankByType: Record<string, string> = {};
+  const tankTimestamps: Record<string, string> = {};
 
-  // First pass: Identify the most recent tank ID for each type
+  // Identify latest tank ID per type
   entries.forEach((entry) => {
     ["low_cal", "mid_cal", "high_cal", "lts"].forEach((tankType) => {
       const tank = entry[tankType as keyof Entry] as TankInfo | null;
       if (tank) {
         const time = entry.time_in || "Unknown";
 
-        // Update if it's the most recent entry
         if (!tankTimestamps[tankType] || new Date(time) > new Date(tankTimestamps[tankType])) {
           latestTankByType[tankType] = tank.id;
           tankTimestamps[tankType] = time;
@@ -47,23 +46,26 @@ const groupTankData = (entries: Entry[]) => {
     });
   });
 
-  // Second pass: Collect all pressures for the most recent tank ID per type
+  // Collect all pressures into a flat array
+  const comparisonData: { time: string; pressure: number; tankType: string }[] = [];
+
   entries.forEach((entry) => {
     ["low_cal", "mid_cal", "high_cal", "lts"].forEach((tankType) => {
       const tank = entry[tankType as keyof Entry] as TankInfo | null;
       if (tank && tank.id === latestTankByType[tankType]) {
         const pressure = extractNumericValue(tank.pressure);
         if (pressure !== null) {
-          if (!tankMap[latestTankByType[tankType]]) {
-            tankMap[latestTankByType[tankType]] = [];
-          }
-          tankMap[latestTankByType[tankType]].push({ time: entry.time_in || "Unknown", pressure });
+          comparisonData.push({
+            time: entry.time_in || "Unknown",
+            pressure,
+            tankType,
+          });
         }
       }
     });
   });
 
-  return tankMap;
+  return comparisonData;
 };
 
 export default function Diagnostics({ navigation }: NavigationType) {
@@ -122,15 +124,57 @@ export default function Diagnostics({ navigation }: NavigationType) {
     fetchData();
   }, [site]); // Re-run if `site` changes
 
-  const [tankData, setTankData] = useState<Record<string, { time: string; pressure: number }[]>>({});
+  const [tankData, setTankData] = useState<{ time: string; pressure: number; tankType: string }[]>([]);
 
   useEffect(() => {
     if (data) {
-      setTankData(groupTankData(data.entries));
+      setTankData(prepareComparisonData(data.entries));
     }
   }, [data]);
 
   const screenWidth = Dimensions.get("window").width;
+
+  
+    if (tankData.length === 0) {
+      return <Text>No data available</Text>;
+    }
+  
+    // Extract unique tank types
+    const tankTypes = [...new Set(tankData.map((entry) => entry.tankType))];
+  
+    // Prepare data series
+    const datasets = tankTypes.map((tankType, index) => ({
+      data: tankData
+        .filter((entry) => entry.tankType === tankType)
+        .map((entry) => entry.pressure),
+      color: (opacity = 1) => `rgba(${index * 60}, 100, 200, ${opacity})`, // Assign different colors
+      strokeWidth: 2,
+    }));
+  
+    const formatDate = (timestamp) => {
+      const date = new Date(timestamp);
+      return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;  // MM/DD/YYYY format
+    };
+    
+    // Extract time labels
+    const labels = tankData.map((entry, index) => index % 5 === 0 ? formatDate(entry.time) : ""
+    );
+
+    const CustomLegend = ({ data }) => {
+      return (
+        <View style={styles.legendContainer}>
+          {data.map((tank, index) => (
+            <View key={index} style={styles.legendItem}>
+              <Svg height="12" width="12">
+                <Circle cx="6" cy="6" r="6" fill={tank.color} />
+              </Svg>
+              <Text style={styles.legendText}>{`Tank ${tank.tankType}`}</Text>
+            </View>
+          ))}
+        </View>
+      );
+    };
+  
 
   return (
     <KeyboardAvoidingView
@@ -151,43 +195,33 @@ export default function Diagnostics({ navigation }: NavigationType) {
           <Text style={{ textAlign: "center", fontSize: 18, fontWeight: "bold", margin: 10 }}>
         Tank Pressure Over Time
       </Text>
-      {Object.entries(tankData).map(([tankId, data]) => {
-        const labels = data.map((d) => d.time);
-        const pressures = data.map((d) => d.pressure);
-
-        return (
-          <View key={tankId} style={{ marginVertical: 10 }}>
-            <Text style={{ textAlign: "center", fontSize: 16, fontWeight: "bold" }}>
-              Tank ID: {tankId}
-            </Text>
-            <LineChart
-              data={{
-                labels,
-                datasets: [{ data: pressures }],
-              }}
-              width={screenWidth - 20}
-              height={220}
-              yAxisLabel=""
-              yAxisSuffix=" psi"
-              chartConfig={{
-                backgroundColor: "#f5f5f5",
-                backgroundGradientFrom: "#e0f7fa",
-                backgroundGradientTo: "#80deea",
-                decimalPlaces: 2,
-                color: (opacity = 1) => `rgba(0, 150, 136, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                style: { borderRadius: 16 },
-                propsForDots: { r: "4", strokeWidth: "2", stroke: "#00695c" },
-              }}
-              bezier
-              style={{
-                marginVertical: 8,
-                borderRadius: 16,
-              }}
-            />
-          </View>
-        );
-      })}
+      <View>
+        <LineChart
+          data={{
+            labels,
+            datasets,
+          }}
+          width={screenWidth}
+          height={300}
+          yAxisLabel=""
+          yAxisSuffix=" psi"
+          chartConfig={{
+            backgroundColor: "#ffffff",
+            backgroundGradientFrom: "#ffffff",
+            backgroundGradientTo: "#ffffff",
+            decimalPlaces: 1,
+            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            propsForDots: {
+              r: "4",
+              strokeWidth: "2",
+              stroke: "#ffa726",
+            },
+          }}
+          bezier
+        />
+      </View>
+      <CustomLegend data={datasets} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -210,5 +244,22 @@ const styles = StyleSheet.create({
   submitButton:{
     margin: 20, 
     backgroundColor: "#06b4e0",
+  },
+  legendContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 8,
+    marginBottom: 4,
+  },
+  legendText: {
+    marginLeft: 5,
+    fontSize: 14,
+    color: '#333',
   },
 });
