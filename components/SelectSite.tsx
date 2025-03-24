@@ -69,9 +69,15 @@ export default function SelectSite({navigation}: NavigationType) {
   if (siteNames) {
     for (let i = 0; i < siteNames.length; i++) {
       if (siteNames[i]) {
+
+        if(siteNames[i] === "mobile")
+        {
+          continue
+        }
         buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});
       }
     }
+
   }
 
   const handleConfirm = (selectedSite: string) => {

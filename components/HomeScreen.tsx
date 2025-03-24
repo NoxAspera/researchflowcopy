@@ -23,7 +23,6 @@ async function readUpdates()
 async function startup()
 {
   let check = await Network.useNetworkState()
-  //console.log(!check.isConnected)
   if(check.isConnected)
     {
       readUpdates();
@@ -32,7 +31,7 @@ async function startup()
     }
   else
   {
-    tankTrackerOffline()
+    tankTrackerOffline();
   } 
 }
 

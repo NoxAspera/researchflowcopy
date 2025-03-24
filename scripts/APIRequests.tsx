@@ -142,7 +142,14 @@ export async function updateDirectories()
         loop(`bad_data/${element}`)
     });
 
+    let result = await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates")
+
+    if(!result.exists)
+    {
+        FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + "offline_updates")
+    }
 }
+   
 
 /**
  * 
@@ -192,29 +199,66 @@ async function setFile(bodyString: string, url: string)
  */
 export async function setVisitFile(visit: visit, commitMessage: string)
 {
+    let check = await Network.getNetworkStateAsync()
 
-    const pullResponse = (await getFile(`researchflow_data/visits`))
-    let existingContent = ""
-    let hash = ""
-    
-    if(pullResponse.success)
+    if (check.isConnected)
     {
-        hash = pullResponse.data.sha
-        existingContent = atob(pullResponse.data.content) + "\n"       
-    }
-    const fullDoc = btoa(existingContent + JSON.stringify(visit))
+        const pullResponse = (await getFile(`researchflow_data/visits`))
+        let existingContent = ""
+        let hash = ""
+        
+        if(pullResponse.success)
+        {
+            hash = pullResponse.data.sha
+            existingContent = atob(pullResponse.data.content) + "\n"       
+        }
+        const fullDoc = btoa(existingContent + JSON.stringify(visit))
 
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/researchflow_data/visits.md`;
-    let bodyString = `{"message":"${commitMessage}","content":"${fullDoc}"`
-    if (hash!== "")
-    {
-        bodyString+= `,"sha":"${hash}"}`
+        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/researchflow_data/visits.md`;
+        let bodyString = `{"message":"${commitMessage}","content":"${fullDoc}"`
+        if (hash!== "")
+        {
+            bodyString+= `,"sha":"${hash}"}`
+        }
+        else
+        {
+            bodyString += '}'
+        }
+        return setFile(bodyString, url)
     }
     else
     {
-        bodyString += '}'
-    }
-    return setFile(bodyString, url)   
+        console.log("here")
+        try
+        {
+            let path = FileSystem.documentDirectory + "offline_updates/sitefile.txt"
+            console.log(path)
+            let exists = (await FileSystem.getInfoAsync(path)).exists
+            let content = ""
+            if(exists)
+            {
+                content = await FileSystem.readAsStringAsync(path)
+            }
+            else
+            {
+                
+            }
+            content += `{date: ${visit.date}, equipment: ${visit.equipment}, name: ${visit.name}, notes: ${visit.notes}, site: ${visit.site}}\n`
+            let result = await FileSystem.writeAsStringAsync(path, content, {})
+            if(await FileSystem.readAsStringAsync(path) === content)
+            {
+                return {success: true}  
+            }
+            else
+            {
+                return {success: false, error: "unable to write file"}
+            }
+        }
+        catch(error)
+        {
+            return{success: false, error: error}
+        }
+    }   
 }
 
 /**
@@ -571,7 +615,7 @@ export async function getDirectory(path: string)
 {
     let check = await Network.getNetworkStateAsync()
 
-    if(!check.isConnected)
+    if(check.isConnected)
     {
        return {success: true, data: await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + path)}
     }
