@@ -49,6 +49,12 @@ async function processNotes(siteName: string) {
   }
 }
 
+async function isConnected()
+{
+  let check = await Network.getNetworkStateAsync()
+  return check.isConnected
+}
+
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
  *  Creates the input elements for the user to input site note information.
@@ -382,15 +388,26 @@ export default function AddNotes({ navigation }: NavigationType) {
       }
     }
 
-    const handleTankChange = (tank: string) => {
+    const handleTankChange = async (tank: string) => {
+      let check = await (await Network.getNetworkStateAsync()).isConnected
       if (tank == "lts") {
         navigation.navigate('SelectTank', {
           from: 'AddNotes',
           onSelect: (selectedTank) => {
+            console.log(check)
             setLTSId(selectedTank);
-            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
-            setLtsTankRecord(entry);
-            setLTSValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+
+            if(check)
+            {
+              const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+              setLtsTankRecord(entry);
+              setLTSValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+            }
+            else
+            {
+              // i have no idea why, but if this isn't here, the tank id doesn't display correctly
+              setLTSValue(" ")
+            }
           }
         });
       } else if (tank == "low") {
@@ -398,9 +415,18 @@ export default function AddNotes({ navigation }: NavigationType) {
           from: 'AddNotes',
           onSelect: (selectedTank) => {
             setLowId(selectedTank);
-            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
-            setLowTankRecord(entry);
-            setLowValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+
+            if(check)
+            {
+              const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+              setLowTankRecord(entry);
+              setLowValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+            }
+            else
+            {
+              // i have no idea why, but if this isn't here, the tank id doesn't display correctly
+              setLowValue(" ")
+            }
           }
         });
       } else if (tank == "mid") {
@@ -408,9 +434,16 @@ export default function AddNotes({ navigation }: NavigationType) {
           from: 'AddNotes',
           onSelect: (selectedTank) => {
             setmidId(selectedTank);
-            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
-            setMidTankRecord(entry);
-            setmidValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+            if (check){
+              const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+              setMidTankRecord(entry);
+              setmidValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+            }
+            else
+            {
+              // i have no idea why, but if this isn't here, the tank id doesn't display correctly
+              setmidValue(" ")
+            }
           }
         });
       } else if (tank == "high") {
@@ -418,9 +451,17 @@ export default function AddNotes({ navigation }: NavigationType) {
           from: 'AddNotes',
           onSelect: (selectedTank) => {
             setHighId(selectedTank);
-            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
-            setHighTankRecord(entry);
-            setHighValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+            if (check)
+            {
+              const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
+              setHighTankRecord(entry);
+              setHighValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+            }
+            else
+            {
+              // i have no idea why, but if this isn't here, the tank id doesn't display correctly
+              setHighValue(" ")
+            }
           }
         });
       }
@@ -454,11 +495,14 @@ export default function AddNotes({ navigation }: NavigationType) {
               if (ltsID) {
                 const ltsEntry = getLatestTankEntry(ltsID) || getLatestTankEntry(ltsID.toLowerCase());
                 if (ltsEntry) {
-                  setLtsTankRecord(ltsEntry);
-                  setOriginalLts(ltsEntry);
-                  setLTSId(ltsEntry.tankId)
-                  setLTSValue(ltsEntry.co2.toString() + " ~ " + ltsEntry.ch4.toString());
+                  if (isConnected())
+                  {
+                    setLtsTankRecord(ltsEntry);
+                    setOriginalLts(ltsEntry);
+                    setLTSId(ltsEntry.tankId)
+                    setLTSValue(ltsEntry.co2.toString() + " ~ " + ltsEntry.ch4.toString());
                 }
+              }
               }
           }
           if (latestEntry.low_cal) {

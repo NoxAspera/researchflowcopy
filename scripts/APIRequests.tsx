@@ -228,10 +228,9 @@ export async function setVisitFile(visit: visit, commitMessage: string)
     }
     else
     {
-        console.log("here")
         try
         {
-            let path = FileSystem.documentDirectory + "offline_updates/sitefile.txt"
+            let path = FileSystem.documentDirectory + "offline_updates/visitfile.txt"
             console.log(path)
             let exists = (await FileSystem.getInfoAsync(path)).exists
             let content = ""
@@ -296,11 +295,36 @@ export async function setTankTracker()
     )
 
     let newContent = csvify(plainfullDoc)
-    const fullDoc = btoa(newContent)
 
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
-    const bodyString = `{"message":"updating from research flow","content":"${fullDoc}","sha":"${tankTrackerSha}"}`
-    return setFile(bodyString, url)
+    if((await Network.getNetworkStateAsync()).isConnected)
+    {
+        const fullDoc = btoa(newContent)
+
+        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
+        const bodyString = `{"message":"updating from research flow","content":"${fullDoc}","sha":"${tankTrackerSha}"}`
+        return setFile(bodyString, url)
+    }
+    else
+    {
+        try
+        {
+            let path = FileSystem.documentDirectory + "offline_updates/tanktracker.txt"
+            console.log(path)
+            let result = await FileSystem.writeAsStringAsync(path, newContent, {})
+            if(await FileSystem.readAsStringAsync(path) === newContent)
+            {
+                return {success: true}  
+            }
+            else
+            {
+                return {success: false, error: "unable to write file"}
+            }
+        }
+        catch(error)
+        {
+            return{success: false, error: error}
+        }
+    }   
 }
 /**
  * This method returns a list of Tank Entries for a specific tank 
@@ -513,6 +537,9 @@ export async function getBadDataFiles(siteName: string)
 export async function setBadData(siteName: string, instrument: string, newEntry: string, commitMessage: string)
 {
     siteName = siteName.toLowerCase();
+
+    if((await Network.getNetworkStateAsync()).isConnected)
+    {
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad/${siteName}/${instrument}.csv`;
 
     let headers = new Headers();
@@ -540,6 +567,8 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
             sha = data.sha
             newFile = headers + entries + '\n' + newEntry
             newFile = btoa(newFile)
+            const bodyString = `{"message":"${commitMessage}","content":"${newFile}","sha":"${sha}"}`
+            return setFile(bodyString, url)
         } 
         else {
             const errorData = await response.json();
@@ -550,10 +579,40 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
     {
         return { success: false, error: error };
     }
+    }
 
-    const bodyString = `{"message":"${commitMessage}","content":"${newFile}","sha":"${sha}"}`
-
-    return setFile(bodyString, url)
+    else
+    {
+        try
+        {
+            let path = FileSystem.documentDirectory + "offline_updates/baddata.txt"
+            console.log(path)
+            let exists = (await FileSystem.getInfoAsync(path)).exists
+            let content = ""
+            if(exists)
+            {
+                content = await FileSystem.readAsStringAsync(path)
+            }
+            else
+            {
+                
+            }
+            content += `{siteName: ${siteName}, instrument: ${instrument}, newEntry: ${newEntry}}\n`
+            let result = await FileSystem.writeAsStringAsync(path, content, {})
+            if(await FileSystem.readAsStringAsync(path) === content)
+            {
+                return {success: true}  
+            }
+            else
+            {
+                return {success: false, error: "unable to write file"}
+            }
+        }
+        catch(error)
+        {
+            return{success: false, error: error}
+        }
+    }  
 }
 /**
  * This method gets the site of the Instrument specified
@@ -583,27 +642,65 @@ export async function getInstrumentSite(path: string) {
  * @returns the contents of the file as a string
  */
 export async function setInstrumentFile(path: string, content: string, commitMessage: string, mobile:boolean, site?: string) {
-    const pullResponse = (await getFile(path))
-    if(pullResponse.error)
-    {
-        return {success: false, error: pullResponse.error}
-    }
-    const hash = pullResponse.data.sha
-    const existingContent = atob(pullResponse.data.content)
-    const maintenanceHeader = `Maintenance Log\n---`
-    let staticHeader = existingContent.substring(0,existingContent.indexOf(maintenanceHeader) + maintenanceHeader.length)
-    if(mobile && site)
-    {
-        let staticHeaderNoLocation  = staticHeader.substring(0, staticHeader.indexOf("---\nCurrently at"))
-        let locationHeader = `---\nCurrently at ${site}\n` + '---\n' + maintenanceHeader
-        staticHeader = staticHeaderNoLocation + locationHeader
-    }
-    const existingNotes = existingContent.substring(existingContent.indexOf(maintenanceHeader) + maintenanceHeader.length) 
-    const fullDoc = btoa(staticHeader +"\n" + content + existingNotes)
 
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}.md`;
-    const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`
-    return setFile(bodyString, url)
+    if( (await Network.getNetworkStateAsync()).isConnected){
+
+        const pullResponse = (await getFile(path))
+        if(pullResponse.error)
+        {
+            return {success: false, error: pullResponse.error}
+        }
+        const hash = pullResponse.data.sha
+        const existingContent = atob(pullResponse.data.content)
+        const maintenanceHeader = `Maintenance Log\n---`
+        let staticHeader = existingContent.substring(0,existingContent.indexOf(maintenanceHeader) + maintenanceHeader.length)
+        if(mobile && site)
+        {
+            let staticHeaderNoLocation  = staticHeader.substring(0, staticHeader.indexOf("---\nCurrently at"))
+            let locationHeader = `---\nCurrently at ${site}\n` + '---\n' + maintenanceHeader
+            staticHeader = staticHeaderNoLocation + locationHeader
+        }
+        const existingNotes = existingContent.substring(existingContent.indexOf(maintenanceHeader) + maintenanceHeader.length) 
+        const fullDoc = btoa(staticHeader +"\n" + content + existingNotes)
+
+        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}.md`;
+        const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`
+        return setFile(bodyString, url)
+    }
+    else
+    {
+        try
+        {
+            let path = FileSystem.documentDirectory + "offline_updates/instrument_maint.txt"
+            console.log(path)
+            let exists = (await FileSystem.getInfoAsync(path)).exists
+            let content = ""
+            if(exists)
+            {
+                content = await FileSystem.readAsStringAsync(path)
+            }
+            content += `{path: ${path}, content: ${content}, mobile: ${mobile}}\n`
+            if(site)
+            {
+                content = content.substring(0, content.length - 3)
+                content += `, path: ${path}}\n`
+            }
+
+            let result = await FileSystem.writeAsStringAsync(path, content, {})
+            if(await FileSystem.readAsStringAsync(path) === content)
+            {
+                return {success: true}  
+            }
+            else
+            {
+                return {success: false, error: "unable to write file"}
+            }
+        }
+        catch(error)
+        {
+            return{success: false, error: error}
+        }
+    }
 }
 
 /**
@@ -614,8 +711,8 @@ export async function setInstrumentFile(path: string, content: string, commitMes
 export async function getDirectory(path: string)
 {
     let check = await Network.getNetworkStateAsync()
-
-    if(check.isConnected)
+    console.log(check.isConnected)
+    if(!check.isConnected)
     {
        return {success: true, data: await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + path)}
     }
@@ -726,26 +823,61 @@ export async function getFileContents(path: string)
  */
 export async function setSiteFile(siteName: string, content: string, commitMessage: string) {
     siteName = siteName.toLowerCase();
-    const pullResponse = (await getFile(`site_notes/${siteName}`))
-    if(pullResponse.error)
+    if((await Network.getNetworkStateAsync()).isConnected)
     {
-        return {success: false, error: pullResponse.error}
-    }
-    const hash = pullResponse.data.sha
-    const existingContent = atob(pullResponse.data.content)
-    let siteHeader;
-    if (siteName.includes("mobile/")) {
-        const site = siteName.replace("mobile/", "");
-        siteHeader = `# Site id: **${site}** \n`
-        siteHeader += existingContent.split("\n")[1];
-        
-    } else {
-        siteHeader = `# Site id: **${siteName}**`
-    }
-    const existingNotes = existingContent.substring(siteHeader.length, existingContent.length -1) 
-    const fullDoc = btoa(siteHeader +"\n" + content + existingNotes)
+        const pullResponse = (await getFile(`site_notes/${siteName}`))
+        if(pullResponse.error)
+        {
+            return {success: false, error: pullResponse.error}
+        }
+        const hash = pullResponse.data.sha
+        const existingContent = atob(pullResponse.data.content)
+        let siteHeader;
+        if (siteName.includes("mobile/")) {
+            const site = siteName.replace("mobile/", "");
+            siteHeader = `# Site id: **${site}** \n`
+            siteHeader += existingContent.split("\n")[1];
+            
+        } else {
+            siteHeader = `# Site id: **${siteName}**`
+        }
+        const existingNotes = existingContent.substring(siteHeader.length, existingContent.length -1) 
+        const fullDoc = btoa(siteHeader +"\n" + content + existingNotes)
 
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/site_notes/${siteName}.md`;
-    const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`
-    return setFile(bodyString, url)
+        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/site_notes/${siteName}.md`;
+        const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`
+        return setFile(bodyString, url)
+    }
+    else
+    {
+        try
+        {
+            let path = FileSystem.documentDirectory + "offline_updates/site_notes.txt"
+            console.log(path)
+            let exists = (await FileSystem.getInfoAsync(path)).exists
+            let content = ""
+            if(exists)
+            {
+                content = await FileSystem.readAsStringAsync(path)
+            }
+            else
+            {
+                
+            }
+            content += `{siteName: ${siteName}, content: ${content}}\n`
+            let result = await FileSystem.writeAsStringAsync(path, content, {})
+            if(await FileSystem.readAsStringAsync(path) === content)
+            {
+                return {success: true}  
+            }
+            else
+            {
+                return {success: false, error: "unable to write file"}
+            }
+        }
+        catch(error)
+        {
+            return{success: false, error: error}
+        }
+    }   
 }
