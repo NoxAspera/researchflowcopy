@@ -28,6 +28,8 @@ export type RootStackParamList = {
 
     // used for auth
     Home: undefined;
+    ViewNotifications: undefined;
+    NotificationsButton: undefined;
 };
 
 // Type for the navigation prop for the HomeScreen

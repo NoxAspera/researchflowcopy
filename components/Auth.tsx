@@ -17,6 +17,7 @@ import PopupProp from './Popup';
 import { setGithubToken } from '../scripts/APIRequests';
 import { NavigationType } from './types'
 import { ThemeContext } from './ThemeContext';
+import LoadingScreen from './LoadingScreen';
 
 export default function Login({ navigation }: NavigationType) {
     const route = useRoute();
@@ -62,7 +63,9 @@ export default function Login({ navigation }: NavigationType) {
           <PopupProp popupText='Missing Login Credentials' 
             popupColor={customTheme['color-danger-700']} 
             onPress={setVisible} 
-            visible={visible}/>
+            visible={visible}
+            navigateHome={null} 
+            returnHome={false}/>
 
           {/* text inputs */}
           <Layout style={styles.textInputContainer}>

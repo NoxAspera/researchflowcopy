@@ -9,10 +9,11 @@
 import { StyleSheet, ScrollView, Dimensions, Platform, PermissionsAndroid } from "react-native";
 import HomeButtonProp from "./HomeButtonProp";
 import { Layout } from "@ui-kitten/components";
-import React from "react";
+import React, { useState, useEffect } from 'react';
 import { NavigationType } from "./types";
 //const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
 import {updateDirectories, tankTrackerOffline} from '../scripts/APIRequests';
+import NoteInput from './NoteInput'
 import * as Network from 'expo-network'
 
 async function readUpdates()
@@ -108,5 +109,10 @@ const styles = StyleSheet.create({
   scrollContainer: {
     paddingVertical: 16,
     alignItems: "center", // Center cards horizontally
+  },
+  notesInput:
+  {
+    flex: 1,
+    margin: 8,
   },
 });

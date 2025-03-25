@@ -8,7 +8,7 @@
  * submit that request to the github repo.
  */
 import { StyleSheet, KeyboardAvoidingView} from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRoute } from "@react-navigation/native";
 import TextInput from "./TextInput";
 import NoteInput from "./NoteInput";
@@ -19,6 +19,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { setBadData, getBadDataFiles } from "../scripts/APIRequests";
 import PopupProp from "./Popup"
 import { ThemeContext } from './ThemeContext';
+import LoadingScreen from "./LoadingScreen";
 import Network from 'expo-network'
 
 export default function BadData({ navigation }: NavigationType) {
@@ -39,6 +40,9 @@ export default function BadData({ navigation }: NavigationType) {
   const [selectedFileIndex, setSelectedFileIndex] = useState<IndexPath | undefined>(undefined);
   const [fileOptions, setFileOptions] = useState<string[]>([]);
   const [instrument, setInstrument] = useState("");
+
+  // used for loading screen
+  const [loadingValue, setLoadingValue] = useState(false);
 
   //method to navigate home to send to popup so it can happen after dismiss button is clicked
   function navigateHome(nav:boolean){
@@ -112,6 +116,7 @@ export default function BadData({ navigation }: NavigationType) {
   const [message, setMessage] = useState("");
   const [visible2, setVisible2] = useState(false);
   const [returnHome, retHome] = useState(false);
+  const visibleRef = useRef(false);
 
   const handleSubmit = () => {
     if (
@@ -141,6 +146,9 @@ export default function BadData({ navigation }: NavigationType) {
   };
 
   const handleUpdate = async () => {
+    // show loading screen
+    setLoadingValue(true);
+
     const badDataString = buildBadDataString();
     const result = await setBadData(
       site,
@@ -148,6 +156,10 @@ export default function BadData({ navigation }: NavigationType) {
       badDataString,
       `Update ${instrument}.csv`
     );
+
+    // hide loading screen when we recieve results
+    setLoadingValue(false);
+    
     if (result.success) {
       setMessage("File updated successfully!");
       setMessageColor(customTheme["color-success-700"]);
@@ -156,7 +168,10 @@ export default function BadData({ navigation }: NavigationType) {
       setMessage(`Error: ${result.error}`);
       setMessageColor(customTheme["color-danger-700"]);
     }
-    setVisible(true);
+    setTimeout(() => {
+      setVisible(true);
+      visibleRef.current = true;
+    }, 100);
   };
 
   return (
@@ -180,6 +195,9 @@ export default function BadData({ navigation }: NavigationType) {
             visible={visible}
             returnHome={returnHome}
           />
+
+          {/* loading screen */}
+          <LoadingScreen visible={loadingValue} />
 
           {/* text inputs */}
           {/* select instrument */}
@@ -263,7 +281,7 @@ export default function BadData({ navigation }: NavigationType) {
             labelText="Name"
             labelValue={nameValue}
             onTextChange={setNameValue}
-            placeholder="John Doe"
+            placeholder="First Last"
             style={styles.textInput}
           />
 
@@ -272,7 +290,7 @@ export default function BadData({ navigation }: NavigationType) {
             labelText="Reason for Bad Data"
             labelValue={reasonValue}
             onTextChange={setReasonValue}
-            placeholder="Its wack."
+            placeholder="Reason"
             multiplelines={true}
             style={styles.reasonText}
           />

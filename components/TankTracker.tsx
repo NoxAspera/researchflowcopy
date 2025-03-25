@@ -7,7 +7,7 @@
  * data and determine when it will most likely run out and need replacement.
  */
 import { StyleSheet, KeyboardAvoidingView } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { Button, IndexPath, Layout, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
@@ -17,6 +17,7 @@ import PopupProp from './Popup';
 import { getLatestTankEntry, setTankTracker, TankRecord, addEntrytoTankDictionary } from '../scripts/APIRequests';
 import { Float } from 'react-native/Libraries/Types/CodegenTypes';
 import { customTheme } from './CustomTheme'
+import LoadingScreen from "./LoadingScreen";
 
 export default function TankTracker({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
@@ -39,6 +40,10 @@ export default function TankTracker({ navigation }: NavigationType) {
     const [messageColor, setMessageColor] = useState("");
     const [message, setMessage] = useState("");
     const [returnHome, retHome] = useState(false);
+    const visibleRef = useRef(false);
+
+    // used for loading screen
+        const [loadingValue, setLoadingValue] = useState(false);
 
     useEffect(() => {
       if (tank) {
@@ -131,9 +136,13 @@ export default function TankTracker({ navigation }: NavigationType) {
     }
 
     const handleUpdate = async () => {
+      // show spinner while submitting
+      setLoadingValue(true);
       const entry = buildTankEntry();
       addEntrytoTankDictionary(entry);
       const result = await setTankTracker();
+      // remove spinner once we have results back
+      setLoadingValue(false);
       if (result.success) {
           setMessage("File updated successfully!");
           setMessageColor(customTheme['color-success-700']);
@@ -142,7 +151,10 @@ export default function TankTracker({ navigation }: NavigationType) {
           setMessage(`Error: ${result.error}`);
           setMessageColor(customTheme['color-danger-700']);
         }
-        setVisible(true);
+        setTimeout(() => {
+          setVisible(true);
+          visibleRef.current = true;
+        }, 100);
     }
 
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
@@ -164,6 +176,9 @@ export default function TankTracker({ navigation }: NavigationType) {
                 {tank}
               </Text>
 
+              {/* loading screen */}
+              <LoadingScreen visible={loadingValue} />
+
               {/* text inputs */}
               {/* success/failure popup */}
               <PopupProp popupText={message} 
@@ -178,7 +193,7 @@ export default function TankTracker({ navigation }: NavigationType) {
               labelText="Name"
               labelValue={nameValue}
               onTextChange={setNameValue}
-              placeholder="Jane Doe"
+              placeholder="First Last"
               style={styles.textInput}
             />
 
@@ -187,7 +202,7 @@ export default function TankTracker({ navigation }: NavigationType) {
                 labelText="Fill ID"
                 labelValue={fillIDValue}
                 onTextChange={setFillIDValue}
-                placeholder="240124_M1"
+                placeholder="ID"
                 style={styles.textInput}
               />
 
@@ -205,7 +220,7 @@ export default function TankTracker({ navigation }: NavigationType) {
                 labelText="PSI"
                 labelValue={PSIValue !== undefined ? PSIValue.toString() : ""}
                 onTextChange={(text) => setPSIValue(parseFloat(text) || undefined)}
-                placeholder="100"
+                placeholder="PSI"
                 style={styles.textInput}
               />
 
@@ -214,7 +229,7 @@ export default function TankTracker({ navigation }: NavigationType) {
                 labelText="CO2"
                 labelValue={CO2Value !== undefined ? CO2Value.toString() : ""}
                 onTextChange={(text) => setCO2Value(parseFloat(text) || undefined)}
-                placeholder="100"
+                placeholder="CO2"
                 style={styles.textInput}
               />
 
@@ -223,7 +238,7 @@ export default function TankTracker({ navigation }: NavigationType) {
                 labelText="CH4"
                 labelValue={CH4Value !== undefined ? CH4Value.toString() : ""}
                 onTextChange={(text) => setCH4Value(parseFloat(text) || undefined)}
-                placeholder="100"
+                placeholder="CH4"
                 style={styles.textInput}
               />
 
@@ -232,7 +247,7 @@ export default function TankTracker({ navigation }: NavigationType) {
               labelText="Notes"
               labelValue={notesValue}
               onTextChange={setNotesValue}
-              placeholder="Tank draining at normal rate."
+              placeholder="Notes"
               style={styles.reasonText}
             />
 
