@@ -18,26 +18,34 @@ import { visit, setVisitFile } from "../scripts/APIRequests";
 import PopupProp from './Popup';
 import LoadingScreen from "./LoadingScreen";
 import { processNotes, ParsedData, Entry, TankInfo } from "../scripts/Parsers";
-import { LineChart } from "react-native-chart-kit";
-import { Svg, Circle } from 'react-native-svg';
+import { LineChart, XAxis, YAxis, Grid } from 'react-native-svg-charts';
+import { Defs, LinearGradient, Stop, Svg, Line } from 'react-native-svg';
+import * as scale from 'd3-scale';
 
 const extractNumericValue = (pressure: string | null): number | null => {
   if (!pressure) return null; // Handle null or undefined
   const match = pressure.match(/\d+(\.\d+)?/); // Match integer or decimal numbers
-  return match ? parseInt(match[0]) : null; // Return the matched number as a string
+  console.log("Pressure:", pressure, "Match:", match);
+  if (match) {
+    const number = parseFloat(match[0]); // Use parseFloat to handle decimals properly
+    return isNaN(number) ? null : number; // Return null if it's NaN
+  }
+  return null;
 };
 
-const prepareComparisonData = (entries: Entry[]) => {
-  const latestTankByType: Record<string, string> = {};
-  const tankTimestamps: Record<string, string> = {};
+const groupTankData = (entries: Entry[]) => {
+  const latestTankByType: Record<string, string> = {}; // Stores latest tank ID per type
+  const tankTimestamps: Record<string, string> = {}; // Stores the latest timestamp per tank type
+  const tankMap: Record<string, { time: string; pressure: number }[]> = {}; // Stores all pressures for latest tank ID
 
-  // Identify latest tank ID per type
+  // First pass: Identify the most recent tank ID for each type
   entries.forEach((entry) => {
     ["low_cal", "mid_cal", "high_cal", "lts"].forEach((tankType) => {
       const tank = entry[tankType as keyof Entry] as TankInfo | null;
       if (tank) {
         const time = entry.time_in || "Unknown";
 
+        // Update if it's the most recent entry
         if (!tankTimestamps[tankType] || new Date(time) > new Date(tankTimestamps[tankType])) {
           latestTankByType[tankType] = tank.id;
           tankTimestamps[tankType] = time;
@@ -46,26 +54,23 @@ const prepareComparisonData = (entries: Entry[]) => {
     });
   });
 
-  // Collect all pressures into a flat array
-  const comparisonData: { time: string; pressure: number; tankType: string }[] = [];
-
+  // Second pass: Collect all pressures for the most recent tank ID per type
   entries.forEach((entry) => {
     ["low_cal", "mid_cal", "high_cal", "lts"].forEach((tankType) => {
       const tank = entry[tankType as keyof Entry] as TankInfo | null;
       if (tank && tank.id === latestTankByType[tankType]) {
         const pressure = extractNumericValue(tank.pressure);
-        if (pressure !== null) {
-          comparisonData.push({
-            time: entry.time_in || "Unknown",
-            pressure,
-            tankType,
-          });
+        if (pressure !== null && !isNaN(pressure)) {
+          if (!tankMap[latestTankByType[tankType]]) {
+            tankMap[latestTankByType[tankType]] = [];
+          }
+          tankMap[latestTankByType[tankType]].unshift({ time: entry.time_in || "Unknown", pressure });
         }
       }
     });
   });
 
-  return comparisonData;
+  return tankMap;
 };
 
 export default function Diagnostics({ navigation }: NavigationType) {
@@ -124,57 +129,20 @@ export default function Diagnostics({ navigation }: NavigationType) {
     fetchData();
   }, [site]); // Re-run if `site` changes
 
-  const [tankData, setTankData] = useState<{ time: string; pressure: number; tankType: string }[]>([]);
+  const [tankData, setTankData] = useState<Record<string, { time: string; pressure: number }[]>>({});
 
   useEffect(() => {
     if (data) {
-      setTankData(prepareComparisonData(data.entries));
+      setTankData(groupTankData(data.entries));
     }
   }, [data]);
 
+  const formatDate = (timestamp: string): string => {
+    const date = new Date(timestamp);
+    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+  };
+
   const screenWidth = Dimensions.get("window").width;
-
-  
-    if (tankData.length === 0) {
-      return <Text>No data available</Text>;
-    }
-  
-    // Extract unique tank types
-    const tankTypes = [...new Set(tankData.map((entry) => entry.tankType))];
-  
-    // Prepare data series
-    const datasets = tankTypes.map((tankType, index) => ({
-      data: tankData
-        .filter((entry) => entry.tankType === tankType)
-        .map((entry) => entry.pressure),
-      color: (opacity = 1) => `rgba(${index * 60}, 100, 200, ${opacity})`, // Assign different colors
-      strokeWidth: 2,
-    }));
-  
-    const formatDate = (timestamp) => {
-      const date = new Date(timestamp);
-      return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;  // MM/DD/YYYY format
-    };
-    
-    // Extract time labels
-    const labels = tankData.map((entry, index) => index % 5 === 0 ? formatDate(entry.time) : ""
-    );
-
-    const CustomLegend = ({ data }) => {
-      return (
-        <View style={styles.legendContainer}>
-          {data.map((tank, index) => (
-            <View key={index} style={styles.legendItem}>
-              <Svg height="12" width="12">
-                <Circle cx="6" cy="6" r="6" fill={tank.color} />
-              </Svg>
-              <Text style={styles.legendText}>{`Tank ${tank.tankType}`}</Text>
-            </View>
-          ))}
-        </View>
-      );
-    };
-  
 
   return (
     <KeyboardAvoidingView
@@ -195,33 +163,81 @@ export default function Diagnostics({ navigation }: NavigationType) {
           <Text style={{ textAlign: "center", fontSize: 18, fontWeight: "bold", margin: 10 }}>
         Tank Pressure Over Time
       </Text>
-      <View>
-        <LineChart
-          data={{
-            labels,
-            datasets,
-          }}
-          width={screenWidth}
-          height={300}
-          yAxisLabel=""
-          yAxisSuffix=" psi"
-          chartConfig={{
-            backgroundColor: "#ffffff",
-            backgroundGradientFrom: "#ffffff",
-            backgroundGradientTo: "#ffffff",
-            decimalPlaces: 1,
-            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            propsForDots: {
-              r: "4",
-              strokeWidth: "2",
-              stroke: "#ffa726",
-            },
-          }}
-          bezier
+      {Object.entries(tankData).map(([tankId, data]) => {
+        const validData = data.filter(d => !isNaN(new Date(d.time).getTime()));
+        const timestamps = validData.map(d => new Date(d.time).getTime());
+        console.log(timestamps);
+        const minTimestamp = Math.min(...timestamps); // Find the earliest timestamp for normalization
+        const normalizedX = timestamps.map(ts => ts - minTimestamp); // Normalize timestamps so that the first point is at `0`
+        const pressures = validData.map(d => d.pressure); // Y values (pressures)
+
+  return (
+    <View key={tankId} style={{ marginVertical: 10, }}>
+      <Text style={{ textAlign: "center", fontSize: 16, fontWeight: "bold" }}>
+        Tank ID: {tankId}
+      </Text>
+      
+      <View style={{ flexDirection: 'row', height: 250, padding: 20 }}>
+        {/* Y Axis */}
+        <YAxis
+          data={pressures}
+          contentInset={{ top: 10, bottom: 10 }}
+          svg={{ fontSize: 12, fill: 'black' }}
+          numberOfTicks={5}
+          formatLabel={(value) => `${value}`}
         />
+
+        {/* Line Chart with proper x-axis spacing */}
+        <View style={{ flex: 1, marginLeft: 10, height:225 }}>
+          <LineChart
+            style={{ flex: 1 }}
+            data={pressures.map((y, i) => ({ x: normalizedX[i], y }))}
+            svg={{ stroke: 'blue', strokeWidth: 1.5 }}
+            contentInset={{ top: 10, bottom: 10 }}
+            xAccessor={({ item }) => item.x} // Ensure x-values are used correctly
+            yAccessor={({ item }) => item.y}
+          >
+      </LineChart>
+
+      {/* Custom Axis Lines */}
+      <Svg height="225" width="100%" style={{ position: 'absolute', left: 0, top: 0 }}>
+        {/* X Axis Line */}
+        <Line x1="0" y1="200" x2="100%" y2="200" stroke="black" strokeWidth="2" />
+
+        {/* Y Axis Line */}
+        <Line x1="0" y1="0" x2="0" y2="200" stroke="black" strokeWidth="2" />
+      </Svg>
+          
+          {/* X Axis with correctly spaced labels */}
+          <XAxis
+            style={{ marginTop: 10, height: 20 }} // Adjust height
+            data={normalizedX}
+            scale={scale.scaleTime}
+            xAccessor={({ item }) => item}
+            formatLabel={(value, index) => {
+            const totalLabels = data.length;
+
+            // Always show first and last labels
+            if (index === 0 || index === totalLabels - 1) {
+              return formatDate(data[index].time);
+            }
+
+            // Show every 3rd label (adjust as needed)
+            //if (index % 3 === 0) {
+              //return formatDate(data[index].time);
+            //}
+
+            return ""; // Hide other labels
+            }}
+          contentInset={{ left: 30, right: 30 }}
+          svg={{ fontSize: 12, fill: 'black' }}
+/>
+
+        </View>
       </View>
-      <CustomLegend data={datasets} />
+    </View>
+  );
+})}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -244,22 +260,5 @@ const styles = StyleSheet.create({
   submitButton:{
     margin: 20, 
     backgroundColor: "#06b4e0",
-  },
-  legendContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    marginTop: 10,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 8,
-    marginBottom: 4,
-  },
-  legendText: {
-    marginLeft: 5,
-    fontSize: 14,
-    color: '#333',
   },
 });
