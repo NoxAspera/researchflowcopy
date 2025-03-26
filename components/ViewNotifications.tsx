@@ -13,7 +13,6 @@ import { getFileContents, visit } from '../scripts/APIRequests';
 import { Entry } from '../scripts/Parsers';
 import { customTheme } from './CustomTheme';
 import { ScrollView } from 'react-native-gesture-handler';
-import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
 import { parseVisits, VisitList } from '../scripts/Parsers'
 
@@ -27,10 +26,6 @@ export default function ViewNotifications({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   let site = route.params?.site;
   let notes: Entry[] = [];
-
-  const [visible, setVisible] = useState(false);
-  const [messageColor, setMessageColor] = useState("");
-  const [message, setMessage] = useState("");
 
   // State to hold parsed data
   const [data, setData] = useState<VisitList>(null);
@@ -81,15 +76,6 @@ export default function ViewNotifications({ navigation }: NavigationType) {
   return (
     <ScrollView style={styles.scrollContainer}>
       <Layout style={styles.container} level="1">
-
-        <PopupProp
-          popupText={message}
-          popupColor={messageColor}
-          onPress={setVisible}
-          visible={visible}
-          navigateHome={null} 
-          returnHome={false}
-        />
         {visitData.map((visit) => (
             <Card>
                 <Text category="h5">{"Upcoming visit: " + visit.visit.date}</Text>

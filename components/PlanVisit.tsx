@@ -105,7 +105,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
 
           {/* success/failure popup */}
           <PopupProp popupText={message} 
-            popupColor={messageColor} 
+            popupStatus={messageColor} 
             onPress={setVisible} 
             navigateHome={navigateHome} 
             visible={visible}

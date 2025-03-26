@@ -195,7 +195,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
           {/* text inputs */}
           {/* success/failure popup */}
           <PopupProp popupText={message} 
-            popupColor={messageColor} 
+            popupStatus={messageColor} 
             onPress={() => setVisible(false)} 
             navigateHome={navigateHome} 
             visible={visible}

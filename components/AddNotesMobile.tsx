@@ -395,15 +395,14 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* success/failure popup */}
             <PopupProp popupText={message} 
-            popupColor={messageColor} 
+            popupStatus={messageColor} 
             onPress={setVisible} 
             navigateHome={navigateHome} 
             visible={visible}
             returnHome={returnHome}/>
 
             {/* popup if user has missing input */}
-            <PopupProp2Button popupText='Missing some input field(s)'
-            popupColor={customTheme['color-danger-700']}
+            <PopupProp2Button 
             sendData={handleUpdate}
             removePopup={setVisible2}
             visible={visible2}/>
