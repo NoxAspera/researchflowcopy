@@ -5,16 +5,16 @@
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
-import { StyleSheet, KeyboardAvoidingView, Platform, Modal, View  } from 'react-native';
+import { StyleSheet, KeyboardAvoidingView, Modal, View, TouchableOpacity  } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { buildNotes, copyTankRecord, Entry } from '../scripts/Parsers';
 import TextInput from './TextInput'
 import NoteInput from './NoteInput'
-import { IndexPath, Layout, Select, SelectItem, Button, Text } from '@ui-kitten/components';
+import { IndexPath, Layout, Select, SelectItem, Button, Text, Icon, CheckBox } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, getLatestTankEntry, getTankList, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, getLatestTankEntry, getTankList, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
@@ -22,6 +22,7 @@ import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
 import VisitPopupProp from './VisitPopup';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 /**
  * @author Megan Ostlie
@@ -99,7 +100,8 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
     
     // these use states to set and store values in the text inputs
-    const [timeValue, setTimeValue] = useState("");
+    const [startDateValue, setStartDateValue] = useState(new Date());
+    const [endDateValue, setEndDateValue] = useState(new Date());
     const [nameValue, setNameValue] = useState("");
     const [ltsId, setLTSId] = useState("");
     const [ltsValue, setLTSValue] = useState("");
@@ -125,14 +127,14 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [highTankRecord, setHighTankRecord] = useState<TankRecord>(undefined);
     const [originalHigh, setOriginalHigh] = useState<TankRecord>(undefined);
     const [instrumentNames, setInstrumentNames] = useState<string[]>();
-    const [instrumentIndex, setInstrumentIndex] = useState<IndexPath | IndexPath[]>(new IndexPath(0));
     const [originalInstrument, setOriginalInstrument] = useState("");
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [customInstrument, setCustomInstrument] = useState<string>("");
-
-    // Use IndexPath for selected index for drop down menu
-    const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
-    const [instruments, setInstruments] = useState<string[]>(['Instrument 1']);
+    const [addToBadData, setAddToBadData] = useState(false);
+    const [badDataReason, setBadDataReason] = useState("");
+    const [showStartPicker, setShowStartPicker] = useState(false);
+    const [showEndPicker, setShowEndPicker] = useState(false);
+    const [selectedTank, setSelectedTank] = useState("");
 
     // used for determining if PUT request was successful
     // will set the success/fail notification to visible, aswell as the color and text
@@ -178,10 +180,10 @@ export default function AddNotes({ navigation }: NavigationType) {
       }
 
       // get date difference
-      // let currTime = new Date().getTime();
-      let currTime = new Date("2027-04-04").getTime(); // use far away date for testing purposes
-      // let prevTime = new Date(prevDate).getTime();
-      let prevTime = new Date("2027-01-01").getTime(); // use far away date for testing purposes
+      let currTime = new Date().getTime();
+      // let currTime = new Date("2027-04-04").getTime(); // use far away date for testing purposes
+      let prevTime = new Date(prevDate).getTime();
+      // let prevTime = new Date("2027-01-01").getTime(); // use far away date for testing purposes
       let changeOfDate = (currTime - prevTime) / (86400000); // get the difference of time in days
 
       // if changeOfDate is 0, then the previous entry was also made today
@@ -248,8 +250,7 @@ export default function AddNotes({ navigation }: NavigationType) {
 
     //method will warn user if fields haven't been input
     function checkTextEntries(){
-        if(timeValue == "" ||
-           nameValue == "" ||
+        if(nameValue == "" ||
            ltsId == "" ||
            ltsValue == "" ||
            ltsPressure == "" ||
@@ -291,6 +292,15 @@ export default function AddNotes({ navigation }: NavigationType) {
       return result;
     };
 
+    const buildBadDataString = (): string => {
+      const startTime = startDateValue.toISOString().split(".")[0] + "Z";
+      const endTime = endDateValue.toISOString().split(".")[0] + "Z";
+      const currentTime = (new Date()).toISOString().split(".")[0] + "Z";
+      let result: string = `${startTime},${endTime},all,NA,${currentTime},${nameValue},${badDataReason}`;
+  
+      return result;
+    };
+
     // will call setFile to send the PUT request. 
     // If it is successful it will display a success message
     // if it fails then it will display a failure message
@@ -300,78 +310,84 @@ export default function AddNotes({ navigation }: NavigationType) {
 
       const LTSignored: boolean = (ltsId == "" && ltsValue == "" && ltsPressure == "")
 
-      // get time submitted
-      const now = new Date();
-      const year = now.getUTCFullYear();
-      const month = String(now.getUTCMonth() + 1).padStart(2, "0");
-      const day = String(now.getUTCDate()).padStart(2, "0");
-      const hours = String(now.getUTCHours()).padStart(2, "0");
-      const minutes = String(now.getUTCMinutes()).padStart(2, "0");
-      const seconds = String(now.getUTCSeconds()).padStart(2, "0");
-      
-      // create an entry object data that will be sent off to the repo
-      let data: Entry = 
-      {
-        time_in: `${year}-${month}-${day} ${timeValue}`,
-        time_out: `${year}-${month}-${day} ${hours}:${minutes}`,
-        names: nameValue,
-        instrument: instrumentInput ? instrumentInput: null,
-        n2_pressure: n2Value ? n2Value: null,
-        lts: LTSignored ? null:
-        {
-          id: ltsId,
-          value: ltsValue,
-          unit: "ppm",
-          pressure: ltsPressure
-        },
-        low_cal:
-        {
-          id:lowId,
-          value:lowValue,
-          unit:"ppm",
-          pressure: lowPressure
-        },
-        mid_cal:
-        {
-          id:midId,
-          value:midValue,
-          unit: "ppm",
-          pressure: midPressure
-        },
-        high_cal:
-        {
-          id:highId,
-          value:highValue,
-          unit: "ppm",
-          pressure: highPressure
-        },
-        additional_notes: notesValue 
-      };
+      const start = new Date(startDateValue);
+      const startYear = start.getUTCFullYear();
+      const startMonth = String(start.getUTCMonth() + 1).padStart(2, "0");
+      const startDay = String(start.getUTCDate()).padStart(2, "0");
+      const startHours = String(start.getUTCHours()).padStart(2, "0");
+      const startMinutes = String(start.getUTCMinutes()).padStart(2, "0");
 
-      const utcTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}Z`;
-      if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
-        removeTankFromSite(originalLts, utcTime);
-      }
-      if (ltsTankRecord) {
-        let ltsTank = copyTankRecord(ltsTankRecord);
-        ltsTank.location = site;
-        ltsTank.updatedAt = utcTime;
-        ltsTank.pressure = parseInt(ltsPressure);
-        ltsTank.userId = nameValue;
-        addEntrytoTankDictionary(ltsTank);
-      }
-      
-      if (originalLow && (!lowTankRecord || (originalLow.tankId != lowTankRecord.tankId))) {
-        removeTankFromSite(originalLow, utcTime);
-      }
-      if (lowTankRecord) {
-        let lowTank = copyTankRecord(lowTankRecord);
-        lowTank.location = site;
-        lowTank.updatedAt = utcTime;
-        lowTank.pressure = parseInt(lowPressure);
-        lowTank.userId = nameValue;
-        addEntrytoTankDictionary(lowTank);
-      }
+      const end = new Date(endDateValue);
+      const endYear = end.getUTCFullYear();
+      const endMonth = String(end.getUTCMonth() + 1).padStart(2, "0");
+      const endDay = String(end.getUTCDate()).padStart(2, "0");
+      const endHours = String(end.getUTCHours()).padStart(2, "0");
+      const endMinutes = String(end.getUTCMinutes()).padStart(2, "0");
+      const endSeconds = String(end.getUTCSeconds()).padStart(2, "0");
+        
+        // create an entry object data that will be sent off to the repo
+        let data: Entry = 
+        {
+          time_in: `${startYear}-${startMonth}-${startDay} ${startHours}:${startMinutes}`,
+          time_out: `${endYear}-${endMonth}-${endDay} ${endHours}:${endMinutes}`,
+          names: nameValue,
+          instrument: instrumentInput ? instrumentInput: null,
+          n2_pressure: n2Value ? n2Value: null,
+          lts: LTSignored ? null:
+          {
+            id: ltsId,
+            value: ltsValue,
+            unit: "ppm",
+            pressure: ltsPressure
+          },
+          low_cal:
+          {
+            id:lowId,
+            value:lowValue,
+            unit:"ppm",
+            pressure: lowPressure
+          },
+          mid_cal:
+          {
+            id:midId,
+            value:midValue,
+            unit: "ppm",
+            pressure: midPressure
+          },
+          high_cal:
+          {
+            id:highId,
+            value:highValue,
+            unit: "ppm",
+            pressure: highPressure
+          },
+          additional_notes: notesValue 
+        };
+
+        const utcTime = `${endYear}-${endMonth}-${endDay} ${endHours}:${endMinutes}:${endSeconds}Z`;
+        if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
+          removeTankFromSite(originalLts, utcTime);
+        }
+        if (ltsTankRecord) {
+          let ltsTank = copyTankRecord(ltsTankRecord);
+          ltsTank.location = site;
+          ltsTank.updatedAt = utcTime;
+          ltsTank.pressure = parseInt(ltsPressure);
+          ltsTank.userId = nameValue;
+          addEntrytoTankDictionary(ltsTank);
+        }
+        
+        if (originalLow && (!lowTankRecord || (originalLow.tankId != lowTankRecord.tankId))) {
+          removeTankFromSite(originalLow, utcTime);
+        }
+        if (lowTankRecord) {
+          let lowTank = copyTankRecord(lowTankRecord);
+          lowTank.location = site;
+          lowTank.updatedAt = utcTime;
+          lowTank.pressure = parseInt(lowPressure);
+          lowTank.userId = nameValue;
+          addEntrytoTankDictionary(lowTank);
+        }
 
       if (originalMid && (!midTankRecord || (originalMid.tankId != midTankRecord.tankId))) {
         removeTankFromSite(originalMid, utcTime);
@@ -401,8 +417,9 @@ export default function AddNotes({ navigation }: NavigationType) {
       const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
       const tankResult = await setTankTracker();
 
-      let instMaintResult;
-      let instMaintResult2;
+        let instMaintResult;
+        let instMaintResult2;
+        let badDataResult;
 
       // If a new instrument was added
       if (instrumentInput && (!originalInstrument || (originalInstrument != instrumentInput))) {
@@ -420,33 +437,50 @@ export default function AddNotes({ navigation }: NavigationType) {
         }
       }
 
-      // if the warning popup is visible, remove it
-      //if(visible2) { setVisible2(false); }
+        if (addToBadData) {
+          let instrument = "";
+          const badDataString = buildBadDataString();
+          if (instrumentInput.includes("LGR")) {
+            instrument = "lgr_ugga";
+          } else if (instrumentInput.includes("7000")) {
+            instrument = "licor_7000";
+          } else if (instrumentInput.includes("6262")) {
+            instrument = "licor_6262";
+          }
+          badDataResult = await setBadData(
+            site,
+            instrument,
+            badDataString,
+            `Update ${instrument}.csv`
+          );
+        }
 
       // remove spinner once we have results back
       setLoadingValue(false);
 
-      // check to see if the request was ok, give a message based on that
-      if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success)) {
-        setMessage("File updated successfully!");
-        setMessageColor(customTheme['color-success-700']);
-        retHome(true);
-      } else {
-        if (result.error) {
-          setMessage(`Error: ${result.error}`);
-        } else if (tankResult.error) {
-          setMessage(`Error: ${tankResult.error}`);
-        } else if (instMaintResult && instMaintResult.error) {
-          setMessage(`Error: ${instMaintResult.error}`);
-        } else if (instMaintResult2 && instMaintResult2.error) {
-          setMessage(`Error: ${instMaintResult2.error}`);
-        }
-        setMessageColor(customTheme['color-danger-700']);
-      }
-      setTimeout(() => {
-        setVisible(true);
-        visibleRef.current = true;
-      }, 100);
+        // check to see if the request was ok, give a message based on that
+        if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success) && (!badDataResult || badDataResult.success)) {
+            setMessage("File updated successfully!");
+            setMessageColor(customTheme['color-success-700']);
+            retHome(true);
+          } else {
+            if (result.error) {
+              setMessage(`Error: ${result.error}`);
+            } else if (tankResult.error) {
+              setMessage(`Error: ${tankResult.error}`);
+            } else if (instMaintResult && instMaintResult.error) {
+              setMessage(`Error: ${instMaintResult.error}`);
+            } else if (instMaintResult2 && instMaintResult2.error) {
+              setMessage(`Error: ${instMaintResult2.error}`);
+            } else if (badDataResult && badDataResult.error) {
+              setMessage(`Error: ${badDataResult.error}`);
+            }
+            setMessageColor(customTheme['color-danger-700']);
+          }
+          setTimeout(() => {
+            setVisible(true);
+            visibleRef.current = true;
+          }, 100);
     };
 
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
@@ -493,47 +527,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
 
     const handleTankChange = (tank: string) => {
-      if (tank == "lts") {
-        navigation.navigate('SelectTank', {
-          from: 'AddNotes',
-          onSelect: (selectedTank) => {
-            setLTSId(selectedTank);
-            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
-            setLtsTankRecord(entry);
-            setLTSValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
-          }
-        });
-      } else if (tank == "low") {
-        navigation.navigate('SelectTank', {
-          from: 'AddNotes',
-          onSelect: (selectedTank) => {
-            setLowId(selectedTank);
-            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
-            setLowTankRecord(entry);
-            setLowValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
-          }
-        });
-      } else if (tank == "mid") {
-        navigation.navigate('SelectTank', {
-          from: 'AddNotes',
-          onSelect: (selectedTank) => {
-            setmidId(selectedTank);
-            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
-            setMidTankRecord(entry);
-            setmidValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
-          }
-        });
-      } else if (tank == "high") {
-        navigation.navigate('SelectTank', {
-          from: 'AddNotes',
-          onSelect: (selectedTank) => {
-            setHighId(selectedTank);
-            const entry = getLatestTankEntry(selectedTank) || getLatestTankEntry(selectedTank.toLowerCase());
-            setHighTankRecord(entry);
-            setHighValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
-          }
-        });
-      }
+      setSelectedTank(tank);
     };
 
     const handleInstrumentUpdate = (index: IndexPath | IndexPath[]) => {
@@ -555,6 +549,61 @@ export default function AddNotes({ navigation }: NavigationType) {
       }
       setModalVisible(false);
     }
+
+    useEffect(() => {
+      if (selectedTank) {
+        if (selectedTank == "lts") {
+          setTimeout(() => {
+            navigation.navigate('SelectTank', {
+              from: 'AddNotes',
+              onSelect: (tank) => {
+                  setLTSId(tank);
+                  const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+                  setLtsTankRecord(entry);
+                  setLTSValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+              }
+            });
+          }, 10);
+        } else if (selectedTank == "low") {
+          setTimeout(() => {
+            navigation.navigate('SelectTank', {
+              from: 'AddNotes',
+              onSelect: (tank) => {
+                setLowId(tank);
+                const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+                setLowTankRecord(entry);
+                setLowValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+              }
+            });
+          }, 10);
+        } else if (selectedTank == "mid") {
+          setTimeout(() => {
+            navigation.navigate('SelectTank', {
+              from: 'AddNotes',
+              onSelect: (tank) => {
+                setmidId(tank);
+                const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+                setMidTankRecord(entry);
+                setmidValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+              }
+            });
+          } , 10);
+        } else if (selectedTank == "high") {
+          setTimeout(() => {
+            navigation.navigate('SelectTank', {
+              from: 'AddNotes',
+              onSelect: (tank) => {
+                setHighId(tank);
+                const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+                setHighTankRecord(entry);
+                setHighValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+              }
+            });
+          }, 10);
+        }
+        setSelectedTank("");
+      }
+    }, [selectedTank]);
 
     //Set tank ids, values, and instruments if available in parsed data
     useEffect(() => {
@@ -689,22 +738,78 @@ export default function AddNotes({ navigation }: NavigationType) {
             <TextInput labelText='Name' 
               labelValue={nameValue} 
               onTextChange={setNameValue} 
-              placeholder='ResearchFlow' 
+              placeholder='First Last' 
               style={styles.inputText}
             />
 
               {/* Time input */}
-            <TextInput labelText='Time Started' 
-              labelValue={timeValue} 
-              onTextChange={setTimeValue} 
-              placeholder='15:00' 
-              style={styles.inputText} />
+              <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Arrived (MT):</Text>
+              <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.datePicker}>
+                <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
+                <Text>{startDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {startDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+              </TouchableOpacity>
+
+          {showStartPicker && (
+          <View>
+          <DateTimePicker
+            value={startDateValue}
+            mode="datetime"
+            display="spinner"
+            onChange={(event, selectedDate) => {
+            if (selectedDate) setStartDateValue(selectedDate);
+          }}
+          />
+          <Button style={styles.submitButton} onPress={() => setShowStartPicker(false)}> 
+          {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Confirm Date/Time</Text>}
+          </Button>
+          </View>
+        )}
+
+        <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Departed (MT):</Text>
+          <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.datePicker}>
+            <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
+            <Text>{endDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {endDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+          </TouchableOpacity>
+
+          {showEndPicker && (
+          <View>
+          <DateTimePicker
+            value={endDateValue}
+            mode="datetime"
+            display="spinner"
+            onChange={(event, selectedDate) => {
+            if (selectedDate) setEndDateValue(selectedDate);
+          }}
+          />
+          <Button style={styles.submitButton} onPress={() => setShowEndPicker(false)}> 
+          {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Confirm Date/Time</Text>}
+          </Button>
+          </View>
+        )}
+
+        <CheckBox
+          checked={addToBadData}
+          onChange={setAddToBadData}
+          style={{ margin: 15 }}
+        >
+        {evaProps => <Text {...evaProps} category="p2">Add this time period to Bad Data?</Text>}
+        </CheckBox>
+
+        {addToBadData && (
+        <TextInput
+          labelText="Reason for Bad Data"
+          labelValue={badDataReason}
+          onTextChange={setBadDataReason}
+          placeholder="Describe why this data is invalid"
+          style={styles.inputText}
+        />
+      )}
 
             {/* N2 */}
             <TextInput labelText='N2 (if needed)' 
               labelValue={n2Value} 
               onTextChange={setN2Value} 
-              placeholder='Pressure' 
+              placeholder='psi' 
               style={styles.inputText} />
 
             {/* LTS input */}
@@ -729,7 +834,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               <TextInput labelText=' ' 
                 labelValue={ltsPressure} 
                 onTextChange={setLTSPressure} 
-                placeholder='Pressure' 
+                placeholder='psi' 
                 style={styles.tankInput} />
             </Layout>
 
@@ -757,7 +862,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               <TextInput labelText=' ' 
                 labelValue={lowPressure} 
                 onTextChange={setLowPressure} 
-                placeholder='Pressure' 
+                placeholder='psi' 
                 style={styles.tankInput} />
             </Layout>
 
@@ -783,7 +888,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               <TextInput labelText=' ' 
                 labelValue={midPressure} 
                 onTextChange={setmidPressure} 
-                placeholder='Pressure' 
+                placeholder='psi' 
                 style={styles.tankInput} />
             </Layout>
 
@@ -809,7 +914,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               <TextInput labelText=' ' 
                 labelValue={highPressure} 
                 onTextChange={setHighPressure} 
-                placeholder='Pressure' 
+                placeholder='psi' 
                 style={styles.tankInput} />
             </Layout>
 
@@ -817,7 +922,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             <NoteInput labelText='Notes' 
               labelValue={notesValue} 
               onTextChange={setNotesValue} 
-              placeholder='All Good.' 
+              placeholder='Notes' 
               multiplelines={true} 
               style={styles.notesInput}/>
 
@@ -921,4 +1026,17 @@ export default function AddNotes({ navigation }: NavigationType) {
       marginBottom: 10,
       padding: 5,
     },
+    datePicker: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 0,
+      marginBottom: 8,
+      marginRight: 8,
+      marginLeft: 8,
+      padding: 10,
+      borderWidth: 1,
+      borderRadius: 5,
+      borderColor: '#d3d3d3',
+      backgroundColor: '#f9f9f9',
+    }
 });

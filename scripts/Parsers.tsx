@@ -257,6 +257,76 @@ export function copyTankRecord(record: TankRecord): TankRecord
 
     return newRecord
 }
+/**
+ * @author  David schiwal
+ * a small interface to contain list of visits
+ * 
+ */
+export interface VisitList {
+    visits: VisitInfo[];
+}
+/**
+ * @author David Schiwal
+ * a small interface for the visit
+ */
+export interface VisitInfo {
+    date: string | null;
+    equipment: string | null;
+    name: string | null;
+    notes: string | null;
+    site: string | null;
+}
+/**
+ * @author David Schiwal, Megan Ostlie, August O'Rourke
+ * @param text the document being parsed
+ * 
+ * @returns a VisitList object that contains the visits from the visit document
+ */
+export function parseVisits(text: string): VisitList{    
+    //const visitPattern = /- {(.*?)}/;
+    const datePattern = /{"date":"(.*?)",/;
+    const equipmentPattern = /"equipment":"(.*?)",/;
+    const namePattern = /"name":"(.*?)",/;
+    const notesPattern = /"notes":"(.*?)"}/;
+    const sitePattern = /"site":"(.*?)",/;
+    const visitBlocks = text.split("\n").slice(1);
+    const visits: VisitInfo[] = visitBlocks.map((block) => {
+        // Parse date
+        const dateMatch = block.match(datePattern);
+        const date = dateMatch ? dateMatch[1] : null;
+        //console.log("Inside parseVisits date is: " + date)
+        // Parse name
+        const nameMatch = block.match(namePattern);
+        const name = nameMatch ? nameMatch[1] : null;
+        //console.log("Inside parseVisits name is: " + name)
+        // Parse site
+        const siteMatch = block.match(sitePattern);
+        const site = siteMatch ? siteMatch[1] : null;
+        //console.log("Inside parseVisits site is: " + site)
+        // Parse equipment
+        const equipmentMatch = block.match(equipmentPattern);
+        const equipment = equipmentMatch ? equipmentMatch[1] : null;
+        //console.log("Inside parseVisits equipment is: " + equipment)
+        // Parse notes
+        const notesMatch = block.match(notesPattern);
+        const notes = notesMatch ? notesMatch[1] : null;
+        //console.log("Inside parseVisits notes is: " + notes)
+        if(date != null){
+            return{
+                date: date,
+                equipment: equipment,
+                name: name,
+                notes: notes,
+                site: site,
+            };
+        }
+    });
+    // Construct final parsed data
+    const jsonData: VisitList = {
+        visits: visits,
+    };
+    return jsonData;
+}
 
 function formDate(dateString: string)
 {

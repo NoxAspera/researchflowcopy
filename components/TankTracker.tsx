@@ -241,31 +241,21 @@ export default function TankTracker({ navigation }: NavigationType) {
                 returnHome={returnHome}
               />
 
-              {/* tank is low popup */}
-              {/* <VisitPopupProp
-                daysRemaining = "999"
-                visible = {tankPredictorVisibility}
-                removePopup = {setTankPredictorVisibility}
-                navigateHome = {navigateHome}
-                navigatePlanVisit = {navigatePlanVisit}
-              /> */}
-
-              {/* text inputs */}
-              {/* Name input */}
-              <TextInput
-                labelText="Name"
-                labelValue={nameValue}
-                onTextChange={setNameValue}
-                placeholder="Jane Doe"
-                style={styles.textInput}
-              />
+            {/* Name input */}
+            <TextInput
+              labelText="Name"
+              labelValue={nameValue}
+              onTextChange={setNameValue}
+              placeholder="First Last"
+              style={styles.textInput}
+            />
 
               {/* FillID input */}
               <TextInput
                 labelText="Fill ID"
                 labelValue={fillIDValue}
                 onTextChange={setFillIDValue}
-                placeholder="240124_M1"
+                placeholder="ID"
                 style={styles.textInput}
               />
 
@@ -283,7 +273,7 @@ export default function TankTracker({ navigation }: NavigationType) {
                 labelText="PSI"
                 labelValue={PSIValue !== undefined ? PSIValue.toString() : ""}
                 onTextChange={(text) => setPSIValue(parseFloat(text) || undefined)}
-                placeholder="100"
+                placeholder="PSI"
                 style={styles.textInput}
               />
 
@@ -292,7 +282,7 @@ export default function TankTracker({ navigation }: NavigationType) {
                 labelText="CO2"
                 labelValue={CO2Value !== undefined ? CO2Value.toString() : ""}
                 onTextChange={(text) => setCO2Value(parseFloat(text) || undefined)}
-                placeholder="100"
+                placeholder="CO2"
                 style={styles.textInput}
               />
 
@@ -301,18 +291,18 @@ export default function TankTracker({ navigation }: NavigationType) {
                 labelText="CH4"
                 labelValue={CH4Value !== undefined ? CH4Value.toString() : ""}
                 onTextChange={(text) => setCH4Value(parseFloat(text) || undefined)}
-                placeholder="100"
+                placeholder="CH4"
                 style={styles.textInput}
               />
 
-              {/* notes entry */}
-              <TextInput
-                labelText="Notes"
-                labelValue={notesValue}
-                onTextChange={setNotesValue}
-                placeholder="Tank draining at normal rate."
-                style={styles.reasonText}
-              />
+            {/* notes entry */}
+            <TextInput
+              labelText="Notes"
+              labelValue={notesValue}
+              onTextChange={setNotesValue}
+              placeholder="Notes"
+              style={styles.reasonText}
+            />
 
               {/* submit button */}
               <Button
