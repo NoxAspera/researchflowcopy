@@ -5,10 +5,10 @@
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
-import { StyleSheet, KeyboardAvoidingView, Modal, View, TouchableOpacity  } from 'react-native';
+import { StyleSheet, KeyboardAvoidingView, Modal, View, TouchableOpacity, Platform  } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView, Pressable } from 'react-native-gesture-handler';
 import { buildNotes, copyTankRecord, Entry } from '../scripts/Parsers';
 import TextInput from './TextInput'
 import NoteInput from './NoteInput'
@@ -21,7 +21,7 @@ import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker, {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
 
 /**
  * @author Megan Ostlie
@@ -54,6 +54,50 @@ export default function AddNotes({ navigation }: NavigationType) {
     const themeContext = React.useContext(ThemeContext);
     const isDarkMode = themeContext.theme === 'dark';
 
+  const onStartChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setStartDateValue(currentDate);
+  };
+
+  const onEndChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setEndDateValue(currentDate);
+  };
+
+
+  const showStartMode = (currentMode) => {
+    DateTimePickerAndroid.open({
+      value: startDateValue,
+      onChange: onStartChange,
+      mode: currentMode,
+      is24Hour: false,
+    });
+  };
+
+  const showEndMode = (currentMode) => {
+    DateTimePickerAndroid.open({
+      value: endDateValue,
+      onChange: onEndChange,
+      mode: currentMode,
+      is24Hour: false,
+    });
+  };
+
+  const showStartDatepicker = () => {
+    showStartMode("date");
+  };
+
+  const showStartTimepicker = () => {
+    showStartMode("time");
+  };
+
+  const showEndDatepicker = () => {
+    showEndMode("date");
+  };
+
+  const showEndTimepicker = () => {
+    showEndMode("time");
+  };
     // State to hold parsed data
     const [data, setData] = useState<ParsedData | null>(null);
 
@@ -618,7 +662,7 @@ export default function AddNotes({ navigation }: NavigationType) {
                 <Text>{startDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {startDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
               </TouchableOpacity>
 
-          {showStartPicker && (
+          {(showStartPicker && Platform.OS === "ios") && (
           <View>
           <DateTimePicker
             value={startDateValue}
@@ -634,26 +678,81 @@ export default function AddNotes({ navigation }: NavigationType) {
           </View>
         )}
 
+        {(showStartPicker && Platform.OS === "android") && (
+          (
+            <View style={styles.androidDateTime}>
+              <Pressable onPress={() => {showStartDatepicker(); setStartDateValue(startDateValue)}}>
+                <Text>
+                  {startDateValue.toLocaleDateString([], {
+                    weekday: "short",
+                    year: "numeric",
+                    month: "short",
+                    day: "2-digit",
+                  })}
+                </Text>
+              </Pressable>
+              <Pressable onPress={() => {showStartTimepicker(); setStartDateValue(startDateValue)}}>
+                <Text>
+                  {startDateValue.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </Pressable>
+            </View>
+          )
+        )}
+
         <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Departed (MT):</Text>
           <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.datePicker}>
             <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
             <Text>{endDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {endDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
           </TouchableOpacity>
 
-          {showEndPicker && (
-          <View>
-          <DateTimePicker
-            value={endDateValue}
-            mode="datetime"
-            display="spinner"
-            onChange={(event, selectedDate) => {
-            if (selectedDate) setEndDateValue(selectedDate);
+          {(showEndPicker && Platform.OS == "ios") && (
+            <View>
+            <DateTimePicker
+              value={endDateValue}
+              mode="datetime"
+              display="spinner"
+              onChange={(event, selectedDate) => {
+                //setShowEndPicker(false)
+                if (selectedDate)
+                {
+                  setEndDateValue(selectedDate);
+                }
+              
           }}
           />
-          <Button style={styles.submitButton} onPress={() => setShowEndPicker(false)}> 
+          <Button style={styles.submitButton}> 
           {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Confirm Date/Time</Text>}
           </Button>
           </View>
+        )}
+
+          {(showEndPicker && Platform.OS === "android") && (
+          (
+            <View style={styles.androidDateTime}>
+              <Pressable onPress={() => {showEndDatepicker(); setEndDateValue(endDateValue)}}>
+                <Text>
+                  {endDateValue.toLocaleDateString([], {
+                    weekday: "short",
+                    year: "numeric",
+                    month: "short",
+                    day: "2-digit",
+                  })}
+                </Text>
+              </Pressable>
+              <Pressable onPress={() => {showEndTimepicker(); setEndDateValue(endDateValue)}}>
+                <Text>
+                  {endDateValue.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </Pressable>
+            </View>
+          )
         )}
 
         <CheckBox
@@ -907,5 +1006,9 @@ export default function AddNotes({ navigation }: NavigationType) {
       borderRadius: 5,
       borderColor: '#d3d3d3',
       backgroundColor: '#f9f9f9',
-    }
+    }, 
+    androidDateTime: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+    },
 });
