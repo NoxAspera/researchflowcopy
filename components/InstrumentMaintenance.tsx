@@ -227,6 +227,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
           {showStartPicker && (
           <View>
           <DateTimePicker
+            textColor= {isDarkMode ? 'white' : 'black'}
             value={startDateValue}
             mode="datetime"
             display="spinner"
@@ -261,6 +262,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
           {showEndPicker && addToBadData && (
           <View>
           <DateTimePicker
+            textColor= {isDarkMode ? 'white' : 'black'}
             value={endDateValue}
             mode="datetime"
             display="spinner"

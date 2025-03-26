@@ -623,6 +623,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           {showStartPicker && (
           <View>
           <DateTimePicker
+            textColor= {isDarkMode ? 'white' : 'black'}
             value={startDateValue}
             mode="datetime"
             display="spinner"
@@ -645,6 +646,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           {showEndPicker && (
           <View>
           <DateTimePicker
+            textColor= {isDarkMode ? 'white' : 'black'}
             value={endDateValue}
             mode="datetime"
             display="spinner"
