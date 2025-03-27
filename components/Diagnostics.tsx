@@ -19,7 +19,7 @@ import PopupProp from './Popup';
 import LoadingScreen from "./LoadingScreen";
 import { processNotes, ParsedData, Entry, TankInfo } from "../scripts/Parsers";
 import { LineChart, XAxis, YAxis, Grid } from 'react-native-svg-charts';
-import { Defs, LinearGradient, Stop, Svg, Line, Path } from 'react-native-svg';
+import { Defs, LinearGradient, Stop, Svg, Line, Path, Rect } from 'react-native-svg';
 import * as scale from 'd3-scale';
 
 const extractNumericValue = (pressure: string | null): number | null => {
@@ -133,11 +133,11 @@ export default function Diagnostics({ navigation }: NavigationType) {
 
   const formatDate = (timestamp: string): string => {
     const date = new Date(timestamp);
-    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear().toString().substring(2,4)}`;
   };
 
   const screenWidth = Dimensions.get("window").width;
-  const predictedZeroPressureDate = "2025-05-01";
+  const predictedZeroPressureDate = "2025-12-01";
 
   return (
     <KeyboardAvoidingView
@@ -164,33 +164,27 @@ export default function Diagnostics({ navigation }: NavigationType) {
         const minTimestamp = Math.min(...timestamps); // Find the earliest timestamp for normalization
         let normalizedX = timestamps.map(ts => ts - minTimestamp); // Normalize timestamps so that the first point is at `0`
         let pressures = validData.map(d => d.pressure); // Y values (pressures)
+        let lastX = normalizedX[normalizedX.length - 1];
 
-        // Get last recorded data point
-const lastDataPoint = validData[validData.length - 1];
-const lastX = normalizedX[normalizedX.length - 1];
-const lastY = pressures[pressures.length - 1];
+        // Compute the x-position for the predicted zero-pressure date
+        const predictedTimestamp = new Date(predictedZeroPressureDate).getTime();
+        const predictedX = predictedTimestamp - minTimestamp;
 
-// Compute the x-position for the predicted zero-pressure date
-const predictedTimestamp = new Date(predictedZeroPressureDate).getTime();
-const predictedX = predictedTimestamp - minTimestamp;
+        // Append this new point to the dataset
+        const extendedData = [
+          ...pressures.map((y, i) => ({ x: normalizedX[i], y })),
+        { x: predictedX, y: 0 }, // New predicted zero-pressure point
+      ];
+      pressures.push(0);
+      normalizedX.push(predictedX);
+      const xScale = scale.scaleLinear()
+        .domain([0, predictedX])
+        .range([0, screenWidth-80]);
 
-// Append this new point to the dataset
-const extendedData = [
-  ...pressures.map((y, i) => ({ x: normalizedX[i], y })),
-  { x: predictedX, y: 0 }, // New predicted zero-pressure point
-];
-pressures.push(0);
-normalizedX.push(predictedX);
-const xScale = scale.scaleLinear()
-  .domain([0, predictedX])
-  .range([0, 310]);
-
-const yScale = scale.scaleLinear()
-  .domain([0, 2200])
-  .range([0, 200]);
-
-  console.log(lastY);
-  console.log(xScale(lastY));
+      //If there is only one data point for the tank, adjust lastX so dotted line is visible at beginning of graph
+      if (lastX == 0) {
+        lastX = 50000000;
+      }
 
   return (
     <View key={tankId} style={{ marginVertical: 10, }}>
@@ -221,8 +215,8 @@ const yScale = scale.scaleLinear()
           >
             <Line
                 x1={xScale(lastX)}
-                y1={yScale(lastY)}
-                x2={"100%"}
+                y1={"0"}
+                x2={xScale(lastX)}
                 y2={"100%"}
                 stroke="red"
                 strokeWidth={2}
@@ -252,23 +246,21 @@ const yScale = scale.scaleLinear()
             if (index === 0 || index === totalLabels - 1) {
               return formatDate(validData[index].time);
             }
+            // Add label for predicted zero date
             if (index === totalLabels) {
               return formatDate(predictedZeroPressureDate);
             }
-
-            // Show every 3rd label (adjust as needed)
-            //if (index % 3 === 0) {
-              //return formatDate(data[index].time);
-            //}
-
             return ""; // Hide other labels
             }}
-          contentInset={{ left: 30, right: 30 }}
+          contentInset={{ left: 25, right: 25 }}
           svg={{ fontSize: 12, fill: 'black' }}
 />
 
         </View>
       </View>
+      <Text style={{ textAlign: "center", fontSize: 16, fontWeight: "bold" }}>
+        Predicted empty date: {predictedZeroPressureDate}
+      </Text>
     </View>
   );
 })}
