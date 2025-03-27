@@ -22,6 +22,9 @@ import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
 import DateTimePicker, {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
+import Network from 'expo-network'
+
+let check = false
 
 /**
  * @author Megan Ostlie
@@ -41,6 +44,12 @@ async function processNotes(siteName: string) {
   }
 }
 
+async function isConnected()
+{
+  let check = (await Network.getNetworkStateAsync()).isConnected
+  return check
+}
+
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
  *  Creates the input elements for the user to input site note information.
@@ -49,10 +58,12 @@ async function processNotes(siteName: string) {
  * 
  */
 export default function AddNotes({ navigation }: NavigationType) {
+    
     const route = useRoute<routeProp>();
     const { site, info } = route.params || {}
     const themeContext = React.useContext(ThemeContext);
     const isDarkMode = themeContext.theme === 'dark';
+
 
   const onStartChange = (event, selectedDate) => {
     const currentDate = selectedDate;
@@ -100,11 +111,14 @@ export default function AddNotes({ navigation }: NavigationType) {
   };
     // State to hold parsed data
     const [data, setData] = useState<ParsedData | null>(null);
+    const [networkStatus, setNetworkStatus] = useState(false)
 
     // Get current notes for the site
     useEffect(() => {
         async function fetchData() {
-            if (site && !data) {
+          setNetworkStatus(await isConnected())
+
+            if (site && !data && networkStatus) {
                 try {
                     const parsedData = await processNotes(site);
                     setData(parsedData); // Update state with the latest entry
@@ -152,9 +166,9 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [lowId, setLowId] = useState("");
     const [lowValue, setLowValue] = useState("");
     const [lowPressure, setLowPressure] = useState("");
-    const [midId, setmidId] = useState("");
-    const [midValue, setmidValue] = useState("");
-    const [midPressure, setmidPressure] = useState("");
+    const [midId, setMidId] = useState("");
+    const [midValue, setMidValue] = useState("");
+    const [midPressure, setMidPressure] = useState("");
     const [highId, setHighId] = useState("");
     const [highValue, setHighValue] = useState("");
     const [highPressure, setHighPressure] = useState("");
@@ -271,6 +285,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       const endMinutes = String(end.getUTCMinutes()).padStart(2, "0");
       const endSeconds = String(end.getUTCSeconds()).padStart(2, "0");
         
+      console.log("creating data")
         // create an entry object data that will be sent off to the repo
         let data: Entry = 
         {
@@ -309,23 +324,26 @@ export default function AddNotes({ navigation }: NavigationType) {
           },
           additional_notes: notesValue 
         };
-
+        console.log("entry created")
         const utcTime = `${endYear}-${endMonth}-${endDay} ${endHours}:${endMinutes}:${endSeconds}Z`;
         if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
           removeTankFromSite(originalLts, utcTime);
         }
+        console.log(ltsTankRecord)
         if (ltsTankRecord) {
           let ltsTank = copyTankRecord(ltsTankRecord);
           ltsTank.location = site;
           ltsTank.updatedAt = utcTime;
           ltsTank.pressure = parseInt(ltsPressure);
           ltsTank.userId = nameValue;
+          console.log("calling this")
           addEntrytoTankDictionary(ltsTank);
         }
-        
+        console.log("tank pressure point")
         if (originalLow && (!lowTankRecord || (originalLow.tankId != lowTankRecord.tankId))) {
           removeTankFromSite(originalLow, utcTime);
         }
+        console.log("tank pressure point 2")
         if (lowTankRecord) {
           let lowTank = copyTankRecord(lowTankRecord);
           lowTank.location = site;
@@ -359,8 +377,10 @@ export default function AddNotes({ navigation }: NavigationType) {
           addEntrytoTankDictionary(highTank);
         }
 
+        console.log("sending add notes")
         // send the request
         const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
+        console.log("sending tank tracker")
         const tankResult = await setTankTracker();
 
         let instMaintResult;
@@ -371,6 +391,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         if (instrumentInput && (!originalInstrument || (originalInstrument != instrumentInput))) {
           if (instrumentNames.includes(instrumentInput)) {
             const notes = installedInstrumentNotes(utcTime);
+            console.log("sending instrument")
             instMaintResult = await setInstrumentFile(`instrument_maint/LGR_UGGA/${instrumentInput}`, notes, `Updated ${instrumentInput}.md`, true, site);
           }
         }
@@ -379,6 +400,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         if (originalInstrument && (!instrumentInput || (originalInstrument != instrumentInput))) {
           if (instrumentNames.includes(originalInstrument)) {
             const notes = removedInstrumentNotes(utcTime);
+            console.log("sending instrument 2")
             instMaintResult2 = await setInstrumentFile(`instrument_maint/LGR_UGGA/${originalInstrument}`, notes, `Updated ${originalInstrument}.md`, true, 'WBB - Spare');
           }
         }
@@ -393,6 +415,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           } else if (instrumentInput.includes("6262")) {
             instrument = "licor_6262";
           }
+          console.log("sending bad data")
           badDataResult = await setBadData(
             site,
             instrument,
@@ -455,8 +478,8 @@ export default function AddNotes({ navigation }: NavigationType) {
         setLowValue("");
         setLowTankRecord(undefined);
       } else if (tank == "mid") {
-        setmidId("");
-        setmidValue("");
+        setMidId("");
+        setMidValue("");
         setMidTankRecord(undefined);
       } else if (tank == "high") {
         setHighId("");
@@ -496,10 +519,19 @@ export default function AddNotes({ navigation }: NavigationType) {
             navigation.navigate('SelectTank', {
               from: 'AddNotes',
               onSelect: (tank) => {
+                if(networkStatus)
+                {
                   setLTSId(tank);
                   const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
                   setLtsTankRecord(entry);
                   setLTSValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+                }
+                else
+                {
+                  setLTSId(tank)
+                  //it won't display the tankID unless we give this an empty value, haven't a clue why
+                  setLTSValue(" ")
+                }
               }
             });
           }, 10);
@@ -508,10 +540,19 @@ export default function AddNotes({ navigation }: NavigationType) {
             navigation.navigate('SelectTank', {
               from: 'AddNotes',
               onSelect: (tank) => {
-                setLowId(tank);
-                const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
-                setLowTankRecord(entry);
-                setLowValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+                if(networkStatus)
+                {
+                  setLowId(tank);
+                  const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+                  setLowTankRecord(entry);
+                  setLowValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+                }
+                else
+                {
+                  setLowId(tank)
+                  //it won't display the tankID unless we give this an empty value, haven't a clue why
+                  setLowValue(" ")
+                }
               }
             });
           }, 10);
@@ -520,10 +561,19 @@ export default function AddNotes({ navigation }: NavigationType) {
             navigation.navigate('SelectTank', {
               from: 'AddNotes',
               onSelect: (tank) => {
-                setmidId(tank);
-                const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
-                setMidTankRecord(entry);
-                setmidValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+                if(networkStatus)
+                {
+                  setMidId(tank);
+                  const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+                  setMidTankRecord(entry);
+                  setMidValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+                }
+                else
+                {
+                  setMidId(tank)
+                  //it won't display the tankID unless we give this an empty value, haven't a clue why
+                  setMidValue(" ")
+                }
               }
             });
           } , 10);
@@ -532,10 +582,18 @@ export default function AddNotes({ navigation }: NavigationType) {
             navigation.navigate('SelectTank', {
               from: 'AddNotes',
               onSelect: (tank) => {
-                setHighId(tank);
-                const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
-                setHighTankRecord(entry);
-                setHighValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+                if(networkStatus){
+                  setHighId(tank);
+                  const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+                  setHighTankRecord(entry);
+                  setHighValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+                }
+                else
+                {
+                  setHighId(tank)
+                  //it won't display the tankID unless we give this an empty value, haven't a clue why
+                  setHighValue(" ")
+                }
               }
             });
           }, 10);
@@ -578,8 +636,8 @@ export default function AddNotes({ navigation }: NavigationType) {
               if (midEntry) {
                 setMidTankRecord(midEntry);
                 setOriginalMid(midEntry);
-                setmidId(midEntry.tankId);
-                setmidValue(midEntry.co2.toString() + " ~ " + midEntry.ch4.toString());
+                setMidId(midEntry.tankId);
+                setMidValue(midEntry.co2.toString() + " ~ " + midEntry.ch4.toString());
               }
             } 
           }
@@ -855,7 +913,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               </Select>
               <TextInput labelText=' ' 
                 labelValue={midPressure} 
-                onTextChange={setmidPressure} 
+                onTextChange={setMidPressure} 
                 placeholder='psi' 
                 style={styles.tankInput} />
             </Layout>

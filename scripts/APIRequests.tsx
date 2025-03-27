@@ -270,8 +270,16 @@ export function setGithubToken(token: string) {
 
 export function addEntrytoTankDictionary(newEntry: TankRecord) {
     let tankEntries = tankDict.get(newEntry.tankId);
-    tankEntries.push(newEntry);
-    tankDict.set(newEntry.tankId, tankEntries);
+    console.log(newEntry)
+    if (tankEntries == undefined)
+    {
+        tankDict.set(newEntry.tankId, [newEntry])
+    }
+    else
+    {
+        tankEntries.push(newEntry);
+        tankDict.set(newEntry.tankId, tankEntries);
+    }
 }
 
 /**
@@ -287,15 +295,18 @@ export async function setTankTracker()
 
     temp.forEach(value =>
         {
+            console.log(temp)
+            console.log(value)
             value.forEach(value =>
             {
+                console.log("looping forever")
                 plainfullDoc.push(value)
             })
         }
     )
 
     let newContent = csvify(plainfullDoc)
-
+    console.log("getting to request")
     if((await Network.getNetworkStateAsync()).isConnected)
     {
         const fullDoc = btoa(newContent)
