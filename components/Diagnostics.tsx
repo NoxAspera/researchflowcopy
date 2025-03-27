@@ -19,13 +19,12 @@ import PopupProp from './Popup';
 import LoadingScreen from "./LoadingScreen";
 import { processNotes, ParsedData, Entry, TankInfo } from "../scripts/Parsers";
 import { LineChart, XAxis, YAxis, Grid } from 'react-native-svg-charts';
-import { Defs, LinearGradient, Stop, Svg, Line } from 'react-native-svg';
+import { Defs, LinearGradient, Stop, Svg, Line, Path } from 'react-native-svg';
 import * as scale from 'd3-scale';
 
 const extractNumericValue = (pressure: string | null): number | null => {
   if (!pressure) return null; // Handle null or undefined
   const match = pressure.match(/\d+(\.\d+)?/); // Match integer or decimal numbers
-  console.log("Pressure:", pressure, "Match:", match);
   if (match) {
     const number = parseFloat(match[0]); // Use parseFloat to handle decimals properly
     return isNaN(number) ? null : number; // Return null if it's NaN
@@ -108,11 +107,6 @@ export default function Diagnostics({ navigation }: NavigationType) {
 
   // State to hold parsed data
   const [data, setData] = useState<ParsedData | null>(null);
-  const [lowCalList, setLowCalList] = useState<{ id: string; pressure: number; time_in: string | null }[]>([]);
-  const [midCalList, setMidCalList] = useState<{ id: string; pressure: number; time_in: string | null }[]>([]);
-  const [highCalList, setHighCalList] = useState<{ id: string; pressure: number; time_in: string | null }[]>([]);
-  const [ltsList, setLtsList] = useState<{ id: string; pressure: number; time_in: string | null }[]>([]);
-  const [n2List, setN2List] = useState<{ id: string; pressure: number; time_in: string | null }[]>([]);
   
   // Get current notes for the site
   useEffect(() => {
@@ -143,6 +137,7 @@ export default function Diagnostics({ navigation }: NavigationType) {
   };
 
   const screenWidth = Dimensions.get("window").width;
+  const predictedZeroPressureDate = "2025-05-01";
 
   return (
     <KeyboardAvoidingView
@@ -166,10 +161,36 @@ export default function Diagnostics({ navigation }: NavigationType) {
       {Object.entries(tankData).map(([tankId, data]) => {
         const validData = data.filter(d => !isNaN(new Date(d.time).getTime()));
         const timestamps = validData.map(d => new Date(d.time).getTime());
-        console.log(timestamps);
         const minTimestamp = Math.min(...timestamps); // Find the earliest timestamp for normalization
-        const normalizedX = timestamps.map(ts => ts - minTimestamp); // Normalize timestamps so that the first point is at `0`
-        const pressures = validData.map(d => d.pressure); // Y values (pressures)
+        let normalizedX = timestamps.map(ts => ts - minTimestamp); // Normalize timestamps so that the first point is at `0`
+        let pressures = validData.map(d => d.pressure); // Y values (pressures)
+
+        // Get last recorded data point
+const lastDataPoint = validData[validData.length - 1];
+const lastX = normalizedX[normalizedX.length - 1];
+const lastY = pressures[pressures.length - 1];
+
+// Compute the x-position for the predicted zero-pressure date
+const predictedTimestamp = new Date(predictedZeroPressureDate).getTime();
+const predictedX = predictedTimestamp - minTimestamp;
+
+// Append this new point to the dataset
+const extendedData = [
+  ...pressures.map((y, i) => ({ x: normalizedX[i], y })),
+  { x: predictedX, y: 0 }, // New predicted zero-pressure point
+];
+pressures.push(0);
+normalizedX.push(predictedX);
+const xScale = scale.scaleLinear()
+  .domain([0, predictedX])
+  .range([0, 310]);
+
+const yScale = scale.scaleLinear()
+  .domain([0, 2200])
+  .range([0, 200]);
+
+  console.log(lastY);
+  console.log(xScale(lastY));
 
   return (
     <View key={tankId} style={{ marginVertical: 10, }}>
@@ -184,6 +205,7 @@ export default function Diagnostics({ navigation }: NavigationType) {
           contentInset={{ top: 10, bottom: 10 }}
           svg={{ fontSize: 12, fill: 'black' }}
           numberOfTicks={5}
+          scale={scale.scaleLinear}
           formatLabel={(value) => `${value}`}
         />
 
@@ -191,12 +213,21 @@ export default function Diagnostics({ navigation }: NavigationType) {
         <View style={{ flex: 1, marginLeft: 10, height:225 }}>
           <LineChart
             style={{ flex: 1 }}
-            data={pressures.map((y, i) => ({ x: normalizedX[i], y }))}
+            data={extendedData}
             svg={{ stroke: 'blue', strokeWidth: 1.5 }}
             contentInset={{ top: 10, bottom: 10 }}
             xAccessor={({ item }) => item.x} // Ensure x-values are used correctly
             yAccessor={({ item }) => item.y}
           >
+            <Line
+                x1={xScale(lastX)}
+                y1={yScale(lastY)}
+                x2={"100%"}
+                y2={"100%"}
+                stroke="red"
+                strokeWidth={2}
+                strokeDasharray={[5, 5]} // Dashed line
+              />
       </LineChart>
 
       {/* Custom Axis Lines */}
@@ -215,11 +246,14 @@ export default function Diagnostics({ navigation }: NavigationType) {
             scale={scale.scaleTime}
             xAccessor={({ item }) => item}
             formatLabel={(value, index) => {
-            const totalLabels = data.length;
+            const totalLabels = validData.length;
 
             // Always show first and last labels
             if (index === 0 || index === totalLabels - 1) {
-              return formatDate(data[index].time);
+              return formatDate(validData[index].time);
+            }
+            if (index === totalLabels) {
+              return formatDate(predictedZeroPressureDate);
             }
 
             // Show every 3rd label (adjust as needed)
