@@ -36,6 +36,8 @@ const groupTankData = (entries: Entry[]) => {
   const latestTankByType: Record<string, string> = {}; // Stores latest tank ID per type
   const tankTimestamps: Record<string, string> = {}; // Stores the latest timestamp per tank type
   const tankMap: Record<string, { time: string; pressure: number }[]> = {}; // Stores all pressures for latest tank ID
+  let oneYearAgo = new Date();
+  oneYearAgo.setDate(oneYearAgo.getDate() - 365);
 
   // First pass: Identify the most recent tank ID for each type
   entries.forEach((entry) => {
@@ -60,7 +62,7 @@ const groupTankData = (entries: Entry[]) => {
         const tank = entry[tankType as keyof Entry] as string | null;
         if (tank) {
           const pressure = extractNumericValue(tank);
-          if (pressure !== null && !isNaN(pressure)) {
+          if (pressure !== null && !isNaN(pressure) && (new Date(entry.time_in) > oneYearAgo)) {
             if (!tankMap["N2"]) {
               tankMap["N2"] = [];
             }
@@ -171,6 +173,11 @@ export default function Diagnostics({ navigation }: NavigationType) {
           <Text style={{ textAlign: "center", fontSize: 18, fontWeight: "bold", margin: 10 }}>
         Tank Pressure Over Time
       </Text>
+      {Object.keys(tankData).length === 0 && (
+  <Text style={{ textAlign: "center", fontSize: 16, fontWeight: "bold", margin: 10, color: 'red' }}>
+    No  recent tank data available for this site.
+  </Text>
+)}
       {Object.entries(tankData).map(([tankId, data]) => {
         const validData = data.filter(d => !isNaN(new Date(d.time).getTime()));
         const timestamps = validData.map(d => new Date(d.time).getTime());
@@ -293,6 +300,9 @@ export default function Diagnostics({ navigation }: NavigationType) {
 
         </View>
       </View>
+      <Text style={{ textAlign: "center", fontSize: 12, fontWeight: "bold" }}>
+        *Data after the red dotted line is projected data
+      </Text>
     </View>
   );
 })}
