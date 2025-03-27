@@ -55,15 +55,28 @@ const groupTankData = (entries: Entry[]) => {
 
   // Second pass: Collect all pressures for the most recent tank ID per type
   entries.forEach((entry) => {
-    ["low_cal", "mid_cal", "high_cal", "lts"].forEach((tankType) => {
-      const tank = entry[tankType as keyof Entry] as TankInfo | null;
-      if (tank && tank.id === latestTankByType[tankType]) {
-        const pressure = extractNumericValue(tank.pressure);
-        if (pressure !== null && !isNaN(pressure)) {
-          if (!tankMap[latestTankByType[tankType]]) {
-            tankMap[latestTankByType[tankType]] = [];
+    ["low_cal", "mid_cal", "high_cal", "lts", "n2_pressure"].forEach((tankType) => {
+      if (tankType === "n2_pressure") {
+        const tank = entry[tankType as keyof Entry] as string | null;
+        if (tank) {
+          const pressure = extractNumericValue(tank);
+          if (pressure !== null && !isNaN(pressure)) {
+            if (!tankMap["N2"]) {
+              tankMap["N2"] = [];
+            }
+            tankMap["N2"].unshift({ time: entry.time_in || "Unknown", pressure });
           }
-          tankMap[latestTankByType[tankType]].unshift({ time: entry.time_in || "Unknown", pressure });
+        }
+      } else {
+        const tank = entry[tankType as keyof Entry] as TankInfo | null;
+        if (tank && tank.id === latestTankByType[tankType]) {
+          const pressure = extractNumericValue(tank.pressure);
+          if (pressure !== null && !isNaN(pressure)) {
+            if (!tankMap[latestTankByType[tankType]]) {
+              tankMap[latestTankByType[tankType]] = [];
+            }
+            tankMap[latestTankByType[tankType]].unshift({ time: entry.time_in || "Unknown", pressure });
+          }
         }
       }
     });
@@ -137,7 +150,7 @@ export default function Diagnostics({ navigation }: NavigationType) {
   };
 
   const screenWidth = Dimensions.get("window").width;
-  const predictedZeroPressureDate = "2025-12-01";
+  const predictedZeroPressureDate = "2025-07-01";
 
   return (
     <KeyboardAvoidingView
@@ -183,7 +196,7 @@ export default function Diagnostics({ navigation }: NavigationType) {
 
       //If there is only one data point for the tank, adjust lastX so dotted line is visible at beginning of graph
       if (lastX == 0) {
-        lastX = 50000000;
+        lastX = predictedX * 0.01;
       }
 
   return (
@@ -191,12 +204,15 @@ export default function Diagnostics({ navigation }: NavigationType) {
       <Text style={{ textAlign: "center", fontSize: 16, fontWeight: "bold" }}>
         Tank ID: {tankId}
       </Text>
+      <Text style={{ textAlign: "center", fontSize: 14, fontWeight: "bold" }}>
+        Predicted empty date: {predictedZeroPressureDate}
+      </Text>
       
       <View style={{ flexDirection: 'row', height: 250, padding: 20 }}>
         {/* Y Axis */}
         <YAxis
           data={pressures}
-          contentInset={{ top: 10, bottom: 10 }}
+          contentInset={{ top: 10, bottom: 15 }}
           svg={{ fontSize: 12, fill: 'black' }}
           numberOfTicks={5}
           scale={scale.scaleLinear}
@@ -223,14 +239,29 @@ export default function Diagnostics({ navigation }: NavigationType) {
                 strokeDasharray={[5, 5]} // Dashed line
               />
       </LineChart>
+      
 
       {/* Custom Axis Lines */}
       <Svg height="225" width="100%" style={{ position: 'absolute', left: 0, top: 0 }}>
+      <Defs>
+  <LinearGradient id="horizontalGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+    <Stop offset="0%" stopColor="#cefad0" />
+    <Stop offset="100%" stopColor="#FFCCCB" />
+  </LinearGradient>
+</Defs>
         {/* X Axis Line */}
         <Line x1="0" y1="200" x2="100%" y2="200" stroke="black" strokeWidth="2" />
 
         {/* Y Axis Line */}
         <Line x1="0" y1="0" x2="0" y2="200" stroke="black" strokeWidth="2" />
+        <Rect x="0" y="0" width="100%" height="30%" fill="green" opacity={0.2} />
+        <Rect x="0" y="67" width="100%" height="30%" fill="yellow" opacity={0.2} />
+        <Rect x="0" y="134" width="100%" height="30%" fill="red" opacity={0.2} />
+        
+        {/*
+        
+        <Rect width="100%" height="90%" fill="url(#horizontalGradient)" opacity={0.5}/>
+        */}
       </Svg>
           
           {/* X Axis with correctly spaced labels */}
@@ -242,8 +273,12 @@ export default function Diagnostics({ navigation }: NavigationType) {
             formatLabel={(value, index) => {
             const totalLabels = validData.length;
 
-            // Always show first and last labels
-            if (index === 0 || index === totalLabels - 1) {
+            // Always show first label
+            if (index === 0) {
+              return formatDate(validData[index].time);
+            }
+            // If first and last labels are not too close together compared to predicted zero date, show last recorded date
+            if ((index === totalLabels - 1) && ((normalizedX[index] - normalizedX[0]) > (predictedX * 0.3))) {
               return formatDate(validData[index].time);
             }
             // Add label for predicted zero date
@@ -258,9 +293,6 @@ export default function Diagnostics({ navigation }: NavigationType) {
 
         </View>
       </View>
-      <Text style={{ textAlign: "center", fontSize: 16, fontWeight: "bold" }}>
-        Predicted empty date: {predictedZeroPressureDate}
-      </Text>
     </View>
   );
 })}
