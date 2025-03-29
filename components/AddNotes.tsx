@@ -329,52 +329,73 @@ export default function AddNotes({ navigation }: NavigationType) {
         if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
           removeTankFromSite(originalLts, utcTime);
         }
-        console.log(ltsTankRecord)
-        if (ltsTankRecord) {
-          let ltsTank = copyTankRecord(ltsTankRecord);
-          ltsTank.location = site;
-          ltsTank.updatedAt = utcTime;
-          ltsTank.pressure = parseInt(ltsPressure);
-          ltsTank.userId = nameValue;
-          console.log("calling this")
-          addEntrytoTankDictionary(ltsTank);
-        }
-        console.log("tank pressure point")
-        if (originalLow && (!lowTankRecord || (originalLow.tankId != lowTankRecord.tankId))) {
-          removeTankFromSite(originalLow, utcTime);
-        }
-        console.log("tank pressure point 2")
-        if (lowTankRecord) {
-          let lowTank = copyTankRecord(lowTankRecord);
-          lowTank.location = site;
-          lowTank.updatedAt = utcTime;
-          lowTank.pressure = parseInt(lowPressure);
-          lowTank.userId = nameValue;
-          addEntrytoTankDictionary(lowTank);
-        }
+        if(networkStatus){
+          if (ltsTankRecord) {
+            let ltsTank = copyTankRecord(ltsTankRecord);
+            ltsTank.location = site;
+            ltsTank.updatedAt = utcTime;
+            ltsTank.pressure = parseInt(ltsPressure);
+            ltsTank.userId = nameValue;
+            console.log("calling this")
+            addEntrytoTankDictionary(ltsTank);
+          }
+          
+          console.log("tank pressure point")
+          if (originalLow && (!lowTankRecord || (originalLow.tankId != lowTankRecord.tankId))) {
+            removeTankFromSite(originalLow, utcTime);
+          }
+          console.log("tank pressure point 2")
+          if (lowTankRecord) {
+            let lowTank = copyTankRecord(lowTankRecord);
+            lowTank.location = site;
+            lowTank.updatedAt = utcTime;
+            lowTank.pressure = parseInt(lowPressure);
+            lowTank.userId = nameValue;
+            addEntrytoTankDictionary(lowTank);
+          }
 
-        if (originalMid && (!midTankRecord || (originalMid.tankId != midTankRecord.tankId))) {
-          removeTankFromSite(originalMid, utcTime);
-        }
-        if (midTankRecord) {
-          let midTank = copyTankRecord(midTankRecord);
-          midTank.location = site;
-          midTank.updatedAt = utcTime;
-          midTank.pressure = parseInt(midPressure);
-          midTank.userId = nameValue;
-          addEntrytoTankDictionary(midTank);
-        }
+          if (originalMid && (!midTankRecord || (originalMid.tankId != midTankRecord.tankId))) {
+            removeTankFromSite(originalMid, utcTime);
+          }
+          if (midTankRecord) {
+            let midTank = copyTankRecord(midTankRecord);
+            midTank.location = site;
+            midTank.updatedAt = utcTime;
+            midTank.pressure = parseInt(midPressure);
+            midTank.userId = nameValue;
+            addEntrytoTankDictionary(midTank);
+          }
 
-        if (originalHigh && (!highTankRecord || (originalHigh.tankId != highTankRecord.tankId))) {
-          removeTankFromSite(originalHigh, utcTime);
+          if (originalHigh && (!highTankRecord || (originalHigh.tankId != highTankRecord.tankId))) {
+            removeTankFromSite(originalHigh, utcTime);
+          }
+          if (highTankRecord) {
+            let highTank = copyTankRecord(highTankRecord);
+            highTank.location = site;
+            highTank.updatedAt = utcTime;
+            highTank.pressure = parseInt(highPressure);
+            highTank.userId = nameValue;
+            addEntrytoTankDictionary(highTank);
+          }
         }
-        if (highTankRecord) {
-          let highTank = copyTankRecord(highTankRecord);
-          highTank.location = site;
-          highTank.updatedAt = utcTime;
-          highTank.pressure = parseInt(highPressure);
-          highTank.userId = nameValue;
-          addEntrytoTankDictionary(highTank);
+        else
+        {
+          if(ltsId && ltsPressure)
+          {
+            offlineTankEntry(ltsId, parseInt(ltsPressure), site, utcTime, nameValue)
+          }
+          if(lowId && lowPressure)
+          {
+            offlineTankEntry(lowId, parseInt(lowPressure), site, utcTime, nameValue)
+          }
+          if(midId && midPressure)
+          {
+            offlineTankEntry(midId, parseInt(midPressure), site, utcTime, nameValue)
+          }
+          if(highId && highPressure)
+          {
+            offlineTankEntry(highId, parseInt(highPressure), site, utcTime, nameValue)
+          }
         }
 
         console.log("sending add notes")
