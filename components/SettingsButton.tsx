@@ -14,7 +14,8 @@ export default function SettingsButton() {
           onPress={() => setVisible(true)} 
           appearance="ghost"
           accessoryLeft={gearIcon} 
-          size='large'/>
+          size='large'
+          style={{ marginHorizontal: -10 }}/>
           <SettingsPage visibility={visible} onPress={setVisible}/>
       </View>
     );
