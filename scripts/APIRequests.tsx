@@ -260,6 +260,30 @@ export async function setVisitFile(visit: visit, commitMessage: string)
     }   
 }
 
+export async function offlineTankEntry(tankID: string, pressure: number, site: string, time:string, name:string)
+{
+    try {
+        let path = FileSystem.documentDirectory + "offline_updates/tank_updates.txt"
+
+        let content = ""
+        if ((await FileSystem.getInfoAsync(path)).exists)
+        {
+            content = await FileSystem.readAsStringAsync(path)
+        }
+        console.log(content)
+
+        content += `{tankId: ${tankID}, pressure: ${pressure}, site: ${site}, time: ${time}, name: ${name}}\n`
+
+        await FileSystem.writeAsStringAsync(path, content)
+
+        return {success: true}
+    }  
+    catch(error)
+    {
+        return {success: true, error: error}
+    } 
+}
+
 /**
  * Sets the GitHub token for subsequent API requests.
  * @param token The personal access token from the login screen.

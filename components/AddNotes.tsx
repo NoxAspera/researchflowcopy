@@ -14,7 +14,7 @@ import TextInput from './TextInput'
 import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text, Icon, CheckBox } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, getLatestTankEntry, getTankList, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, getLatestTankEntry, offlineTankEntry, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
@@ -455,7 +455,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             retHome(true);
           } else {
             if (result.error) {
-              setMessage(`Error: ${result.error}`);
+              setMessage(`Error: ${result?.error}`);
             } else if (tankResult.error) {
               setMessage(`Error: ${tankResult.error}`);
             } else if (instMaintResult && instMaintResult.error) {
