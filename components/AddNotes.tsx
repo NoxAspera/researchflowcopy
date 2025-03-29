@@ -1,7 +1,7 @@
 /**
  * Add Notes Page
  * @author Blake Stambaugh, Megan Ostlie, August O'Rourke, and David Schiwal
- * Updated: 2/11/25 - MO
+ * Updated: 3/28/25 - DS
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
@@ -65,7 +65,6 @@ export default function AddNotes({ navigation }: NavigationType) {
     setEndDateValue(currentDate);
   };
 
-
   const showStartMode = (currentMode) => {
     DateTimePickerAndroid.open({
       value: startDateValue,
@@ -84,21 +83,6 @@ export default function AddNotes({ navigation }: NavigationType) {
     });
   };
 
-  const showStartDatepicker = () => {
-    showStartMode("date");
-  };
-
-  const showStartTimepicker = () => {
-    showStartMode("time");
-  };
-
-  const showEndDatepicker = () => {
-    showEndMode("date");
-  };
-
-  const showEndTimepicker = () => {
-    showEndMode("time");
-  };
   function setStartDateHourMinutes (pickedDuration) {
     const tempDate = startDateValue;
     console.log("pickedDuration hours: " + pickedDuration.hours + " and minutes: " + pickedDuration.minutes)
@@ -700,7 +684,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         {(showStartPicker && Platform.OS === "android") && (
           (
             <View style={styles.androidDateTime}>
-              <Pressable onPress={() => {showStartDatepicker(); setStartDateValue(startDateValue)}}>
+              <Pressable onPress={() => {showStartMode("date");; setStartDateValue(startDateValue)}}>
                 <Text>
                   {startDateValue.toLocaleDateString([], {
                     weekday: "short",
@@ -774,7 +758,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           {(showEndPicker && Platform.OS === "android") && (
           (
             <View style={styles.androidDateTime}>
-              <Pressable onPress={() => {showEndDatepicker(); setEndDateValue(endDateValue)}}>
+              <Pressable onPress={() => {showEndMode("date"); setEndDateValue(endDateValue)}}>
                 <Text>
                   {endDateValue.toLocaleDateString([], {
                     weekday: "short",
