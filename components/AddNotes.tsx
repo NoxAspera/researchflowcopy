@@ -544,7 +544,7 @@ export default function AddNotes({ navigation }: NavigationType) {
 
     function navigatePlanVisit(nav:boolean){
       if(nav){
-        navigation.navigate("PlanVisit")
+        navigation.navigate("PlanVisit", {site: site})
       }
     }
 
@@ -860,7 +860,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               
           }}
           />
-          <Button style={styles.submitButton}> 
+          <Button style={styles.submitButton} onPress={() => setShowEndPicker(false)}> 
           {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Confirm Date/Time</Text>}
           </Button>
           </View>
