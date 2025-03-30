@@ -1,7 +1,7 @@
 /**
  * Add Notes Page
  * @author Blake Stambaugh, Megan Ostlie, August O'Rourke, and David Schiwal
- * Updated: 2/11/25 - MO
+ * Updated: 3/23/25 - DS
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
@@ -63,7 +63,6 @@ export default function AddNotes({ navigation }: NavigationType) {
     const { site, info } = route.params || {}
     const themeContext = React.useContext(ThemeContext);
     const isDarkMode = themeContext.theme === 'dark';
-
 
   const onStartChange = (event, selectedDate) => {
     const currentDate = selectedDate;
@@ -207,6 +206,110 @@ export default function AddNotes({ navigation }: NavigationType) {
     // used for loading screen
     const [loadingValue, setLoadingValue] = useState(false);
     
+    // tank predictor
+    const [tankPredictorVisibility, setTankPredictorVisibility] = useState(false);
+    const [lowTankName, setLowTankName] = useState("");
+    const [lowDaysRemaining, setLowDaysRemaining] = useState(-1);
+    const [midDaysRemaining, setMidDaysRemaining] = useState(-1);
+    const [midTankName, setMidTankName] = useState("");
+    const [highDaysRemaining, setHighDaysRemaining] = useState(-1);
+    const [highTankName, setHighTankName] = useState("");
+    const [ltsDaysRemaining, setLtsDaysRemaining] = useState(-1);
+    const [ltsTankName, setLtsTankName] = useState("");
+    const [n2DaysRemaining, setN2DaysRemaining] = useState(-1);
+    const [n2TankName, setN2TankName] = useState("");
+
+    function getTimeBetweenDates(date1, date2) {
+      const timeDiffMs = Math.abs(date2.getTime() - date1.getTime());
+      const seconds = Math.floor(timeDiffMs / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+    
+      return {
+        days,
+        hours: hours % 24,
+        minutes: minutes % 60,
+        seconds: seconds % 60,
+        milliseconds: timeDiffMs % 1000
+      };
+    }
+
+    function daysUntilEmpty(prevPress, prevDate, currPress) {
+      // get change of pressure over time, assume it is linear
+      let changeOfPress = currPress - prevPress;
+      console.log(`${currPress} - ${prevPress} = ${changeOfPress}`);
+
+      // if change of pressure is positive, then it got replaced, no need to check date
+      // if change of pressure is 0, then there is no need to check date bc nothing has changed
+      if (changeOfPress >= 0) {
+        return 365;
+      }
+
+      // get date difference
+      let currTime = endDateValue;
+      let prevTime = new Date(prevDate);
+      let changeOfDate = getTimeBetweenDates(prevTime, currTime).days; // get the difference of time in days
+      console.log(`Days between: ${changeOfDate}`);
+
+      // if changeOfDate is 0, then the previous entry was also made today
+      if (changeOfDate == 0) {
+        return 365;
+      }
+      
+      let rateOfDecay = changeOfPress / changeOfDate; // measured in psi lost per day
+      console.log(`Rate of decay: ${changeOfPress} / ${changeOfDate} = ${rateOfDecay}`);
+
+      // solve for when the tank should be under 500 psi
+      let days = Math.trunc((-prevPress / rateOfDecay) - changeOfDate);
+      return days;
+    }
+
+    function checkIfRefillIsNeeded() {
+      // get tank values from previous entries
+      let prevEntry = data.entries[0];
+
+      // compare pressure from prev entry to current entry to see if tank will be empty soon
+      let lowDays = daysUntilEmpty(parseInt(prevEntry.low_cal.pressure), prevEntry.time_out, parseInt(lowPressure));
+      let midDays = daysUntilEmpty(parseInt(prevEntry.mid_cal.pressure), prevEntry.time_out, parseInt(midPressure));
+      let highDays = daysUntilEmpty(parseInt(prevEntry.high_cal.pressure), prevEntry.time_out, parseInt(highPressure));
+      let ltsDays = daysUntilEmpty(parseInt(prevEntry.lts.pressure), prevEntry.time_out, parseInt(ltsPressure));
+      let n2Days = daysUntilEmpty(parseInt(prevEntry.n2_pressure), prevEntry.time_out, parseInt(n2Value));
+
+      console.log(`
+        Low Days: ${lowDays}
+        Mid Days: ${midDays}
+        highDays: ${highDays}
+        lts Days: ${ltsDays}
+        n2 Days:  ${n2Days}`);
+
+      // if any of the tanks are predicted to be empty in 90 days or less, send a warning
+      if (lowDays <= 90) {
+        setLowDaysRemaining(lowDays);
+        setLowTankName(lowId);
+        setTankPredictorVisibility(true);
+      }
+      if (midDays <= 90) {
+        setMidDaysRemaining(midDays);
+        setMidTankName(midId);
+        setTankPredictorVisibility(true);
+      }
+      if (highDays <= 90) {
+        setHighDaysRemaining(highDays);
+        setHighTankName(highId);
+        setTankPredictorVisibility(true);
+      }
+      if (ltsDays <= 90) {
+        setLtsDaysRemaining(ltsDays);
+        setLtsTankName(ltsId);
+        setTankPredictorVisibility(true);
+      }
+      if (n2Days <= 90) {
+        setN2DaysRemaining(n2Days);
+        setN2TankName("N2");
+        setTankPredictorVisibility(true);
+      }
+    }
 
     //method will warn user if fields haven't been input
     function checkTextEntries(){
@@ -412,7 +515,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         if (instrumentInput && (!originalInstrument || (originalInstrument != instrumentInput))) {
           if (instrumentNames.includes(instrumentInput)) {
             const notes = installedInstrumentNotes(utcTime);
-            console.log("sending instrument")
+            //console.log("sending instrument")
             instMaintResult = await setInstrumentFile(`instrument_maint/LGR_UGGA/${instrumentInput}`, notes, `Updated ${instrumentInput}.md`, true, site);
           }
         }
@@ -445,8 +548,8 @@ export default function AddNotes({ navigation }: NavigationType) {
           );
         }
 
-        // remove spinner once we have results back
-        setLoadingValue(false);
+      // remove spinner once we have results back
+      setLoadingValue(false);
 
         // check to see if the request was ok, give a message based on that
         if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success) && (!badDataResult || badDataResult.success)) {
@@ -477,6 +580,13 @@ export default function AddNotes({ navigation }: NavigationType) {
     function navigateHome(nav:boolean){
       if(nav){
         navigation.navigate("Home")
+      }
+      setTimeout(checkIfRefillIsNeeded, 100);
+    }
+
+    function navigatePlanVisit(nav:boolean){
+      if(nav){
+        navigation.navigate("PlanVisit", {site: site})
       }
     }
 
@@ -705,6 +815,27 @@ export default function AddNotes({ navigation }: NavigationType) {
             removePopup={setVisible2}
             visible={visible2}/>
 
+            {/* tank is low popup */}
+            <VisitPopupProp
+              lowTank={lowTankName}
+              lowDays={lowDaysRemaining}
+              midTank={midTankName}
+              midDays={midDaysRemaining}
+              highTank={highTankName}
+              highDays={highDaysRemaining}
+              ltsTank={ltsTankName}
+              ltsDays={ltsDaysRemaining}
+              n2Tank={n2TankName}
+              n2Days={n2DaysRemaining}
+              visible={tankPredictorVisibility}
+              removePopup={setTankPredictorVisibility}
+              navigateHome={navigateHome}
+              navigatePlanVisit={navigatePlanVisit} />
+              {/* ltsTankName
+              highTankName
+              midTankName
+              lowTankName */}
+
             {/* loading screen */}
             <LoadingScreen visible={loadingValue} />
 
@@ -734,16 +865,19 @@ export default function AddNotes({ navigation }: NavigationType) {
               style={styles.inputText}
             />
 
-              {/* Time input */}
-              <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Arrived (MT):</Text>
-              <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.datePicker}>
-                <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
-                <Text>{startDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {startDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-              </TouchableOpacity>
+            {/* Time input */}
+            <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Arrived (MT):</Text>
+            {/*light mode colors came from researchflow\node_modules\@eva-design\eva\themes\light.json */}
+            {/*dark mode colors came from researchflow\node_modules\@eva-design\eva\themes\dark.json*/}
+            <TouchableOpacity onPress={() => setShowStartPicker(true)} style={[styles.datePicker, {borderColor: isDarkMode ? "#101426" : "#E4E9F2"}, {backgroundColor: isDarkMode ? "#1A2138" : "#F7F9FC"}]}>
+              <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
+              <Text>{startDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {startDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+            </TouchableOpacity>
 
           {(showStartPicker && Platform.OS === "ios") && (
           <View>
           <DateTimePicker
+            textColor= {isDarkMode ? 'white' : 'black'}
             value={startDateValue}
             mode="datetime"
             display="spinner"
@@ -783,7 +917,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         )}
 
         <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Departed (MT):</Text>
-          <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.datePicker}>
+          <TouchableOpacity onPress={() => setShowEndPicker(true)} style={[styles.datePicker, {borderColor: isDarkMode ? "#101426" : "#E4E9F2"}, {backgroundColor: isDarkMode ? "#1A2138" : "#F7F9FC"}]}>
             <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
             <Text>{endDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {endDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
           </TouchableOpacity>
@@ -803,7 +937,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               
           }}
           />
-          <Button style={styles.submitButton}> 
+          <Button style={styles.submitButton} onPress={() => setShowEndPicker(false)}> 
           {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Confirm Date/Time</Text>}
           </Button>
           </View>
@@ -1090,4 +1224,5 @@ export default function AddNotes({ navigation }: NavigationType) {
       flexDirection: "row",
       justifyContent: "space-around",
     },
+     
 });

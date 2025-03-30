@@ -1,7 +1,7 @@
 /**
  * Bad Data Page
  * @author David Schiwal, Blake Stambaugh, Megan Ostlie
- * Updated: 1/10/25
+ * Updated: 3/23/25 - DS
  *
  * This page allows the user to mark data as bad. They will enter in
  * a date range, the data, and why it is bad. The code will format and
@@ -33,8 +33,10 @@ export default function BadData({ navigation }: NavigationType) {
   const [newIDValue, setNewIDValue] = useState("NA");
   const [startTimeValue, setStartTimeValue] = useState("");
   const [startDateValue, setStartDateValue] = useState<Date | null>(null);
+  const [startStatusValue, setStartStatusValue] = useState("basic");
   const [endTimeValue, setEndTimeValue] = useState("");
   const [endDateValue, setEndDateValue] = useState<Date | null>(null);
+  const [endStatusValue, setEndStatusValue] = useState("basic");
   const [nameValue, setNameValue] = useState("");
   const [reasonValue, setReasonValue] = useState("");
   const [selectedFileIndex, setSelectedFileIndex] = useState<IndexPath | undefined>(undefined);
@@ -240,11 +242,14 @@ export default function BadData({ navigation }: NavigationType) {
           <Datepicker
             label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Start Date</Text>}
             date={startDateValue}
-            onSelect={(date) => setStartDateValue(date as Date)}
+            //changing the status here works because the mapping.json file (researchflow\node_modules\@eva-design\eva\mapping.json)
+            //has a different textColor in the primary field for Datepicker
+            onSelect={(date) => {setStartDateValue(date as Date); setStartStatusValue("primary")}}
             min={new Date(1900, 0, 1)}
             max={new Date(2500, 12, 31)}
             placeholder="Start Date"
             style={styles.textInput}
+            status={startStatusValue}
           />
 
           {/* start time input */}
@@ -260,11 +265,14 @@ export default function BadData({ navigation }: NavigationType) {
           <Datepicker
             label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>End Date</Text>}
             date={endDateValue}
-            onSelect={(date) => setEndDateValue(date as Date)}
+            //changing the status here works because the mapping.json file (researchflow\node_modules\@eva-design\eva\mapping.json)
+            //has a different textColor in the primary field for Datepicker
+            onSelect={(date) => {setEndDateValue(date as Date); setEndStatusValue("primary")}}
             min={new Date(1900, 0, 1)}
             max={new Date(2500, 12, 31)}
             placeholder="End Date"
             style={styles.textInput}
+            status={endStatusValue}
           />
 
           {/* end time input */}
