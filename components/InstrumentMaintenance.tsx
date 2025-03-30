@@ -1,7 +1,7 @@
 /**
  * Instrument Maintenance Page
  * @author David Schiwal, Blake Stambaugh, Megan Ostlie
- * Updated: 1/14/25
+ * Updated: 3/29/25 - DS
  *
  * This is the page for instrument maintenance. It will take in the user input, format
  * it, and send it to the github repo.
@@ -25,16 +25,19 @@ import { ThemeContext } from './ThemeContext';
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
-  const onStartChange = (event, selectedDate) => {
+      //changes start date
+      const onStartChange = (event, selectedDate) => {
         const currentDate = selectedDate;
         setStartDateValue(currentDate);
       };
     
+      //changes end date
       const onEndChange = (event, selectedDate) => {
         const currentDate = selectedDate;
         setEndDateValue(currentDate);
       };
     
+      //pops up date picker for start date
       const showStartMode = (currentMode) => {
         DateTimePickerAndroid.open({
           value: startDateValue,
@@ -44,6 +47,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
         });
       };
     
+      //pops up date picker for end date
       const showEndMode = (currentMode) => {
         DateTimePickerAndroid.open({
           value: endDateValue,
@@ -53,12 +57,15 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
         });
       };
     
+      //sets start date hours and minutes
       function setStartDateHourMinutes (pickedDuration) {
         const tempDate = startDateValue;
         tempDate.setHours(pickedDuration.hours)
         tempDate.setMinutes(pickedDuration.minutes)
         setStartDateValue(tempDate);
       };
+
+      //sets end date hours and minutes
       function setEndDateHourMinutes (pickedDuration) {
         const tempDate = endDateValue;
         tempDate.setHours(pickedDuration.hours)
@@ -312,7 +319,9 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
               <TimerPickerModal
                   visible={showPicker}
                   setIsVisible={setShowPicker}
+                  //makes it am/pm
                   use12HourPicker={true}
+                  //since we don't need seconds it is hidden
                   hideSeconds={true}
                   minuteLabel={"<"}
                   onConfirm={(pickedDuration) => {

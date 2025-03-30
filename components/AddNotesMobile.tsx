@@ -1,7 +1,7 @@
 /**
  * Add Notes Page for mobile sites
  * @author Blake Stambaugh, Megan Ostlie, August O'Rourke, and David Schiwal
- * Updated: 2/11/25 - MO
+ * Updated: 3/29/25 - DS
  * This page will take in input from the user, format it, and upload it to the
  * github repo. This page is slightly different than the main AddNotes page because
  * the mobile sites do not have as many tanks as the stationary sites
@@ -65,16 +65,19 @@ async function processNotes(siteName: string) {
  */
 export default function AddNotes({ navigation }: NavigationType) {
 
-  const onStartChange = (event, selectedDate) => {
+    //changes start date
+    const onStartChange = (event, selectedDate) => {
       const currentDate = selectedDate;
       setStartDateValue(currentDate);
     };
   
+    //changes end date
     const onEndChange = (event, selectedDate) => {
       const currentDate = selectedDate;
       setEndDateValue(currentDate);
     };
   
+    //pops up date picker for start date
     const showStartMode = (currentMode) => {
       DateTimePickerAndroid.open({
         value: startDateValue,
@@ -84,6 +87,8 @@ export default function AddNotes({ navigation }: NavigationType) {
       });
     };
   
+
+    //pops up date picker for end date
     const showEndMode = (currentMode) => {
       DateTimePickerAndroid.open({
         value: endDateValue,
@@ -93,12 +98,16 @@ export default function AddNotes({ navigation }: NavigationType) {
       });
     };
   
+
+    //sets start date hours and minutes
     function setStartDateHourMinutes (pickedDuration) {
       const tempDate = startDateValue;
       tempDate.setHours(pickedDuration.hours)
       tempDate.setMinutes(pickedDuration.minutes)
       setStartDateValue(tempDate);
     };
+
+    //sets end date hours and minutes
     function setEndDateHourMinutes (pickedDuration) {
       const tempDate = endDateValue;
       tempDate.setHours(pickedDuration.hours)
@@ -540,7 +549,9 @@ export default function AddNotes({ navigation }: NavigationType) {
                 <TimerPickerModal
                   visible={showPicker}
                   setIsVisible={setShowPicker}
+                  //makes it am/pm
                   use12HourPicker={true}
+                  //since we don't need seconds it is hidden
                   hideSeconds={true}
                   minuteLabel={"<"}
                   onConfirm={(pickedDuration) => {
