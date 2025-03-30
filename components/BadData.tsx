@@ -53,7 +53,7 @@ export default function BadData({ navigation }: NavigationType) {
 
   useEffect(() => {
     const fetchBadDataFiles = async () => {
-      let check = await  Network.useNetworkState()
+      let check = await  Network.getNetworkStateAsync()
       if(check.isConnected)
       {
         try {

@@ -382,19 +382,19 @@ export default function AddNotes({ navigation }: NavigationType) {
         {
           if(ltsId && ltsPressure)
           {
-            offlineTankEntry(ltsId, parseInt(ltsPressure), site, utcTime, nameValue)
+            await offlineTankEntry(ltsId, parseInt(ltsPressure), site, utcTime, nameValue)
           }
           if(lowId && lowPressure)
           {
-            offlineTankEntry(lowId, parseInt(lowPressure), site, utcTime, nameValue)
+            await offlineTankEntry(lowId, parseInt(lowPressure), site, utcTime, nameValue)
           }
           if(midId && midPressure)
           {
-            offlineTankEntry(midId, parseInt(midPressure), site, utcTime, nameValue)
+            await offlineTankEntry(midId, parseInt(midPressure), site, utcTime, nameValue)
           }
           if(highId && highPressure)
           {
-            offlineTankEntry(highId, parseInt(highPressure), site, utcTime, nameValue)
+            await offlineTankEntry(highId, parseInt(highPressure), site, utcTime, nameValue)
           }
         }
 

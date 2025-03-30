@@ -23,8 +23,9 @@ async function readUpdates()
 
 async function startup()
 {
-  let check = await Network.useNetworkState()
-  if(check.isConnected)
+  let check = (await Network.getNetworkStateAsync()).isConnected && (!(await Network.isAirplaneModeEnabledAsync()))
+  console.log(check)
+  if(check)
     {
       readUpdates();
       updateDirectories();

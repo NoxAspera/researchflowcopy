@@ -38,6 +38,7 @@ export default function SelectSite({navigation}: NavigationType) {
         let mobile_names;
         if (from === 'AddNotes' || from === 'ViewNotes' || from === 'PlanVisit') {
           names = await getDirectory("site_notes");
+          //console.log(names)
           mobile_names = await getDirectory("site_notes/mobile");
         } else if (from === 'BadData') {
           names = await getBadDataSites();

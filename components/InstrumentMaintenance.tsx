@@ -96,7 +96,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
   useEffect(() => {
     const fetchSite = async () => {
-      let check = await Network.useNetworkState()
+      let check = await Network.getNetworkStateAsync()
       if (site.includes("LGR") && check.isConnected) {
         try {
           const response = await getInstrumentSite(site);

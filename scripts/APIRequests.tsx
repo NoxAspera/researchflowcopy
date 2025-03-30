@@ -231,7 +231,7 @@ export async function setVisitFile(visit: visit, commitMessage: string)
         try
         {
             let path = FileSystem.documentDirectory + "offline_updates/visitfile.txt"
-            console.log(path)
+            //(path)
             let exists = (await FileSystem.getInfoAsync(path)).exists
             let content = ""
             if(exists)
@@ -268,9 +268,9 @@ export async function offlineTankEntry(tankID: string, pressure: number, site: s
         let content = ""
         if ((await FileSystem.getInfoAsync(path)).exists)
         {
-            content = await FileSystem.readAsStringAsync(path)
+            content += await FileSystem.readAsStringAsync(path)
         }
-        console.log(content)
+        //console.log(content)
 
         content += `{tankId: ${tankID}, pressure: ${pressure}, site: ${site}, time: ${time}, name: ${name}}\n`
 
@@ -294,7 +294,7 @@ export function setGithubToken(token: string) {
 
 export function addEntrytoTankDictionary(newEntry: TankRecord) {
     let tankEntries = tankDict.get(newEntry.tankId);
-    console.log(newEntry)
+    //console.log(newEntry)
     if (tankEntries == undefined)
     {
         tankDict.set(newEntry.tankId, [newEntry])
@@ -314,25 +314,24 @@ export function addEntrytoTankDictionary(newEntry: TankRecord) {
  */
 export async function setTankTracker()
 {
-    let temp = Array.from(tankDict.values())
-    let plainfullDoc: TankRecord[] = []
-
-    temp.forEach(value =>
-        {
-            console.log(temp)
-            console.log(value)
-            value.forEach(value =>
-            {
-                console.log("looping forever")
-                plainfullDoc.push(value)
-            })
-        }
-    )
-
-    let newContent = csvify(plainfullDoc)
-    console.log("getting to request")
     if((await Network.getNetworkStateAsync()).isConnected)
     {
+        let temp = Array.from(tankDict.values())
+        let plainfullDoc: TankRecord[] = []
+
+        temp.forEach(value =>
+            {
+                value.forEach(value =>
+                {
+                    //console.log("looping forever")
+                    plainfullDoc.push(value)
+                })
+            }
+        )
+
+        let newContent = csvify(plainfullDoc)
+        //console.log("getting to request")
+   
         const fullDoc = btoa(newContent)
 
         const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
@@ -341,24 +340,7 @@ export async function setTankTracker()
     }
     else
     {
-        try
-        {
-            let path = FileSystem.documentDirectory + "offline_updates/tanktracker.txt"
-            console.log(path)
-            let result = await FileSystem.writeAsStringAsync(path, newContent, {})
-            if(await FileSystem.readAsStringAsync(path) === newContent)
-            {
-                return {success: true}  
-            }
-            else
-            {
-                return {success: false, error: "unable to write file"}
-            }
-        }
-        catch(error)
-        {
-            return{success: false, error: error}
-        }
+       return {success: true}
     }   
 }
 /**
@@ -621,7 +603,7 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
         try
         {
             let path = FileSystem.documentDirectory + "offline_updates/baddata.txt"
-            console.log(path)
+            //console.log(path)
             let exists = (await FileSystem.getInfoAsync(path)).exists
             let content = ""
             if(exists)
@@ -707,7 +689,7 @@ export async function setInstrumentFile(path: string, content: string, commitMes
         try
         {
             let path = FileSystem.documentDirectory + "offline_updates/instrument_maint.txt"
-            console.log(path)
+            //console.log(path)
             let exists = (await FileSystem.getInfoAsync(path)).exists
             let content = ""
             if(exists)
@@ -741,13 +723,13 @@ export async function setInstrumentFile(path: string, content: string, commitMes
 /**
  * @author August O'Rourke
  *  This method gets a list of sites from the CS_4000_mock_docs repository
- * @returns returns a list of sites with the type of siteResponse
+ * @returns returns a list of sites with the type of siteReåsponse
  */
 export async function getDirectory(path: string)
 {
     let check = await Network.getNetworkStateAsync()
-    console.log(check.isConnected)
-    if(!check.isConnected)
+    console.log(!(check.isConnected))
+    if(!(check.isConnected))
     {
        return {success: true, data: await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + path)}
     }
@@ -888,7 +870,7 @@ export async function setSiteFile(siteName: string, content: string, commitMessa
         try
         {
             let path = FileSystem.documentDirectory + "offline_updates/site_notes.txt"
-            console.log(path)
+            //console.log(path)
             let exists = (await FileSystem.getInfoAsync(path)).exists
             let content = ""
             if(exists)
