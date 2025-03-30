@@ -1,7 +1,7 @@
 /**
  * Plan Visit
  * @author Blake Stambaugh and David Schiwal
- * Updated: 2/6/25 - MO
+ * Updated: 3/23/25 - DS
  *
  * This page is responsible for planning visits.
  */
@@ -29,6 +29,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
   const [dateValue, setDateValue] = useState<Date | null>(null);
   const [notesValue, setNotesValue] = useState("");
   const [additionalNotesValue, setAdditionalNotesValue] = useState("");
+  const [statusValue, setStatusValue] = useState("basic");
 
   // used for determining if PUT request was successful
   // will set the success/fail notification to visible, aswell as the color and text
@@ -118,11 +119,14 @@ export default function PlanVisit({ navigation }: NavigationType) {
           <Datepicker
             label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Visit Date</Text>}
             date={dateValue}
-            onSelect={(date) => setDateValue(date as Date)}
+            //changing the status here works because the mapping.json file (researchflow\node_modules\@eva-design\eva\mapping.json)
+            //has a different textColor in the primary field for Datepicker 
+            onSelect={(date) => {setDateValue(date as Date); setStatusValue("primary")}}
             min={new Date(1900, 0, 1)}
             max={new Date(2500, 12, 31)}
             placeholder="Visit Date"
             style={styles.textInput}
+            status={statusValue}
           />
 
           {/* Name input */}

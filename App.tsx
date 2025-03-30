@@ -23,8 +23,10 @@ import Calendar from './components/Calendar';
 import { useState } from 'react';
 import SettingsButton from './components/SettingsButton';
 import ViewNotifications from './components/ViewNotifications';
+import ContactInfo from './components/ContactInfo';
 import { NavigationType } from './components/types';
 import { Button, Icon, IconElement } from '@ui-kitten/components';
+import { View } from 'react-native';
 import Diagnostics from './components/Diagnostics';
 
 const Stack = createStackNavigator();
@@ -43,6 +45,7 @@ export default function App() {
       setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
   };
   const bellIcon = (props): IconElement => <Icon {...props} name='bell-outline' />;
+  const infoIcon = (props): IconElement => <Icon {...props} name='info-outline' />;
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
@@ -53,132 +56,268 @@ export default function App() {
             <Stack.Screen name="Login" component={Auth} options={{ headerRight: () => <SettingsButton/>}}/>
             <Stack.Screen name="Home" component={HomeScreen} options={({ navigation }) => ({
               headerRight: () => (
-                [<Button testID='notificationsButton'
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                  <Button testID='notificationsButton'
                     onPress={() => navigation.navigate('ViewNotifications')} 
                     appearance="ghost"
                     accessoryLeft={bellIcon} 
-                    size='large'/>,
-                <SettingsButton/>]
+                    size='large'
+                    style={{ marginHorizontal: -10 }}/>
+                <SettingsButton/>
+                </View>
               ),
             })}/>
             <Stack.Screen name="SelectSite" component={SelectSite} options={({ navigation }) => ({
               headerRight: () => (
-                [<Button testID='notificationsButton'
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                  <Button testID='notificationsButton'
                     onPress={() => navigation.navigate('ViewNotifications')} 
                     appearance="ghost"
                     accessoryLeft={bellIcon} 
-                    size='large'/>,
-                <SettingsButton/>]
+                    size='large'
+                    style={{ marginHorizontal: -10 }}/>
+                <SettingsButton/>
+                </View>
               ),
             })}/>
             <Stack.Screen name="AddNotes" component={AddNotes} options={({ navigation }) => ({
               headerRight: () => (
-                [<Button testID='notificationsButton'
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                  <Button testID='notificationsButton'
                     onPress={() => navigation.navigate('ViewNotifications')} 
                     appearance="ghost"
                     accessoryLeft={bellIcon} 
-                    size='large'/>,
-                <SettingsButton/>]
+                    size='large'
+                    style={{ marginHorizontal: -10 }}/>
+                <SettingsButton/>
+                </View>
               ),
             })}/>
             <Stack.Screen name="ViewNotes" component={ViewNotes} options={({ navigation }) => ({
               headerRight: () => (
-                [<Button testID='notificationsButton'
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                  <Button testID='notificationsButton'
                     onPress={() => navigation.navigate('ViewNotifications')} 
                     appearance="ghost"
                     accessoryLeft={bellIcon} 
-                    size='large'/>,
-                <SettingsButton/>]
+                    size='large'
+                    style={{ marginHorizontal: -10 }}/>
+                <SettingsButton/>
+                </View>
               ),
             })}/>
             <Stack.Screen name="BadData" component={BadData} options={({ navigation }) => ({
               headerRight: () => (
-                [<Button testID='notificationsButton'
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                  <Button testID='notificationsButton'
                     onPress={() => navigation.navigate('ViewNotifications')} 
                     appearance="ghost"
                     accessoryLeft={bellIcon} 
-                    size='large'/>,
-                <SettingsButton/>]
+                    size='large'
+                    style={{ marginHorizontal: -10 }}/>
+                <SettingsButton/>
+                </View>
               ),
             })}/>
             <Stack.Screen name="InstrumentMaintenance" component={InstrumentMaintenance} options={({ navigation }) => ({
+              title: "Maintenance",
               headerRight: () => (
-                [<Button testID='notificationsButton'
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                  <Button testID='notificationsButton'
                     onPress={() => navigation.navigate('ViewNotifications')} 
                     appearance="ghost"
                     accessoryLeft={bellIcon} 
-                    size='large'/>,
-                <SettingsButton/>]
+                    size='large'
+                    style={{ marginHorizontal: -10 }}/>
+                <SettingsButton/>
+                </View>
               ),
             })}/>
             <Stack.Screen name="TankTracker" component={TankTracker} options={({ navigation }) => ({
               headerRight: () => (
-                [<Button testID='notificationsButton'
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                  <Button testID='notificationsButton'
                     onPress={() => navigation.navigate('ViewNotifications')} 
                     appearance="ghost"
                     accessoryLeft={bellIcon} 
-                    size='large'/>,
-                <SettingsButton/>]
+                    size='large'
+                    style={{ marginHorizontal: -10 }}/>
+                <SettingsButton/>
+                </View>
               ),
             })}/>
             <Stack.Screen name="SelectInstrument" component={SelectInstrument} options={({ navigation }) => ({
               headerRight: () => (
-                [<Button testID='notificationsButton'
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                  <Button testID='notificationsButton'
                     onPress={() => navigation.navigate('ViewNotifications')} 
                     appearance="ghost"
                     accessoryLeft={bellIcon} 
-                    size='large'/>,
-                <SettingsButton/>]
+                    size='large'
+                    style={{ marginHorizontal: -10 }}/>
+                <SettingsButton/>
+                </View>
               ),
             })}/>
             <Stack.Screen name="PlanVisit" component={PlanVisit} options={({ navigation }) => ({
               headerRight: () => (
-                [<Button testID='notificationsButton'
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                  <Button testID='notificationsButton'
                     onPress={() => navigation.navigate('ViewNotifications')} 
                     appearance="ghost"
                     accessoryLeft={bellIcon} 
-                    size='large'/>,
-                <SettingsButton/>]
+                    size='large'
+                    style={{ marginHorizontal: -10 }}/>
+                <SettingsButton/>
+                </View>
               ),
             })}/>
             <Stack.Screen name="SelectTank" component={SelectTank} options={({ navigation }) => ({
               headerRight: () => (
-                [<Button testID='notificationsButton'
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                  <Button testID='notificationsButton'
                     onPress={() => navigation.navigate('ViewNotifications')} 
                     appearance="ghost"
                     accessoryLeft={bellIcon} 
-                    size='large'/>,
-                <SettingsButton/>]
+                    size='large'
+                    style={{ marginHorizontal: -10 }}/>
+                <SettingsButton/>
+                </View>
               ),
             })}/>
             <Stack.Screen name="AddNotesMobile" component={AddNotesMobile} options={({ navigation }) => ({
               headerRight: () => (
-                [<Button testID='notificationsButton'
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                  <Button testID='notificationsButton'
                     onPress={() => navigation.navigate('ViewNotifications')} 
                     appearance="ghost"
                     accessoryLeft={bellIcon} 
-                    size='large'/>,
-                <SettingsButton/>]
+                    size='large'
+                    style={{ marginHorizontal: -10 }}/>
+                <SettingsButton/>
+                </View>
               ),
             })}/>
             <Stack.Screen name="SelectNotes" component={SelectNotes} options={({ navigation }) => ({
               headerRight: () => (
-                [<Button testID='notificationsButton'
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                  <Button testID='notificationsButton'
                     onPress={() => navigation.navigate('ViewNotifications')} 
                     appearance="ghost"
                     accessoryLeft={bellIcon} 
-                    size='large'/>,
-                <SettingsButton/>]
+                    size='large'
+                    style={{ marginHorizontal: -10 }}/>
+                <SettingsButton/>
+                </View>
               ),
             })}/>
             <Stack.Screen name="Calendar" component={Calendar} options={({ navigation }) => ({
               headerRight: () => (
-                [<Button testID='notificationsButton'
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                  <Button testID='notificationsButton'
+                    onPress={() => navigation.navigate('ViewNotifications')} 
+                    appearance="ghost"
+                    accessoryLeft={bellIcon} 
+                    size='large'
+                    style={{ marginHorizontal: -10 }}/>
+                <SettingsButton/>
+                </View>
+              ),
+            })}/>
+            <Stack.Screen name="Diagnostics" component={Diagnostics} options={({ navigation }) => ({
+              headerRight: () => (
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                  <Button testID='notificationsButton'
                     onPress={() => navigation.navigate('ViewNotifications')} 
                     appearance="ghost"
                     accessoryLeft={bellIcon} 
                     size='large'/>,
-                <SettingsButton/>]
+                <SettingsButton/>
+                </View>
               ),
             })}/>
             <Stack.Screen name="Diagnostics" component={Diagnostics} options={({ navigation }) => ({
@@ -192,6 +331,7 @@ export default function App() {
               ),
             })}/>
             <Stack.Screen name="ViewNotifications" component={ViewNotifications} options={{ headerRight: () => <SettingsButton/>}}/>
+            <Stack.Screen name="ContactInfo" component={ContactInfo} options={{ headerRight: () => <SettingsButton/>}}/>
           </Stack.Navigator>
         </NavigationContainer>
       </ApplicationProvider>
