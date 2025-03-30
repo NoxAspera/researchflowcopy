@@ -85,14 +85,12 @@ export default function AddNotes({ navigation }: NavigationType) {
 
   function setStartDateHourMinutes (pickedDuration) {
     const tempDate = startDateValue;
-    console.log("pickedDuration hours: " + pickedDuration.hours + " and minutes: " + pickedDuration.minutes)
     tempDate.setHours(pickedDuration.hours)
     tempDate.setMinutes(pickedDuration.minutes)
     setStartDateValue(tempDate);
   };
   function setEndDateHourMinutes (pickedDuration) {
     const tempDate = endDateValue;
-    console.log("pickedDuration hours: " + pickedDuration.hours + " and minutes: " + pickedDuration.minutes)
     tempDate.setHours(pickedDuration.hours)
     tempDate.setMinutes(pickedDuration.minutes)
     setEndDateValue(tempDate);
@@ -684,7 +682,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         {(showStartPicker && Platform.OS === "android") && (
           (
             <View style={styles.androidDateTime}>
-              <Pressable onPress={() => {showStartMode("date");; setStartDateValue(startDateValue)}}>
+              <Pressable onPress={() => {showStartMode("date"); setStartDateValue(startDateValue)}}>
                 <Text>
                   {startDateValue.toLocaleDateString([], {
                     weekday: "short",

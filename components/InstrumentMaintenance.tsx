@@ -20,57 +20,58 @@ import PopupProp from './Popup';
 import LoadingScreen from "./LoadingScreen";
 import DateTimePicker , {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
 import Network from 'expo-network'
+import { TimerPickerModal } from "react-native-timer-picker";
+import { ThemeContext } from './ThemeContext';
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
   const onStartChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setStartDateValue(currentDate);
-  };
-
-  const onEndChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setEndDateValue(currentDate);
-  };
-
-  const showStartMode = (currentMode) => {
-    DateTimePickerAndroid.open({
-      value: startDateValue,
-      onChange: onStartChange,
-      mode: currentMode,
-      is24Hour: false,
-    });
-  };
-
-  const showEndMode = (currentMode) => {
-    DateTimePickerAndroid.open({
-      value: endDateValue,
-      onChange: onEndChange,
-      mode: currentMode,
-      is24Hour: false,
-    });
-  };
-
-  const showStartDatepicker = () => {
-    showStartMode("date");
-  };
-
-  const showStartTimepicker = () => {
-    showStartMode("time");
-  };
-
-  const showEndDatepicker = () => {
-    showEndMode("date");
-  };
-
-  const showEndTimepicker = () => {
-    showEndMode("time");
-  };
+        const currentDate = selectedDate;
+        setStartDateValue(currentDate);
+      };
+    
+      const onEndChange = (event, selectedDate) => {
+        const currentDate = selectedDate;
+        setEndDateValue(currentDate);
+      };
+    
+      const showStartMode = (currentMode) => {
+        DateTimePickerAndroid.open({
+          value: startDateValue,
+          onChange: onStartChange,
+          mode: currentMode,
+          is24Hour: false,
+        });
+      };
+    
+      const showEndMode = (currentMode) => {
+        DateTimePickerAndroid.open({
+          value: endDateValue,
+          onChange: onEndChange,
+          mode: currentMode,
+          is24Hour: false,
+        });
+      };
+    
+      function setStartDateHourMinutes (pickedDuration) {
+        const tempDate = startDateValue;
+        tempDate.setHours(pickedDuration.hours)
+        tempDate.setMinutes(pickedDuration.minutes)
+        setStartDateValue(tempDate);
+      };
+      function setEndDateHourMinutes (pickedDuration) {
+        const tempDate = endDateValue;
+        tempDate.setHours(pickedDuration.hours)
+        tempDate.setMinutes(pickedDuration.minutes)
+        setEndDateValue(tempDate);
+      };
 
   const route = useRoute<routeProp>();
   let site = route.params?.site ?? "";
   let instrumentName = site.slice(site.lastIndexOf("/") + 1);
   let needsLocation = site.includes("LGR");
+  const themeContext = React.useContext(ThemeContext);
+  const isDarkMode = themeContext.theme === 'dark';
 
   // used for setting and remembering the input values
   const [nameValue, setNameValue] = useState("");
@@ -93,6 +94,9 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
   // used for loading screen
     const [loadingValue, setLoadingValue] = useState(false);
+  //used for date/time pickers
+  const [showPicker, setShowPicker] = useState(false);
+  const [showPicker2, setShowPicker2] = useState(false);
 
   useEffect(() => {
     const fetchSite = async () => {
@@ -287,7 +291,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
           {(showStartPicker && Platform.OS === "android") && (
           (
             <View style={styles.androidDateTime}>
-              <Pressable onPress={() => {showStartDatepicker(); setStartDateValue(startDateValue)}}>
+              <Pressable onPress={() => {showStartMode("date"); setStartDateValue(startDateValue)}}>
                 <Text>
                   {startDateValue.toLocaleDateString([], {
                     weekday: "short",
@@ -297,7 +301,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
                   })}
                 </Text>
               </Pressable>
-              <Pressable onPress={() => {showStartTimepicker(); setStartDateValue(startDateValue)}}>
+              <Pressable onPress={() => {setShowPicker(true); setStartDateValue(startDateValue)}}>
                 <Text>
                   {startDateValue.toLocaleTimeString([], {
                     hour: "2-digit",
@@ -305,6 +309,28 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
                   })}
                 </Text>
               </Pressable>
+              <TimerPickerModal
+                  visible={showPicker}
+                  setIsVisible={setShowPicker}
+                  use12HourPicker={true}
+                  hideSeconds={true}
+                  minuteLabel={"<"}
+                  onConfirm={(pickedDuration) => {
+                    //set time
+                    setStartDateHourMinutes(pickedDuration);                    
+                    //set time picker to false to close it
+                    setShowPicker(false);
+                  }}
+                  modalTitle="Set Time"
+                  onCancel={() => setShowPicker(false)}
+                  closeOnOverlayPress
+                  styles={{
+                      theme: isDarkMode ? "dark" : "light"
+                  }}
+                  modalProps={{
+                      overlayOpacity: 0.2,
+                  }}
+              />
             </View>
           )
         )}
@@ -346,7 +372,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
           {(showEndPicker && Platform.OS === "android" && addToBadData) && (
           (
             <View style={styles.androidDateTime}>
-              <Pressable onPress={() => {showEndDatepicker(); setEndDateValue(endDateValue)}}>
+              <Pressable onPress={() => {showEndMode("date"); setEndDateValue(endDateValue)}}>
                 <Text>
                   {endDateValue.toLocaleDateString([], {
                     weekday: "short",
@@ -356,7 +382,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
                   })}
                 </Text>
               </Pressable>
-              <Pressable onPress={() => {showEndTimepicker(); setEndDateValue(endDateValue)}}>
+              <Pressable onPress={() => {setShowPicker2(true); setEndDateValue(endDateValue)}}>
                 <Text>
                   {endDateValue.toLocaleTimeString([], {
                     hour: "2-digit",
@@ -364,6 +390,28 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
                   })}
                 </Text>
               </Pressable>
+              <TimerPickerModal
+                  visible={showPicker2}
+                  setIsVisible={setShowPicker2}
+                  use12HourPicker={true}
+                  hideSeconds={true}
+                  minuteLabel={"<"}
+                  onConfirm={(pickedDuration) => {
+                    //set time
+                    setEndDateHourMinutes(pickedDuration);                    
+                    //set time picker to false to close it
+                    setShowPicker2(false);
+                  }}
+                  modalTitle="Set Time"
+                  onCancel={() => setShowPicker2(false)}
+                  closeOnOverlayPress
+                  styles={{
+                      theme: isDarkMode ? "dark" : "light"
+                  }}
+                  modalProps={{
+                      overlayOpacity: 0.2,
+                  }}
+              />
             </View>
           )
           )}  
