@@ -504,7 +504,7 @@ export default function AddNotes({ navigation }: NavigationType) {
 
               {/* Time input */}
               <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Arrived (MT):</Text>
-              <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.datePicker}>
+              <TouchableOpacity onPress={() => setShowStartPicker(true)} style={[styles.datePicker, {borderColor: isDarkMode ? "#101426" : "#E4E9F2"}, {backgroundColor: isDarkMode ? "#1A2138" : "#F7F9FC"}]}>
                 <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
                 <Text>{startDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {startDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
               </TouchableOpacity>
@@ -512,6 +512,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           {(showStartPicker && Platform.OS === "ios") && (
           <View>
           <DateTimePicker
+            textColor= {isDarkMode ? 'white' : 'black'}
             value={startDateValue}
             mode="datetime"
             display="spinner"
@@ -575,7 +576,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           )}
 
         <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Departed (MT):</Text>
-          <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.datePicker}>
+          <TouchableOpacity onPress={() => setShowEndPicker(true)} style={[styles.datePicker, {borderColor: isDarkMode ? "#101426" : "#E4E9F2"}, {backgroundColor: isDarkMode ? "#1A2138" : "#F7F9FC"}]}>
             <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
             <Text>{endDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {endDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
           </TouchableOpacity>
@@ -583,6 +584,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           {(showEndPicker && Platform.OS === "ios") && (
           <View>
           <DateTimePicker
+            textColor= {isDarkMode ? 'white' : 'black'}
             value={endDateValue}
             mode="datetime"
             display="spinner"
