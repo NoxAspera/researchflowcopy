@@ -87,6 +87,52 @@ const groupTankData = (entries: Entry[]) => {
   return tankMap;
 };
 
+function getTimeBetweenDates(date1, date2) {
+  const timeDiffMs = Math.abs(date2.getTime() - date1.getTime());
+  const seconds = Math.floor(timeDiffMs / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  return {
+    days,
+    hours: hours % 24,
+    minutes: minutes % 60,
+    seconds: seconds % 60,
+    milliseconds: timeDiffMs % 1000
+  };
+}
+
+function daysUntilEmpty(prevPress, prevDate, currPress, currDate) {
+  // get change of pressure over time, assume it is linear
+  let changeOfPress = currPress - prevPress;
+  console.log(`${currPress} - ${prevPress} = ${changeOfPress}`);
+
+  // if change of pressure is positive, then it got replaced, no need to check date
+  // if change of pressure is 0, then there is no need to check date bc nothing has changed
+  if (changeOfPress >= 0) {
+    return 365;
+  }
+
+  // get date difference
+  let currTime = new Date(currDate);
+  let prevTime = new Date(prevDate);
+  let changeOfDate = getTimeBetweenDates(prevTime, currTime).days; // get the difference of time in days
+  console.log(`Days between: ${changeOfDate}`);
+
+  // if changeOfDate is 0, then the previous entry was also made today
+  if (changeOfDate == 0) {
+    return 365;
+  }
+  
+  let rateOfDecay = changeOfPress / changeOfDate; // measured in psi lost per day
+  console.log(`Rate of decay: ${changeOfPress} / ${changeOfDate} = ${rateOfDecay}`);
+
+  // solve for when the tank should be under 500 psi
+  let days = Math.trunc((-prevPress / rateOfDecay) - changeOfDate);
+  return days;
+}
+
 export default function Diagnostics({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   let site = route.params?.site;
@@ -152,7 +198,7 @@ export default function Diagnostics({ navigation }: NavigationType) {
   };
 
   const screenWidth = Dimensions.get("window").width;
-  const predictedZeroPressureDate = "2025-07-01";
+  //const predictedZeroPressureDate = "2025-07-01";
 
   return (
     <KeyboardAvoidingView
@@ -167,15 +213,15 @@ export default function Diagnostics({ navigation }: NavigationType) {
             status="primary"
             style={styles.submitButton}
           >
-          {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Diagnostics</Text>}
+          {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Go to Data Diagnostics</Text>}
           </Button>
 
           <Text style={{ textAlign: "center", fontSize: 18, fontWeight: "bold", margin: 10 }}>
-        Tank Pressure Over Time
+        {"Tank Pressure Over Time"}
       </Text>
       {Object.keys(tankData).length === 0 && (
   <Text style={{ textAlign: "center", fontSize: 16, fontWeight: "bold", margin: 10, color: 'red' }}>
-    No  recent tank data available for this site.
+    {"No  recent tank data available for this site."}
   </Text>
 )}
       {Object.entries(tankData).map(([tankId, data]) => {
@@ -187,7 +233,15 @@ export default function Diagnostics({ navigation }: NavigationType) {
         let lastX = normalizedX[normalizedX.length - 1];
 
         // Compute the x-position for the predicted zero-pressure date
-        const predictedTimestamp = new Date(predictedZeroPressureDate).getTime();
+        let daysUntilZero;
+        if (validData.length >= 2) {
+          daysUntilZero = daysUntilEmpty(pressures[pressures.length - 2], timestamps[timestamps.length - 2], pressures[pressures.length - 1], timestamps[timestamps.length - 1]);
+        } else {
+          daysUntilZero = 365;
+        }
+        let predictedZeroDate = new Date(validData[validData.length - 1].time)
+        predictedZeroDate.setDate(predictedZeroDate.getDate() + daysUntilZero);
+        const predictedTimestamp = predictedZeroDate.getTime();
         const predictedX = predictedTimestamp - minTimestamp;
 
         // Append this new point to the dataset
@@ -209,10 +263,10 @@ export default function Diagnostics({ navigation }: NavigationType) {
   return (
     <View key={tankId} style={{ marginVertical: 10, }}>
       <Text style={{ textAlign: "center", fontSize: 16, fontWeight: "bold" }}>
-        Tank ID: {tankId}
+        {`Tank ID: ${tankId}`}
       </Text>
       <Text style={{ textAlign: "center", fontSize: 14, fontWeight: "bold" }}>
-        Predicted empty date: {predictedZeroPressureDate}
+        {`Predicted empty date: ${formatDate(predictedZeroDate.toISOString())}`}
       </Text>
       
       <View style={{ flexDirection: 'row', height: 250, padding: 20 }}>
@@ -250,12 +304,6 @@ export default function Diagnostics({ navigation }: NavigationType) {
 
       {/* Custom Axis Lines */}
       <Svg height="225" width="100%" style={{ position: 'absolute', left: 0, top: 0 }}>
-      <Defs>
-  <LinearGradient id="horizontalGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-    <Stop offset="0%" stopColor="#cefad0" />
-    <Stop offset="100%" stopColor="#FFCCCB" />
-  </LinearGradient>
-</Defs>
         {/* X Axis Line */}
         <Line x1="0" y1="200" x2="100%" y2="200" stroke="black" strokeWidth="2" />
 
@@ -264,11 +312,6 @@ export default function Diagnostics({ navigation }: NavigationType) {
         <Rect x="0" y="0" width="100%" height="30%" fill="green" opacity={0.2} />
         <Rect x="0" y="67" width="100%" height="30%" fill="yellow" opacity={0.2} />
         <Rect x="0" y="134" width="100%" height="30%" fill="red" opacity={0.2} />
-        
-        {/*
-        
-        <Rect width="100%" height="90%" fill="url(#horizontalGradient)" opacity={0.5}/>
-        */}
       </Svg>
           
           {/* X Axis with correctly spaced labels */}
@@ -290,7 +333,7 @@ export default function Diagnostics({ navigation }: NavigationType) {
             }
             // Add label for predicted zero date
             if (index === totalLabels) {
-              return formatDate(predictedZeroPressureDate);
+              return formatDate(predictedZeroDate.toISOString());
             }
             return ""; // Hide other labels
             }}
@@ -301,7 +344,7 @@ export default function Diagnostics({ navigation }: NavigationType) {
         </View>
       </View>
       <Text style={{ textAlign: "center", fontSize: 12, fontWeight: "bold" }}>
-        *Data after the red dotted line is projected data
+        {"*Data after the red dotted line is projected data"}
       </Text>
     </View>
   );

@@ -315,19 +315,10 @@ export default function App() {
                     onPress={() => navigation.navigate('ViewNotifications')} 
                     appearance="ghost"
                     accessoryLeft={bellIcon} 
-                    size='large'/>,
+                    size='large'
+                    style={{ marginHorizontal: -10 }}/>
                 <SettingsButton/>
                 </View>
-              ),
-            })}/>
-            <Stack.Screen name="Diagnostics" component={Diagnostics} options={({ navigation }) => ({
-              headerRight: () => (
-                [<Button testID='notificationsButton'
-                    onPress={() => navigation.navigate('ViewNotifications')} 
-                    appearance="ghost"
-                    accessoryLeft={bellIcon} 
-                    size='large'/>,
-                <SettingsButton/>]
               ),
             })}/>
             <Stack.Screen name="ViewNotifications" component={ViewNotifications} options={{ headerRight: () => <SettingsButton/>}}/>
