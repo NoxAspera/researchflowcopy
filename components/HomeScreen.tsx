@@ -12,21 +12,17 @@ import { Layout } from "@ui-kitten/components";
 import React, { useState, useEffect } from 'react';
 import { NavigationType } from "./types";
 //const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
-import {updateDirectories, tankTrackerOffline} from '../scripts/APIRequests';
+import {updateDirectories, tankTrackerOffline, readUpdates, tankTrackerSpinUp} from '../scripts/APIRequests';
 import NoteInput from './NoteInput'
 import * as Network from 'expo-network'
 
-async function readUpdates()
-{
- 
-}
-
 async function startup()
 {
-  let check = (await Network.getNetworkStateAsync()).isConnected && (!(await Network.isAirplaneModeEnabledAsync()))
-  console.log(check)
+  let check = (await Network.getNetworkStateAsync()).isConnected
+  //console.log(check)
   if(check)
     {
+      await tankTrackerSpinUp()
       readUpdates();
       updateDirectories();
       return 

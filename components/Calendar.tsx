@@ -12,7 +12,7 @@ import { Calendar, CalendarList,Agenda } from "react-native-calendars";
 import { customTheme } from './CustomTheme';
 import PlanVisit from "./PlanVisit";
 import ViewNotes from "./ViewNotes";
-import Network from "expo-network"
+import * as Network from "expo-network"
 
 let visitDict: Map<string, visit[]>
 
@@ -27,7 +27,7 @@ export default function CalendarScreen({ navigation }: NavigationType) {
   useEffect(() => {
     async function fetchData() {
       try{
-        let check = await  Network.useNetworkState()
+        let check = await (Network.getNetworkStateAsync())
         online = check.isConnected
         if(check.isConnected)
         {

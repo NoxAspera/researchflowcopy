@@ -1,6 +1,7 @@
 import csv from 'csvtojson';
 import * as FileSystem from 'expo-file-system'
 import * as Network from 'expo-network'
+import { parseVisits, VisitList } from './Parsers';
 
 /**
  * @author August O'Rourke
@@ -107,6 +108,33 @@ async function loop(path: string)
     }
 }
 
+export async function readUpdates()
+{
+    if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/visitfile.txt")).exists)
+    {
+        let visits: VisitList = parseVisits(await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/visitfile.txt"))
+        console.log("passed visits")
+        console.log(visits)
+        await setVisitFileOffline(visits)
+        FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/visitfile.txt")
+    }
+    
+    console.log(await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + "offline_updates"))
+    let entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/baddata.txt")).split("\n")
+
+    entries.forEach(async (value) => {
+        let site = value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
+        value = value.substring(value.indexOf(", ") + 2)
+        let instrument =  value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
+        value = value.substring(value.indexOf(", ") + 2)
+        let newEntry = value.substring(value.indexOf(": ") + 2).slice(0, -1)
+        value = value.substring(value.indexOf(", ") + 2)
+
+        await setBadData(site, instrument, newEntry, "updating from offline")
+        
+    })
+}
+
 export async function tankTrackerOffline()
 {
     let string = await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "tank_tracker/names")
@@ -127,7 +155,7 @@ export async function updateDirectories()
         });
     }
     loop("site_notes/mobile")
-    await tankTrackerSpinUp()
+    //await tankTrackerSpinUp()
     let list = getTankList()
     let names = ""
     list.forEach(value => {
@@ -178,6 +206,7 @@ async function setFile(bodyString: string, url: string)
     
     try {
         const response = await fetch(requestOptions);
+        //console.log(response)
         if (response.ok) {
             const data = await response.json();
             return { success: true, data };
@@ -189,6 +218,39 @@ async function setFile(bodyString: string, url: string)
         return { success: false, error: error };
     }
     
+}
+
+async function setVisitFileOffline(visits: VisitList)
+{
+    const pullResponse = (await getFile(`researchflow_data/visits`))
+        let existingContent = ""
+        let hash = ""
+        
+        if(pullResponse.success)
+        {
+            hash = pullResponse.data.sha
+            existingContent = atob(pullResponse.data.content)       
+        }
+        visits.visits.forEach((value) => 
+        {
+            if(value != undefined)
+            {
+                existingContent += `{"date":"${value.date}","name":"${value.name}","site":"${value.site}","equipment":"${value.equipment}","notes":"${value.notes}"}\n`
+            }
+        })    
+        //console.log("exited loop")
+        let fullDoc = btoa(existingContent)
+        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/researchflow_data/visits.md`;
+        let bodyString = `{"message":"updating from offline","content":"${fullDoc}"`
+        if (hash!== "")
+        {
+            bodyString+= `,"sha":"${hash}"}`
+        }
+        else
+        {
+            bodyString += '}'
+        }
+        return setFile(bodyString, url)
 }
 
 /**
@@ -210,9 +272,9 @@ export async function setVisitFile(visit: visit, commitMessage: string)
         if(pullResponse.success)
         {
             hash = pullResponse.data.sha
-            existingContent = atob(pullResponse.data.content) + "\n"       
+            existingContent = atob(pullResponse.data.content)       
         }
-        const fullDoc = btoa(existingContent + JSON.stringify(visit))
+        const fullDoc = btoa(existingContent + `{"date":"${visit.date}","name":"${visit.name}","site":"${visit.site}","equipment":"${visit.equipment}","notes":"${visit.notes}"}\n`)
 
         const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/researchflow_data/visits.md`;
         let bodyString = `{"message":"${commitMessage}","content":"${fullDoc}"`
@@ -242,7 +304,7 @@ export async function setVisitFile(visit: visit, commitMessage: string)
             {
                 
             }
-            content += `{date: ${visit.date}, equipment: ${visit.equipment}, name: ${visit.name}, notes: ${visit.notes}, site: ${visit.site}}\n`
+            content += `{"date":"${visit.date}","name":"${visit.name}","site":"${visit.site}","equipment":"${visit.equipment}","notes":"${visit.notes}"}\n`
             let result = await FileSystem.writeAsStringAsync(path, content, {})
             if(await FileSystem.readAsStringAsync(path) === content)
             {
@@ -576,6 +638,7 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
     let sha = ""
     try {
         const response = await fetch(requestOptions);
+        console.log(response)
         if (response.ok) {
             const data = await response.json();
             let plainContent = atob(data.content);
@@ -728,7 +791,7 @@ export async function setInstrumentFile(path: string, content: string, commitMes
 export async function getDirectory(path: string)
 {
     let check = await Network.getNetworkStateAsync()
-    console.log(!(check.isConnected))
+    //console.log(!(check.isConnected))
     if(!(check.isConnected))
     {
        return {success: true, data: await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + path)}
