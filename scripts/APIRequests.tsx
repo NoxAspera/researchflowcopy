@@ -120,19 +120,88 @@ export async function readUpdates()
     }
     
     console.log(await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + "offline_updates"))
-    let entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/baddata.txt")).split("\n")
 
-    entries.forEach(async (value) => {
-        let site = value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
-        value = value.substring(value.indexOf(", ") + 2)
-        let instrument =  value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
-        value = value.substring(value.indexOf(", ") + 2)
-        let newEntry = value.substring(value.indexOf(": ") + 2).slice(0, -1)
-        value = value.substring(value.indexOf(", ") + 2)
+    if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/baddata.txt")).exists)
+    {
+        let bad_data_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/baddata.txt")).split("\n")
 
-        await setBadData(site, instrument, newEntry, "updating from offline")
-        
-    })
+        bad_data_entries.forEach(async (value) => {
+            let site = value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
+            value = value.substring(value.indexOf(", ") + 2)
+            let instrument =  value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
+            value = value.substring(value.indexOf(", ") + 2)
+            let newEntry = value.substring(value.indexOf(": ") + 2).slice(0, -1)
+            value = value.substring(value.indexOf(", ") + 2)
+
+            await setBadData(site, instrument, newEntry, "updating from offline")
+            
+        })
+        FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/baddata.txt")
+    }
+
+    if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/instrument_maint.txt")).exists)
+    {
+        let instrument_maintence_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/instrument_maint.txt")).split("}\n")
+        console.log(instrument_maintence_entries)
+        instrument_maintence_entries.forEach(async (value) => {
+            if(value !== ""){
+                let path = value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
+                console.log(path)
+                value = value.substring(value.indexOf(", ") + 2)
+                let content =  value.substring(value.indexOf("content: ") + 8 , value.indexOf(", mobile:"))
+                console.log(content)
+                value = value.substring(value.indexOf(", ") + 2)
+                let needsSite =(value.substring(value.indexOf(": ") + 2 , value.indexOf(", ")) === "true")
+                console.log(needsSite)
+                value = value.substring(value.indexOf(", ") + 2)
+                let site = value.substring(value.indexOf(": ") + 2)
+                console.log(site)
+                await setInstrumentFile(path,content,"updating from offline", needsSite, site)
+            }
+            
+        })
+        FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/instrument_maint.txt")
+    }
+
+    if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/site_notes.txt")).exists)
+        {
+                let site_notes_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/site_notes.txt")).split("\n")
+                console.log(site_notes_entries)
+                FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/site_notes.txt")
+        }
+
+    if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/tank_updates.txt")).exists)
+    {
+            let tank_update_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/tank_updates.txt")).split("\n")
+            tank_update_entries.forEach(async (value) => {
+                if(value !== ""){
+                    let tankId = value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
+                    value = value.substring(value.indexOf(", ") + 2)
+                    let pressure =  parseInt(value.substring(value.indexOf(": ") + 2 , value.indexOf(", ")))
+                    value = value.substring(value.indexOf(", ") + 2)
+                    let site =value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
+                    value = value.substring(value.indexOf(", ") + 2)
+                    let time = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
+                    value = value.substring(value.indexOf(", ") + 2)
+                    let name = value.substring(value.indexOf(": ") + 2).slice(0, -1)
+
+                    let previousRecord: TankRecord = getLatestTankEntry(tankId)
+
+                    previousRecord.pressure = pressure
+                    previousRecord.location = site
+                    previousRecord.updatedAt = time
+                    previousRecord.userId = name
+                    
+                    addEntrytoTankDictionary(previousRecord)
+                }
+                
+            })
+            FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/tank_updates.txt")
+            await setTankTracker()
+            
+    }
+    console.log("finished")
+
 }
 
 export async function tankTrackerOffline()
@@ -206,7 +275,7 @@ async function setFile(bodyString: string, url: string)
     
     try {
         const response = await fetch(requestOptions);
-        //console.log(response)
+        console.log(response)
         if (response.ok) {
             const data = await response.json();
             return { success: true, data };
@@ -432,7 +501,7 @@ export function getLatestTankEntry(key:string): TankRecord | undefined {
  */
 export function getTankList()
 {   
-    //console.log(tankDict)
+    console.log(tankDict)
     return Array.from(tankDict.keys())
 }
 /**
@@ -751,23 +820,23 @@ export async function setInstrumentFile(path: string, content: string, commitMes
     {
         try
         {
-            let path = FileSystem.documentDirectory + "offline_updates/instrument_maint.txt"
+            let filePath = FileSystem.documentDirectory + "offline_updates/instrument_maint.txt"
             //console.log(path)
-            let exists = (await FileSystem.getInfoAsync(path)).exists
-            let content = ""
+            let exists = (await FileSystem.getInfoAsync(filePath)).exists
+            let newContent = ""
             if(exists)
             {
-                content = await FileSystem.readAsStringAsync(path)
+                newContent = await FileSystem.readAsStringAsync(filePath)
             }
-            content += `{path: ${path}, content: ${content}, mobile: ${mobile}}\n`
+            newContent += `{path: ${path}, content: ${content}, mobile: ${mobile}}\n`
             if(site)
             {
-                content = content.substring(0, content.length - 3)
-                content += `, path: ${path}}\n`
+                newContent = newContent.substring(0, newContent.length - 2)
+                newContent += `, site: ${site}}\n`
             }
 
-            let result = await FileSystem.writeAsStringAsync(path, content, {})
-            if(await FileSystem.readAsStringAsync(path) === content)
+            let result = await FileSystem.writeAsStringAsync(filePath, newContent, {})
+            if(await FileSystem.readAsStringAsync(filePath) === newContent)
             {
                 return {success: true}  
             }
@@ -935,18 +1004,18 @@ export async function setSiteFile(siteName: string, content: string, commitMessa
             let path = FileSystem.documentDirectory + "offline_updates/site_notes.txt"
             //console.log(path)
             let exists = (await FileSystem.getInfoAsync(path)).exists
-            let content = ""
+            let newContent = ""
             if(exists)
             {
-                content = await FileSystem.readAsStringAsync(path)
+                newContent = await FileSystem.readAsStringAsync(path)
             }
             else
             {
                 
             }
-            content += `{siteName: ${siteName}, content: ${content}}\n`
-            let result = await FileSystem.writeAsStringAsync(path, content, {})
-            if(await FileSystem.readAsStringAsync(path) === content)
+            newContent += `{siteName: ${siteName}, content: ${content}}\n`
+            let result = await FileSystem.writeAsStringAsync(path, newContent, {})
+            if(await FileSystem.readAsStringAsync(path) === newContent)
             {
                 return {success: true}  
             }
