@@ -1,9 +1,9 @@
 /**
  * View Notes
- * @author Blake Stambaugh, August O'Rourke, Megan Ostlie
- * Updated: 2/4/25 - MO
+ * @author David Schiwal, Megan Ostlie
+ * Updated: 3/23/25 - DS
  * 
- * View notes page. Will pull in data from the github repo and display it for the user in cards.
+ * View notifications page. Will pull in data from the github repo and display it for the user in cards.
  */
 import { useRoute } from '@react-navigation/native';
 import { Card, Layout, Text } from '@ui-kitten/components';
@@ -19,8 +19,8 @@ import { parseVisits, VisitList } from '../scripts/Parsers'
 
 
 /**
- * @author Blake Stambaugh, August O'Rourke
- * @returns The view notes page in our app
+ * @author David Schiwal
+ * @returns The view notifications page in our app
  */
 export default function ViewNotifications({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -45,19 +45,35 @@ export default function ViewNotifications({ navigation }: NavigationType) {
   },[]);
 
 
-  // data for buttons
+  // checks if visit is today or later and adds it to list to display if so
   let visitData = [];
   if(data){
     if(data.visits){
       for(let i = 0; i < data.visits.length; i++){
-        if(data.visits[i]){
-            const visit = data.visits[i]
-            //need to check if current visit date is prior to current date, if so don't add it to list
-            const visitDate = new Date(visit.date)
-            const now = new Date();
-            if(visitDate.getDate() >= now.getDate()){
+        if(data.visits[i]){        
+          const visit = data.visits[i]
+          const visitDate = new Date(visit.date)
+          const now = new Date();
+          //apparently getDate only gets the day of the month not the whole date so you have to check things individually
+          const day = now.getDate();
+          const month = now.getMonth() + 1;
+          const year = now.getFullYear();
+          //if year greater add visit            
+          if(visitDate.getFullYear() > year){
+            visitData.push({visit: visit})
+          }
+          else if(visitDate.getFullYear() == year){
+            //if year equal but month greater add visit
+            if((visitDate.getMonth() + 1) > month){
               visitData.push({visit: visit})
             }
+            else if((visitDate.getMonth() + 1) == month){
+              //if year and month equal but day equal or greater add visit
+              if(visitDate.getDate() >= now.getDate()){
+                visitData.push({visit: visit})
+              }
+            }
+          }
         }
       }
     }
@@ -90,7 +106,7 @@ export default function ViewNotifications({ navigation }: NavigationType) {
   );
 }
 /**
- * @author David Ostlie
+ * @author Megan Ostlie
  *  a function that pulls the current note document for the specified site from GitHub
  *  @param siteName the name of the site
  * 
