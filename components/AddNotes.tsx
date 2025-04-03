@@ -1,14 +1,14 @@
 /**
  * Add Notes Page
  * @author Blake Stambaugh, Megan Ostlie, August O'Rourke, and David Schiwal
- * Updated: 2/11/25 - MO
+ * Updated: 3/23/25 - DS
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
-import { StyleSheet, KeyboardAvoidingView, Modal, View, TouchableOpacity  } from 'react-native';
+import { StyleSheet, KeyboardAvoidingView, Modal, View, TouchableOpacity, Platform  } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView, Pressable } from 'react-native-gesture-handler';
 import { buildNotes, copyTankRecord, Entry } from '../scripts/Parsers';
 import TextInput from './TextInput'
 import NoteInput from './NoteInput'
@@ -22,7 +22,7 @@ import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
 import VisitPopupProp from './VisitPopup';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker, {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
 
 /**
  * @author Megan Ostlie
@@ -55,6 +55,50 @@ export default function AddNotes({ navigation }: NavigationType) {
     const themeContext = React.useContext(ThemeContext);
     const isDarkMode = themeContext.theme === 'dark';
 
+  const onStartChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setStartDateValue(currentDate);
+  };
+
+  const onEndChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setEndDateValue(currentDate);
+  };
+
+
+  const showStartMode = (currentMode) => {
+    DateTimePickerAndroid.open({
+      value: startDateValue,
+      onChange: onStartChange,
+      mode: currentMode,
+      is24Hour: false,
+    });
+  };
+
+  const showEndMode = (currentMode) => {
+    DateTimePickerAndroid.open({
+      value: endDateValue,
+      onChange: onEndChange,
+      mode: currentMode,
+      is24Hour: false,
+    });
+  };
+
+  const showStartDatepicker = () => {
+    showStartMode("date");
+  };
+
+  const showStartTimepicker = () => {
+    showStartMode("time");
+  };
+
+  const showEndDatepicker = () => {
+    showEndMode("date");
+  };
+
+  const showEndTimepicker = () => {
+    showEndMode("time");
+  };
     // State to hold parsed data
     const [data, setData] = useState<ParsedData | null>(null);
 
@@ -151,11 +195,6 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [loadingValue, setLoadingValue] = useState(false);
     
     // tank predictor
-    // pressures from previous date
-    const low = useRef<any>(null);
-    const mid = useRef<any>(null);
-    const high = useRef<any>(null);
-    const lts = useRef<any>(null);
     const [tankPredictorVisibility, setTankPredictorVisibility] = useState(false);
     const [lowTankName, setLowTankName] = useState("");
     const [lowDaysRemaining, setLowDaysRemaining] = useState(-1);
@@ -168,10 +207,26 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [n2DaysRemaining, setN2DaysRemaining] = useState(-1);
     const [n2TankName, setN2TankName] = useState("");
 
+    function getTimeBetweenDates(date1, date2) {
+      const timeDiffMs = Math.abs(date2.getTime() - date1.getTime());
+      const seconds = Math.floor(timeDiffMs / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+    
+      return {
+        days,
+        hours: hours % 24,
+        minutes: minutes % 60,
+        seconds: seconds % 60,
+        milliseconds: timeDiffMs % 1000
+      };
+    }
+
     function daysUntilEmpty(prevPress, prevDate, currPress) {
       // get change of pressure over time, assume it is linear
       let changeOfPress = currPress - prevPress;
-      // console.log(`${currPress} - ${prevPress} = ${changeOfPress}`);
+      console.log(`${currPress} - ${prevPress} = ${changeOfPress}`);
 
       // if change of pressure is positive, then it got replaced, no need to check date
       // if change of pressure is 0, then there is no need to check date bc nothing has changed
@@ -180,11 +235,10 @@ export default function AddNotes({ navigation }: NavigationType) {
       }
 
       // get date difference
-      let currTime = new Date().getTime();
-      // let currTime = new Date("2027-04-04").getTime(); // use far away date for testing purposes
-      let prevTime = new Date(prevDate).getTime();
-      // let prevTime = new Date("2027-01-01").getTime(); // use far away date for testing purposes
-      let changeOfDate = (currTime - prevTime) / (86400000); // get the difference of time in days
+      let currTime = endDateValue;
+      let prevTime = new Date(prevDate);
+      let changeOfDate = getTimeBetweenDates(prevTime, currTime).days; // get the difference of time in days
+      console.log(`Days between: ${changeOfDate}`);
 
       // if changeOfDate is 0, then the previous entry was also made today
       if (changeOfDate == 0) {
@@ -192,7 +246,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       }
       
       let rateOfDecay = changeOfPress / changeOfDate; // measured in psi lost per day
-      // console.log(`Rate of decay: ${rateOfDecay}`);
+      console.log(`Rate of decay: ${changeOfPress} / ${changeOfDate} = ${rateOfDecay}`);
 
       // solve for when the tank should be under 500 psi
       let days = Math.trunc((-prevPress / rateOfDecay) - changeOfDate);
@@ -201,24 +255,21 @@ export default function AddNotes({ navigation }: NavigationType) {
 
     function checkIfRefillIsNeeded() {
       // get tank values from previous entries
-      let prevlow = low.current;
-      let prevmid = mid.current;
-      let prevhigh = high.current;
-      let prevLts = lts.current;
+      let prevEntry = data.entries[0];
 
       // compare pressure from prev entry to current entry to see if tank will be empty soon
-      let lowDays = daysUntilEmpty(parseInt(prevlow.pressure), prevlow.updatedAt, parseInt(lowPressure));
-      let midDays = daysUntilEmpty(parseInt(prevmid.pressure), prevmid.updatedAt, parseInt(midPressure));
-      let highDays = daysUntilEmpty(parseInt(prevhigh.pressure), prevhigh.updatedAt, parseInt(highPressure));
-      let ltsDays = daysUntilEmpty(parseInt(prevLts.pressure), prevLts.updatedAt, parseInt(ltsPressure));
-      let n2Days = daysUntilEmpty(parseInt(data.entries[0].n2_pressure), data.entries[0].time_out, parseInt(n2Value));
+      let lowDays = daysUntilEmpty(parseInt(prevEntry.low_cal.pressure), prevEntry.time_out, parseInt(lowPressure));
+      let midDays = daysUntilEmpty(parseInt(prevEntry.mid_cal.pressure), prevEntry.time_out, parseInt(midPressure));
+      let highDays = daysUntilEmpty(parseInt(prevEntry.high_cal.pressure), prevEntry.time_out, parseInt(highPressure));
+      let ltsDays = daysUntilEmpty(parseInt(prevEntry.lts.pressure), prevEntry.time_out, parseInt(ltsPressure));
+      let n2Days = daysUntilEmpty(parseInt(prevEntry.n2_pressure), prevEntry.time_out, parseInt(n2Value));
 
-      // console.log(`
-      //   Low Days: ${lowDays}
-      //   Mid Days: ${midDays}
-      //   highDays: ${highDays}
-      //   lts Days: ${ltsDays}
-      //   n2 Days:  ${n2Days}`);
+      console.log(`
+        Low Days: ${lowDays}
+        Mid Days: ${midDays}
+        highDays: ${highDays}
+        lts Days: ${ltsDays}
+        n2 Days:  ${n2Days}`);
 
       // if any of the tanks are predicted to be empty in 90 days or less, send a warning
       if (lowDays <= 90) {
@@ -493,7 +544,7 @@ export default function AddNotes({ navigation }: NavigationType) {
 
     function navigatePlanVisit(nav:boolean){
       if(nav){
-        navigation.navigate("PlanVisit")
+        navigation.navigate("PlanVisit", {site: site})
       }
     }
 
@@ -617,7 +668,6 @@ export default function AddNotes({ navigation }: NavigationType) {
                   setOriginalLts(ltsEntry);
                   setLTSId(ltsEntry.tankId)
                   setLTSValue(ltsEntry.co2.toString() + " ~ " + ltsEntry.ch4.toString());
-                  lts.current = ltsEntry;
                 }
               }
           }
@@ -630,8 +680,6 @@ export default function AddNotes({ navigation }: NavigationType) {
                 setOriginalLow(lowEntry);
                 setLowId(lowEntry.tankId);
                 setLowValue(lowEntry.co2.toString() + " ~ " + lowEntry.ch4.toString());
-                low.current = lowEntry;
-                // console.log(`lowEntry: ${low.current.pressure}`);
               }
             }
           }
@@ -644,7 +692,6 @@ export default function AddNotes({ navigation }: NavigationType) {
                 setOriginalMid(midEntry);
                 setmidId(midEntry.tankId);
                 setmidValue(midEntry.co2.toString() + " ~ " + midEntry.ch4.toString());
-                mid.current = midEntry;
               }
             } 
           }
@@ -657,7 +704,6 @@ export default function AddNotes({ navigation }: NavigationType) {
                 setOriginalHigh(highEntry);
                 setHighId(highEntry.tankId);
                 setHighValue(highEntry.co2.toString() + " ~ " + highEntry.ch4.toString());
-                high.current = highEntry;
               }
             }
           }
@@ -738,16 +784,19 @@ export default function AddNotes({ navigation }: NavigationType) {
               style={styles.inputText}
             />
 
-              {/* Time input */}
-              <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Arrived (MT):</Text>
-              <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.datePicker}>
-                <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
-                <Text>{startDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {startDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-              </TouchableOpacity>
+            {/* Time input */}
+            <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Arrived (MT):</Text>
+            {/*light mode colors came from researchflow\node_modules\@eva-design\eva\themes\light.json */}
+            {/*dark mode colors came from researchflow\node_modules\@eva-design\eva\themes\dark.json*/}
+            <TouchableOpacity onPress={() => setShowStartPicker(true)} style={[styles.datePicker, {borderColor: isDarkMode ? "#101426" : "#E4E9F2"}, {backgroundColor: isDarkMode ? "#1A2138" : "#F7F9FC"}]}>
+              <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
+              <Text>{startDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {startDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+            </TouchableOpacity>
 
-          {showStartPicker && (
+          {(showStartPicker && Platform.OS === "ios") && (
           <View>
           <DateTimePicker
+            textColor= {isDarkMode ? 'white' : 'black'}
             value={startDateValue}
             mode="datetime"
             display="spinner"
@@ -761,26 +810,81 @@ export default function AddNotes({ navigation }: NavigationType) {
           </View>
         )}
 
+        {(showStartPicker && Platform.OS === "android") && (
+          (
+            <View style={styles.androidDateTime}>
+              <Pressable onPress={() => {showStartDatepicker(); setStartDateValue(startDateValue)}}>
+                <Text>
+                  {startDateValue.toLocaleDateString([], {
+                    weekday: "short",
+                    year: "numeric",
+                    month: "short",
+                    day: "2-digit",
+                  })}
+                </Text>
+              </Pressable>
+              <Pressable onPress={() => {showStartTimepicker(); setStartDateValue(startDateValue)}}>
+                <Text>
+                  {startDateValue.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </Pressable>
+            </View>
+          )
+        )}
+
         <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Departed (MT):</Text>
-          <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.datePicker}>
+          <TouchableOpacity onPress={() => setShowEndPicker(true)} style={[styles.datePicker, {borderColor: isDarkMode ? "#101426" : "#E4E9F2"}, {backgroundColor: isDarkMode ? "#1A2138" : "#F7F9FC"}]}>
             <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
             <Text>{endDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {endDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
           </TouchableOpacity>
 
-          {showEndPicker && (
-          <View>
-          <DateTimePicker
-            value={endDateValue}
-            mode="datetime"
-            display="spinner"
-            onChange={(event, selectedDate) => {
-            if (selectedDate) setEndDateValue(selectedDate);
+          {(showEndPicker && Platform.OS == "ios") && (
+            <View>
+            <DateTimePicker
+              value={endDateValue}
+              mode="datetime"
+              display="spinner"
+              onChange={(event, selectedDate) => {
+                //setShowEndPicker(false)
+                if (selectedDate)
+                {
+                  setEndDateValue(selectedDate);
+                }
+              
           }}
           />
           <Button style={styles.submitButton} onPress={() => setShowEndPicker(false)}> 
           {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Confirm Date/Time</Text>}
           </Button>
           </View>
+        )}
+
+          {(showEndPicker && Platform.OS === "android") && (
+          (
+            <View style={styles.androidDateTime}>
+              <Pressable onPress={() => {showEndDatepicker(); setEndDateValue(endDateValue)}}>
+                <Text>
+                  {endDateValue.toLocaleDateString([], {
+                    weekday: "short",
+                    year: "numeric",
+                    month: "short",
+                    day: "2-digit",
+                  })}
+                </Text>
+              </Pressable>
+              <Pressable onPress={() => {showEndTimepicker(); setEndDateValue(endDateValue)}}>
+                <Text>
+                  {endDateValue.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </Pressable>
+            </View>
+          )
         )}
 
         <CheckBox
@@ -1034,5 +1138,9 @@ export default function AddNotes({ navigation }: NavigationType) {
       borderRadius: 5,
       borderColor: '#d3d3d3',
       backgroundColor: '#f9f9f9',
-    }
+    }, 
+    androidDateTime: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+    },
 });
