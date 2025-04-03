@@ -33,24 +33,20 @@ import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/d
  * @returns a ParsedData object that contains the information of the given document
  */
 async function processNotes(siteName: string) {
-  let check = await Network.useNetworkState()
-
-  if(check.isConnected)
-  {
-    const fileContents = await getFileContents(`site_notes/${siteName}`);
-    if(fileContents.data)
-    {
-      return parseNotes(fileContents.data)
-    }
-    else
-    {
-      return null
-    }
+  const fileContents = await getFileContents(`site_notes/${siteName}`);
+  if(fileContents.data){
+    return parseNotes(fileContents.data)
   }
   else
   {
     return null
   }
+}
+
+async function isConnected()
+{
+  let check = (await Network.getNetworkStateAsync()).isConnected
+  return check
 }
 
 /**
@@ -119,20 +115,21 @@ const showEndTimepicker = () => {
       // used for loading screen
         const [loadingValue, setLoadingValue] = useState(false);
 
-    // Get current notes for the site
     useEffect(() => {
-        async function fetchData() {
-            if (site && !data) {
-                try {
-                    const parsedData = await processNotes(site);
-                    setData(parsedData); // Update state with the latest entry
-                } catch (error) {
-                    //console.error("Error processing notes:", error);
-                }
-            }
-        }
-        fetchData();
-    }, [site]); // Re-run if `site` changes
+      async function fetchData() {
+        setNetworkStatus(await isConnected())
+
+          if (site && !data && networkStatus) {
+              try {
+                  const parsedData = await processNotes(site);
+                  setData(parsedData); // Update state with the latest entry
+              } catch (error) {
+                  console.error("Error processing notes:", error);
+              }
+          }
+      }
+      fetchData();
+  }, [site]); // Re-run if `site` changes
 
     // Get list of possible instruments
     useEffect(() => {

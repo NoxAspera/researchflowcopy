@@ -25,8 +25,6 @@ import DateTimePicker, {DateTimePickerAndroid} from '@react-native-community/dat
 import Network from 'expo-network'
 import VisitPopupProp from './VisitPopup';
 
-let check = false
-
 /**
  * @author Megan Ostlie
  *  a function that pulls the current note document for the specified site from GitHub
