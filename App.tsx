@@ -20,12 +20,14 @@ import { EvaIconsPack } from '@ui-kitten/eva-icons';
 import SelectTank from './components/SelectTank';
 import customColors from './custom-theme.json'
 import { useState } from 'react';
+import CalendarScreen from './components/Calendar';
 import SettingsButton from './components/SettingsButton';
 import ViewNotifications from './components/ViewNotifications';
 import ContactInfo from './components/ContactInfo';
 import { NavigationType } from './components/types';
 import { Button, Icon, IconElement } from '@ui-kitten/components';
 import { View } from 'react-native';
+import Diagnostics from './components/Diagnostics';
 
 const Stack = createStackNavigator();
 type ThemeType = 'light' | 'dark';
@@ -33,7 +35,7 @@ type ThemeType = 'light' | 'dark';
 export default function App() {
   // used for swapping between light and dark mode
   // Initialize state with a type
-  LogBox.ignoreAllLogs(true)
+  //LogBox.ignoreAllLogs(true)
   const [theme, setTheme] = useState<ThemeType>('light');
 
   // Merge custom theme with Eva's base theme
@@ -283,6 +285,25 @@ export default function App() {
               ),
             })}/>
             <Stack.Screen name="Calendar" component={CalendarScreen} options={({ navigation }) => ({
+              headerRight: () => (
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                  <Button testID='notificationsButton'
+                    onPress={() => navigation.navigate('ViewNotifications')} 
+                    appearance="ghost"
+                    accessoryLeft={bellIcon} 
+                    size='large'
+                    style={{ marginHorizontal: -10 }}/>
+                <SettingsButton/>
+                </View>
+              ),
+            })}/>
+            <Stack.Screen name="Diagnostics" component={Diagnostics} options={({ navigation }) => ({
               headerRight: () => (
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Button testID='infoButton'

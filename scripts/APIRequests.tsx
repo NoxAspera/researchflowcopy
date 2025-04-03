@@ -1031,7 +1031,7 @@ async function getFile(path: string)
     headers.append("Accept", "application/vnd.github+json");
     headers.append("X-GitHub-Api-Version", "2022-11-28");
 
-    console.log(githubToken)
+    //console.log(githubToken)
 
     const requestOptions: RequestInfo = new Request(url, 
         {

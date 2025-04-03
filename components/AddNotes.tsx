@@ -1,7 +1,7 @@
 /**
  * Add Notes Page
  * @author Blake Stambaugh, Megan Ostlie, August O'Rourke, and David Schiwal
- * Updated: 3/23/25 - DS
+ * Updated: 3/29/25 - DS
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
@@ -15,33 +15,16 @@ import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text, Icon, CheckBox } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
 import { setSiteFile, getFileContents, getLatestTankEntry, offlineTankEntry, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData } from '../scripts/APIRequests';
-import { parseNotes, ParsedData } from '../scripts/Parsers'
+import { processNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
 import DateTimePicker, {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
-import Network from 'expo-network'
+import * as Network from 'expo-network'
 import VisitPopupProp from './VisitPopup';
-
-/**
- * @author Megan Ostlie
- *  a function that pulls the current note document for the specified site from GitHub
- *  @param siteName the name of the site
- * 
- * @returns a ParsedData object that contains the information of the given document
- */
-async function processNotes(siteName: string) {
-  const fileContents = await getFileContents(`site_notes/${siteName}`);
-  if(fileContents.data){
-    return parseNotes(fileContents.data)
-  }
-  else
-  {
-    return null
-  }
-}
+import { TimerPickerModal } from "react-native-timer-picker";
 
 async function isConnected()
 {
@@ -63,17 +46,19 @@ export default function AddNotes({ navigation }: NavigationType) {
     const themeContext = React.useContext(ThemeContext);
     const isDarkMode = themeContext.theme === 'dark';
 
+  //changes start date
   const onStartChange = (event, selectedDate) => {
     const currentDate = selectedDate;
     setStartDateValue(currentDate);
   };
 
+  //changes end date
   const onEndChange = (event, selectedDate) => {
     const currentDate = selectedDate;
     setEndDateValue(currentDate);
   };
 
-
+  //pops up date picker for start date
   const showStartMode = (currentMode) => {
     DateTimePickerAndroid.open({
       value: startDateValue,
@@ -83,6 +68,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     });
   };
 
+  //pops up date picker for end date
   const showEndMode = (currentMode) => {
     DateTimePickerAndroid.open({
       value: endDateValue,
@@ -92,20 +78,20 @@ export default function AddNotes({ navigation }: NavigationType) {
     });
   };
 
-  const showStartDatepicker = () => {
-    showStartMode("date");
+  //sets start date hours and minutes
+  function setStartDateHourMinutes (pickedDuration) {
+    const tempDate = startDateValue;
+    tempDate.setHours(pickedDuration.hours)
+    tempDate.setMinutes(pickedDuration.minutes)
+    setStartDateValue(tempDate);
   };
 
-  const showStartTimepicker = () => {
-    showStartMode("time");
-  };
-
-  const showEndDatepicker = () => {
-    showEndMode("date");
-  };
-
-  const showEndTimepicker = () => {
-    showEndMode("time");
+  //sets end date hours and minutes
+  function setEndDateHourMinutes (pickedDuration) {
+    const tempDate = endDateValue;
+    tempDate.setHours(pickedDuration.hours)
+    tempDate.setMinutes(pickedDuration.minutes)
+    setEndDateValue(tempDate);
   };
     // State to hold parsed data
     const [data, setData] = useState<ParsedData | null>(null);
@@ -204,6 +190,10 @@ export default function AddNotes({ navigation }: NavigationType) {
 
     // used for loading screen
     const [loadingValue, setLoadingValue] = useState(false);
+
+    //used for date/time pickers
+    const [showPicker, setShowPicker] = useState(false);
+    const [showPicker2, setShowPicker2] = useState(false);
     
     // tank predictor
     const [tankPredictorVisibility, setTankPredictorVisibility] = useState(false);
@@ -269,11 +259,26 @@ export default function AddNotes({ navigation }: NavigationType) {
       let prevEntry = data.entries[0];
 
       // compare pressure from prev entry to current entry to see if tank will be empty soon
-      let lowDays = daysUntilEmpty(parseInt(prevEntry.low_cal.pressure), prevEntry.time_out, parseInt(lowPressure));
-      let midDays = daysUntilEmpty(parseInt(prevEntry.mid_cal.pressure), prevEntry.time_out, parseInt(midPressure));
-      let highDays = daysUntilEmpty(parseInt(prevEntry.high_cal.pressure), prevEntry.time_out, parseInt(highPressure));
-      let ltsDays = daysUntilEmpty(parseInt(prevEntry.lts.pressure), prevEntry.time_out, parseInt(ltsPressure));
-      let n2Days = daysUntilEmpty(parseInt(prevEntry.n2_pressure), prevEntry.time_out, parseInt(n2Value));
+      let lowDays;
+      if (prevEntry.low_cal) {
+        lowDays = daysUntilEmpty(parseInt(prevEntry.low_cal.pressure), prevEntry.time_out, parseInt(lowPressure));
+      }
+      let midDays;
+      if (prevEntry.mid_cal) {
+        midDays = daysUntilEmpty(parseInt(prevEntry.mid_cal.pressure), prevEntry.time_out, parseInt(midPressure));
+      }
+      let highDays;
+      if (prevEntry.high_cal) {
+        highDays = daysUntilEmpty(parseInt(prevEntry.high_cal.pressure), prevEntry.time_out, parseInt(highPressure));
+      }
+      let ltsDays;
+      if (prevEntry.lts) {
+        ltsDays = daysUntilEmpty(parseInt(prevEntry.lts.pressure), prevEntry.time_out, parseInt(ltsPressure));
+      }
+      let n2Days
+      if (prevEntry.n2_pressure) {
+        n2Days = daysUntilEmpty(parseInt(prevEntry.n2_pressure), prevEntry.time_out, parseInt(n2Value));
+      }
 
       console.log(`
         Low Days: ${lowDays}
@@ -283,27 +288,27 @@ export default function AddNotes({ navigation }: NavigationType) {
         n2 Days:  ${n2Days}`);
 
       // if any of the tanks are predicted to be empty in 90 days or less, send a warning
-      if (lowDays <= 90) {
+      if (lowDays && lowDays <= 90) {
         setLowDaysRemaining(lowDays);
         setLowTankName(lowId);
         setTankPredictorVisibility(true);
       }
-      if (midDays <= 90) {
+      if (midDays && midDays <= 90) {
         setMidDaysRemaining(midDays);
         setMidTankName(midId);
         setTankPredictorVisibility(true);
       }
-      if (highDays <= 90) {
+      if (highDays && highDays <= 90) {
         setHighDaysRemaining(highDays);
         setHighTankName(highId);
         setTankPredictorVisibility(true);
       }
-      if (ltsDays <= 90) {
+      if (ltsDays && ltsDays <= 90) {
         setLtsDaysRemaining(ltsDays);
         setLtsTankName(ltsId);
         setTankPredictorVisibility(true);
       }
-      if (n2Days <= 90) {
+      if (n2Days && n2Days <= 90) {
         setN2DaysRemaining(n2Days);
         setN2TankName("N2");
         setTankPredictorVisibility(true);
@@ -431,6 +436,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
           removeTankFromSite(originalLts, utcTime);
         }
+        console.log(networkStatus)
         if(networkStatus){
           if (ltsTankRecord) {
             let ltsTank = copyTankRecord(ltsTankRecord);
@@ -896,7 +902,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         {(showStartPicker && Platform.OS === "android") && (
           (
             <View style={styles.androidDateTime}>
-              <Pressable onPress={() => {showStartDatepicker(); setStartDateValue(startDateValue)}}>
+              <Pressable onPress={() => {showStartMode("date"); setStartDateValue(startDateValue)}}>
                 <Text>
                   {startDateValue.toLocaleDateString([], {
                     weekday: "short",
@@ -905,8 +911,8 @@ export default function AddNotes({ navigation }: NavigationType) {
                     day: "2-digit",
                   })}
                 </Text>
-              </Pressable>
-              <Pressable onPress={() => {showStartTimepicker(); setStartDateValue(startDateValue)}}>
+              </Pressable>              
+              <Pressable onPress={() => {setShowPicker(true); setStartDateValue(startDateValue)}}>
                 <Text>
                   {startDateValue.toLocaleTimeString([], {
                     hour: "2-digit",
@@ -914,6 +920,32 @@ export default function AddNotes({ navigation }: NavigationType) {
                   })}
                 </Text>
               </Pressable>
+              {/*Displays time picker*/}
+              <TimerPickerModal
+                  visible={showPicker}
+                  setIsVisible={setShowPicker}
+                  //makes it am/pm
+                  use12HourPicker={true}
+                  //since we don't need seconds it is hidden
+                  hideSeconds={true}
+                  //displays the little arrow for which value is being selected
+                  minuteLabel={"<"}
+                  onConfirm={(pickedDuration) => {
+                    //set time
+                    setStartDateHourMinutes(pickedDuration);                    
+                    //set time picker to false to close it
+                    setShowPicker(false);
+                  }}
+                  modalTitle="Set Time"
+                  onCancel={() => setShowPicker(false)}
+                  closeOnOverlayPress
+                  styles={{
+                      theme: isDarkMode ? "dark" : "light"
+                  }}
+                  modalProps={{
+                      overlayOpacity: 0.2,
+                  }}
+              />
             </View>
           )
         )}
@@ -948,7 +980,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           {(showEndPicker && Platform.OS === "android") && (
           (
             <View style={styles.androidDateTime}>
-              <Pressable onPress={() => {showEndDatepicker(); setEndDateValue(endDateValue)}}>
+              <Pressable onPress={() => {showEndMode("date"); setEndDateValue(endDateValue)}}>
                 <Text>
                   {endDateValue.toLocaleDateString([], {
                     weekday: "short",
@@ -958,7 +990,7 @@ export default function AddNotes({ navigation }: NavigationType) {
                   })}
                 </Text>
               </Pressable>
-              <Pressable onPress={() => {showEndTimepicker(); setEndDateValue(endDateValue)}}>
+              <Pressable onPress={() => {setShowPicker2(true); setEndDateValue(endDateValue)}}>
                 <Text>
                   {endDateValue.toLocaleTimeString([], {
                     hour: "2-digit",
@@ -966,6 +998,28 @@ export default function AddNotes({ navigation }: NavigationType) {
                   })}
                 </Text>
               </Pressable>
+              <TimerPickerModal
+                  visible={showPicker2}
+                  setIsVisible={setShowPicker2}
+                  use12HourPicker={true}
+                  hideSeconds={true}
+                  minuteLabel={"<"}
+                  onConfirm={(pickedDuration) => {
+                    //set time
+                    setEndDateHourMinutes(pickedDuration);                    
+                    //set time picker to false to close it
+                    setShowPicker2(false);
+                  }}
+                  modalTitle="Set Time"
+                  onCancel={() => setShowPicker2(false)}
+                  closeOnOverlayPress
+                  styles={{
+                      theme: isDarkMode ? "dark" : "light"
+                  }}
+                  modalProps={{
+                      overlayOpacity: 0.2,
+                  }}
+              />
             </View>
           )
         )}

@@ -1,5 +1,6 @@
 import { json } from "../jest.config";
 import { TankRecord, visit } from "./APIRequests";
+import { getFileContents } from "./APIRequests";
 
 /**
  * @author Megan Ostlie
@@ -399,3 +400,21 @@ export function processVisits(jsonString: string)
     })
     return result
 }
+
+/**
+ * @author Megan Ostlie
+ *  a function that pulls the current note document for the specified site from GitHub
+ *  @param siteName the name of the site
+ * 
+ * @returns a ParsedData object that contains the information of the given document
+ */
+export async function processNotes(siteName: string) {
+    const fileContents = await getFileContents(`site_notes/${siteName}`);
+    if(fileContents.data){
+      return parseNotes(fileContents.data)
+    }
+    else
+    {
+      return null
+    }
+  }
