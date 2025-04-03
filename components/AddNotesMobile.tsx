@@ -42,15 +42,12 @@ async function processNotes(siteName: string) {
   }
 }
 
-<<<<<<< HEAD
 async function isConnected()
 {
   let check = (await Network.getNetworkStateAsync()).isConnected
   return check
 }
 
-=======
->>>>>>> main
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
  *  Creates the input elements for the user to input site note information.
