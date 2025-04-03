@@ -29,7 +29,7 @@ async function isConnected()
 }
 
 export default function App({navigation}: NavigationType) {
-  const [networkStatus, setNetworkStatus] = useState(false)
+  const [networkStatus, setNetworkStatus] = useState(true)
   const [loadingValue, setLoadingValue] = useState(false);
 
   console.log(makeRedirectUri({scheme: 'researchflowuofu'}))

@@ -1087,9 +1087,11 @@ export async function getFileContents(path: string)
  * @returns the contents of the file as a string
  */
 export async function setSiteFile(siteName: string, content: string, commitMessage: string) {
-    siteName = siteName.toLowerCase();
+    console.log("getting called")
+    siteName = siteName.toLowerCase()
     if((await Network.getNetworkStateAsync()).isConnected)
     {
+        //console.log("passing check")
         const pullResponse = (await getFile(`site_notes/${siteName}`))
         if(pullResponse.error)
         {
@@ -1097,6 +1099,7 @@ export async function setSiteFile(siteName: string, content: string, commitMessa
         }
         const hash = pullResponse.data.sha
         const existingContent = atob(pullResponse.data.content)
+        //console.log("pulled notes")
         let siteHeader;
         if (siteName.includes("mobile/")) {
             const site = siteName.replace("mobile/", "");
@@ -1104,13 +1107,17 @@ export async function setSiteFile(siteName: string, content: string, commitMessa
             siteHeader += existingContent.split("\n")[1];
             
         } else {
+            //console.log("line 1110")
             siteHeader = `# Site id: **${siteName}**`
         }
-        const existingNotes = existingContent.substring(siteHeader.length, existingContent.length -1) 
+        console.log("removing header")
+        const existingNotes = existingContent.substring(siteHeader.length, existingContent.length -1)
+        //console.log("encrypting") 
         const fullDoc = btoa(siteHeader +"\n" + content + existingNotes)
 
         const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/site_notes/${siteName}.md`;
         const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`
+        //console.log("sent requestß")
         return setFile(bodyString, url)
     }
     else

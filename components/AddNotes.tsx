@@ -95,7 +95,7 @@ export default function AddNotes({ navigation }: NavigationType) {
   };
     // State to hold parsed data
     const [data, setData] = useState<ParsedData | null>(null);
-    const [networkStatus, setNetworkStatus] = useState(false)
+    const [networkStatus, setNetworkStatus] = useState(true)
 
     // Get current notes for the site
     useEffect(() => {
