@@ -18,6 +18,7 @@ import { setGithubToken } from '../scripts/APIRequests';
 import { NavigationType } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
+import { sendEmailNotification } from "../scripts/EmailNotifications";
 
 export default function Login({ navigation }: NavigationType) {
     const route = useRoute();
@@ -93,6 +94,14 @@ export default function Login({ navigation }: NavigationType) {
                 status='primary'
                 style={{margin: 15, backgroundColor: "#06b4e0"}}>
                 {evaProps => <Text {...evaProps} category="h5" style={{color: "black"}}>SIGN IN</Text>}
+            </Button>
+            {/* Temp button */}
+            <Button
+                onPress={() => sendEmailNotification("schiwaldavid@gmail.com", ["tempSite", "tempSite2"], ["4/3/2025", "4/4/2025"])}
+                appearance='filled'
+                status='primary'
+                style={{margin: 15, backgroundColor: "#06b4e0"}}>
+                {evaProps => <Text {...evaProps} category="h5" style={{color: "black"}}>Send Email Test</Text>}
             </Button>
           </Layout>
         </Layout>
