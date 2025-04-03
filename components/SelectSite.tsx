@@ -36,7 +36,7 @@ export default function SelectSite({navigation}: NavigationType) {
       try {
         let names;
         let mobile_names;
-        if (from === 'AddNotes' || from === 'ViewNotes' || from === 'PlanVisit') {
+        if (from === 'AddNotes' || from === 'ViewNotes' || from === 'PlanVisit' || from === 'Diagnostics') {
           names = await getDirectory("site_notes");
           mobile_names = await getDirectory("site_notes/mobile");
         } else if (from === 'BadData') {
@@ -85,7 +85,7 @@ export default function SelectSite({navigation}: NavigationType) {
     }
     else if(from === 'ViewNotes')
     {
-      navigation.navigate('ViewNotes', {site: `site_notes/${selectedSite}`}); //{site: selectValue} tells the AddNotes what the selected value is
+      navigation.navigate('ViewNotes', {site: `site_notes/${selectedSite}`, from: "", visits: undefined}); //{site: selectValue} tells the AddNotes what the selected value is
     }
     else if(from === 'BadData')
     {
@@ -103,7 +103,10 @@ export default function SelectSite({navigation}: NavigationType) {
       navigation.navigate('TankTracker', {site: selectedSite});
     }
     else if (from == 'PlanVisit'){
-      navigation.navigate('PlanVisit', {site: selectedSite})
+      navigation.navigate('PlanVisit', {site: selectedSite});
+    }
+    else if (from == 'Diagnostics') {
+      navigation.navigate('Diagnostics', {site: selectedSite});
     }
   };
 

@@ -34,27 +34,15 @@ import { TimerPickerModal } from "react-native-timer-picker";
  * @returns a ParsedData object that contains the information of the given document
  */
 async function processNotes(siteName: string) {
-  let check = await Network.useNetworkState()
-
-  if(check.isConnected)
-  {
-    const fileContents = await getFileContents(`site_notes/${siteName}`);
-    if(fileContents.data)
-    {
-      return parseNotes(fileContents.data)
-    }
-    else
-    {
-      return null
-    }
+  const fileContents = await getFileContents(`site_notes/${siteName}`);
+  if(fileContents.data){
+    return parseNotes(fileContents.data)
   }
   else
   {
     return null
   }
 }
-
-
 
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie

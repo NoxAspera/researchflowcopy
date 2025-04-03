@@ -15,7 +15,7 @@ import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text, Icon, CheckBox } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
 import { setSiteFile, getFileContents, getLatestTankEntry, getTankList, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData } from '../scripts/APIRequests';
-import { parseNotes, ParsedData } from '../scripts/Parsers'
+import { processNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
@@ -24,24 +24,6 @@ import LoadingScreen from './LoadingScreen';
 import VisitPopupProp from './VisitPopup';
 import DateTimePicker, {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
 import { TimerPickerModal } from "react-native-timer-picker";
-
-/**
- * @author Megan Ostlie
- *  a function that pulls the current note document for the specified site from GitHub
- *  @param siteName the name of the site
- * 
- * @returns a ParsedData object that contains the information of the given document
- */
-async function processNotes(siteName: string) {
-  const fileContents = await getFileContents(`site_notes/${siteName}`);
-  if(fileContents.data){
-    return parseNotes(fileContents.data)
-  }
-  else
-  {
-    return null
-  }
-}
 
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
@@ -266,11 +248,26 @@ export default function AddNotes({ navigation }: NavigationType) {
       let prevEntry = data.entries[0];
 
       // compare pressure from prev entry to current entry to see if tank will be empty soon
-      let lowDays = daysUntilEmpty(parseInt(prevEntry.low_cal.pressure), prevEntry.time_out, parseInt(lowPressure));
-      let midDays = daysUntilEmpty(parseInt(prevEntry.mid_cal.pressure), prevEntry.time_out, parseInt(midPressure));
-      let highDays = daysUntilEmpty(parseInt(prevEntry.high_cal.pressure), prevEntry.time_out, parseInt(highPressure));
-      let ltsDays = daysUntilEmpty(parseInt(prevEntry.lts.pressure), prevEntry.time_out, parseInt(ltsPressure));
-      let n2Days = daysUntilEmpty(parseInt(prevEntry.n2_pressure), prevEntry.time_out, parseInt(n2Value));
+      let lowDays;
+      if (prevEntry.low_cal) {
+        lowDays = daysUntilEmpty(parseInt(prevEntry.low_cal.pressure), prevEntry.time_out, parseInt(lowPressure));
+      }
+      let midDays;
+      if (prevEntry.mid_cal) {
+        midDays = daysUntilEmpty(parseInt(prevEntry.mid_cal.pressure), prevEntry.time_out, parseInt(midPressure));
+      }
+      let highDays;
+      if (prevEntry.high_cal) {
+        highDays = daysUntilEmpty(parseInt(prevEntry.high_cal.pressure), prevEntry.time_out, parseInt(highPressure));
+      }
+      let ltsDays;
+      if (prevEntry.lts) {
+        ltsDays = daysUntilEmpty(parseInt(prevEntry.lts.pressure), prevEntry.time_out, parseInt(ltsPressure));
+      }
+      let n2Days
+      if (prevEntry.n2_pressure) {
+        n2Days = daysUntilEmpty(parseInt(prevEntry.n2_pressure), prevEntry.time_out, parseInt(n2Value));
+      }
 
       console.log(`
         Low Days: ${lowDays}
@@ -280,27 +277,27 @@ export default function AddNotes({ navigation }: NavigationType) {
         n2 Days:  ${n2Days}`);
 
       // if any of the tanks are predicted to be empty in 90 days or less, send a warning
-      if (lowDays <= 90) {
+      if (lowDays && lowDays <= 90) {
         setLowDaysRemaining(lowDays);
         setLowTankName(lowId);
         setTankPredictorVisibility(true);
       }
-      if (midDays <= 90) {
+      if (midDays && midDays <= 90) {
         setMidDaysRemaining(midDays);
         setMidTankName(midId);
         setTankPredictorVisibility(true);
       }
-      if (highDays <= 90) {
+      if (highDays && highDays <= 90) {
         setHighDaysRemaining(highDays);
         setHighTankName(highId);
         setTankPredictorVisibility(true);
       }
-      if (ltsDays <= 90) {
+      if (ltsDays && ltsDays <= 90) {
         setLtsDaysRemaining(ltsDays);
         setLtsTankName(ltsId);
         setTankPredictorVisibility(true);
       }
-      if (n2Days <= 90) {
+      if (n2Days && n2Days <= 90) {
         setN2DaysRemaining(n2Days);
         setN2TankName("N2");
         setTankPredictorVisibility(true);

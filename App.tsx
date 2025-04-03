@@ -27,6 +27,7 @@ import ContactInfo from './components/ContactInfo';
 import { NavigationType } from './components/types';
 import { Button, Icon, IconElement } from '@ui-kitten/components';
 import { View } from 'react-native';
+import Diagnostics from './components/Diagnostics';
 
 const Stack = createStackNavigator();
 type ThemeType = 'light' | 'dark';
@@ -283,6 +284,25 @@ export default function App() {
               ),
             })}/>
             <Stack.Screen name="Calendar" component={Calendar} options={({ navigation }) => ({
+              headerRight: () => (
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                  <Button testID='notificationsButton'
+                    onPress={() => navigation.navigate('ViewNotifications')} 
+                    appearance="ghost"
+                    accessoryLeft={bellIcon} 
+                    size='large'
+                    style={{ marginHorizontal: -10 }}/>
+                <SettingsButton/>
+                </View>
+              ),
+            })}/>
+            <Stack.Screen name="Diagnostics" component={Diagnostics} options={({ navigation }) => ({
               headerRight: () => (
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Button testID='infoButton'
