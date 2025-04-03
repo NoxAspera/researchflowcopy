@@ -24,7 +24,6 @@ import { ThemeContext } from './ThemeContext';
 import  * as Network from 'expo-network'
 import LoadingScreen from "./LoadingScreen";
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-
 /**
  * @author Megan Ostlie
  *  a function that pullsr the current note document for the specified site from GitHub
@@ -43,12 +42,15 @@ async function processNotes(siteName: string) {
   }
 }
 
+<<<<<<< HEAD
 async function isConnected()
 {
   let check = (await Network.getNetworkStateAsync()).isConnected
   return check
 }
 
+=======
+>>>>>>> main
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
  *  Creates the input elements for the user to input site note information.
