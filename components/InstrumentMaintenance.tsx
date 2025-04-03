@@ -19,7 +19,8 @@ import { ScrollView } from "react-native-gesture-handler";
 import PopupProp from './Popup';
 import LoadingScreen from "./LoadingScreen";
 import DateTimePicker , {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
-import Network from 'expo-network'
+import * as Network from 'expo-network'
+import { ThemeContext } from "./ThemeContext";
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
 

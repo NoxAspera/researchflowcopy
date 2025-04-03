@@ -24,7 +24,6 @@ import { ThemeContext } from './ThemeContext';
 import  Network from 'expo-network'
 import LoadingScreen from "./LoadingScreen";
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-
 /**
  * @author Megan Ostlie
  *  a function that pullsr the current note document for the specified site from GitHub
@@ -33,27 +32,15 @@ import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/d
  * @returns a ParsedData object that contains the information of the given document
  */
 async function processNotes(siteName: string) {
-  let check = await Network.useNetworkState()
-
-  if(check.isConnected)
-  {
-    const fileContents = await getFileContents(`site_notes/${siteName}`);
-    if(fileContents.data)
-    {
-      return parseNotes(fileContents.data)
-    }
-    else
-    {
-      return null
-    }
+  const fileContents = await getFileContents(`site_notes/${siteName}`);
+  if(fileContents.data){
+    return parseNotes(fileContents.data)
   }
   else
   {
     return null
   }
 }
-
-
 
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
