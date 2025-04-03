@@ -14,6 +14,7 @@ import { NavigationType } from "./types";
 //const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
 import {updateDirectories, tankTrackerOffline, readUpdates, tankTrackerSpinUp} from '../scripts/APIRequests';
 import NoteInput from './NoteInput'
+import LoadingScreen from './LoadingScreen';
 import * as Network from 'expo-network'
 
 async function startup()
@@ -23,7 +24,7 @@ async function startup()
   if(check)
     {
       await tankTrackerSpinUp()
-      readUpdates();
+      await readUpdates();
       updateDirectories();
       return 
     }
@@ -35,13 +36,14 @@ async function startup()
 
 export default function HomeScreen({ navigation }: NavigationType) {
 
-  startup()
-  
+startup()
+
   return (
     <Layout style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/*If you add a new navigation point you have to add it in types.ts, and App.tsx*/}
         {/* Add Notes */}
+
         <HomeButtonProp
           text="ADD NOTES"
           color="#AEDD94"

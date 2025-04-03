@@ -21,7 +21,7 @@ import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
-import  Network from 'expo-network'
+import  * as Network from 'expo-network'
 import LoadingScreen from "./LoadingScreen";
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 
@@ -52,8 +52,6 @@ async function processNotes(siteName: string) {
     return null
   }
 }
-
-
 
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
@@ -129,7 +127,7 @@ const showEndTimepicker = () => {
                     const parsedData = await processNotes(site);
                     setData(parsedData); // Update state with the latest entry
                 } catch (error) {
-                    console.error("Error processing notes:", error);
+                    //console.error("Error processing notes:", error);
                 }
             }
         }

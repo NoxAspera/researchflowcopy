@@ -1,7 +1,8 @@
 import csv from 'csvtojson';
 import * as FileSystem from 'expo-file-system'
 import * as Network from 'expo-network'
-import { parseVisits, VisitList } from './Parsers';
+import { parseNotes, parseVisits, VisitList } from './Parsers';
+import InstrumentMaintenance from '../components/InstrumentMaintenance';
 
 /**
  * @author August O'Rourke
@@ -94,6 +95,10 @@ let tankDict: Map<string, TankRecord[]>;
 
 let tankTrackerSha = ""
 
+function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
 async function loop(path: string)
 {
     FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + path)
@@ -117,7 +122,10 @@ export async function readUpdates()
         console.log(visits)
         await setVisitFileOffline(visits)
         FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/visitfile.txt")
+        await sleep(200)
     }
+
+    
     
     console.log(await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + "offline_updates"))
 
@@ -137,8 +145,8 @@ export async function readUpdates()
             
         })
         FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/baddata.txt")
+        await sleep(200)
     }
-
     if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/instrument_maint.txt")).exists)
     {
         let instrument_maintence_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/instrument_maint.txt")).split("}\n")
@@ -161,15 +169,85 @@ export async function readUpdates()
             
         })
         FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/instrument_maint.txt")
+        await sleep(200)
     }
-
     if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/site_notes.txt")).exists)
         {
-                let site_notes_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/site_notes.txt")).split("\n")
+                let site_notes_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/site_notes.txt")).split("}\n")
                 console.log(site_notes_entries)
-                FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/site_notes.txt")
-        }
+                site_notes_entries.forEach(async (value) => {
+                    if(value !== "")
+                    {
+                        let siteName = value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
+                        console.log(siteName)
+                        value = value.substring(value.indexOf(", ") + 2)
+                        let content =  value.substring(value.indexOf("content: ") + 8)
+                        setSiteFile(siteName, content, "updating from offline")
+                        let notes = parseNotes(content).entries[0]
+                        let data = (await getFileContents(`site_notes/${siteName}`)).data
+                        if(data)
+                        {
+                            let previousNotes = parseNotes(data).entries[0]
 
+                            if(previousNotes.instrument !== notes.instrument)
+                            {
+                                let newNotes: string = `- Time in: ${notes.time_in}\n`;
+  
+                                newNotes += `- Name: ${notes.names}\n`;
+                                newNotes += `- Notes: Removed from ${siteName}\n`;
+                                newNotes += "---\n";
+                                
+                                await setInstrumentFile(`instrument_maint/LGR_UGGA/${previousNotes.instrument}`,content,"updating from offline", true, siteName)
+                            }
+
+                            if(previousNotes.high_cal.id !== notes.high_cal.id)
+                            {
+                                let newTankEntry = getLatestTankEntry(previousNotes.high_cal.id)
+                                newTankEntry.location = "ASB279";
+                                newTankEntry.pressure = 500;
+                                newTankEntry.userId = previousNotes.names;
+                                newTankEntry.updatedAt = previousNotes.time_out;
+                                addEntrytoTankDictionary(newTankEntry);
+                            }
+
+                            if(previousNotes.mid_cal.id !== notes.mid_cal.id)
+                            {
+                                let newTankEntry = getLatestTankEntry(previousNotes.mid_cal.id)
+                                newTankEntry.location = "ASB279";
+                                newTankEntry.pressure = 500;
+                                newTankEntry.userId = previousNotes.names;
+                                newTankEntry.updatedAt = previousNotes.time_out;
+                                addEntrytoTankDictionary(newTankEntry);
+                            }
+                            if(previousNotes.low_cal.id !== notes.low_cal.id)
+                            {
+                                let newTankEntry = getLatestTankEntry(previousNotes.low_cal.id)
+                                newTankEntry.location = "ASB279";
+                                newTankEntry.pressure = 500;
+                                newTankEntry.userId = previousNotes.names;
+                                newTankEntry.updatedAt = previousNotes.time_out;
+                                addEntrytoTankDictionary(newTankEntry);
+                            }
+
+                            if(previousNotes.high_cal.id !== notes.high_cal.id)
+                            {
+                                let newTankEntry = getLatestTankEntry(previousNotes.high_cal.id)
+                                newTankEntry.location = "ASB279";
+                                newTankEntry.pressure = 500;
+                                newTankEntry.userId = previousNotes.names;
+                                newTankEntry.updatedAt = previousNotes.time_out;
+                                addEntrytoTankDictionary(newTankEntry);
+                            }
+
+                        }
+                    
+
+                        
+                    }
+                })
+                FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/site_notes.txt")
+                await sleep(200)
+        }
     if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/tank_updates.txt")).exists)
     {
             let tank_update_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/tank_updates.txt")).split("\n")
@@ -197,16 +275,15 @@ export async function readUpdates()
                 
             })
             FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/tank_updates.txt")
-            await setTankTracker()
-            
     }
-    console.log("finished")
 
+    await setTankTracker()
 }
 
 export async function tankTrackerOffline()
 {
     let string = await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "tank_tracker/names")
+    //console.log(string)
     let names = string.split("\n")
     tankDict = new Map()
     names.forEach(element => {
@@ -501,7 +578,7 @@ export function getLatestTankEntry(key:string): TankRecord | undefined {
  */
 export function getTankList()
 {   
-    console.log(tankDict)
+    //console.log(tankDict)
     return Array.from(tankDict.keys())
 }
 /**

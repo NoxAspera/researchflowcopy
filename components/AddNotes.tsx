@@ -582,7 +582,10 @@ export default function AddNotes({ navigation }: NavigationType) {
       if(nav){
         navigation.navigate("Home")
       }
-      setTimeout(checkIfRefillIsNeeded, 100);
+      if(networkStatus)
+      {
+        setTimeout(checkIfRefillIsNeeded, 100);
+      }
     }
 
     function navigatePlanVisit(nav:boolean){
