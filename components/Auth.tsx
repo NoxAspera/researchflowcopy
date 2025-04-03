@@ -14,7 +14,8 @@ import { Button, Layout, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
 import { customTheme } from './CustomTheme'
 import PopupProp from './Popup';
-import { setGithubToken } from '../scripts/APIRequests';
+import { setGithubToken,  tankTrackerSpinUp, readUpdates, updateDirectories, tankTrackerOffline} from '../scripts/APIRequests';
+import * as Network from 'expo-network'
 import { NavigationType } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
@@ -24,18 +25,38 @@ export default function Login({ navigation }: NavigationType) {
     
     const themeContext = React.useContext(ThemeContext);
     const isDarkMode = themeContext.theme === 'dark';
+    const [loadingValue, setLoadingValue] = useState(false);
+
+    async function startup()
+    {
+      setLoadingValue(true)
+      let check = (await Network.getNetworkStateAsync()).isConnected
+      //console.log(check)
+      if(check)
+        {
+          await tankTrackerSpinUp()
+          await readUpdates();
+          await updateDirectories();
+        }
+      else
+      {
+        tankTrackerOffline();
+      } 
+      setLoadingValue(false)
+    }
 
     // will set the no email/password notification to visible
     const [visible, setVisible] = useState(false);
 
     // helper method that will make sure the user has entered credentials
-    function checkTextEntry() {
+    async function checkTextEntry() {
         // used for testing purposes only
         if (emailValue == "admin" && passwordValue == "1234"){ 
             navigation.navigate('Home')
         }
         else if (emailValue != "" && passwordValue != "") {
             setGithubToken(passwordValue)
+            await startup()
             navigation.navigate('Home')
         }
         else {
@@ -52,7 +73,7 @@ export default function Login({ navigation }: NavigationType) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
         <Layout style={styles.container} level='1'>
-
+        <LoadingScreen visible={loadingValue} />
           {/* header */}
           <Layout style={isDarkMode ? styles.loginTextDark : styles.loginTextLight}>
             <Text category='h1' style={{textAlign: 'center'}}>Hello</Text>

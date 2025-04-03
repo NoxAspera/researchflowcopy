@@ -15,7 +15,7 @@ import TextInput from './TextInput'
 import NoteInput from './NoteInput'
 import { Layout, Button, Text, Select, SelectItem, IndexPath, CheckBox, Icon, DateService } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile, setBadData } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile, setBadData, offlineTankEntry } from '../scripts/APIRequests';
 import { parseNotes, ParsedData, copyTankRecord } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
@@ -156,6 +156,7 @@ const showEndTimepicker = () => {
     }
     
     // these use states to set and store values in the text inputs
+    const [networkStatus, setNetworkStatus] = useState(false)
     const [startDateValue, setStartDateValue] = useState(new Date());
     const [endDateValue, setEndDateValue] = useState(new Date());
     const [nameValue, setNameValue] = useState("");
@@ -209,10 +210,19 @@ const showEndTimepicker = () => {
           navigation.navigate('SelectTank', {
           from: 'AddNotes',
           onSelect: (tank) => {
-            setTankId(tank);
-            const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
-            setTankRecord(entry);
-            setTankValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+            if(networkStatus)
+            {
+              setTankId(tank);
+              const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+              setTankRecord(entry);
+              setTankValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+            }
+            else
+            {
+              setTankId(tank)
+              //it won't display the tankID unless we give this an empty value, haven't a clue why
+              setTankValue(" ")
+            }
           }
         });
         }, 10);
@@ -328,14 +338,22 @@ const showEndTimepicker = () => {
           newTankEntry.updatedAt = utcTime;
           addEntrytoTankDictionary(newTankEntry);
         }
-        if (tankRecord) {
-          let tank = copyTankRecord(tankRecord);
-          tank.location = siteName;
-          tank.updatedAt = utcTime;
-          tank.pressure = parseInt(tankPressure);
-          tank.userId = nameValue;
-          addEntrytoTankDictionary(tank);
+        if(networkStatus){
+          if (tankRecord) {
+            let tank = copyTankRecord(tankRecord);
+            tank.location = siteName;
+            tank.updatedAt = utcTime;
+            tank.pressure = parseInt(tankPressure);
+            tank.userId = nameValue;
+            addEntrytoTankDictionary(tank);
+          }
         }
+        else
+        {
+          if(tankId && tankPressure)
+          {
+            await offlineTankEntry(tankId, parseInt(tankPressure), site, utcTime, nameValue)
+          }
 
         // send the request
         const result = await setSiteFile(site, buildMobileNotes(data), "updating notes from researchFlow");
@@ -405,6 +423,7 @@ const showEndTimepicker = () => {
           visibleRef.current = true;
         }, 100);
     };
+  }
 
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
     function navigateHome(nav:boolean){
@@ -672,7 +691,7 @@ const showEndTimepicker = () => {
       </KeyboardAvoidingView>
     );
   }
-  
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,

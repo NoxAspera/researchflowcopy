@@ -17,30 +17,12 @@ import NoteInput from './NoteInput'
 import LoadingScreen from './LoadingScreen';
 import * as Network from 'expo-network'
 
-async function startup()
-{
-  let check = (await Network.getNetworkStateAsync()).isConnected
-  //console.log(check)
-  if(check)
-    {
-      await tankTrackerSpinUp()
-      await readUpdates();
-      updateDirectories();
-      return 
-    }
-  else
-  {
-    tankTrackerOffline();
-  } 
-}
-
 export default function HomeScreen({ navigation }: NavigationType) {
-
-startup()
-
+  
   return (
     <Layout style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+      
         {/*If you add a new navigation point you have to add it in types.ts, and App.tsx*/}
         {/* Add Notes */}
 
