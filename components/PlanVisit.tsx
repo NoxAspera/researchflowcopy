@@ -33,7 +33,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
   // used for determining if PUT request was successful
   // will set the success/fail notification to visible, aswell as the color and text
   const [visible, setVisible] = useState(false);
-  const [messageColor, setMessageColor] = useState("");
+  const [messageStatus, setMessageStatus] = useState("");
   const [message, setMessage] = useState("");
   const [returnHome, retHome] = useState(false);
   const visibleRef = useRef(false);
@@ -50,7 +50,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
   const handleSubmit = () => {
         if (!nameValue || !dateValue) {
           setMessage("Please make sure Name and Date are filled out before submitting.");
-          setMessageColor(customTheme['color-danger-700']);
+          setMessageStatus("danger");
           setVisible(true);
           return;
         }
@@ -78,12 +78,12 @@ export default function PlanVisit({ navigation }: NavigationType) {
 
     // check to see if the request was ok, give a message based on that
     if (result.success) {
-        setMessage("File updated successfully!");
-        setMessageColor(customTheme['color-success-700']);
+        setMessage("Visit planned successfully!");
+        setMessageStatus("success");
         retHome(true);
       } else {
         setMessage(`Error: ${result.error}`);
-        setMessageColor(customTheme['color-danger-700']);
+        setMessageStatus("danger");
       }
       setTimeout(() => {
         setVisible(true);
@@ -105,7 +105,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
 
           {/* success/failure popup */}
           <PopupProp popupText={message} 
-            popupStatus={messageColor} 
+            popupStatus={messageStatus} 
             onPress={setVisible} 
             navigateHome={navigateHome} 
             visible={visible}

@@ -40,7 +40,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   // used for determining if PUT request was successful
   // will set the success/fail notification to visible, aswell as the color and text
   const [visible, setVisible] = useState(false);
-  const [messageColor, setMessageColor] = useState("");
+  const [messageStatus, setMessageStatus] = useState("");
   const [message, setMessage] = useState("");
   const [returnHome, retHome] = useState(false);
   const visibleRef = useRef(false);
@@ -102,7 +102,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
       (addToBadData && !badDataReason.trim())
     ) {
       setMessage("Please fill out all fields before submitting.");
-      setMessageColor(customTheme["color-danger-700"]);
+      setMessageStatus("danger");
       setVisible(true);
       return;
     }
@@ -148,15 +148,15 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
     if (result.success && (!badResult || badResult.success)) {
       setMessage("File updated successfully!");
-      setMessageColor(customTheme["color-success-700"]);
+      setMessageStatus("success");
       retHome(true);
     } else {
       if (result.error) {
         setMessage(`Error: ${result.error}`);
-        setMessageColor(customTheme["color-danger-700"]);
+        setMessageStatus("danger");
       } else if (badResult.error) {
         setMessage(`Instrument maintenance notes updated successfully.\nUnable to update Bad Data. Please update Bad Data manually.`);
-        setMessageColor(customTheme["color-danger-700"]);
+        setMessageStatus("danger");
         retHome(true);
       }
     }
@@ -195,7 +195,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
           {/* text inputs */}
           {/* success/failure popup */}
           <PopupProp popupText={message} 
-            popupStatus={messageColor} 
+            popupStatus={messageStatus} 
             onPress={() => setVisible(false)} 
             navigateHome={navigateHome} 
             visible={visible}
