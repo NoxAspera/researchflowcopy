@@ -6,24 +6,25 @@
  * The follow code represents the home page the user sees when they first launch our app.
  * It has a button for each section of the app that will take them to the next page.
  **/
-import { StyleSheet, ScrollView, Dimensions } from "react-native";
+import { StyleSheet, ScrollView, Dimensions, Platform, PermissionsAndroid } from "react-native";
 import HomeButtonProp from "./HomeButtonProp";
 import { Layout } from "@ui-kitten/components";
 import React, { useState, useEffect } from 'react';
 import { NavigationType } from "./types";
 //const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
-import { tankTrackerSpinUp} from '../scripts/APIRequests';
-
 import NoteInput from './NoteInput'
+import LoadingScreen from './LoadingScreen';
+import * as Network from 'expo-network'
 
 export default function HomeScreen({ navigation }: NavigationType) {
-
-  tankTrackerSpinUp()
+  
   return (
     <Layout style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+      
         {/*If you add a new navigation point you have to add it in types.ts, and App.tsx*/}
         {/* Add Notes */}
+
         <HomeButtonProp
           text="ADD NOTES"
           color="#AEDD94"

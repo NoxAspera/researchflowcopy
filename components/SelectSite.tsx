@@ -38,6 +38,7 @@ export default function SelectSite({navigation}: NavigationType) {
         let mobile_names;
         if (from === 'AddNotes' || from === 'ViewNotes' || from === 'PlanVisit') {
           names = await getDirectory("site_notes");
+          //console.log(names)
           mobile_names = await getDirectory("site_notes/mobile");
         } else if (from === 'BadData') {
           names = await getBadDataSites();
@@ -71,9 +72,15 @@ export default function SelectSite({navigation}: NavigationType) {
   if (siteNames) {
     for (let i = 0; i < siteNames.length; i++) {
       if (siteNames[i]) {
+
+        if(siteNames[i] === "mobile")
+        {
+          continue
+        }
         buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});
       }
     }
+
   }
 
   const handleConfirm = (selectedSite: string) => {

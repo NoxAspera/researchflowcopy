@@ -1,7 +1,7 @@
 /**
  * Add Notes Page for mobile sites
  * @author Blake Stambaugh, Megan Ostlie, August O'Rourke, and David Schiwal
- * Updated: 2/11/25 - MO
+ * Updated: 3/23/25 - DS
  * This page will take in input from the user, format it, and upload it to the
  * github repo. This page is slightly different than the main AddNotes page because
  * the mobile sites do not have as many tanks as the stationary sites
@@ -9,24 +9,24 @@
 import { StyleSheet, KeyboardAvoidingView, Platform, Modal, View, TouchableOpacity } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { useRoute } from '@react-navigation/native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView, Pressable } from 'react-native-gesture-handler';
 import { buildMobileNotes, MobileEntry } from '../scripts/Parsers';
 import TextInput from './TextInput'
 import NoteInput from './NoteInput'
-import { Layout, Button, Text, Select, SelectItem, IndexPath, CheckBox, Icon } from '@ui-kitten/components';
+import { Layout, Button, Text, Select, SelectItem, IndexPath, CheckBox, Icon, DateService } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile, setBadData } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile, setBadData, offlineTankEntry } from '../scripts/APIRequests';
 import { parseNotes, ParsedData, copyTankRecord } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
+import  * as Network from 'expo-network'
 import LoadingScreen from "./LoadingScreen";
-import DateTimePicker from '@react-native-community/datetimepicker';
-
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 /**
  * @author Megan Ostlie
- *  a function that pulls the current note document for the specified site from GitHub
+ *  a function that pullsr the current note document for the specified site from GitHub
  *  @param siteName the name of the site
  * 
  * @returns a ParsedData object that contains the information of the given document
@@ -42,6 +42,15 @@ async function processNotes(siteName: string) {
   }
 }
 
+<<<<<<< HEAD
+async function isConnected()
+{
+  let check = (await Network.getNetworkStateAsync()).isConnected
+  return check
+}
+
+=======
+>>>>>>> main
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
  *  Creates the input elements for the user to input site note information.
@@ -50,6 +59,52 @@ async function processNotes(siteName: string) {
  * 
  */
 export default function AddNotes({ navigation }: NavigationType) {
+
+  const onStartChange = (event, selectedDate) => {
+  const currentDate = selectedDate;
+  setStartDateValue(currentDate);
+};
+
+const onEndChange = (event, selectedDate) => {
+  const currentDate = selectedDate;
+  setEndDateValue(currentDate);
+};
+
+
+const showStartMode = (currentMode) => {
+  DateTimePickerAndroid.open({
+    value: startDateValue,
+    onChange: onStartChange,
+    mode: currentMode,
+    is24Hour: false,
+  });
+};
+
+const showEndMode = (currentMode) => {
+  DateTimePickerAndroid.open({
+    value: endDateValue,
+    onChange: onEndChange,
+    mode: currentMode,
+    is24Hour: false,
+  });
+};
+
+const showStartDatepicker = () => {
+  showStartMode("date");
+};
+
+const showStartTimepicker = () => {
+  showStartMode("time");
+};
+
+const showEndDatepicker = () => {
+  showEndMode("date");
+};
+
+const showEndTimepicker = () => {
+  showEndMode("time");
+};
+
     const route = useRoute<routeProp>();
     const { site, info } = route.params || {}
     const themeContext = React.useContext(ThemeContext);
@@ -62,20 +117,21 @@ export default function AddNotes({ navigation }: NavigationType) {
       // used for loading screen
         const [loadingValue, setLoadingValue] = useState(false);
 
-    // Get current notes for the site
     useEffect(() => {
-        async function fetchData() {
-            if (site && !data) {
-                try {
-                    const parsedData = await processNotes(site);
-                    setData(parsedData); // Update state with the latest entry
-                } catch (error) {
-                    console.error("Error processing notes:", error);
-                }
-            }
-        }
-        fetchData();
-    }, [site]); // Re-run if `site` changes
+      async function fetchData() {
+        setNetworkStatus(await isConnected())
+
+          if (site && !data && networkStatus) {
+              try {
+                  const parsedData = await processNotes(site);
+                  setData(parsedData); // Update state with the latest entry
+              } catch (error) {
+                  console.error("Error processing notes:", error);
+              }
+          }
+      }
+      fetchData();
+  }, [site]); // Re-run if `site` changes
 
     // Get list of possible instruments
     useEffect(() => {
@@ -102,6 +158,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
     
     // these use states to set and store values in the text inputs
+    const [networkStatus, setNetworkStatus] = useState(false)
     const [startDateValue, setStartDateValue] = useState(new Date());
     const [endDateValue, setEndDateValue] = useState(new Date());
     const [nameValue, setNameValue] = useState("");
@@ -155,10 +212,19 @@ export default function AddNotes({ navigation }: NavigationType) {
           navigation.navigate('SelectTank', {
           from: 'AddNotes',
           onSelect: (tank) => {
-            setTankId(tank);
-            const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
-            setTankRecord(entry);
-            setTankValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+            if(networkStatus)
+            {
+              setTankId(tank);
+              const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+              setTankRecord(entry);
+              setTankValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+            }
+            else
+            {
+              setTankId(tank)
+              //it won't display the tankID unless we give this an empty value, haven't a clue why
+              setTankValue(" ")
+            }
           }
         });
         }, 10);
@@ -274,14 +340,22 @@ export default function AddNotes({ navigation }: NavigationType) {
           newTankEntry.updatedAt = utcTime;
           addEntrytoTankDictionary(newTankEntry);
         }
-        if (tankRecord) {
-          let tank = copyTankRecord(tankRecord);
-          tank.location = siteName;
-          tank.updatedAt = utcTime;
-          tank.pressure = parseInt(tankPressure);
-          tank.userId = nameValue;
-          addEntrytoTankDictionary(tank);
+        if(networkStatus){
+          if (tankRecord) {
+            let tank = copyTankRecord(tankRecord);
+            tank.location = siteName;
+            tank.updatedAt = utcTime;
+            tank.pressure = parseInt(tankPressure);
+            tank.userId = nameValue;
+            addEntrytoTankDictionary(tank);
+          }
         }
+        else
+        {
+          if(tankId && tankPressure)
+          {
+            await offlineTankEntry(tankId, parseInt(tankPressure), site, utcTime, nameValue)
+          }
 
         // send the request
         const result = await setSiteFile(site, buildMobileNotes(data), "updating notes from researchFlow");
@@ -351,6 +425,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           visibleRef.current = true;
         }, 100);
     };
+  }
 
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
     function navigateHome(nav:boolean){
@@ -436,14 +511,15 @@ export default function AddNotes({ navigation }: NavigationType) {
 
               {/* Time input */}
               <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Arrived (MT):</Text>
-              <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.datePicker}>
+              <TouchableOpacity onPress={() => setShowStartPicker(true)} style={[styles.datePicker, {borderColor: isDarkMode ? "#101426" : "#E4E9F2"}, {backgroundColor: isDarkMode ? "#1A2138" : "#F7F9FC"}]}>
                 <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
                 <Text>{startDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {startDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
               </TouchableOpacity>
 
-          {showStartPicker && (
+          {(showStartPicker && Platform.OS === "ios") && (
           <View>
           <DateTimePicker
+            textColor= {isDarkMode ? 'white' : 'black'}
             value={startDateValue}
             mode="datetime"
             display="spinner"
@@ -455,17 +531,43 @@ export default function AddNotes({ navigation }: NavigationType) {
           {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Confirm Date/Time</Text>}
           </Button>
           </View>
-        )}
+          )}
+
+          {(showStartPicker && Platform.OS === "android") && (
+            (
+              <View style={styles.androidDateTime}>
+                <Pressable onPress={() => {showStartDatepicker(); setStartDateValue(startDateValue)}}>
+                  <Text>
+                    {startDateValue.toLocaleDateString([], {
+                      weekday: "short",
+                      year: "numeric",
+                      month: "short",
+                      day: "2-digit",
+                    })}
+                  </Text>
+                </Pressable>
+                <Pressable onPress={() => {showStartTimepicker(); setStartDateValue(startDateValue)}}>
+                  <Text>
+                    {startDateValue.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                </Pressable>
+              </View>
+            )
+          )}
 
         <Text category="p2" style={{ marginTop: 8, marginLeft: 8 }}>Time Departed (MT):</Text>
-          <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.datePicker}>
+          <TouchableOpacity onPress={() => setShowEndPicker(true)} style={[styles.datePicker, {borderColor: isDarkMode ? "#101426" : "#E4E9F2"}, {backgroundColor: isDarkMode ? "#1A2138" : "#F7F9FC"}]}>
             <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
             <Text>{endDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {endDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
           </TouchableOpacity>
 
-          {showEndPicker && (
+          {(showEndPicker && Platform.OS === "ios") && (
           <View>
           <DateTimePicker
+            textColor= {isDarkMode ? 'white' : 'black'}
             value={endDateValue}
             mode="datetime"
             display="spinner"
@@ -478,6 +580,31 @@ export default function AddNotes({ navigation }: NavigationType) {
           </Button>
           </View>
         )}
+
+          {(showEndPicker && Platform.OS === "android") && (
+            (
+              <View style={styles.androidDateTime}>
+                <Pressable onPress={() => {showEndDatepicker(); setEndDateValue(endDateValue)}}>
+                  <Text>
+                    {endDateValue.toLocaleDateString([], {
+                      weekday: "short",
+                      year: "numeric",
+                      month: "short",
+                      day: "2-digit",
+                    })}
+                  </Text>
+                </Pressable>
+                <Pressable onPress={() => {showEndTimepicker(); setEndDateValue(endDateValue)}}>
+                  <Text>
+                    {endDateValue.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                </Pressable>
+              </View>
+            )
+          )}
 
         <CheckBox
           checked={addToBadData}
@@ -566,7 +693,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       </KeyboardAvoidingView>
     );
   }
-  
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -640,5 +767,9 @@ export default function AddNotes({ navigation }: NavigationType) {
       borderRadius: 5,
       borderColor: '#d3d3d3',
       backgroundColor: '#f9f9f9',
-    }
+    },
+    androidDateTime: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+    },
 });

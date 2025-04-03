@@ -1,5 +1,9 @@
 import * as variables from "../config"
 import csv from 'csvtojson';
+import * as FileSystem from 'expo-file-system'
+import * as Network from 'expo-network'
+import { parseNotes, parseVisits, VisitList } from './Parsers';
+import InstrumentMaintenance from '../components/InstrumentMaintenance';
 
 /**
  * @author August O'Rourke
@@ -93,6 +97,240 @@ let tankDict: Map<string, TankRecord[]>;
 
 let tankTrackerSha = ""
 
+export const sleep = async (ms: number): Promise<void> => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  };
+
+async function loop(path: string)
+{
+    FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + path)
+    //console.log("here")
+    let response = (await getDirectory(path))
+    if(response.success)
+    {
+        response.data.forEach(element => {
+            //console.log(FileSystem.documentDirectory + path + `/${element}`)
+            loop(path + `/${element}`)
+        });
+    }
+}
+
+export async function readUpdates()
+{
+    if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/visitfile.txt")).exists)
+    {
+        let visits: VisitList = parseVisits(await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/visitfile.txt"))
+        //console.log("passed visits")
+        //console.log(visits)
+        await setVisitFileOffline(visits)
+        FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/visitfile.txt")
+        await sleep(50)
+    }
+
+    
+    
+    //console.log(await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + "offline_updates"))
+
+    if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/baddata.txt")).exists)
+    {
+        let bad_data_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/baddata.txt")).split("\n")
+
+        for (let value of bad_data_entries){
+            let site = value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
+            value = value.substring(value.indexOf(", ") + 2)
+            let instrument =  value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
+            value = value.substring(value.indexOf(", ") + 2)
+            let newEntry = value.substring(value.indexOf(": ") + 2).slice(0, -1)
+            value = value.substring(value.indexOf(", ") + 2)
+
+            await setBadData(site, instrument, newEntry, "updating from offline")
+            await sleep(50)
+            
+        }
+        FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/baddata.txt")
+        
+    }
+    if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/instrument_maint.txt")).exists)
+    {
+        let instrument_maintence_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/instrument_maint.txt")).split("}\n")
+        //console.log(instrument_maintence_entries)
+        for (let value of instrument_maintence_entries){
+            if(value !== ""){
+                let path = value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
+                //console.log(path)
+                value = value.substring(value.indexOf(", ") + 2)
+                let content =  value.substring(value.indexOf("content: ") + 8 , value.indexOf(", mobile:"))
+                //console.log(content)
+                value = value.substring(value.indexOf(", ") + 2)
+                let needsSite =(value.substring(value.indexOf(": ") + 2 , value.indexOf(", ")) === "true")
+                //console.log(needsSite)
+                value = value.substring(value.indexOf(", ") + 2)
+                let site = value.substring(value.indexOf(": ") + 2)
+                //console.log(site)
+                await setInstrumentFile(path,content,"updating from offline", needsSite, site)
+                await sleep(50)
+            }
+            
+        }
+        FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/instrument_maint.txt")
+        //await sleep(50)
+    }
+    if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/site_notes.txt")).exists)
+        {
+                let site_notes_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/site_notes.txt")).split("}\n")
+                //console.log(site_notes_entries)
+                for(let value of site_notes_entries){
+                    if(value !== "")
+                    {
+                        let siteName = value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
+                        //console.log(siteName)
+                        value = value.substring(value.indexOf(", ") + 2)
+                        let content =  value.substring(value.indexOf("content: ") + 8)
+                        await setSiteFile(siteName, content, "updating from offline")
+                        await sleep(50)
+                        let notes = parseNotes(content).entries[0]
+                        let data = (await getFileContents(`site_notes/${siteName}`)).data
+                        await sleep(50)
+                        if(data)
+                        {
+                            let previousNotes = parseNotes(data).entries[0]
+
+                            if(previousNotes.instrument !== notes.instrument)
+                            {
+                                let newNotes: string = `- Time in: ${notes.time_in}\n`;
+  
+                                newNotes += `- Name: ${notes.names}\n`;
+                                newNotes += `- Notes: Removed from ${siteName}\n`;
+                                newNotes += "---\n";
+                                
+                                await setInstrumentFile(`instrument_maint/LGR_UGGA/${previousNotes.instrument}`,content,"updating from offline", true, siteName)
+                            }
+
+                            if(previousNotes.high_cal.id !== notes.high_cal.id)
+                            {
+                                let newTankEntry = getLatestTankEntry(previousNotes.high_cal.id)
+                                newTankEntry.location = "ASB279";
+                                newTankEntry.pressure = 500;
+                                newTankEntry.userId = previousNotes.names;
+                                newTankEntry.updatedAt = previousNotes.time_out;
+                                addEntrytoTankDictionary(newTankEntry);
+                            }
+
+                            if(previousNotes.mid_cal.id !== notes.mid_cal.id)
+                            {
+                                let newTankEntry = getLatestTankEntry(previousNotes.mid_cal.id)
+                                newTankEntry.location = "ASB279";
+                                newTankEntry.pressure = 500;
+                                newTankEntry.userId = previousNotes.names;
+                                newTankEntry.updatedAt = previousNotes.time_out;
+                                addEntrytoTankDictionary(newTankEntry);
+                            }
+                            if(previousNotes.low_cal.id !== notes.low_cal.id)
+                            {
+                                let newTankEntry = getLatestTankEntry(previousNotes.low_cal.id)
+                                newTankEntry.location = "ASB279";
+                                newTankEntry.pressure = 500;
+                                newTankEntry.userId = previousNotes.names;
+                                newTankEntry.updatedAt = previousNotes.time_out;
+                                addEntrytoTankDictionary(newTankEntry);
+                            }
+
+                            if(previousNotes.high_cal.id !== notes.high_cal.id)
+                            {
+                                let newTankEntry = getLatestTankEntry(previousNotes.high_cal.id)
+                                newTankEntry.location = "ASB279";
+                                newTankEntry.pressure = 500;
+                                newTankEntry.userId = previousNotes.names;
+                                newTankEntry.updatedAt = previousNotes.time_out;
+                                addEntrytoTankDictionary(newTankEntry);
+                            }
+
+                        }
+                    }
+                    await sleep(50)
+                }
+                FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/site_notes.txt")
+                await sleep(50)
+        }
+    if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/tank_updates.txt")).exists)
+    {
+            let tank_update_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/tank_updates.txt")).split("\n")
+            tank_update_entries.forEach(async (value) => {
+                if(value !== ""){
+                    let tankId = value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
+                    value = value.substring(value.indexOf(", ") + 2)
+                    let pressure =  parseInt(value.substring(value.indexOf(": ") + 2 , value.indexOf(", ")))
+                    value = value.substring(value.indexOf(", ") + 2)
+                    let site =value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
+                    value = value.substring(value.indexOf(", ") + 2)
+                    let time = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
+                    value = value.substring(value.indexOf(", ") + 2)
+                    let name = value.substring(value.indexOf(": ") + 2).slice(0, -1)
+
+                    let previousRecord: TankRecord = getLatestTankEntry(tankId)
+
+                    previousRecord.pressure = pressure
+                    previousRecord.location = site
+                    previousRecord.updatedAt = time
+                    previousRecord.userId = name
+                    
+                    addEntrytoTankDictionary(previousRecord)
+
+                }
+                
+            })
+            FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/tank_updates.txt")
+    }
+
+    await setTankTracker()
+}
+
+export async function tankTrackerOffline()
+{
+    let string = await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "tank_tracker/names")
+    //console.log(string)
+    let names = string.split("\n")
+    tankDict = new Map()
+    names.forEach(element => {
+        tankDict.set(element, undefined)
+    })
+}
+
+export async function updateDirectories()
+{
+    let response = (await getDirectory(""))
+    if(response.success)
+    {
+        response.data.forEach(element => {
+            loop(`${element}`)
+        });
+    }
+    loop("site_notes/mobile")
+    //await tankTrackerSpinUp()
+    let list = getTankList()
+    let names = ""
+    list.forEach(value => {
+        names += (value + "\n")
+    })
+    await FileSystem.writeAsStringAsync(FileSystem.documentDirectory + "tank_tracker/names", names)
+
+    FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + "bad_data")
+    response = await getBadDataSites()
+    let entries = response.data
+    entries.forEach(element => {
+        loop(`bad_data/${element}`)
+    });
+
+    let result = await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates")
+
+    if(!result.exists)
+    {
+        FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + "offline_updates")
+    }
+    console.log("update complete")
+}
+   
+
 /**
  * 
  * @author August O'Rourke
@@ -120,7 +358,7 @@ async function setFile(bodyString: string, url: string)
     
     try {
         const response = await fetch(requestOptions);
-        console.log(response)
+        //console.log(response)
         if (response.ok) {
             const data = await response.json();
             return { success: true, data };
@@ -134,6 +372,39 @@ async function setFile(bodyString: string, url: string)
     
 }
 
+async function setVisitFileOffline(visits: VisitList)
+{
+    const pullResponse = (await getFile(`researchflow_data/visits`))
+        let existingContent = ""
+        let hash = ""
+        
+        if(pullResponse.success)
+        {
+            hash = pullResponse.data.sha
+            existingContent = atob(pullResponse.data.content)       
+        }
+        visits.visits.forEach((value) => 
+        {
+            if(value != undefined)
+            {
+                existingContent += `{"date":"${value.date}","name":"${value.name}","site":"${value.site}","equipment":"${value.equipment}","notes":"${value.notes}"}\n`
+            }
+        })    
+        //console.log("exited loop")
+        let fullDoc = btoa(existingContent)
+        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/researchflow_data/visits.md`;
+        let bodyString = `{"message":"updating from offline","content":"${fullDoc}"`
+        if (hash!== "")
+        {
+            bodyString+= `,"sha":"${hash}"}`
+        }
+        else
+        {
+            bodyString += '}'
+        }
+        return setFile(bodyString, url)
+}
+
 /**
  * This method sets the plan a visit file
  * @param visit - the visit we are uploading
@@ -142,29 +413,89 @@ async function setFile(bodyString: string, url: string)
  */
 export async function setVisitFile(visit: visit, commitMessage: string)
 {
-    const pullResponse = (await getFile(`researchflow_data/visits`))
-    let existingContent = ""
-    let hash = ""
-    
-    if(pullResponse.success)
-    {
-        hash = pullResponse.data.sha
-        existingContent = atob(pullResponse.data.content) + "\n"       
-    }
-    const fullDoc = btoa(existingContent + JSON.stringify(visit))
+    let check = await Network.getNetworkStateAsync()
 
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/researchflow_data/visits.md`;
-    let bodyString = `{"message":"${commitMessage}","content":"${fullDoc}"`
-    if (hash!== "")
+    if (check.isConnected)
     {
-        bodyString+= `,"sha":"${hash}"}`
+        const pullResponse = (await getFile(`researchflow_data/visits`))
+        let existingContent = ""
+        let hash = ""
+        
+        if(pullResponse.success)
+        {
+            hash = pullResponse.data.sha
+            existingContent = atob(pullResponse.data.content)       
+        }
+        const fullDoc = btoa(existingContent + `{"date":"${visit.date}","name":"${visit.name}","site":"${visit.site}","equipment":"${visit.equipment}","notes":"${visit.notes}"}\n`)
+
+        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/researchflow_data/visits.md`;
+        let bodyString = `{"message":"${commitMessage}","content":"${fullDoc}"`
+        if (hash!== "")
+        {
+            bodyString+= `,"sha":"${hash}"}`
+        }
+        else
+        {
+            bodyString += '}'
+        }
+        return setFile(bodyString, url)
     }
     else
     {
-        bodyString += '}'
-    }
-    //console.log(bodyString)
-    return setFile(bodyString, url)   
+        try
+        {
+            let path = FileSystem.documentDirectory + "offline_updates/visitfile.txt"
+            //(path)
+            let exists = (await FileSystem.getInfoAsync(path)).exists
+            let content = ""
+            if(exists)
+            {
+                content = await FileSystem.readAsStringAsync(path)
+            }
+            else
+            {
+                
+            }
+            content += `{"date":"${visit.date}","name":"${visit.name}","site":"${visit.site}","equipment":"${visit.equipment}","notes":"${visit.notes}"}\n`
+            let result = await FileSystem.writeAsStringAsync(path, content, {})
+            if(await FileSystem.readAsStringAsync(path) === content)
+            {
+                return {success: true}  
+            }
+            else
+            {
+                return {success: false, error: "unable to write file"}
+            }
+        }
+        catch(error)
+        {
+            return{success: false, error: error}
+        }
+    }   
+}
+
+export async function offlineTankEntry(tankID: string, pressure: number, site: string, time:string, name:string)
+{
+    try {
+        let path = FileSystem.documentDirectory + "offline_updates/tank_updates.txt"
+
+        let content = ""
+        if ((await FileSystem.getInfoAsync(path)).exists)
+        {
+            content += await FileSystem.readAsStringAsync(path)
+        }
+        //console.log(content)
+
+        content += `{tankId: ${tankID}, pressure: ${pressure}, site: ${site}, time: ${time}, name: ${name}}\n`
+
+        await FileSystem.writeAsStringAsync(path, content)
+
+        return {success: true}
+    }  
+    catch(error)
+    {
+        return {success: true, error: error}
+    } 
 }
 
 /**
@@ -207,8 +538,16 @@ export function setGithubToken(token: string) {
 
 export function addEntrytoTankDictionary(newEntry: TankRecord) {
     let tankEntries = tankDict.get(newEntry.tankId);
-    tankEntries.push(newEntry);
-    tankDict.set(newEntry.tankId, tankEntries);
+    //console.log(newEntry)
+    if (tankEntries == undefined)
+    {
+        tankDict.set(newEntry.tankId, [newEntry])
+    }
+    else
+    {
+        tankEntries.push(newEntry);
+        tankDict.set(newEntry.tankId, tankEntries);
+    }
 }
 
 /**
@@ -219,25 +558,34 @@ export function addEntrytoTankDictionary(newEntry: TankRecord) {
  */
 export async function setTankTracker()
 {
-    let temp = Array.from(tankDict.values())
-    let plainfullDoc: TankRecord[] = []
+    if((await Network.getNetworkStateAsync()).isConnected)
+    {
+        let temp = Array.from(tankDict.values())
+        let plainfullDoc: TankRecord[] = []
 
-    temp.forEach(value =>
-        {
-            value.forEach(value =>
+        temp.forEach(value =>
             {
-                plainfullDoc.push(value)
-            })
-        }
-    )
+                value.forEach(value =>
+                {
+                    //console.log("looping forever")
+                    plainfullDoc.push(value)
+                })
+            }
+        )
 
-    //console.log(plainfullDoc)
-    let newContent = csvify(plainfullDoc)
-    const fullDoc = btoa(newContent)
+        let newContent = csvify(plainfullDoc)
+        //console.log("getting to request")
+   
+        const fullDoc = btoa(newContent)
 
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
-    const bodyString = `{"message":"updating from research flow","content":"${fullDoc}","sha":"${tankTrackerSha}"}`
-    return setFile(bodyString, url)
+        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
+        const bodyString = `{"message":"updating from research flow","content":"${fullDoc}","sha":"${tankTrackerSha}"}`
+        return setFile(bodyString, url)
+    }
+    else
+    {
+       return {success: true}
+    }   
 }
 /**
  * This method returns a list of Tank Entries for a specific tank 
@@ -247,7 +595,6 @@ export async function setTankTracker()
  */
 export function getTankEntries(key:string)
 {
-    //console.log(tankDict.get(key))
     return tankDict.get(key)
 }
 
@@ -267,8 +614,7 @@ export function getLatestTankEntry(key:string): TankRecord | undefined {
  */
 export function getTankList()
 {   
-    let id_array = []
-    console.log(Array.from(tankDict.keys()))
+    //console.log(tankDict)
     return Array.from(tankDict.keys())
 }
 /**
@@ -297,7 +643,6 @@ export async function tankTrackerSpinUp()
     )
     try {
         let response = await fetch(requestOptions);
-        //console.log(response)
         if (response.ok) {
             let data = await response.json();
             tankTrackerSha = data.sha
@@ -314,19 +659,16 @@ export async function tankTrackerSpinUp()
     
                     response = await fetch(requestOptions)
                     data = await response.json();
-                    //console.log("success")
+                
                 }
-
             // Decode base64 content
             let decodedContent = atob(data.content);
-            console.log(decodedContent.charCodeAt(0));
             // Remove UTF-8 BOM if it exists (0xEF, 0xBB, 0xBF)
             if (decodedContent.charCodeAt(0) === 0xEF && decodedContent.charCodeAt(1) === 0xBB && decodedContent.charCodeAt(2) === 0xBF) {
                 // Remove the BOM (first 3 characters)
                 decodedContent = decodedContent.slice(3);
             }
             let tankData = await csv().fromString(decodedContent);
-            //console.log(tankData)
             let id_array: string[] =[]
             
             tankData.forEach(value => 
@@ -357,6 +699,13 @@ export async function tankTrackerSpinUp()
  */
 export async function getBadDataSites()
 {
+    let check = await Network.getNetworkStateAsync()
+
+    if(!check.isConnected)
+        {
+           return {success: true, data: await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + "bad_data")}
+        }
+
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad`;
 
     let headers = new Headers();
@@ -449,6 +798,9 @@ export async function getBadDataFiles(siteName: string)
 export async function setBadData(siteName: string, instrument: string, newEntry: string, commitMessage: string)
 {
     siteName = siteName.toLowerCase();
+
+    if((await Network.getNetworkStateAsync()).isConnected)
+    {
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad/${siteName}/${instrument}.csv`;
 
     let headers = new Headers();
@@ -468,7 +820,7 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
     let sha = ""
     try {
         const response = await fetch(requestOptions);
-        //console.log(response)
+        console.log(response)
         if (response.ok) {
             const data = await response.json();
             let plainContent = atob(data.content);
@@ -477,8 +829,8 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
             sha = data.sha
             newFile = headers + entries + '\n' + newEntry
             newFile = btoa(newFile)
-            //console.log(headers);
-            //console.log(entries);
+            const bodyString = `{"message":"${commitMessage}","content":"${newFile}","sha":"${sha}"}`
+            return setFile(bodyString, url)
         } 
         else {
             const errorData = await response.json();
@@ -489,10 +841,40 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
     {
         return { success: false, error: error };
     }
+    }
 
-    const bodyString = `{"message":"${commitMessage}","content":"${newFile}","sha":"${sha}"}`
-
-    return setFile(bodyString, url)
+    else
+    {
+        try
+        {
+            let path = FileSystem.documentDirectory + "offline_updates/baddata.txt"
+            //console.log(path)
+            let exists = (await FileSystem.getInfoAsync(path)).exists
+            let content = ""
+            if(exists)
+            {
+                content = await FileSystem.readAsStringAsync(path)
+            }
+            else
+            {
+                
+            }
+            content += `{siteName: ${siteName}, instrument: ${instrument}, newEntry: ${newEntry}}\n`
+            let result = await FileSystem.writeAsStringAsync(path, content, {})
+            if(await FileSystem.readAsStringAsync(path) === content)
+            {
+                return {success: true}  
+            }
+            else
+            {
+                return {success: false, error: "unable to write file"}
+            }
+        }
+        catch(error)
+        {
+            return{success: false, error: error}
+        }
+    }  
 }
 /**
  * This method gets the site of the Instrument specified
@@ -522,40 +904,81 @@ export async function getInstrumentSite(path: string) {
  * @returns the contents of the file as a string
  */
 export async function setInstrumentFile(path: string, content: string, commitMessage: string, mobile:boolean, site?: string) {
-    //console.log("here")
-    const pullResponse = (await getFile(path))
-    if(pullResponse.error)
-    {
-        return {success: false, error: pullResponse.error}
-    }
-    //console.log(pullResponse)
-    const hash = pullResponse.data.sha
-    const existingContent = atob(pullResponse.data.content)
-    const maintenanceHeader = `Maintenance Log\n---`
-    let staticHeader = existingContent.substring(0,existingContent.indexOf(maintenanceHeader) + maintenanceHeader.length)
-    if(mobile && site)
-    {
-        let staticHeaderNoLocation  = staticHeader.substring(0, staticHeader.indexOf("---\nCurrently at"))
-        let locationHeader = `---\nCurrently at ${site}\n` + '---\n' + maintenanceHeader
-        staticHeader = staticHeaderNoLocation + locationHeader
-    }
-    const existingNotes = existingContent.substring(existingContent.indexOf(maintenanceHeader) + maintenanceHeader.length) 
-    //console.log(existingNotes)
-    //console.log(staticHeader)
-    const fullDoc = btoa(staticHeader +"\n" + content + existingNotes)
 
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}.md`;
-    const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`
-    return setFile(bodyString, url)
+    if( (await Network.getNetworkStateAsync()).isConnected){
+
+        const pullResponse = (await getFile(path))
+        if(pullResponse.error)
+        {
+            return {success: false, error: pullResponse.error}
+        }
+        const hash = pullResponse.data.sha
+        const existingContent = atob(pullResponse.data.content)
+        const maintenanceHeader = `Maintenance Log\n---`
+        let staticHeader = existingContent.substring(0,existingContent.indexOf(maintenanceHeader) + maintenanceHeader.length)
+        if(mobile && site)
+        {
+            let staticHeaderNoLocation  = staticHeader.substring(0, staticHeader.indexOf("---\nCurrently at"))
+            let locationHeader = `---\nCurrently at ${site}\n` + '---\n' + maintenanceHeader
+            staticHeader = staticHeaderNoLocation + locationHeader
+        }
+        const existingNotes = existingContent.substring(existingContent.indexOf(maintenanceHeader) + maintenanceHeader.length) 
+        const fullDoc = btoa(staticHeader +"\n" + content + existingNotes)
+
+        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}.md`;
+        const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`
+        return setFile(bodyString, url)
+    }
+    else
+    {
+        try
+        {
+            let filePath = FileSystem.documentDirectory + "offline_updates/instrument_maint.txt"
+            //console.log(path)
+            let exists = (await FileSystem.getInfoAsync(filePath)).exists
+            let newContent = ""
+            if(exists)
+            {
+                newContent = await FileSystem.readAsStringAsync(filePath)
+            }
+            newContent += `{path: ${path}, content: ${content}, mobile: ${mobile}}\n`
+            if(site)
+            {
+                newContent = newContent.substring(0, newContent.length - 2)
+                newContent += `, site: ${site}}\n`
+            }
+
+            let result = await FileSystem.writeAsStringAsync(filePath, newContent, {})
+            if(await FileSystem.readAsStringAsync(filePath) === newContent)
+            {
+                return {success: true}  
+            }
+            else
+            {
+                return {success: false, error: "unable to write file"}
+            }
+        }
+        catch(error)
+        {
+            return{success: false, error: error}
+        }
+    }
 }
 
 /**
  * @author August O'Rourke
  *  This method gets a list of sites from the CS_4000_mock_docs repository
- * @returns returns a list of sites with the type of siteResponse
+ * @returns returns a list of sites with the type of siteReåsponse
  */
 export async function getDirectory(path: string)
 {
+    let check = await Network.getNetworkStateAsync()
+    //console.log(!(check.isConnected))
+    if(!(check.isConnected))
+    {
+       return {success: true, data: await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + path)}
+    }
+
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}`
     const headers = new Headers();
     headers.append("User-Agent", "ResearchFlow");
@@ -575,7 +998,7 @@ export async function getDirectory(path: string)
         //console.log(response)
         const data: siteResponse[] = await response.json();
         let options;
-        if (path === "instrument_maint") {
+        if (path === "instrument_maint" || path === "") {
             options = data
                 .filter((item: any) => item.type === "dir")
                 .map((item: any) => item.name); 
@@ -619,7 +1042,7 @@ async function getFile(path: string)
     )
     try {
         const response = await fetch(requestOptions);
-        console.log(response)
+        //console.log(response)
         if (response.ok) {
             const data = await response.json();
             return { success: true, data };
@@ -665,26 +1088,61 @@ export async function getFileContents(path: string)
  */
 export async function setSiteFile(siteName: string, content: string, commitMessage: string) {
     siteName = siteName.toLowerCase();
-    const pullResponse = (await getFile(`site_notes/${siteName}`))
-    if(pullResponse.error)
+    if((await Network.getNetworkStateAsync()).isConnected)
     {
-        return {success: false, error: pullResponse.error}
-    }
-    const hash = pullResponse.data.sha
-    const existingContent = atob(pullResponse.data.content)
-    let siteHeader;
-    if (siteName.includes("mobile/")) {
-        const site = siteName.replace("mobile/", "");
-        siteHeader = `# Site id: **${site}** \n`
-        siteHeader += existingContent.split("\n")[1];
-        
-    } else {
-        siteHeader = `# Site id: **${siteName}**`
-    }
-    const existingNotes = existingContent.substring(siteHeader.length, existingContent.length -1) 
-    const fullDoc = btoa(siteHeader +"\n" + content + existingNotes)
+        const pullResponse = (await getFile(`site_notes/${siteName}`))
+        if(pullResponse.error)
+        {
+            return {success: false, error: pullResponse.error}
+        }
+        const hash = pullResponse.data.sha
+        const existingContent = atob(pullResponse.data.content)
+        let siteHeader;
+        if (siteName.includes("mobile/")) {
+            const site = siteName.replace("mobile/", "");
+            siteHeader = `# Site id: **${site}** \n`
+            siteHeader += existingContent.split("\n")[1];
+            
+        } else {
+            siteHeader = `# Site id: **${siteName}**`
+        }
+        const existingNotes = existingContent.substring(siteHeader.length, existingContent.length -1) 
+        const fullDoc = btoa(siteHeader +"\n" + content + existingNotes)
 
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/site_notes/${siteName}.md`;
-    const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`
-    return setFile(bodyString, url)
+        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/site_notes/${siteName}.md`;
+        const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`
+        return setFile(bodyString, url)
+    }
+    else
+    {
+        try
+        {
+            let path = FileSystem.documentDirectory + "offline_updates/site_notes.txt"
+            //console.log(path)
+            let exists = (await FileSystem.getInfoAsync(path)).exists
+            let newContent = ""
+            if(exists)
+            {
+                newContent = await FileSystem.readAsStringAsync(path)
+            }
+            else
+            {
+                
+            }
+            newContent += `{siteName: ${siteName}, content: ${content}}\n`
+            let result = await FileSystem.writeAsStringAsync(path, newContent, {})
+            if(await FileSystem.readAsStringAsync(path) === newContent)
+            {
+                return {success: true}  
+            }
+            else
+            {
+                return {success: false, error: "unable to write file"}
+            }
+        }
+        catch(error)
+        {
+            return{success: false, error: error}
+        }
+    }   
 }

@@ -33,6 +33,7 @@ export default function SelectTank({navigation}: NavigationType) {
     const fetchTankNames = async () => {
       try {
         const tanks = getTankList(); // Ensure getTankList is returning a valid list
+        //console.log(tanks)
         const validTanks = tanks.filter(tank => tank && tank.trim() !== "");
         setTankNames(validTanks);
         setFilteredTanks(validTanks); // Initialize filtered list
