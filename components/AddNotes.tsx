@@ -22,7 +22,7 @@ import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
 import DateTimePicker, {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
-import Network from 'expo-network'
+import * as Network from 'expo-network'
 import VisitPopupProp from './VisitPopup';
 
 /**

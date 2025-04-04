@@ -20,7 +20,7 @@ import { setBadData, getBadDataFiles } from "../scripts/APIRequests";
 import PopupProp from "./Popup"
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from "./LoadingScreen";
-import Network from 'expo-network'
+import * as Network from 'expo-network'
 
 export default function BadData({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
