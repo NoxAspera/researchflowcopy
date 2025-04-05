@@ -24,12 +24,14 @@ export type RootStackParamList = {
     BadData: { site: string };
     InstrumentMaintenance: { site: string };
     TankTracker: { site: string };
-    PlanVisit: {site: string}
+    PlanVisit: {site: string};
+    Diagnostics: {site: string};
 
     // used for auth
     Home: undefined;
     ViewNotifications: undefined;
     NotificationsButton: undefined;
+    Calendar: undefined;
 };
 
 // Type for the navigation prop for the HomeScreen
