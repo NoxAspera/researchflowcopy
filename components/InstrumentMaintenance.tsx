@@ -16,12 +16,12 @@ import { customTheme } from "./CustomTheme";
 import { NavigationType, routeProp } from "./types";
 import {setInstrumentFile, getInstrumentSite, setBadData} from "../scripts/APIRequests";
 import { ScrollView } from "react-native-gesture-handler";
+import { ThemeContext } from './ThemeContext';
 import PopupProp from './Popup';
 import LoadingScreen from "./LoadingScreen";
 import DateTimePicker , {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
-import Network from 'expo-network'
 import { TimerPickerModal } from "react-native-timer-picker";
-import { ThemeContext } from './ThemeContext';
+import * as Network from 'expo-network'
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
@@ -107,7 +107,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
   useEffect(() => {
     const fetchSite = async () => {
-      let check = await Network.useNetworkState()
+      let check = await Network.getNetworkStateAsync()
       if (site.includes("LGR") && check.isConnected) {
         try {
           const response = await getInstrumentSite(site);

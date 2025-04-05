@@ -15,13 +15,13 @@ import TextInput from './TextInput'
 import NoteInput from './NoteInput'
 import { Layout, Button, Text, Select, SelectItem, IndexPath, CheckBox, Icon, DateService } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile, setBadData } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile, setBadData, offlineTankEntry } from '../scripts/APIRequests';
 import { parseNotes, ParsedData, copyTankRecord } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
-import  Network from 'expo-network'
+import  * as Network from 'expo-network'
 import LoadingScreen from "./LoadingScreen";
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { TimerPickerModal } from "react-native-timer-picker";
@@ -42,6 +42,12 @@ async function processNotes(siteName: string) {
   {
     return null
   }
+}
+
+async function isConnected()
+{
+  let check = (await Network.getNetworkStateAsync()).isConnected
+  return check
 }
 
 /**
@@ -115,20 +121,21 @@ export default function AddNotes({ navigation }: NavigationType) {
       // used for loading screen
         const [loadingValue, setLoadingValue] = useState(false);
 
-    // Get current notes for the site
     useEffect(() => {
-        async function fetchData() {
-            if (site && !data) {
-                try {
-                    const parsedData = await processNotes(site);
-                    setData(parsedData); // Update state with the latest entry
-                } catch (error) {
-                    console.error("Error processing notes:", error);
-                }
-            }
-        }
-        fetchData();
-    }, [site]); // Re-run if `site` changes
+      async function fetchData() {
+        setNetworkStatus(await isConnected())
+
+          if (site && !data && networkStatus) {
+              try {
+                  const parsedData = await processNotes(site);
+                  setData(parsedData); // Update state with the latest entry
+              } catch (error) {
+                  console.error("Error processing notes:", error);
+              }
+          }
+      }
+      fetchData();
+  }, [site]); // Re-run if `site` changes
 
     // Get list of possible instruments
     useEffect(() => {
@@ -155,6 +162,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
     
     // these use states to set and store values in the text inputs
+    const [networkStatus, setNetworkStatus] = useState(false)
     const [startDateValue, setStartDateValue] = useState(new Date());
     const [endDateValue, setEndDateValue] = useState(new Date());
     const [nameValue, setNameValue] = useState("");
@@ -211,10 +219,19 @@ export default function AddNotes({ navigation }: NavigationType) {
           navigation.navigate('SelectTank', {
           from: 'AddNotes',
           onSelect: (tank) => {
-            setTankId(tank);
-            const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
-            setTankRecord(entry);
-            setTankValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+            if(networkStatus)
+            {
+              setTankId(tank);
+              const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+              setTankRecord(entry);
+              setTankValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+            }
+            else
+            {
+              setTankId(tank)
+              //it won't display the tankID unless we give this an empty value, haven't a clue why
+              setTankValue(" ")
+            }
           }
         });
         }, 10);
@@ -330,14 +347,22 @@ export default function AddNotes({ navigation }: NavigationType) {
           newTankEntry.updatedAt = utcTime;
           addEntrytoTankDictionary(newTankEntry);
         }
-        if (tankRecord) {
-          let tank = copyTankRecord(tankRecord);
-          tank.location = siteName;
-          tank.updatedAt = utcTime;
-          tank.pressure = parseInt(tankPressure);
-          tank.userId = nameValue;
-          addEntrytoTankDictionary(tank);
+        if(networkStatus){
+          if (tankRecord) {
+            let tank = copyTankRecord(tankRecord);
+            tank.location = siteName;
+            tank.updatedAt = utcTime;
+            tank.pressure = parseInt(tankPressure);
+            tank.userId = nameValue;
+            addEntrytoTankDictionary(tank);
+          }
         }
+        else
+        {
+          if(tankId && tankPressure)
+          {
+            await offlineTankEntry(tankId, parseInt(tankPressure), site, utcTime, nameValue)
+          }
 
         // send the request
         const result = await setSiteFile(site, buildMobileNotes(data), "updating notes from researchFlow");
@@ -407,6 +432,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           visibleRef.current = true;
         }, 100);
     };
+  }
 
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
     function navigateHome(nav:boolean){
@@ -720,7 +746,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       </KeyboardAvoidingView>
     );
   }
-  
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
