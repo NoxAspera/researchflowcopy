@@ -34,8 +34,11 @@ export default function Login({ navigation }: NavigationType) {
       //console.log(check)
       if(check)
         {
+          setLoadingText("Registering Tanks")
           await tankTrackerSpinUp()
+          setLoadingText("Updating from Offline")
           await readUpdates();
+          setLoadingText("Preparing Offline Mode")
           await updateDirectories();
         }
       else
@@ -67,13 +70,14 @@ export default function Login({ navigation }: NavigationType) {
     // used for setting and remembering the input values
     const [emailValue, setEmailValue] = useState("");
     const [passwordValue, setPasswordValue] = useState("");
+    const [loadingText, setLoadingText] = useState("")
 
     return (
       <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
         <Layout style={styles.container} level='1'>
-        <LoadingScreen visible={loadingValue} />
+        <LoadingScreen visible={loadingValue} loadingText={loadingText} />
           {/* header */}
           <Layout style={isDarkMode ? styles.loginTextDark : styles.loginTextLight}>
             <Text category='h1' style={{textAlign: 'center'}}>Hello</Text>
