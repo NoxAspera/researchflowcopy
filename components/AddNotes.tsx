@@ -14,7 +14,7 @@ import TextInput from './TextInput'
 import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text, Icon, CheckBox } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, getLatestTankEntry, offlineTankEntry, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, getLatestTankEntry, offlineTankEntry, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData, buildTankRecordString } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
@@ -410,6 +410,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       const endMinutes = String(end.getUTCMinutes()).padStart(2, "0");
       const endSeconds = String(end.getUTCSeconds()).padStart(2, "0");
         
+      let tankRecordString = "";
       console.log("creating data")
         // create an entry object data that will be sent off to the repo
         let data: Entry = 
@@ -452,7 +453,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         console.log("entry created")
         const utcTime = `${endYear}-${endMonth}-${endDay} ${endHours}:${endMinutes}:${endSeconds}Z`;
         if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
-          removeTankFromSite(originalLts, utcTime);
+          tankRecordString += removeTankFromSite(originalLts, utcTime);
         }
         if(networkStatus){
           if (ltsTankRecord) {
@@ -463,11 +464,12 @@ export default function AddNotes({ navigation }: NavigationType) {
             ltsTank.userId = nameValue;
             console.log("calling this")
             addEntrytoTankDictionary(ltsTank);
+            tankRecordString += buildTankRecordString(ltsTank);
           }
           
           console.log("tank pressure point")
           if (originalLow && (!lowTankRecord || (originalLow.tankId != lowTankRecord.tankId))) {
-            removeTankFromSite(originalLow, utcTime);
+            tankRecordString += removeTankFromSite(originalLow, utcTime);
           }
           console.log("tank pressure point 2")
           if (lowTankRecord) {
@@ -477,10 +479,11 @@ export default function AddNotes({ navigation }: NavigationType) {
             lowTank.pressure = parseInt(lowPressure);
             lowTank.userId = nameValue;
             addEntrytoTankDictionary(lowTank);
+            tankRecordString += buildTankRecordString(lowTank);
           }
 
           if (originalMid && (!midTankRecord || (originalMid.tankId != midTankRecord.tankId))) {
-            removeTankFromSite(originalMid, utcTime);
+            tankRecordString += removeTankFromSite(originalMid, utcTime);
           }
           if (midTankRecord) {
             let midTank = copyTankRecord(midTankRecord);
@@ -489,10 +492,11 @@ export default function AddNotes({ navigation }: NavigationType) {
             midTank.pressure = parseInt(midPressure);
             midTank.userId = nameValue;
             addEntrytoTankDictionary(midTank);
+            tankRecordString += buildTankRecordString(midTank);
           }
 
           if (originalHigh && (!highTankRecord || (originalHigh.tankId != highTankRecord.tankId))) {
-            removeTankFromSite(originalHigh, utcTime);
+            tankRecordString += removeTankFromSite(originalHigh, utcTime);
           }
           if (highTankRecord) {
             let highTank = copyTankRecord(highTankRecord);
@@ -501,6 +505,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             highTank.pressure = parseInt(highPressure);
             highTank.userId = nameValue;
             addEntrytoTankDictionary(highTank);
+            tankRecordString += buildTankRecordString(highTank);
           }
         }
         else
@@ -527,7 +532,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         // send the request
         const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
         console.log("sending tank tracker")
-        const tankResult = await setTankTracker();
+        const tankResult = await setTankTracker(tankRecordString);
 
         let instMaintResult;
         let instMaintResult2;
@@ -615,13 +620,14 @@ export default function AddNotes({ navigation }: NavigationType) {
       }
     }
 
-    const removeTankFromSite = (tank: TankRecord, time: string) => {
+    const removeTankFromSite = (tank: TankRecord, time: string): string => {
       let newTankEntry = copyTankRecord(tank);
       newTankEntry.location = "ASB279";
       newTankEntry.pressure = 500;
       newTankEntry.userId = nameValue;
       newTankEntry.updatedAt = time;
       addEntrytoTankDictionary(newTankEntry);
+      return buildTankRecordString(newTankEntry);
     }
 
     const clearTankEntry = (tank: string) => {

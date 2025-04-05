@@ -14,7 +14,7 @@ import TextInput from './TextInput'
 import { NavigationType, routeProp } from './types'
 import { ScrollView } from 'react-native-gesture-handler';
 import PopupProp from './Popup';
-import { getLatestTankEntry, setTankTracker, TankRecord, addEntrytoTankDictionary } from '../scripts/APIRequests';
+import { getLatestTankEntry, setTankTracker, TankRecord, addEntrytoTankDictionary, buildTankRecordString } from '../scripts/APIRequests';
 import { Float } from 'react-native/Libraries/Types/CodegenTypes';
 import { customTheme } from './CustomTheme'
 import LoadingScreen from "./LoadingScreen";
@@ -186,7 +186,8 @@ export default function TankTracker({ navigation }: NavigationType) {
 
       const entry = buildTankEntry();
       addEntrytoTankDictionary(entry);
-      const result = await setTankTracker();
+      const tankRecordString = buildTankRecordString(entry);
+      const result = await setTankTracker(tankRecordString);
 
       // remove spinner once we have results back
       setLoadingValue(false);
