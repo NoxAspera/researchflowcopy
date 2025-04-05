@@ -8,6 +8,7 @@
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { visit } from '../scripts/APIRequests';
+import EmailSetup from './EmailSetup';
 
 // Define the type for the stack's navigation parameters
 export type RootStackParamList = {
@@ -30,6 +31,8 @@ export type RootStackParamList = {
     Home: undefined;
     ViewNotifications: undefined;
     NotificationsButton: undefined;
+    EmailSetup: undefined;
+    Calendar: undefined;
 };
 
 // Type for the navigation prop for the HomeScreen

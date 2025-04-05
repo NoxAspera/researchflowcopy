@@ -95,14 +95,14 @@ export default function Login({ navigation }: NavigationType) {
                 style={{margin: 15, backgroundColor: "#06b4e0"}}>
                 {evaProps => <Text {...evaProps} category="h5" style={{color: "black"}}>SIGN IN</Text>}
             </Button>
-            {/* Temp button */}
+            {/* REMOVE ME 
             <Button
                 onPress={() => sendEmailNotification("schiwaldavid@gmail.com", ["tempSite", "tempSite2"], ["4/3/2025", "4/4/2025"])}
                 appearance='filled'
                 status='primary'
                 style={{margin: 15, backgroundColor: "#06b4e0"}}>
                 {evaProps => <Text {...evaProps} category="h5" style={{color: "black"}}>Send Email Test</Text>}
-            </Button>
+            </Button> */}
           </Layout>
         </Layout>
       </KeyboardAvoidingView>
