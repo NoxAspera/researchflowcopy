@@ -20,7 +20,7 @@ import { EvaIconsPack } from '@ui-kitten/eva-icons';
 import SelectTank from './components/SelectTank';
 import customColors from './custom-theme.json'
 import Calendar from './components/Calendar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SettingsButton from './components/SettingsButton';
 import ViewNotifications from './components/ViewNotifications';
 import ContactInfo from './components/ContactInfo';
@@ -28,6 +28,8 @@ import EmailSetup from './components/EmailSetup';
 import { NavigationType } from './components/types';
 import { Button, Icon, IconElement } from '@ui-kitten/components';
 import { View } from 'react-native';
+import { loadStoredValues } from './scripts/LoadStoredValues';
+
 
 const Stack = createStackNavigator();
 type ThemeType = 'light' | 'dark';
@@ -36,6 +38,9 @@ export default function App() {
   // used for swapping between light and dark mode
   // Initialize state with a type
   const [theme, setTheme] = useState<ThemeType>('light');
+  //load stored values
+  loadStoredValues();
+  //try sending notifications if email isn't empty
 
   // Merge custom theme with Eva's base theme
   const currentTheme = { ...eva[theme], ...customColors };

@@ -21,70 +21,19 @@ import LoadingScreen from "./LoadingScreen";
 import DateTimePicker , {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
 import Network from 'expo-network';
 import { ThemeContext } from './ThemeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { sendEmailNotification } from "../scripts/EmailNotifications";
 
-export default function EmailSetup({ navigation }: NavigationType) {
+export default function EmailSetup( { navigation }: NavigationType) {
+  //const [email, setEmail] = useState<string>('');
+  
 
-  const onStartChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setStartDateValue(currentDate);
-  };
-
-  const onEndChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setEndDateValue(currentDate);
-  };
-
-  const showStartMode = (currentMode) => {
-    DateTimePickerAndroid.open({
-      value: startDateValue,
-      onChange: onStartChange,
-      mode: currentMode,
-      is24Hour: false,
-    });
-  };
-
-  const showEndMode = (currentMode) => {
-    DateTimePickerAndroid.open({
-      value: endDateValue,
-      onChange: onEndChange,
-      mode: currentMode,
-      is24Hour: false,
-    });
-  };
-
-  const showStartDatepicker = () => {
-    showStartMode("date");
-  };
-
-  const showStartTimepicker = () => {
-    showStartMode("time");
-  };
-
-  const showEndDatepicker = () => {
-    showEndMode("date");
-  };
-
-  const showEndTimepicker = () => {
-    showEndMode("time");
-  };
-
-  const route = useRoute<routeProp>();
-  let site = route.params?.site ?? "";
-  let instrumentName = site.slice(site.lastIndexOf("/") + 1);
-  let needsLocation = site.includes("LGR");
   const themeContext = React.useContext(ThemeContext);
   const isDarkMode = themeContext.theme === 'dark';
 
   // used for setting and remembering the input values
+  const [emailValue, setEmailValue] = useState("");
   const [nameValue, setNameValue] = useState("");
-  const [startDateValue, setStartDateValue] = useState(new Date());
-  const [endDateValue, setEndDateValue] = useState(new Date());
-  const [notesValue, setNotesValue] = useState("");
-  const [siteValue, setSiteValue] = useState("");
-  const [addToBadData, setAddToBadData] = useState(false);
-  const [badDataReason, setBadDataReason] = useState("");
-  const [showStartPicker, setShowStartPicker] = useState(false);
-  const [showEndPicker, setShowEndPicker] = useState(false);
 
   // used for determining if PUT request was successful
   // will set the success/fail notification to visible, aswell as the color and text
@@ -92,136 +41,37 @@ export default function EmailSetup({ navigation }: NavigationType) {
   const [messageColor, setMessageColor] = useState("");
   const [message, setMessage] = useState("");
   const [returnHome, retHome] = useState(false);
-  const visibleRef = useRef(false);
 
-  // used for loading screen
-    const [loadingValue, setLoadingValue] = useState(false);
-
-  useEffect(() => {
-    const fetchSite = async () => {
-      let check = await Network.useNetworkState()
-      if (site.includes("LGR") && check.isConnected) {
-        try {
-          const response = await getInstrumentSite(site);
-          if (response.success) {
-            setSiteValue(response.data || ""); // Set the file names as options
-          } else {
-            alert(`Error fetching site: ${response.error}`);
-          }
-        } catch (error) {
-          console.error("Error fetching instrument site:", error);
-        }
-      }
-    };
-    fetchSite();
-  }, [site]);
-
-  const buildInstrumentNotes = (): string => {
-    const time = new Date(startDateValue);
-    const year = time.getFullYear().toString()
-    const month = (time.getMonth() + 1).toString() // now.getMonth() is zero-base (i.e. January is 0), likely due to something with Oracle's implementation - August
-    const day = time.getDate().toString()
-    const hours= time.getHours().toString()
-    const minutes = time.getMinutes().toString()
-
-    let result: string = `- Time in: ${year}-${month}-${day} ${hours}:${minutes}Z\n`;
-
-    result += `- Name: ${nameValue}\n`;
-    result += `- Notes: ${notesValue}\n`;
-    result += "---\n";
-
-    return result;
-  };
-
-  const buildBadDataString = (): string => {
-    const startTime = startDateValue.toISOString().split(".")[0] + "Z";
-    const endTime = endDateValue.toISOString().split(".")[0] + "Z";
-    const currentTime = (new Date()).toISOString().split(".")[0] + "Z";
-    let result: string = `${startTime},${endTime},all,NA,${currentTime},${nameValue},${badDataReason}`;
-
-    return result;
-  };
-
-  const handleSubmit = () => {
-    if (
-      !nameValue ||
-      !startDateValue ||
-      (addToBadData && !endDateValue) ||
-      !notesValue ||
-      (needsLocation && !siteValue.trim()) ||
-      (addToBadData && !badDataReason.trim())
-    ) {
+  const saveEmail = async () => {
+    try {
+      await AsyncStorage.setItem('email', emailValue);
+    } catch (e) {
+      console.error("Failed to save the current email: ", e);
+    }
+  }
+  const saveName = async () => {
+    try {
+      await AsyncStorage.setItem('name', nameValue);
+    } catch (e) {
+      console.error("Failed to save the current name: ", e);
+    }
+  }
+  function handleSubmit() {
+    if (!emailValue) {
       setMessage("Please fill out all fields before submitting.");
       setMessageColor(customTheme["color-danger-700"]);
       setVisible(true);
       return;
     }
-    handleUpdate();
+    
+    //set Email in storage
+    saveEmail();
+    //set Name in storage
+    saveName();
+    //return home
+    navigateHome(true);
   };
-
-  const handleUpdate = async () => {
-    // display loading screen while while awaiting for results
-    setLoadingValue(true);
-
-    const instrumentNotes = buildInstrumentNotes();
-
-    let badResult;
-    if (addToBadData) {
-      const badDataString = buildBadDataString();
-      let location;
-      let instrument;
-      if (needsLocation) {
-        location = siteValue.toLowerCase();
-        instrument = "lgr_ugga";
-      } else {
-        location = "wbb";
-        instrument = "teledyne_" + instrumentName.toLowerCase();
-      }
-      badResult = await setBadData(
-        location,
-        instrument,
-        badDataString,
-        `Update ${instrument}.csv`
-      );
-    }
-
-    const result = await setInstrumentFile(
-      site,
-      instrumentNotes,
-      `Update ${instrumentName}.md`,
-      needsLocation,
-      siteValue
-    );
-
-    // hide loading screen when we have results
-    setLoadingValue(false);
-
-    if (result.success && (!badResult || badResult.success)) {
-      setMessage("File updated successfully!");
-      setMessageColor(customTheme["color-success-700"]);
-      retHome(true);
-    } else {
-      if (result.error) {
-        setMessage(`Error: ${result.error}`);
-        setMessageColor(customTheme["color-danger-700"]);
-      } else if (badResult.error) {
-        setMessage(`Instrument maintenance notes updated successfully.\nUnable to update Bad Data. Please update Bad Data manually.`);
-        setMessageColor(customTheme["color-danger-700"]);
-        retHome(true);
-      }
-    }
-    setTimeout(() => {
-      setVisible(true);
-      visibleRef.current = true;
-  }, 100);
-  };
-
-  const handleChecked = (checked: boolean) => {
-    setAddToBadData(checked);
-    if (showEndPicker) {
-      setShowEndPicker(false);
-    }
-  };
+  //try pushing email notifications
 
   //method to navigate home to send to popup so it can happen after dismiss button is clicked
   function navigateHome(nav:boolean){
@@ -251,25 +101,20 @@ export default function EmailSetup({ navigation }: NavigationType) {
             visible={visible}
             returnHome={returnHome}/>
 
-          {/* loading screen */}
-          <LoadingScreen visible={loadingValue}/>
-            
-          {/* Time input */}
-          {needsLocation && (
-            <TextInput
-              labelText="Location"
-              labelValue={siteValue}
-              onTextChange={setSiteValue}
-              placeholder="Enter site"
-              style={styles.textInput}
-            />
-          )}
-
           {/* Name input */}
           <TextInput
-            labelText="Email"
+            labelText="Name in site notes/planning visits"
             labelValue={nameValue}
             onTextChange={setNameValue}
+            placeholder="first last"
+            style={styles.textInput}
+          />
+
+          {/* Email input */}
+          <TextInput
+            labelText="Email you want notifications sent to"
+            labelValue={emailValue}
+            onTextChange={setEmailValue}
             placeholder="example@example.com"
             style={styles.textInput}
           />
@@ -295,10 +140,6 @@ const styles = StyleSheet.create({
     alignItems: "stretch", // has button fill space horizontally
     justifyContent: "flex-start",
   },
-  requestText: {
-    flex: 1,
-    margin: 15,
-  },
   textInput: {
     flex: 1,
     margin: 15,
@@ -306,22 +147,5 @@ const styles = StyleSheet.create({
   submitButton:{
     margin: 20, 
     backgroundColor: "#06b4e0",
-  },
-  datePicker: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 0,
-    marginBottom: 15,
-    marginRight: 15,
-    marginLeft: 15,
-    padding: 10,
-    borderWidth: 1,
-    borderRadius: 5,
-    borderColor: '#d3d3d3',
-    backgroundColor: '#f9f9f9',
-  },
-  androidDateTime: {
-    flexDirection: "row",
-    justifyContent: "space-around",
   },
 });
