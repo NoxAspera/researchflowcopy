@@ -16,6 +16,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import PopupProp from './Popup';
 import { ThemeContext } from './ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { sendEmailNotification } from "../scripts/EmailNotifications";
 
 export default function EmailSetup( { navigation }: NavigationType) {
   const themeContext = React.useContext(ThemeContext);
@@ -70,11 +71,13 @@ export default function EmailSetup( { navigation }: NavigationType) {
     saveEmail();
     //set Name in storage
     saveName();
+    //try pushing email notifications
+    console.log("calling send notifications")
+    sendEmailNotification(emailValue, nameValue);
     //return home
     navigateHome(true);
   };
-  //try pushing email notifications
-
+  
   //method to navigate home to send to popup so it can happen after dismiss button is clicked
   function navigateHome(nav:boolean){
     if(nav){
