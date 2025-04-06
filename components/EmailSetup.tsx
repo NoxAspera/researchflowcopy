@@ -1,33 +1,23 @@
 /**
- * Instrument Maintenance Page
+ * Email Setup Page
  * @author David Schiwal
- * Updated: 4/4/25 - DS
+ * Updated: 4/5/25 - DS
  *
- * This is the page for instrument maintenance. It will take in the user input, format
- * it, and send it to the github repo.
+ * This is the page for email natofication setup. It will take in the given email and name, try to send
+ * notifications immeidately if applicable, and save the email and name to the device.
  */
-import { StyleSheet, KeyboardAvoidingView, TouchableOpacity, View, Platform, Pressable } from "react-native";
-import React, { useState, useEffect, useRef } from "react";
-import { useRoute } from "@react-navigation/native";
-import { Button, Layout, Text, CheckBox, Icon } from "@ui-kitten/components";
+import { StyleSheet, KeyboardAvoidingView } from "react-native";
+import React, { useState} from "react";
+import { Button, Layout, Text } from "@ui-kitten/components";
 import TextInput from "./TextInput";
-import NoteInput from "./NoteInput";
 import { customTheme } from "./CustomTheme";
-import { NavigationType, routeProp } from "./types";
-import {setInstrumentFile, getInstrumentSite, setBadData} from "../scripts/APIRequests";
+import { NavigationType } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
 import PopupProp from './Popup';
-import LoadingScreen from "./LoadingScreen";
-import DateTimePicker , {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
-import Network from 'expo-network';
 import { ThemeContext } from './ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { sendEmailNotification } from "../scripts/EmailNotifications";
 
 export default function EmailSetup( { navigation }: NavigationType) {
-  //const [email, setEmail] = useState<string>('');
-  
-
   const themeContext = React.useContext(ThemeContext);
   const isDarkMode = themeContext.theme === 'dark';
 
@@ -42,6 +32,10 @@ export default function EmailSetup( { navigation }: NavigationType) {
   const [message, setMessage] = useState("");
   const [returnHome, retHome] = useState(false);
 
+  /**
+   * @author David Schiwal
+   * This method saves the given email to the device
+   */
   const saveEmail = async () => {
     try {
       await AsyncStorage.setItem('email', emailValue);
@@ -49,6 +43,10 @@ export default function EmailSetup( { navigation }: NavigationType) {
       console.error("Failed to save the current email: ", e);
     }
   }
+  /**
+   * @author David Schiwal
+   * This method saves the given name to the device
+   */
   const saveName = async () => {
     try {
       await AsyncStorage.setItem('name', nameValue);
@@ -56,6 +54,11 @@ export default function EmailSetup( { navigation }: NavigationType) {
       console.error("Failed to save the current name: ", e);
     }
   }
+  /**
+   * @author David Schiwal
+   * This method checks if fields have been field and saves them if they are
+   * @returns If needed to put the popup up warning that fields haven't been filled.
+   */
   function handleSubmit() {
     if (!emailValue) {
       setMessage("Please fill out all fields before submitting.");
@@ -63,7 +66,6 @@ export default function EmailSetup( { navigation }: NavigationType) {
       setVisible(true);
       return;
     }
-    
     //set Email in storage
     saveEmail();
     //set Name in storage

@@ -41,7 +41,7 @@ export default function App() {
   //load stored values
   loadStoredValues();
   //try sending notifications if email isn't empty
-
+  
   // Merge custom theme with Eva's base theme
   const currentTheme = { ...eva[theme], ...customColors };
 
