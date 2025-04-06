@@ -451,7 +451,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           additional_notes: notesValue 
         };
         console.log("entry created")
-        const utcTime = `${endYear}-${endMonth}-${endDay} ${endHours}:${endMinutes}:${endSeconds}Z`;
+        const utcTime = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:${endSeconds}Z`;
         if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
           tankRecordString += removeTankFromSite(originalLts, utcTime);
         }
