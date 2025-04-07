@@ -6,9 +6,10 @@
  * This property represents the popup messages that appear on the screen for success and failures.
  */
 import { Button, Card, Icon, IconElement, Layout, Modal, Text } from "@ui-kitten/components";
-import React from "react";
+import React, { useContext } from "react";
 import { StyleSheet, ColorValue } from "react-native";
 import { customTheme } from "./CustomTheme";
+import { ThemeContext } from "./ThemeContext";
 
 interface PUProp {
   popupText: string;
@@ -20,6 +21,8 @@ interface PUProp {
 }
 
 const PopupProp: React.FC<PUProp> = ({ popupText, popupStatus, visible, returnHome, onPress, navigateHome }) => {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   return (
     <Layout>
       <Modal
@@ -27,8 +30,8 @@ const PopupProp: React.FC<PUProp> = ({ popupText, popupStatus, visible, returnHo
         backdropStyle={styles.backdrop}
         onBackdropPress={() => onPress(false)}
       >
-        <Card disabled={true} style={styles.card} status={popupStatus}>
-          <Layout style={styles.container}>
+        <Card disabled={true} style={isDark ? styles.cardDark : styles.cardLight} status={popupStatus}>
+          <Layout style={isDark ? styles.containerDark : styles.containerLight}>
             {popupStatus === "success" ? (
               <Icon name="checkmark-circle-outline" style={styles.icon} fill={customTheme["color-success-500"]} />
             ) : (
@@ -53,10 +56,23 @@ const styles = StyleSheet.create({
   backdrop: {
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
-  card: {
+  cardLight: {
     margin: 15,
     backgroundColor: "#e3e3e3",
-    alignItems: "stretch",
+  },
+  cardDark: {
+    margin: 15,
+    backgroundColor: "#1C2760",
+  },
+  containerLight: {
+    alignItems: "center", 
+    justifyContent: "center",
+    backgroundColor: "#e3e3e3",
+  },
+  containerDark: {
+    alignItems: "center", 
+    justifyContent: "center",
+    backgroundColor: "#1C2760",
   },
   icon: {
     height: 128,

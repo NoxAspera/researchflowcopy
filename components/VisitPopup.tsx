@@ -7,10 +7,11 @@
  * be empty soon, and a visit should be made
  */
 import { Button, Card, Icon, Layout, Modal, Text } from '@ui-kitten/components';
-import React from 'react'
+import React, { useContext } from 'react'
 import { StyleSheet, ColorValue } from "react-native"
 import { NavigationType } from './types';
 import { customTheme } from './CustomTheme';
+import { ThemeContext } from './ThemeContext';
 
 interface VisitPUProp {
   visible: boolean; 
@@ -45,14 +46,16 @@ const VisitPopupProp: React.FC<VisitPUProp> = ({
   visible, 
   removePopup,
   navigatePlanVisit }) => {
+    const { theme } = useContext(ThemeContext);
+    const isDark = theme === 'dark';
     return (
       <Layout>
         <Modal
           visible={visible}
           backdropStyle={styles.backdrop}
         >
-          <Card disabled={true} style={styles.card} status='info'>
-            <Layout style={styles.container}>
+          <Card disabled={true} style={isDark ? styles.cardDark : styles.cardLight} status='info'>
+            <Layout style={isDark ? styles.containerDark : styles.containerLight}>
               <Icon name="trending-down-outline" style={styles.icon} fill={customTheme["color-info-500"]} />
               <Text style={{ textAlign: "center" }}>{`${(() => {
                   let tanks = [lowTank, midTank, highTank, ltsTank, n2Tank].filter(tank => tank != "");
@@ -104,6 +107,24 @@ const styles = StyleSheet.create({
       width: "90%",
       backgroundColor: "#9c9c9c",
       borderColor: "#9c9c9c",
+    },
+    cardLight: {
+      margin: 15,
+      backgroundColor: "#e3e3e3",
+    },
+    cardDark: {
+      margin: 15,
+      backgroundColor: "#1C2760",
+    },
+    containerLight: {
+      alignItems: "center", 
+      justifyContent: "center",
+      backgroundColor: "#e3e3e3",
+    },
+    containerDark: {
+      alignItems: "center", 
+      justifyContent: "center",
+      backgroundColor: "#1C2760",
     },
     icon: {
       height: 128,

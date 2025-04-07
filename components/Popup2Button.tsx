@@ -8,9 +8,10 @@
  * to submit' pop up
  */
 import { Button, Card, Icon, Layout, Modal, Text } from '@ui-kitten/components';
-import React from 'react'
-import { StyleSheet, ColorValue } from "react-native"
+import React, { useContext } from 'react'
+import { StyleSheet, ColorValue, useColorScheme } from "react-native"
 import { customTheme } from './CustomTheme';
+import { ThemeContext } from './ThemeContext';
 
 interface PUProp{
     visible: boolean;
@@ -19,6 +20,8 @@ interface PUProp{
 }
 
 const PopupProp2Button: React.FC<PUProp> = ({ visible, sendData, removePopup }) => {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
     return (
       <Layout>
         <Modal
@@ -26,8 +29,8 @@ const PopupProp2Button: React.FC<PUProp> = ({ visible, sendData, removePopup }) 
           backdropStyle={styles.backdrop}
           onBackdropPress={() => removePopup(false)}
         >
-          <Card disabled={true} style={styles.card} status='warning'>
-            <Layout style={styles.container}>
+          <Card disabled={true} style={isDark ? styles.cardDark : styles.cardLight} status='warning'>
+            <Layout style={isDark ? styles.containerDark : styles.containerLight}>
               <Icon name="alert-triangle-outline" style={styles.icon} fill={"#fcba00"} />
                 <Text style={{ textAlign: "center" }}>You are missing some input field(s), would you like to add them?</Text>
               <Button
@@ -51,18 +54,27 @@ const styles = StyleSheet.create({
     backdrop: {
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
-    card: {
+    cardLight: {
       margin: 15,
       backgroundColor: "#e3e3e3",
+    },
+    cardDark: {
+      margin: 15,
+      backgroundColor: "#1C2760",
     },
     icon: {
       height: 128,
       width: 128,
     },
-    container: {
+    containerLight: {
       alignItems: "center", 
       justifyContent: "center",
       backgroundColor: "#e3e3e3",
+    },
+    containerDark: {
+      alignItems: "center", 
+      justifyContent: "center",
+      backgroundColor: "#1C2760",
     },
     primaryButton: {
       marginTop: 15,
