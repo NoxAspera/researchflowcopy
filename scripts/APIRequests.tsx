@@ -152,7 +152,6 @@ export async function readUpdates()
             let instrument =  value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
             value = value.substring(value.indexOf(", ") + 2)
             let newEntry = value.substring(value.indexOf(": ") + 2).slice(0, -1)
-            value = value.substring(value.indexOf(", ") + 2)
 
             await setBadData(site, instrument, newEntry, "updating from offline")
             await sleep(50)
@@ -174,10 +173,9 @@ export async function readUpdates()
                 //console.log(content)
                 value = value.substring(value.indexOf(", ") + 2)
                 let needsSite =(value.substring(value.indexOf(": ") + 2 , value.indexOf(", ")) === "true")
-                //console.log(needsSite)
                 value = value.substring(value.indexOf(", ") + 2)
                 let site = value.substring(value.indexOf(": ") + 2)
-                //console.log(site)
+                console.log(site)
                 await setInstrumentFile(path,content,"updating from offline", needsSite, site)
                 await sleep(50)
             }
@@ -271,6 +269,7 @@ export async function readUpdates()
             let tank_update_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/tank_updates.txt")).split("\n")
             tank_update_entries.forEach(async (value) => {
                 if(value !== ""){
+                    console.log(value)
                     let tankId = value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
                     value = value.substring(value.indexOf(", ") + 2)
                     let pressure =  parseInt(value.substring(value.indexOf(": ") + 2 , value.indexOf(", ")))
@@ -279,7 +278,33 @@ export async function readUpdates()
                     value = value.substring(value.indexOf(", ") + 2)
                     let time = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
                     value = value.substring(value.indexOf(", ") + 2)
-                    let name = value.substring(value.indexOf(": ") + 2).slice(0, -1)
+                    let name = ""
+                    let co2 = undefined
+                    let ch4 = undefined
+                    let comment = undefined
+                    let fillId = undefined
+                    if (value.includes("co2:"))
+                    {
+                        name = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
+                        value = value.substring(value.indexOf(", ") + 2)
+                        console.log(name)
+                        co2 = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
+                        console.log(co2)
+                        value = value.substring(value.indexOf(", ") + 2)
+                        ch4 = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
+                        console.log(ch4)
+                        value = value.substring(value.indexOf(", ") + 2)
+                        comment = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
+                        console.log(comment)
+                        value = value.substring(value.indexOf(", ") + 2)
+                        fillId = value.substring(value.indexOf(": ") + 2).slice(0, -1)
+                        console.log(fillId)
+
+                    }
+                    else
+                    {
+                        name = value.substring(value.indexOf(": ") + 2).slice(0, -1)
+                    }
 
                     let previousRecord: TankRecord = getLatestTankEntry(tankId)
 
@@ -287,6 +312,14 @@ export async function readUpdates()
                     previousRecord.location = site
                     previousRecord.updatedAt = time
                     previousRecord.userId = name
+
+                    if(co2)
+                    {
+                        previousRecord.co2 = co2
+                        previousRecord.ch4 = ch4
+                        previousRecord.comment = comment
+                        previousRecord.fillId = fillId
+                    }
                     
                     addEntrytoTankDictionary(previousRecord)
                     tankRecordString += buildTankRecordString(previousRecord);
@@ -490,8 +523,9 @@ export async function setVisitFile(visit: visit, commitMessage: string)
     }   
 }
 
-export async function offlineTankEntry(tankID: string, pressure: number, site: string, time:string, name:string)
+export async function offlineTankEntry(tankID: string, pressure: number, site: string, time:string, name:string, co2?: number, ch4?: number, comment?: string, fillId?: string)
 {
+    console.log("called")
     try {
         let path = FileSystem.documentDirectory + "offline_updates/tank_updates.txt"
 
@@ -502,8 +536,14 @@ export async function offlineTankEntry(tankID: string, pressure: number, site: s
         }
         //console.log(content)
 
-        content += `{tankId: ${tankID}, pressure: ${pressure}, site: ${site}, time: ${time}, name: ${name}}\n`
+        content += `{tankId: ${tankID}, pressure: ${pressure}, site: ${site}, time: ${time}, name: ${name}`
 
+        if(co2 && ch4 && comment)
+        {
+            content += `, co2: ${co2}, ch4: ${ch4}, comment: ${comment}, fillId: ${fillId}`
+        }
+        content += "}\n"
+        console.log(content)
         await FileSystem.writeAsStringAsync(path, content)
 
         return {success: true}

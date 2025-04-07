@@ -14,17 +14,26 @@ import TextInput from './TextInput'
 import { NavigationType, routeProp } from './types'
 import { ScrollView } from 'react-native-gesture-handler';
 import PopupProp from './Popup';
-import { getLatestTankEntry, setTankTracker, TankRecord, addEntrytoTankDictionary, buildTankRecordString } from '../scripts/APIRequests';
+import { getLatestTankEntry, setTankTracker, TankRecord, addEntrytoTankDictionary, buildTankRecordString, offlineTankEntry } from '../scripts/APIRequests';
 import { Float } from 'react-native/Libraries/Types/CodegenTypes';
 import { customTheme } from './CustomTheme'
 import LoadingScreen from "./LoadingScreen";
+import * as Network from "expo-network"
 import VisitPopupProp from './VisitPopup';
+
+async function isConnected()
+{
+  let check = (await Network.getNetworkStateAsync()).isConnected
+  console.log(check)
+  return check
+}
 
 export default function TankTracker({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
     let tank = route.params?.site;
 
     // used for setting and remembering the input values
+    const [networkStatus, setNetworkStatus] = useState(true)
     const [nameValue, setNameValue] = useState("");
     const [dateValue, setDateValue] = useState("");
     const [PSIValue, setPSIValue] = useState<Float>(undefined);
@@ -52,7 +61,10 @@ export default function TankTracker({ navigation }: NavigationType) {
     const [loadingValue, setLoadingValue] = useState(false);
 
     useEffect(() => {
+      const fetchTank = async () => {
+      setNetworkStatus(await isConnected())
       if (tank) {
+       
         const entry = getLatestTankEntry(tank);
         console.log("Latest Entry:");
         console.log(entry);
@@ -69,6 +81,8 @@ export default function TankTracker({ navigation }: NavigationType) {
           prevPressure = entry.pressure;
         }
       }
+    }
+    fetchTank()
     }, [tank]);
 
     // Use IndexPath for selected index for drop down menu
@@ -183,11 +197,19 @@ export default function TankTracker({ navigation }: NavigationType) {
     const handleUpdate = async () => {
       // show spinner while submitting
       setLoadingValue(true);
-
-      const entry = buildTankEntry();
-      addEntrytoTankDictionary(entry);
-      const tankRecordString = buildTankRecordString(entry);
-      const result = await setTankTracker(tankRecordString);
+      console.log(networkStatus)
+      let result = undefined
+      if(networkStatus)
+      {
+        const entry = buildTankEntry();
+        addEntrytoTankDictionary(entry);
+        const tankRecordString = buildTankRecordString(entry);
+        result = await setTankTracker(tankRecordString);
+      }
+      else
+      {
+        result = await  offlineTankEntry(tank, PSIValue, locationValue, getCurrentUtcDateTime(), nameValue, CO2Value, CH4Value, notesValue, fillIDValue)
+      }
 
       // remove spinner once we have results back
       setLoadingValue(false);
