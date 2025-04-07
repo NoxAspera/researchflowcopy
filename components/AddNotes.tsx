@@ -580,7 +580,14 @@ export default function AddNotes({ navigation }: NavigationType) {
 
         // check to see if the request was ok, give a message based on that
         if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success) && (!badDataResult || badDataResult.success)) {
+          if(networkStatus)
+          {
             setMessage("File updated successfully!");
+          }
+          else
+          {
+            setMessage("File updated successfully! Login when in service to upload changes")
+          }
             setMessageStatus("success");
             retHome(true);
           } else {
