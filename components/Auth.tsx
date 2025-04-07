@@ -18,7 +18,7 @@ WebBrowser.maybeCompleteAuthSession();
 const discovery = {
   authorizationEndpoint: 'https://github.com/login/oauth/authorize',
   tokenEndpoint: 'https://github.com/login/oauth/access_token',
-  revocationEndpoint: 'https://github.com/settings/connections/applications/Iv23liZ9ogrXCPdG093f',
+  revocationEndpoint: 'https://github.com/settings/connections/applications/Ov23lizfwfjG9hB6JIf9',
 };
 
 
@@ -52,11 +52,13 @@ export default function App({navigation}: NavigationType) {
         const { code } = response.params;
         
         const {token_type, scopes, access_token} = (await generateGithubToken(code)).data
+        console.log(access_token)
         setGithubToken(access_token);
         await tankTrackerSpinUp();
         await readUpdates()
         await updateDirectories()
         setLoadingValue(false)
+        navigation.navigate("Home")
     }
   }
 
@@ -77,8 +79,9 @@ async function handlePress()
     setLoadingValue(true)
     await tankTrackerOffline()
     setLoadingValue(false)
+    navigation.navigate("Home")
   }
-  navigation.navigate("Home")
+  
 }
 
   return (
