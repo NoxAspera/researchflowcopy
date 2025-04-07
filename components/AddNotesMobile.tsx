@@ -15,7 +15,7 @@ import TextInput from './TextInput'
 import NoteInput from './NoteInput'
 import { Layout, Button, Text, Select, SelectItem, IndexPath, CheckBox, Icon, DateService } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile, setBadData, offlineTankEntry } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile, setBadData, offlineTankEntry, buildTankRecordString } from '../scripts/APIRequests';
 import { parseNotes, ParsedData, copyTankRecord } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
@@ -320,6 +320,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       const endMinutes = String(end.getUTCMinutes()).padStart(2, "0");
       const endSeconds = String(end.getUTCSeconds()).padStart(2, "0");
         
+      let tankRecordString = "";
         // create an entry object data that will be sent off to the repo
         let data: MobileEntry = 
         {
@@ -337,17 +338,18 @@ export default function AddNotes({ navigation }: NavigationType) {
           additional_notes: notesValue 
         };
 
-        const utcTime = `${endYear}-${endMonth}-${endDay} ${endHours}:${endMinutes}:${endSeconds}Z`;
+        const utcTime = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:${endSeconds}Z`;
         const siteName = site.replace("mobile/","");
-        if (originalTank && (!tankRecord || (originalTank.tankId != tankRecord.tankId))) {
+        if(networkStatus){
+          if (originalTank && (!tankRecord || (originalTank.tankId != tankRecord.tankId))) {
           let newTankEntry = copyTankRecord(originalTank);
           newTankEntry.location = "ASB279";
           newTankEntry.pressure = 500;
           newTankEntry.userId = nameValue;
           newTankEntry.updatedAt = utcTime;
           addEntrytoTankDictionary(newTankEntry);
+          tankRecordString += buildTankRecordString(newTankEntry);
         }
-        if(networkStatus){
           if (tankRecord) {
             let tank = copyTankRecord(tankRecord);
             tank.location = siteName;
@@ -355,6 +357,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             tank.pressure = parseInt(tankPressure);
             tank.userId = nameValue;
             addEntrytoTankDictionary(tank);
+            tankRecordString += buildTankRecordString(tank);
           }
         }
         else
@@ -363,10 +366,11 @@ export default function AddNotes({ navigation }: NavigationType) {
           {
             await offlineTankEntry(tankId, parseInt(tankPressure), site, utcTime, nameValue)
           }
+        }
 
         // send the request
         const result = await setSiteFile(site, buildMobileNotes(data), "updating notes from researchFlow");
-        const tankResult = await setTankTracker();
+        const tankResult = await setTankTracker(tankRecordString);
 
         let instMaintResult;
         let instMaintResult2;
@@ -432,7 +436,6 @@ export default function AddNotes({ navigation }: NavigationType) {
           visibleRef.current = true;
         }, 100);
     };
-  }
 
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
     function navigateHome(nav:boolean){
