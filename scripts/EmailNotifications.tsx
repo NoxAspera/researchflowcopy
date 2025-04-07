@@ -8,7 +8,7 @@
  * 
  * Note: CANT CALL ANYTHING WITH "use" in the name in this file
  **/
-import { parseVisits } from '../scripts/Parsers'
+import { parseVisits } from '../scripts/Parsers';
 import { getFileContents } from '../scripts/APIRequests';
 
 /**
