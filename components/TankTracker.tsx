@@ -14,7 +14,7 @@ import TextInput from './TextInput'
 import { NavigationType, routeProp } from './types'
 import { ScrollView } from 'react-native-gesture-handler';
 import PopupProp from './Popup';
-import { getLatestTankEntry, setTankTracker, TankRecord, addEntrytoTankDictionary } from '../scripts/APIRequests';
+import { getLatestTankEntry, setTankTracker, TankRecord, addEntrytoTankDictionary, buildTankRecordString } from '../scripts/APIRequests';
 import { Float } from 'react-native/Libraries/Types/CodegenTypes';
 import { customTheme } from './CustomTheme'
 import LoadingScreen from "./LoadingScreen";
@@ -38,7 +38,7 @@ export default function TankTracker({ navigation }: NavigationType) {
     // used for determining if PUT request was successful
     // will set the success/fail notification to visible, aswell as the color and text
     const [visible, setVisible] = useState(false);
-    const [messageColor, setMessageColor] = useState("");
+    const [messageStatus, setMessageStatus] = useState("");
     const [message, setMessage] = useState("");
     const [returnHome, retHome] = useState(false);
     const visibleRef = useRef(false);
@@ -138,7 +138,7 @@ export default function TankTracker({ navigation }: NavigationType) {
     const handleSubmit = () => {
       if (!nameValue || !locationValue || !PSIValue) {
         setMessage("Please make sure Name, Location, and PSI are filled out before submitting.");
-        setMessageColor(customTheme['color-danger-700']);
+        setMessageStatus("danger");
         setVisible(true);
         return;
       }
@@ -186,17 +186,18 @@ export default function TankTracker({ navigation }: NavigationType) {
 
       const entry = buildTankEntry();
       addEntrytoTankDictionary(entry);
-      const result = await setTankTracker();
+      const tankRecordString = buildTankRecordString(entry);
+      const result = await setTankTracker(tankRecordString);
 
       // remove spinner once we have results back
       setLoadingValue(false);
       if (result.success) {
         setMessage("File updated successfully!");
-        setMessageColor(customTheme['color-success-700']);
+        setMessageStatus("success");
         retHome(true);
       } else {
         setMessage(`Error: ${result.error}`);
-        setMessageColor(customTheme['color-danger-700']);
+        setMessageStatus("danger");
       }
       setTimeout(() => {
         setVisible(true);
@@ -220,8 +221,8 @@ export default function TankTracker({ navigation }: NavigationType) {
     return (
       <KeyboardAvoidingView
                   behavior = "padding"
-                  style={styles.container}>
-          <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
+                  style={{flex: 1}}>
+          <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1 }}>
             <Layout style={styles.container} level="1">
               
               {/* header */}
@@ -234,7 +235,7 @@ export default function TankTracker({ navigation }: NavigationType) {
 
               {/* success/failure popup */}
               <PopupProp popupText={message} 
-                popupColor={messageColor} 
+                popupStatus={messageStatus} 
                 onPress={setVisible} 
                 navigateHome={navigateHome} 
                 visible={visible}
@@ -322,8 +323,9 @@ export default function TankTracker({ navigation }: NavigationType) {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
+      flexDirection: "column",
       alignItems: 'stretch',        // has button fill space horizontally
-      justifyContent: 'space-evenly',
+      justifyContent: 'flex-start',
     },
     reasonText: {
       flex: 1,
