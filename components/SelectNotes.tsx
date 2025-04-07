@@ -32,7 +32,7 @@ export default function SelectSite({navigation}: NavigationType) {
   };
 
   return (
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <Layout style={styles.container}>
 
         {buttonData.map((button) => (
@@ -53,7 +53,7 @@ export default function SelectSite({navigation}: NavigationType) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'space-around',
+    justifyContent: 'flex-start',
     padding: 20,
   },
   button: {

@@ -142,9 +142,9 @@ export default function PlanVisit({ navigation }: NavigationType) {
   return (
     <KeyboardAvoidingView
       behavior = "padding"
-      style={styles.container}
+      style={{ flex: 1 }}
     >
-      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
+      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1 }}>
         <Layout style={styles.container} level="1">
           {/* header */}
           <Text category="h1" style={{ textAlign: "center" }}>
@@ -227,8 +227,6 @@ export default function PlanVisit({ navigation }: NavigationType) {
           >
           {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Submit</Text>}
           </Button>
-
-          
         </Layout>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -238,15 +236,14 @@ export default function PlanVisit({ navigation }: NavigationType) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: "column",
     alignItems: "stretch", // has button fill space horizontally
     justifyContent: "space-evenly",
   },
   reasonText: {
-    flex: 1,
     margin: 8,
   },
   textInput: {
-    flex: 1,
     margin: 8,
   },
   submitButton:{
