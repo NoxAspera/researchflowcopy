@@ -221,8 +221,8 @@ export default function TankTracker({ navigation }: NavigationType) {
     return (
       <KeyboardAvoidingView
                   behavior = "padding"
-                  style={styles.container}>
-          <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
+                  style={{flex: 1}}>
+          <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1 }}>
             <Layout style={styles.container} level="1">
               
               {/* header */}
@@ -323,8 +323,9 @@ export default function TankTracker({ navigation }: NavigationType) {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
+      flexDirection: "column",
       alignItems: 'stretch',        // has button fill space horizontally
-      justifyContent: 'space-evenly',
+      justifyContent: 'flex-start',
     },
     reasonText: {
       flex: 1,
