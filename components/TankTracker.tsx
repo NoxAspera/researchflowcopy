@@ -36,9 +36,9 @@ export default function TankTracker({ navigation }: NavigationType) {
     const [networkStatus, setNetworkStatus] = useState(true)
     const [nameValue, setNameValue] = useState("");
     const [dateValue, setDateValue] = useState("");
-    const [PSIValue, setPSIValue] = useState<Float>(undefined);
-    const [CO2Value, setCO2Value] = useState<Float>(undefined);
-    const [CH4Value, setCH4Value] = useState<Float>(undefined);
+    const [PSIValue, setPSIValue] = useState("");
+    const [CO2Value, setCO2Value] = useState("");
+    const [CH4Value, setCH4Value] = useState("");
     const [notesValue, setNotesValue] = useState("");
     const [fillIDValue, setFillIDValue] = useState("");
     const [locationValue, setLocationValue] = useState("");
@@ -70,10 +70,10 @@ export default function TankTracker({ navigation }: NavigationType) {
         console.log(entry);
         if (entry) {
           setLocationValue(entry.location);
-          setCO2Value(entry.co2);
-          setCH4Value(entry.ch4);
+          setCO2Value(entry.co2.toString());
+          setCH4Value(entry.ch4.toString());
           setFillIDValue(entry.fillId);
-          setPSIValue(entry.pressure);
+          setPSIValue(entry.pressure.toString());
           setLatestEntry(entry);
 
           // save previous date and pressure for tank predictor
@@ -107,7 +107,7 @@ export default function TankTracker({ navigation }: NavigationType) {
       const currentTime = getCurrentUtcDateTime();
       let newEntry: TankRecord = {
         serial: latestEntry ? latestEntry.serial : "",
-        ch4: CH4Value,
+        ch4: parseFloat(CH4Value),
         ch4CalibrationFile: latestEntry ? latestEntry.ch4CalibrationFile : "",
         ch4InstrumentId: latestEntry ? latestEntry.ch4InstrumentId : "",
         ch4N: latestEntry ? latestEntry.ch4N : undefined,
@@ -115,7 +115,7 @@ export default function TankTracker({ navigation }: NavigationType) {
         ch4Stdev: latestEntry ? latestEntry.ch4Stdev : undefined,
         ch4Sterr: latestEntry ? latestEntry.ch4Sterr : undefined,
         co: latestEntry ? latestEntry.co : undefined,
-        co2: CO2Value,
+        co2: parseFloat(CO2Value),
         co2CalibrationFile: latestEntry ? latestEntry.co2CalibrationFile : "",
         co2InstrumentId: latestEntry ? latestEntry.co2InstrumentId : "",
         co2N: latestEntry ? latestEntry.co2N : undefined,
@@ -140,7 +140,7 @@ export default function TankTracker({ navigation }: NavigationType) {
         location: locationValue,
         ottoCalibrationFile: latestEntry ? latestEntry.ottoCalibrationFile : "",
         owner: latestEntry ? latestEntry.owner : "",
-        pressure: PSIValue,
+        pressure: parseFloat(PSIValue),
         tankId: tank,
         updatedAt: currentTime,
         userId: nameValue,
@@ -188,7 +188,7 @@ export default function TankTracker({ navigation }: NavigationType) {
     function checkIfRefillIsNeeded() {
       // compare pressure from prev entry to current entry to see if tank will be empty soon
       console.log("checking tank algo");
-      let days = daysUntilEmpty(PSIValue, dateValue, prevPressure, prevDate);
+      let days = daysUntilEmpty(parseFloat(PSIValue), dateValue, prevPressure, prevDate);
       if (days <= 90) {
         setTankPredictorVisibility(true);
       }
@@ -208,7 +208,7 @@ export default function TankTracker({ navigation }: NavigationType) {
       }
       else
       {
-        result = await  offlineTankEntry(tank, PSIValue, locationValue, getCurrentUtcDateTime(), nameValue, CO2Value, CH4Value, notesValue, fillIDValue)
+        result = await  offlineTankEntry(tank, parseFloat(PSIValue), locationValue, getCurrentUtcDateTime(), nameValue, parseFloat(CO2Value), parseFloat(CH4Value), notesValue, fillIDValue)
       }
 
       // remove spinner once we have results back
@@ -294,8 +294,8 @@ export default function TankTracker({ navigation }: NavigationType) {
               {/* PSI input */}
               <TextInput
                 labelText="PSI"
-                labelValue={PSIValue !== undefined ? PSIValue.toString() : ""}
-                onTextChange={(text) => setPSIValue(parseFloat(text) || undefined)}
+                labelValue={PSIValue !== undefined ? PSIValue : ""}
+                onTextChange={setPSIValue}
                 placeholder="PSI"
                 style={styles.textInput}
               />
@@ -303,8 +303,8 @@ export default function TankTracker({ navigation }: NavigationType) {
               {/* C02 entry */}
               <TextInput
                 labelText="CO2"
-                labelValue={CO2Value !== undefined ? CO2Value.toString() : ""}
-                onTextChange={(text) => setCO2Value(parseFloat(text) || undefined)}
+                labelValue={CO2Value !== undefined ? CO2Value : ""}
+                onTextChange={setCO2Value}
                 placeholder="CO2"
                 style={styles.textInput}
               />
@@ -312,9 +312,8 @@ export default function TankTracker({ navigation }: NavigationType) {
               {/* CH4 entry */}
               <TextInput
                 labelText="CH4"
-                labelValue={CH4Value !== undefined ? CH4Value.toString() : ""}
-                onTextChange={(text) => setCH4Value(parseFloat(text) || undefined)}
-                placeholder="CH4"
+                labelValue={CH4Value !== undefined ? CH4Value : ""}
+                onTextChange={setCH4Value}
                 style={styles.textInput}
               />
 
