@@ -1,9 +1,9 @@
 /**
  * Email Setup Page
  * @author David Schiwal
- * Updated: 4/5/25 - DS
+ * Updated: 4/6/25 - DS
  *
- * This is the page for email natofication setup. It will take in the given email and name, try to send
+ * This is the page for email notification setup. It will take in the given email and name, try to send
  * notifications immeidately if applicable, and save the email and name to the device.
  */
 import { StyleSheet, KeyboardAvoidingView } from "react-native";
@@ -20,7 +20,6 @@ import { sendEmailNotification } from "../scripts/EmailNotifications";
 
 export default function EmailSetup( { navigation }: NavigationType) {
   const themeContext = React.useContext(ThemeContext);
-  const isDarkMode = themeContext.theme === 'dark';
 
   // used for setting and remembering the input values
   const [emailValue, setEmailValue] = useState("");
@@ -72,7 +71,6 @@ export default function EmailSetup( { navigation }: NavigationType) {
     //set Name in storage
     saveName();
     //try pushing email notifications
-    console.log("calling send notifications")
     sendEmailNotification(emailValue, nameValue);
     //return home
     navigateHome(true);
