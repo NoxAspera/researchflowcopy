@@ -202,6 +202,22 @@ export default function PlanVisit({ navigation }: NavigationType) {
             style={styles.reasonText}
           />
 
+          {/* notes from previous site */}
+          {data !== null ? (
+              <Card>
+                <Text>
+                Previous Notes
+                </Text>
+                <Text category="p2">{data[2]}</Text>
+              </Card>
+            ) : (
+              <Card>
+                <Text>
+                No Previous Notes
+                </Text>
+              </Card>
+            )}
+
           {/* submit button */}
           <Button
             onPress={() => handleSubmit()}
@@ -212,13 +228,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
           {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Submit</Text>}
           </Button>
 
-          {/* notes from previous site */}
-          <Card>
-            <Text category="h1" style={{ textAlign: "center" }}>
-                Previous Notes
-            </Text>
-            <Text category="p1">{data[2]}</Text>
-          </Card>
+          
         </Layout>
       </ScrollView>
     </KeyboardAvoidingView>
