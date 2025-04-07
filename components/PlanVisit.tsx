@@ -15,7 +15,7 @@ import { NavigationType, routeProp } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
 import { ThemeContext } from "./ThemeContext";
 import { visit, setVisitFile } from "../scripts/APIRequests";
-import PopupProp from './Popup';
+import SuccessFailurePopup from './SuccessFailurePopup';
 import LoadingScreen from "./LoadingScreen";
 
 export default function PlanVisit({ navigation }: NavigationType) {
@@ -105,7 +105,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
           </Text>
 
           {/* success/failure popup */}
-          <PopupProp popupText={message} 
+          <SuccessFailurePopup popupText={message} 
             popupStatus={messageStatus} 
             onPress={setVisible} 
             navigateHome={navigateHome} 

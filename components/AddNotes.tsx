@@ -16,8 +16,8 @@ import { IndexPath, Layout, Select, SelectItem, Button, Text, Icon, CheckBox } f
 import { customTheme } from './CustomTheme'
 import { setSiteFile, getFileContents, getLatestTankEntry, offlineTankEntry, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData, buildTankRecordString } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
-import PopupProp from './Popup';
-import PopupProp2Button from './Popup2Button';
+import SuccessFailurePopup from './SuccessFailurePopup';
+import MissingInputPopup from './MissingInputPopup';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
@@ -257,7 +257,6 @@ export default function AddNotes({ navigation }: NavigationType) {
       let currTime = endDateValue;
       let prevTime = new Date(prevDate);
       let changeOfDate = getTimeBetweenDates(prevTime, currTime).days; // get the difference of time in days
-      console.log(`Days between: ${changeOfDate}`);
 
       // if changeOfDate is 0, then the previous entry was also made today
       if (changeOfDate == 0) {
@@ -265,7 +264,6 @@ export default function AddNotes({ navigation }: NavigationType) {
       }
       
       let rateOfDecay = changeOfPress / changeOfDate; // measured in psi lost per day
-      console.log(`Rate of decay: ${changeOfPress} / ${changeOfDate} = ${rateOfDecay}`);
 
       // solve for when the tank should be under 500 psi
       let days = Math.trunc((-prevPress / rateOfDecay) - changeOfDate);
@@ -297,13 +295,6 @@ export default function AddNotes({ navigation }: NavigationType) {
       if (prevEntry.n2_pressure) {
         n2Days = daysUntilEmpty(parseInt(prevEntry.n2_pressure), prevEntry.time_out, parseInt(n2Value));
       }
-
-      console.log(`
-        Low Days: ${lowDays}
-        Mid Days: ${midDays}
-        highDays: ${highDays}
-        lts Days: ${ltsDays}
-        n2 Days:  ${n2Days}`);
 
       // if any of the tanks are predicted to be empty in 90 days or less, send a warning
       if (lowDays && lowDays <= 90) {
@@ -411,7 +402,6 @@ export default function AddNotes({ navigation }: NavigationType) {
       const endSeconds = String(end.getUTCSeconds()).padStart(2, "0");
         
       let tankRecordString = "";
-      console.log("creating data")
         // create an entry object data that will be sent off to the repo
         let data: Entry = 
         {
@@ -832,7 +822,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
 
             {/* success/failure popup */}
-            <PopupProp popupText={message}
+            <SuccessFailurePopup popupText={message}
             popupStatus={messageStatus} 
             onPress={setVisible}
             navigateHome={navigateHome} 
@@ -840,7 +830,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             returnHome={returnHome}/>
 
             {/* popup if user has missing input */}
-            <PopupProp2Button
+            <MissingInputPopup
             sendData={handleUpdate}
             removePopup={setVisible2}
             visible={visible2}/>

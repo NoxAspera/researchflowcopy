@@ -13,7 +13,7 @@ import { Button, IndexPath, Layout, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
 import { NavigationType, routeProp } from './types'
 import { ScrollView } from 'react-native-gesture-handler';
-import PopupProp from './Popup';
+import SuccessFailurePopup from './SuccessFailurePopup';
 import { getLatestTankEntry, setTankTracker, TankRecord, addEntrytoTankDictionary, buildTankRecordString } from '../scripts/APIRequests';
 import { Float } from 'react-native/Libraries/Types/CodegenTypes';
 import { customTheme } from './CustomTheme'
@@ -234,7 +234,7 @@ export default function TankTracker({ navigation }: NavigationType) {
               <LoadingScreen visible={loadingValue} />
 
               {/* success/failure popup */}
-              <PopupProp popupText={message} 
+              <SuccessFailurePopup popupText={message} 
                 popupStatus={messageStatus} 
                 onPress={setVisible} 
                 navigateHome={navigateHome} 

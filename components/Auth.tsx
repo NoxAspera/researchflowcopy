@@ -13,7 +13,7 @@ import { useRoute } from '@react-navigation/native';
 import { Button, Layout, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
 import { customTheme } from './CustomTheme'
-import PopupProp from './Popup';
+import SuccessFailurePopup from './SuccessFailurePopup';
 import { setGithubToken,  tankTrackerSpinUp, readUpdates, updateDirectories, tankTrackerOffline} from '../scripts/APIRequests';
 import * as Network from 'expo-network'
 import { NavigationType } from './types'
@@ -81,7 +81,7 @@ export default function Login({ navigation }: NavigationType) {
           </Layout>
 
           {/* popup if user has missing credentials */}
-          <PopupProp popupText='Missing Login Credentials' 
+          <SuccessFailurePopup popupText='Missing Login Credentials' 
             popupStatus={customTheme['color-danger-700']} 
             onPress={setVisible} 
             visible={visible}

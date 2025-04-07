@@ -17,7 +17,7 @@ import { NavigationType, routeProp } from "./types";
 import {setInstrumentFile, getInstrumentSite, setBadData} from "../scripts/APIRequests";
 import { ScrollView } from "react-native-gesture-handler";
 import { ThemeContext } from './ThemeContext';
-import PopupProp from './Popup';
+import SuccessFailurePopup from './SuccessFailurePopup';
 import LoadingScreen from "./LoadingScreen";
 import DateTimePicker , {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
 import { TimerPickerModal } from "react-native-timer-picker";
@@ -252,7 +252,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
           {/* text inputs */}
           {/* success/failure popup */}
-          <PopupProp popupText={message} 
+          <SuccessFailurePopup popupText={message} 
             popupStatus={messageStatus} 
             onPress={() => setVisible(false)} 
             navigateHome={navigateHome} 

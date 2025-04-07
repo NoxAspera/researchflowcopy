@@ -26,6 +26,7 @@ export type RootStackParamList = {
     TankTracker: { site: string };
     PlanVisit: {site: string};
     Diagnostics: {site: string};
+    ContactInfo: {site: string};
 
     // used for auth
     Home: undefined;

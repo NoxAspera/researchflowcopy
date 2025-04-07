@@ -17,7 +17,7 @@ import { customTheme } from "./CustomTheme";
 import { NavigationType, routeProp } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
 import { setBadData, getBadDataFiles } from "../scripts/APIRequests";
-import PopupProp from "./Popup"
+import SuccessFailurePopup from "./SuccessFailurePopup"
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from "./LoadingScreen";
 import * as Network from 'expo-network'
@@ -189,7 +189,7 @@ export default function BadData({ navigation }: NavigationType) {
           </Text>
 
           {/* success/failure popup */}
-          <PopupProp
+          <SuccessFailurePopup
             popupText={message}
             popupStatus={messageStatus}
             onPress={setVisible}

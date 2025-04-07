@@ -17,8 +17,8 @@ import { Layout, Button, Text, Select, SelectItem, IndexPath, CheckBox, Icon, Da
 import { customTheme } from './CustomTheme'
 import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile, setBadData, offlineTankEntry, buildTankRecordString } from '../scripts/APIRequests';
 import { parseNotes, ParsedData, copyTankRecord } from '../scripts/Parsers'
-import PopupProp from './Popup';
-import PopupProp2Button from './Popup2Button';
+import SuccessFailurePopup from './SuccessFailurePopup';
+import MissingInputPopup from './MissingInputPopup';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
 import  * as Network from 'expo-network'
@@ -479,7 +479,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           <LoadingScreen visible={loadingValue}/>
 
             {/* success/failure popup */}
-            <PopupProp popupText={message} 
+            <SuccessFailurePopup popupText={message} 
             popupStatus={messageStatus} 
             onPress={setVisible} 
             navigateHome={navigateHome} 
@@ -487,7 +487,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             returnHome={returnHome}/>
 
             {/* popup if user has missing input */}
-            <PopupProp2Button 
+            <MissingInputPopup 
             sendData={handleUpdate}
             removePopup={setVisible2}
             visible={visible2}/>
