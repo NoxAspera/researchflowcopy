@@ -198,10 +198,10 @@ export async function readUpdates()
                         //console.log(siteName)
                         value = value.substring(value.indexOf(", ") + 2)
                         let content =  value.substring(value.indexOf("content: ") + 8)
+                        let data = (await getFileContents(`site_notes/${siteName}`)).data
                         await setSiteFile(siteName, content, "updating from offline")
                         await sleep(50)
                         let notes = parseNotes(content).entries[0]
-                        let data = (await getFileContents(`site_notes/${siteName}`)).data
                         await sleep(50)
                         if(data)
                         {
@@ -217,10 +217,9 @@ export async function readUpdates()
                                 
                                 await setInstrumentFile(`instrument_maint/LGR_UGGA/${previousNotes.instrument}`,content,"updating from offline", true, siteName)
                             }
-
-                            if(previousNotes.lts.id !== notes.lts.id)
+                            if(previousNotes.lts && notes.lts && previousNotes.lts.id !== notes.lts.id)
                             {
-                                let newTankEntry = getLatestTankEntry(previousNotes.high_cal.id)
+                                let newTankEntry = getLatestTankEntry(previousNotes.lts.id)
                                 newTankEntry.location = "ASB279";
                                 newTankEntry.pressure = 500;
                                 newTankEntry.userId = previousNotes.names;
@@ -228,7 +227,6 @@ export async function readUpdates()
                                 addEntrytoTankDictionary(newTankEntry);
                                 tankRecordString += buildTankRecordString(newTankEntry);
                             }
-
                             if(previousNotes.mid_cal.id !== notes.mid_cal.id)
                             {
                                 let newTankEntry = getLatestTankEntry(previousNotes.mid_cal.id)
@@ -298,8 +296,9 @@ export async function readUpdates()
             })
             FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/tank_updates.txt")
     }
-
-    await setTankTracker(tankRecordString);
+    if (tankRecordString != "") {
+        await setTankTracker(tankRecordString);
+    } 
 }
 
 export async function tankTrackerOffline()
@@ -597,7 +596,7 @@ export async function setTankTracker(newEntry: string)
             let entries = plainContent.substring(plainContent.indexOf("\n"))
             let headers = plainContent.substring(0, plainContent.indexOf("\n"))
             sha = data.sha
-            newFile = headers + entries + '\n' + newEntry
+            newFile = headers + entries + newEntry
             newFile = btoa(newFile)
             const bodyString = `{"message":"updating from research flow","content":"${newFile}","sha":"${sha}"}`
             return setFile(bodyString, url)
