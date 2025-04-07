@@ -82,7 +82,7 @@ export default function Login({ navigation }: NavigationType) {
 
           {/* popup if user has missing credentials */}
           <PopupProp popupText='Missing Login Credentials' 
-            popupColor={customTheme['color-danger-700']} 
+            popupStatus={customTheme['color-danger-700']} 
             onPress={setVisible} 
             visible={visible}
             navigateHome={null} 

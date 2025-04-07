@@ -186,7 +186,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     // used for determining if PUT request was successful
     // will set the success/fail notification to visible, aswell as the color and text
     const [visible, setVisible] = useState(false);
-    const [messageColor, setMessageColor] = useState("");
+    const [messageStatus, setMessageStatus] = useState("");
     const [message, setMessage] = useState("");
     const [returnHome, retHome] = useState(false);
     //used for popup if info is missing
@@ -415,7 +415,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         // check to see if the request was ok, give a message based on that
         if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success) && (!badDataResult || badDataResult.success)) {
           setMessage("File updated successfully!");
-          setMessageColor(customTheme['color-success-700']);
+          setMessageStatus("success");
           retHome(true);
         } else {
           if (result.error) {
@@ -429,7 +429,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           } else if (badDataResult && badDataResult.error) {
             setMessage(`Error: ${badDataResult.error}`);
           }
-          setMessageColor(customTheme['color-danger-700']);
+          setMessageStatus("danger");
         }
         setTimeout(() => {
           setVisible(true);
@@ -480,15 +480,14 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* success/failure popup */}
             <PopupProp popupText={message} 
-            popupColor={messageColor} 
+            popupStatus={messageStatus} 
             onPress={setVisible} 
             navigateHome={navigateHome} 
             visible={visible}
             returnHome={returnHome}/>
 
             {/* popup if user has missing input */}
-            <PopupProp2Button popupText='Missing some input field(s)'
-            popupColor={customTheme['color-danger-700']}
+            <PopupProp2Button 
             sendData={handleUpdate}
             removePopup={setVisible2}
             visible={visible2}/>
