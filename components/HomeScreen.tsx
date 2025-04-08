@@ -18,6 +18,8 @@ import LoadingScreen from './LoadingScreen';
 import * as Network from 'expo-network'
 
 export default function HomeScreen({ navigation }: NavigationType) {
+  tankTrackerSpinUp()
+
   const openURL = async () => {
     const url =
     "https://air.utah.edu/s/diagnostics/?_inputs_&remove_failed_qc=false&color_by=%22QAQC_Flag%22&dates=%5B%222025-02-20%22%2C%222025-03-06%22%5D&column=%22%22&lvl=%22%22&instrument=%22%22&stid=%22%22&submit=0&sidebarCollapsed=false&sidebarItemExpanded=null";
