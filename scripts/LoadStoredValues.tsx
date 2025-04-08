@@ -13,38 +13,47 @@ import { useEffect, useState } from 'react';
  * otherwise returns array of two empty strings
  * @returns a string array with the email and name of the person who enabled notifications
  */
-export function loadStoredValues() {
+export async function loadStoredValues() {
+    //console.log("in load stored values")
     //used for pulling stored email
-    const [email, setEmail] = useState('');
+    //const [email, setEmail] = useState('');
+    var email = "";
+    
     const loadEmail = async () => {
+      //console.log("in load email")
         try {
           const savedEmail = await AsyncStorage.getItem('email');
-          console.log(savedEmail)
+          //console.log(savedEmail)
           if (savedEmail != null) {
-            setEmail(savedEmail);
+            //console.log("setting name")
+            email = savedEmail;
           }
         } catch (e) {
           console.error("Failed to retrieve the previous email: ", e);
         }
     }
     //used for pulling stored name
-    const [name, setName] = useState('');
+    //const [name, setName] = useState('');
+    var name = "";
     const loadName = async () => {
+      //console.log("in load name")
         try {
           const savedName = await AsyncStorage.getItem('name');
-          console.log(savedName)
+          //console.log(savedName)
           if (savedName != null) {
-            setName(savedName);
+            //console.log("setting name")
+            name = savedName;
           }
         } catch (e) {
           console.error("Failed to retrieve the previous name: ", e);
         }
     }
-    useEffect(() => {
-        loadName();
-        loadEmail();
-      }, []);
-
+    //console.log("calling useEffect")
+    //useEffect(() => {
+        await loadName();
+        await loadEmail();
+      //}, []);
+    console.log("returning email: " + email + " name: " + name + " from loadStored")
     return([email, name])
 }
 

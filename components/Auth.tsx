@@ -8,7 +8,7 @@
  * a later update.
  */
 import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { Button, Layout, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
@@ -22,9 +22,7 @@ import { sendEmailNotification } from "../scripts/EmailNotifications";
 import { loadStoredValues } from '../scripts/LoadStoredValues';
 
 export default function Login({ navigation }: NavigationType) {
-    const loadedVals = loadStoredValues();
-    const email = loadedVals[0]
-    const name = loadedVals[1]  
+     
     const route = useRoute();
     
     const themeContext = React.useContext(ThemeContext);
@@ -43,7 +41,7 @@ export default function Login({ navigation }: NavigationType) {
             setGithubToken(passwordValue)
             //send email notifications
             console.log("calling send notifs")
-            sendEmailNotification(email,name);            
+            sendEmailNotification("Auth","Load")                       
             navigation.navigate('Home')
         }
         else {
@@ -96,7 +94,7 @@ export default function Login({ navigation }: NavigationType) {
             {/* Sign in button */}
             <Button
                 testID='AuthButton'
-                onPress={checkTextEntry}
+                onPress={() => {checkTextEntry()}}
                 appearance='filled'
                 status='primary'
                 style={{margin: 15, backgroundColor: "#06b4e0"}}>

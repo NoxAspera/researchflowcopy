@@ -13,6 +13,7 @@ import { getFileContents } from '../scripts/APIRequests';
 import { send, EmailJSResponseStatus } from '@emailjs/react-native' //imports for sending email don't delete
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getDirectory } from '../scripts/APIRequests';
+import { loadStoredValues } from '../scripts/LoadStoredValues';
 
 /**
  * @author David Schiwal
@@ -21,10 +22,19 @@ import {getDirectory } from '../scripts/APIRequests';
  * @param name the name of the person in site notes/plan visits
  */
 export async function sendEmailNotification(emailAddress: string, name: string){
-  console.log("in send notifs name: " + name)
+  console.log("in send notifs name: " + name)  
+  if(emailAddress == "Auth" && name == "Load"){
+    //console.log("Calling loadStoredValues")    
+    const loadedVals = await loadStoredValues();
+    //console.log("email loaded: " + loadedVals[0])
+    //console.log("name loaded: " + loadedVals[1])
+    emailAddress = loadedVals[0]
+    name = loadedVals[1] 
+  }
   if(emailAddress == null || name == null){
     return
-  }  
+  }   
+  console.log("calling remove old dates")
   await checkAndRemoveOldDates();
   //Holds parsed data
   let data = null;
