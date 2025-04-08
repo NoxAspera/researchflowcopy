@@ -347,25 +347,6 @@ export default function App() {
                   accessoryLeft={infoIcon} 
                   size='large'
                   style={{ marginHorizontal: -10 }}/>
-                <Button testID='notificationsButton'
-                  onPress={() => navigation.navigate('ViewNotifications')} 
-                  appearance="ghost"
-                  accessoryLeft={bellIcon} 
-                  size='large'
-                  style={{ marginHorizontal: -10 }}/>
-                <SettingsButton/>
-                </View>
-              ),
-            })}/>
-            <Stack.Screen name="Diagnostics" component={Diagnostics} options={({ navigation }) => ({
-              headerRight: () => (
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Button testID='infoButton'
-                  onPress={() => navigation.navigate('ContactInfo')} 
-                  appearance="ghost"
-                  accessoryLeft={infoIcon} 
-                  size='large'
-                  style={{ marginHorizontal: -10 }}/>
                   <Button testID='notificationsButton'
                     onPress={() => navigation.navigate('ViewNotifications')} 
                     appearance="ghost"
