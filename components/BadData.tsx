@@ -20,6 +20,7 @@ import { setBadData, getBadDataFiles } from "../scripts/APIRequests";
 import PopupProp from "./Popup"
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from "./LoadingScreen";
+import * as Network from 'expo-network'
 
 export default function BadData({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -38,9 +39,7 @@ export default function BadData({ navigation }: NavigationType) {
   const [endStatusValue, setEndStatusValue] = useState("basic");
   const [nameValue, setNameValue] = useState("");
   const [reasonValue, setReasonValue] = useState("");
-  const [selectedFileIndex, setSelectedFileIndex] = useState<
-    IndexPath | undefined
-  >(undefined);
+  const [selectedFileIndex, setSelectedFileIndex] = useState<IndexPath | undefined>(undefined);
   const [fileOptions, setFileOptions] = useState<string[]>([]);
   const [instrument, setInstrument] = useState("");
 
@@ -56,15 +55,20 @@ export default function BadData({ navigation }: NavigationType) {
 
   useEffect(() => {
     const fetchBadDataFiles = async () => {
-      try {
-        const response = await getBadDataFiles(site);
-        if (response.success) {
-          setFileOptions(response.data || []); // Set the file names as options
-        } else {
-          alert(`Error fetching files: ${response.error}`);
+      let check = await  Network.getNetworkStateAsync()
+      if(check.isConnected)
+      {
+        try {
+          
+          const response = await getBadDataFiles(site);
+          if (response.success) {
+            setFileOptions(response.data || []); // Set the file names as options
+          } else {
+            alert(`Error fetching files: ${response.error}`);
+          }
+        } catch (error) {
+          console.error("Error fetching bad data files:", error);
         }
-      } catch (error) {
-        console.error("Error fetching bad data files:", error);
       }
     };
 
@@ -110,7 +114,7 @@ export default function BadData({ navigation }: NavigationType) {
   // used for determining if PUT request was successful
   // will set the success/fail notification to visible, aswell as the color and text
   const [visible, setVisible] = useState(false);
-  const [messageColor, setMessageColor] = useState("");
+  const [messageStatus, setMessageStatus] = useState("");
   const [message, setMessage] = useState("");
   const [visible2, setVisible2] = useState(false);
   const [returnHome, retHome] = useState(false);
@@ -129,14 +133,14 @@ export default function BadData({ navigation }: NavigationType) {
     ) {
       //alert("Please fill out all fields before submitting.");
       setMessage("Please fill out all fields before submitting.");
-      setMessageColor(customTheme["color-danger-700"]);
+      setMessageStatus("danger");
       setVisible(true);
       return;
     }
     if (!validateTime(startTimeValue) || !validateTime(endTimeValue)) {
       //alert("Please make sure time entries follow the HH:MM:SS format");
       setMessage("Please make sure time entries follow the HH:MM:SS format.");
-      setMessageColor(customTheme["color-danger-700"]);
+      setMessageStatus("danger");
       setVisible(true);
       return;
     }
@@ -160,11 +164,11 @@ export default function BadData({ navigation }: NavigationType) {
     
     if (result.success) {
       setMessage("File updated successfully!");
-      setMessageColor(customTheme["color-success-700"]);
+      setMessageStatus("success");
       retHome(true);
     } else {
       setMessage(`Error: ${result.error}`);
-      setMessageColor(customTheme["color-danger-700"]);
+      setMessageStatus("success");
     }
     setTimeout(() => {
       setVisible(true);
@@ -177,7 +181,7 @@ export default function BadData({ navigation }: NavigationType) {
       behavior = "padding"
       style={styles.container}
     >
-      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
+      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1 }}>
         <Layout style={styles.container} level="1">
           {/* header */}
           <Text category="h1" style={{ textAlign: "center" }}>
@@ -187,7 +191,7 @@ export default function BadData({ navigation }: NavigationType) {
           {/* success/failure popup */}
           <PopupProp
             popupText={message}
-            popupColor={messageColor}
+            popupStatus={messageStatus}
             onPress={setVisible}
             navigateHome={navigateHome} 
             visible={visible}

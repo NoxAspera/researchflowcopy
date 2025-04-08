@@ -27,9 +27,11 @@ import ContactInfo from './components/ContactInfo';
 import EmailSetup from './components/EmailSetup';
 import { NavigationType } from './components/types';
 import { Button, Icon, IconElement } from '@ui-kitten/components';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View } from 'react-native';
 import { loadStoredValues } from './scripts/LoadStoredValues';
 
+import Diagnostics from './components/Diagnostics';
 
 const Stack = createStackNavigator();
 type ThemeType = 'light' | 'dark';
@@ -38,10 +40,32 @@ export default function App() {
   // used for swapping between light and dark mode
   // Initialize state with a type
   const [theme, setTheme] = useState<ThemeType>('light');
-  //load stored values
-  ///loadStoredValues();
-  //try sending notifications if email isn't empty
+  useEffect(() => {
+    const loadTheme = async () => {
+      try {
+        const savedTheme = await AsyncStorage.getItem('theme');
+        if (savedTheme === 'light' || savedTheme === 'dark') {
+          setTheme(savedTheme);
+        }
+      } catch (e) {
+        console.error("Failed to retrieve the previous theme: ", e);
+      }
+    }
+    loadTheme();
+  }, []);
   
+  useEffect(() => {
+    const saveTheme = async () => {
+      try {
+        await AsyncStorage.setItem('theme', theme);
+      } catch (e) {
+        console.error("Failed to save the current theme: ", e);
+      }
+    }
+    saveTheme();
+  }, [theme]);
+
+
   // Merge custom theme with Eva's base theme
   const currentTheme = { ...eva[theme], ...customColors };
 
@@ -310,6 +334,44 @@ export default function App() {
                   accessoryLeft={bellIcon} 
                   size='large'
                   style={{ marginHorizontal: -10 }}/>
+                <SettingsButton/>
+                </View>
+              ),
+            })}/>
+            <Stack.Screen name="Diagnostics" component={Diagnostics} options={({ navigation }) => ({
+              headerRight: () => (
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                <Button testID='notificationsButton'
+                  onPress={() => navigation.navigate('ViewNotifications')} 
+                  appearance="ghost"
+                  accessoryLeft={bellIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                <SettingsButton/>
+                </View>
+              ),
+            })}/>
+            <Stack.Screen name="Diagnostics" component={Diagnostics} options={({ navigation }) => ({
+              headerRight: () => (
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Button testID='infoButton'
+                  onPress={() => navigation.navigate('ContactInfo')} 
+                  appearance="ghost"
+                  accessoryLeft={infoIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
+                  <Button testID='notificationsButton'
+                    onPress={() => navigation.navigate('ViewNotifications')} 
+                    appearance="ghost"
+                    accessoryLeft={bellIcon} 
+                    size='large'
+                    style={{ marginHorizontal: -10 }}/>
                 <SettingsButton/>
                 </View>
               ),

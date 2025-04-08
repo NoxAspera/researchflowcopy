@@ -1,7 +1,7 @@
 /**
  * Add Notes Page for mobile sites
  * @author Blake Stambaugh, Megan Ostlie, August O'Rourke, and David Schiwal
- * Updated: 3/23/25 - DS
+ * Updated: 3/29/25 - DS
  * This page will take in input from the user, format it, and upload it to the
  * github repo. This page is slightly different than the main AddNotes page because
  * the mobile sites do not have as many tanks as the stationary sites
@@ -15,15 +15,16 @@ import TextInput from './TextInput'
 import NoteInput from './NoteInput'
 import { Layout, Button, Text, Select, SelectItem, IndexPath, CheckBox, Icon, DateService } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile, setBadData } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile, setBadData, offlineTankEntry, buildTankRecordString } from '../scripts/APIRequests';
 import { parseNotes, ParsedData, copyTankRecord } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
-import  Network from 'expo-network'
+import  * as Network from 'expo-network'
 import LoadingScreen from "./LoadingScreen";
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+import { TimerPickerModal } from "react-native-timer-picker";
 
 /**
  * @author Megan Ostlie
@@ -33,19 +34,9 @@ import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/d
  * @returns a ParsedData object that contains the information of the given document
  */
 async function processNotes(siteName: string) {
-  let check = await Network.useNetworkState()
-
-  if(check.isConnected)
-  {
-    const fileContents = await getFileContents(`site_notes/${siteName}`);
-    if(fileContents.data)
-    {
-      return parseNotes(fileContents.data)
-    }
-    else
-    {
-      return null
-    }
+  const fileContents = await getFileContents(`site_notes/${siteName}`);
+  if(fileContents.data){
+    return parseNotes(fileContents.data)
   }
   else
   {
@@ -53,7 +44,11 @@ async function processNotes(siteName: string) {
   }
 }
 
-
+async function isConnected()
+{
+  let check = (await Network.getNetworkStateAsync()).isConnected
+  return check
+}
 
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
@@ -64,50 +59,55 @@ async function processNotes(siteName: string) {
  */
 export default function AddNotes({ navigation }: NavigationType) {
 
-  const onStartChange = (event, selectedDate) => {
-  const currentDate = selectedDate;
-  setStartDateValue(currentDate);
-};
+    //changes start date
+    const onStartChange = (event, selectedDate) => {
+      const currentDate = selectedDate;
+      setStartDateValue(currentDate);
+    };
+  
+    //changes end date
+    const onEndChange = (event, selectedDate) => {
+      const currentDate = selectedDate;
+      setEndDateValue(currentDate);
+    };
+  
+    //pops up date picker for start date
+    const showStartMode = (currentMode) => {
+      DateTimePickerAndroid.open({
+        value: startDateValue,
+        onChange: onStartChange,
+        mode: currentMode,
+        is24Hour: false,
+      });
+    };
+  
 
-const onEndChange = (event, selectedDate) => {
-  const currentDate = selectedDate;
-  setEndDateValue(currentDate);
-};
+    //pops up date picker for end date
+    const showEndMode = (currentMode) => {
+      DateTimePickerAndroid.open({
+        value: endDateValue,
+        onChange: onEndChange,
+        mode: currentMode,
+        is24Hour: false,
+      });
+    };
+  
 
+    //sets start date hours and minutes
+    function setStartDateHourMinutes (pickedDuration) {
+      const tempDate = startDateValue;
+      tempDate.setHours(pickedDuration.hours)
+      tempDate.setMinutes(pickedDuration.minutes)
+      setStartDateValue(tempDate);
+    };
 
-const showStartMode = (currentMode) => {
-  DateTimePickerAndroid.open({
-    value: startDateValue,
-    onChange: onStartChange,
-    mode: currentMode,
-    is24Hour: false,
-  });
-};
-
-const showEndMode = (currentMode) => {
-  DateTimePickerAndroid.open({
-    value: endDateValue,
-    onChange: onEndChange,
-    mode: currentMode,
-    is24Hour: false,
-  });
-};
-
-const showStartDatepicker = () => {
-  showStartMode("date");
-};
-
-const showStartTimepicker = () => {
-  showStartMode("time");
-};
-
-const showEndDatepicker = () => {
-  showEndMode("date");
-};
-
-const showEndTimepicker = () => {
-  showEndMode("time");
-};
+    //sets end date hours and minutes
+    function setEndDateHourMinutes (pickedDuration) {
+      const tempDate = endDateValue;
+      tempDate.setHours(pickedDuration.hours)
+      tempDate.setMinutes(pickedDuration.minutes)
+      setEndDateValue(tempDate);
+    };
 
     const route = useRoute<routeProp>();
     const { site, info } = route.params || {}
@@ -121,20 +121,21 @@ const showEndTimepicker = () => {
       // used for loading screen
         const [loadingValue, setLoadingValue] = useState(false);
 
-    // Get current notes for the site
     useEffect(() => {
-        async function fetchData() {
-            if (site && !data) {
-                try {
-                    const parsedData = await processNotes(site);
-                    setData(parsedData); // Update state with the latest entry
-                } catch (error) {
-                    console.error("Error processing notes:", error);
-                }
-            }
-        }
-        fetchData();
-    }, [site]); // Re-run if `site` changes
+      async function fetchData() {
+        setNetworkStatus(await isConnected())
+
+          if (site && !data && networkStatus) {
+              try {
+                  const parsedData = await processNotes(site);
+                  setData(parsedData); // Update state with the latest entry
+              } catch (error) {
+                  console.error("Error processing notes:", error);
+              }
+          }
+      }
+      fetchData();
+  }, [site]); // Re-run if `site` changes
 
     // Get list of possible instruments
     useEffect(() => {
@@ -161,6 +162,7 @@ const showEndTimepicker = () => {
     }
     
     // these use states to set and store values in the text inputs
+    const [networkStatus, setNetworkStatus] = useState(false)
     const [startDateValue, setStartDateValue] = useState(new Date());
     const [endDateValue, setEndDateValue] = useState(new Date());
     const [nameValue, setNameValue] = useState("");
@@ -184,11 +186,14 @@ const showEndTimepicker = () => {
     // used for determining if PUT request was successful
     // will set the success/fail notification to visible, aswell as the color and text
     const [visible, setVisible] = useState(false);
-    const [messageColor, setMessageColor] = useState("");
+    const [messageStatus, setMessageStatus] = useState("");
     const [message, setMessage] = useState("");
     const [returnHome, retHome] = useState(false);
     //used for popup if info is missing
     const [visible2, setVisible2] = useState(false);
+    //used for date/time pickers
+    const [showPicker, setShowPicker] = useState(false);
+    const [showPicker2, setShowPicker2] = useState(false);
 
     //method will warn user if fields haven't been input
     function checkTextEntries(){
@@ -214,10 +219,19 @@ const showEndTimepicker = () => {
           navigation.navigate('SelectTank', {
           from: 'AddNotes',
           onSelect: (tank) => {
-            setTankId(tank);
-            const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
-            setTankRecord(entry);
-            setTankValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+            if(networkStatus)
+            {
+              setTankId(tank);
+              const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+              setTankRecord(entry);
+              setTankValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+            }
+            else
+            {
+              setTankId(tank)
+              //it won't display the tankID unless we give this an empty value, haven't a clue why
+              setTankValue(" ")
+            }
           }
         });
         }, 10);
@@ -306,6 +320,7 @@ const showEndTimepicker = () => {
       const endMinutes = String(end.getUTCMinutes()).padStart(2, "0");
       const endSeconds = String(end.getUTCSeconds()).padStart(2, "0");
         
+      let tankRecordString = "";
         // create an entry object data that will be sent off to the repo
         let data: MobileEntry = 
         {
@@ -323,28 +338,39 @@ const showEndTimepicker = () => {
           additional_notes: notesValue 
         };
 
-        const utcTime = `${endYear}-${endMonth}-${endDay} ${endHours}:${endMinutes}:${endSeconds}Z`;
+        const utcTime = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:${endSeconds}Z`;
         const siteName = site.replace("mobile/","");
-        if (originalTank && (!tankRecord || (originalTank.tankId != tankRecord.tankId))) {
+        if(networkStatus){
+          if (originalTank && (!tankRecord || (originalTank.tankId != tankRecord.tankId))) {
           let newTankEntry = copyTankRecord(originalTank);
           newTankEntry.location = "ASB279";
           newTankEntry.pressure = 500;
           newTankEntry.userId = nameValue;
           newTankEntry.updatedAt = utcTime;
           addEntrytoTankDictionary(newTankEntry);
+          tankRecordString += buildTankRecordString(newTankEntry);
         }
-        if (tankRecord) {
-          let tank = copyTankRecord(tankRecord);
-          tank.location = siteName;
-          tank.updatedAt = utcTime;
-          tank.pressure = parseInt(tankPressure);
-          tank.userId = nameValue;
-          addEntrytoTankDictionary(tank);
+          if (tankRecord) {
+            let tank = copyTankRecord(tankRecord);
+            tank.location = siteName;
+            tank.updatedAt = utcTime;
+            tank.pressure = parseInt(tankPressure);
+            tank.userId = nameValue;
+            addEntrytoTankDictionary(tank);
+            tankRecordString += buildTankRecordString(tank);
+          }
+        }
+        else
+        {
+          if(tankId && tankPressure)
+          {
+            await offlineTankEntry(tankId, parseInt(tankPressure), site, utcTime, nameValue)
+          }
         }
 
         // send the request
         const result = await setSiteFile(site, buildMobileNotes(data), "updating notes from researchFlow");
-        const tankResult = await setTankTracker();
+        const tankResult = await setTankTracker(tankRecordString);
 
         let instMaintResult;
         let instMaintResult2;
@@ -389,7 +415,7 @@ const showEndTimepicker = () => {
         // check to see if the request was ok, give a message based on that
         if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success) && (!badDataResult || badDataResult.success)) {
           setMessage("File updated successfully!");
-          setMessageColor(customTheme['color-success-700']);
+          setMessageStatus("success");
           retHome(true);
         } else {
           if (result.error) {
@@ -403,7 +429,7 @@ const showEndTimepicker = () => {
           } else if (badDataResult && badDataResult.error) {
             setMessage(`Error: ${badDataResult.error}`);
           }
-          setMessageColor(customTheme['color-danger-700']);
+          setMessageStatus("danger");
         }
         setTimeout(() => {
           setVisible(true);
@@ -454,15 +480,14 @@ const showEndTimepicker = () => {
 
             {/* success/failure popup */}
             <PopupProp popupText={message} 
-            popupColor={messageColor} 
+            popupStatus={messageStatus} 
             onPress={setVisible} 
             navigateHome={navigateHome} 
             visible={visible}
             returnHome={returnHome}/>
 
             {/* popup if user has missing input */}
-            <PopupProp2Button popupText='Missing some input field(s)'
-            popupColor={customTheme['color-danger-700']}
+            <PopupProp2Button 
             sendData={handleUpdate}
             removePopup={setVisible2}
             visible={visible2}/>
@@ -520,7 +545,7 @@ const showEndTimepicker = () => {
           {(showStartPicker && Platform.OS === "android") && (
             (
               <View style={styles.androidDateTime}>
-                <Pressable onPress={() => {showStartDatepicker(); setStartDateValue(startDateValue)}}>
+                <Pressable onPress={() => {showStartMode("date"); setStartDateValue(startDateValue)}}>
                   <Text>
                     {startDateValue.toLocaleDateString([], {
                       weekday: "short",
@@ -530,7 +555,7 @@ const showEndTimepicker = () => {
                     })}
                   </Text>
                 </Pressable>
-                <Pressable onPress={() => {showStartTimepicker(); setStartDateValue(startDateValue)}}>
+                <Pressable onPress={() => {setShowPicker(true); setStartDateValue(startDateValue)}}>
                   <Text>
                     {startDateValue.toLocaleTimeString([], {
                       hour: "2-digit",
@@ -538,6 +563,30 @@ const showEndTimepicker = () => {
                     })}
                   </Text>
                 </Pressable>
+                <TimerPickerModal
+                  visible={showPicker}
+                  setIsVisible={setShowPicker}
+                  //makes it am/pm
+                  use12HourPicker={true}
+                  //since we don't need seconds it is hidden
+                  hideSeconds={true}
+                  minuteLabel={"<"}
+                  onConfirm={(pickedDuration) => {
+                    //set time
+                    setStartDateHourMinutes(pickedDuration);                    
+                    //set time picker to false to close it
+                    setShowPicker(false);
+                  }}
+                  modalTitle="Set Time"
+                  onCancel={() => setShowPicker(false)}
+                  closeOnOverlayPress
+                  styles={{
+                      theme: isDarkMode ? "dark" : "light"
+                  }}
+                  modalProps={{
+                      overlayOpacity: 0.2,
+                  }}
+              />
               </View>
             )
           )}
@@ -568,7 +617,7 @@ const showEndTimepicker = () => {
           {(showEndPicker && Platform.OS === "android") && (
             (
               <View style={styles.androidDateTime}>
-                <Pressable onPress={() => {showEndDatepicker(); setEndDateValue(endDateValue)}}>
+                <Pressable onPress={() => {showEndMode("date"); setEndDateValue(endDateValue)}}>
                   <Text>
                     {endDateValue.toLocaleDateString([], {
                       weekday: "short",
@@ -578,7 +627,7 @@ const showEndTimepicker = () => {
                     })}
                   </Text>
                 </Pressable>
-                <Pressable onPress={() => {showEndTimepicker(); setEndDateValue(endDateValue)}}>
+                <Pressable onPress={() => {setShowPicker2(true); setEndDateValue(endDateValue)}}>
                   <Text>
                     {endDateValue.toLocaleTimeString([], {
                       hour: "2-digit",
@@ -586,6 +635,28 @@ const showEndTimepicker = () => {
                     })}
                   </Text>
                 </Pressable>
+                <TimerPickerModal
+                    visible={showPicker2}
+                    setIsVisible={setShowPicker2}
+                    use12HourPicker={true}
+                    hideSeconds={true}
+                    minuteLabel={"<"}
+                    onConfirm={(pickedDuration) => {
+                      //set time
+                      setEndDateHourMinutes(pickedDuration);                    
+                      //set time picker to false to close it
+                      setShowPicker2(false);
+                    }}
+                    modalTitle="Set Time"
+                    onCancel={() => setShowPicker2(false)}
+                    closeOnOverlayPress
+                    styles={{
+                        theme: isDarkMode ? "dark" : "light"
+                    }}
+                    modalProps={{
+                        overlayOpacity: 0.2,
+                    }}
+                />
               </View>
             )
           )}
@@ -677,7 +748,7 @@ const showEndTimepicker = () => {
       </KeyboardAvoidingView>
     );
   }
-  
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,

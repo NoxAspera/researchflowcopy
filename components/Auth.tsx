@@ -14,7 +14,8 @@ import { Button, Layout, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
 import { customTheme } from './CustomTheme'
 import PopupProp from './Popup';
-import { setGithubToken } from '../scripts/APIRequests';
+import { setGithubToken,  tankTrackerSpinUp, readUpdates, updateDirectories, tankTrackerOffline} from '../scripts/APIRequests';
+import * as Network from 'expo-network'
 import { NavigationType } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
@@ -26,6 +27,28 @@ export default function Login({ navigation }: NavigationType) {
     
     const themeContext = React.useContext(ThemeContext);
     const isDarkMode = themeContext.theme === 'dark';
+    const [loadingValue, setLoadingValue] = useState(false);
+
+    async function startup()
+    {
+      setLoadingValue(true)
+      let check = (await Network.getNetworkStateAsync()).isConnected
+      //console.log(check)
+      if(check)
+        {
+          setLoadingText("Registering Tanks")
+          await tankTrackerSpinUp()
+          setLoadingText("Updating from Offline")
+          await readUpdates();
+          setLoadingText("Preparing Offline Mode")
+          await updateDirectories();
+        }
+      else
+      {
+        tankTrackerOffline();
+      } 
+      setLoadingValue(false)
+    }
 
     // will set the no email/password notification to visible
     const [visible, setVisible] = useState(false);
@@ -40,6 +63,7 @@ export default function Login({ navigation }: NavigationType) {
             setGithubToken(passwordValue)
             //send email notifications
             await sendEmailNotification("Auth","Load")                       
+            await startup()
             navigation.navigate('Home')
         }
         else {
@@ -50,13 +74,14 @@ export default function Login({ navigation }: NavigationType) {
     // used for setting and remembering the input values
     const [emailValue, setEmailValue] = useState("");
     const [passwordValue, setPasswordValue] = useState("");
+    const [loadingText, setLoadingText] = useState("")
 
     return (
       <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
         <Layout style={styles.container} level='1'>
-
+        <LoadingScreen visible={loadingValue} loadingText={loadingText} />
           {/* header */}
           <Layout style={isDarkMode ? styles.loginTextDark : styles.loginTextLight}>
             <Text category='h1' style={{textAlign: 'center'}}>Hello</Text>
@@ -65,7 +90,7 @@ export default function Login({ navigation }: NavigationType) {
 
           {/* popup if user has missing credentials */}
           <PopupProp popupText='Missing Login Credentials' 
-            popupColor={customTheme['color-danger-700']} 
+            popupStatus={customTheme['color-danger-700']} 
             onPress={setVisible} 
             visible={visible}
             navigateHome={null} 

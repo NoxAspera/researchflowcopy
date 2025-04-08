@@ -8,24 +8,30 @@
  */
 
 import React from "react";
-import { Layout, Modal, Spinner } from "@ui-kitten/components";
-import { StyleSheet } from "react-native";
+import { Layout, Modal, Spinner, Text, Card} from "@ui-kitten/components";
+import { StyleSheet} from "react-native";
 
 interface LoadingScreenProp {
     visible: boolean;
+    loadingText?: string
     // onPress: (arg0: boolean) => void;
 }
 
-const LoadingScreen: React.FC<LoadingScreenProp> = ({ visible }) => {
+const LoadingScreen: React.FC<LoadingScreenProp> = ({ visible, loadingText }) => {
   return (
-    <Layout>
+    <Layout style={styles.container}>
+      
       <Modal
         visible={visible}
         backdropStyle={styles.backdrop}
       >
         {/* onShow component for modal may be useful to make the spinner disappear */}
-        <Spinner size="giant"/>
+          <Spinner size="giant" style={{alignContent: 'center'}}/>
+          <Card>
+            <Text category='h6'>{loadingText}</Text>
+          </Card>
       </Modal>
+      
     </Layout>
   );
 };
@@ -33,7 +39,14 @@ const LoadingScreen: React.FC<LoadingScreenProp> = ({ visible }) => {
 const styles = StyleSheet.create({
   backdrop: {
     backgroundColor: "rgba(0, 0, 0, 0.7)",
+    paddingHorizontal: 100,
   },
+  container:
+  {
+    alignContent: 'center',
+    paddingHorizontal: 10,
+    flex: 1
+  }
 });
 
 export default LoadingScreen;

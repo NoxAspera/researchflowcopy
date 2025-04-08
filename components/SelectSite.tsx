@@ -12,7 +12,6 @@ import { StyleSheet } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { Layout, Button, Text } from '@ui-kitten/components';
-import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
 import { getBadDataSites, getDirectory, getTankList } from '../scripts/APIRequests';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -24,9 +23,6 @@ export default function SelectSite({navigation}: NavigationType) {
 
   // previous buttons hit, used to know where to go next
   let from = route.params?.from;
-  const [visible, setVisible] = useState(false);
-  const [messageColor, setMessageColor] = useState("");
-  const [message, setMessage] = useState("");
   // State to hold the list of site names
   const [siteNames, setSiteNames] = useState<string[]>();
 
@@ -36,8 +32,9 @@ export default function SelectSite({navigation}: NavigationType) {
       try {
         let names;
         let mobile_names;
-        if (from === 'AddNotes' || from === 'ViewNotes' || from === 'PlanVisit') {
+        if (from === 'AddNotes' || from === 'ViewNotes' || from === 'PlanVisit' || from === 'Diagnostics') {
           names = await getDirectory("site_notes");
+          //console.log(names)
           mobile_names = await getDirectory("site_notes/mobile");
         } else if (from === 'BadData') {
           names = await getBadDataSites();
@@ -69,9 +66,15 @@ export default function SelectSite({navigation}: NavigationType) {
   if (siteNames) {
     for (let i = 0; i < siteNames.length; i++) {
       if (siteNames[i]) {
+
+        if(siteNames[i] === "mobile")
+        {
+          continue
+        }
         buttonData.push({ id: i+1, label: siteNames[i], onPress: () => handleConfirm(siteNames[i])});
       }
     }
+
   }
 
   const handleConfirm = (selectedSite: string) => {
@@ -85,7 +88,7 @@ export default function SelectSite({navigation}: NavigationType) {
     }
     else if(from === 'ViewNotes')
     {
-      navigation.navigate('ViewNotes', {site: `site_notes/${selectedSite}`}); //{site: selectValue} tells the AddNotes what the selected value is
+      navigation.navigate('ViewNotes', {site: `site_notes/${selectedSite}`, from: "", visits: undefined}); //{site: selectValue} tells the AddNotes what the selected value is
     }
     else if(from === 'BadData')
     {
@@ -103,22 +106,16 @@ export default function SelectSite({navigation}: NavigationType) {
       navigation.navigate('TankTracker', {site: selectedSite});
     }
     else if (from == 'PlanVisit'){
-      navigation.navigate('PlanVisit', {site: selectedSite})
+      navigation.navigate('PlanVisit', {site: selectedSite});
+    }
+    else if (from == 'Diagnostics') {
+      navigation.navigate('Diagnostics', {site: selectedSite});
     }
   };
 
   return (
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <Layout style={styles.container}>
-
-      <PopupProp
-        popupText={message}
-        popupColor={messageColor}
-        onPress={setVisible}
-        visible={visible}
-        navigateHome={null} 
-        returnHome={false}
-      />
 
         {buttonData.map((button) => (
           <Button
@@ -138,7 +135,7 @@ export default function SelectSite({navigation}: NavigationType) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'space-around',
+    justifyContent: 'flex-start',
     padding: 20,
   },
   button: {

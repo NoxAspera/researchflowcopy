@@ -1,7 +1,7 @@
 /**
  * Add Notes Page
  * @author Blake Stambaugh, Megan Ostlie, August O'Rourke, and David Schiwal
- * Updated: 3/23/25 - DS
+ * Updated: 3/29/25 - DS
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
@@ -14,15 +14,17 @@ import TextInput from './TextInput'
 import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text, Icon, CheckBox } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, getLatestTankEntry, getTankList, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, getLatestTankEntry, offlineTankEntry, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData, buildTankRecordString } from '../scripts/APIRequests';
 import { parseNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
-import VisitPopupProp from './VisitPopup';
 import DateTimePicker, {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
+import { TimerPickerModal } from "react-native-timer-picker";
+import * as Network from 'expo-network'
+import VisitPopupProp from './VisitPopup';
 
 /**
  * @author Megan Ostlie
@@ -42,6 +44,12 @@ async function processNotes(siteName: string) {
   }
 }
 
+async function isConnected()
+{
+  let check = (await Network.getNetworkStateAsync()).isConnected
+  return check
+}
+
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
  *  Creates the input elements for the user to input site note information.
@@ -50,22 +58,25 @@ async function processNotes(siteName: string) {
  * 
  */
 export default function AddNotes({ navigation }: NavigationType) {
+    
     const route = useRoute<routeProp>();
     const { site, info } = route.params || {}
     const themeContext = React.useContext(ThemeContext);
     const isDarkMode = themeContext.theme === 'dark';
 
+  //changes start date
   const onStartChange = (event, selectedDate) => {
     const currentDate = selectedDate;
     setStartDateValue(currentDate);
   };
 
+  //changes end date
   const onEndChange = (event, selectedDate) => {
     const currentDate = selectedDate;
     setEndDateValue(currentDate);
   };
 
-
+  //pops up date picker for start date
   const showStartMode = (currentMode) => {
     DateTimePickerAndroid.open({
       value: startDateValue,
@@ -75,6 +86,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     });
   };
 
+  //pops up date picker for end date
   const showEndMode = (currentMode) => {
     DateTimePickerAndroid.open({
       value: endDateValue,
@@ -84,28 +96,31 @@ export default function AddNotes({ navigation }: NavigationType) {
     });
   };
 
-  const showStartDatepicker = () => {
-    showStartMode("date");
+  //sets start date hours and minutes
+  function setStartDateHourMinutes (pickedDuration) {
+    const tempDate = startDateValue;
+    tempDate.setHours(pickedDuration.hours)
+    tempDate.setMinutes(pickedDuration.minutes)
+    setStartDateValue(tempDate);
   };
 
-  const showStartTimepicker = () => {
-    showStartMode("time");
-  };
-
-  const showEndDatepicker = () => {
-    showEndMode("date");
-  };
-
-  const showEndTimepicker = () => {
-    showEndMode("time");
+  //sets end date hours and minutes
+  function setEndDateHourMinutes (pickedDuration) {
+    const tempDate = endDateValue;
+    tempDate.setHours(pickedDuration.hours)
+    tempDate.setMinutes(pickedDuration.minutes)
+    setEndDateValue(tempDate);
   };
     // State to hold parsed data
     const [data, setData] = useState<ParsedData | null>(null);
+    const [networkStatus, setNetworkStatus] = useState(true)
 
     // Get current notes for the site
     useEffect(() => {
         async function fetchData() {
-            if (site && !data) {
+          setNetworkStatus(await isConnected())
+
+            if (site && !data && networkStatus) {
                 try {
                     const parsedData = await processNotes(site);
                     setData(parsedData); // Update state with the latest entry
@@ -153,9 +168,9 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [lowId, setLowId] = useState("");
     const [lowValue, setLowValue] = useState("");
     const [lowPressure, setLowPressure] = useState("");
-    const [midId, setmidId] = useState("");
-    const [midValue, setmidValue] = useState("");
-    const [midPressure, setmidPressure] = useState("");
+    const [midId, setMidId] = useState("");
+    const [midValue, setMidValue] = useState("");
+    const [midPressure, setMidPressure] = useState("");
     const [highId, setHighId] = useState("");
     const [highValue, setHighValue] = useState("");
     const [highPressure, setHighPressure] = useState("");
@@ -183,7 +198,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     // used for determining if PUT request was successful
     // will set the success/fail notification to visible, aswell as the color and text
     const [visible, setVisible] = useState(false);
-    const [messageColor, setMessageColor] = useState("");
+    const [messageStatus, setMessageStatus] = useState("");
     const [message, setMessage] = useState("");
     const [returnHome, retHome] = useState(false);
     const visibleRef = useRef(false);
@@ -193,6 +208,10 @@ export default function AddNotes({ navigation }: NavigationType) {
 
     // used for loading screen
     const [loadingValue, setLoadingValue] = useState(false);
+
+    //used for date/time pickers
+    const [showPicker, setShowPicker] = useState(false);
+    const [showPicker2, setShowPicker2] = useState(false);
     
     // tank predictor
     const [tankPredictorVisibility, setTankPredictorVisibility] = useState(false);
@@ -258,11 +277,26 @@ export default function AddNotes({ navigation }: NavigationType) {
       let prevEntry = data.entries[0];
 
       // compare pressure from prev entry to current entry to see if tank will be empty soon
-      let lowDays = daysUntilEmpty(parseInt(prevEntry.low_cal.pressure), prevEntry.time_out, parseInt(lowPressure));
-      let midDays = daysUntilEmpty(parseInt(prevEntry.mid_cal.pressure), prevEntry.time_out, parseInt(midPressure));
-      let highDays = daysUntilEmpty(parseInt(prevEntry.high_cal.pressure), prevEntry.time_out, parseInt(highPressure));
-      let ltsDays = daysUntilEmpty(parseInt(prevEntry.lts.pressure), prevEntry.time_out, parseInt(ltsPressure));
-      let n2Days = daysUntilEmpty(parseInt(prevEntry.n2_pressure), prevEntry.time_out, parseInt(n2Value));
+      let lowDays;
+      if (prevEntry.low_cal) {
+        lowDays = daysUntilEmpty(parseInt(prevEntry.low_cal.pressure), prevEntry.time_out, parseInt(lowPressure));
+      }
+      let midDays;
+      if (prevEntry.mid_cal) {
+        midDays = daysUntilEmpty(parseInt(prevEntry.mid_cal.pressure), prevEntry.time_out, parseInt(midPressure));
+      }
+      let highDays;
+      if (prevEntry.high_cal) {
+        highDays = daysUntilEmpty(parseInt(prevEntry.high_cal.pressure), prevEntry.time_out, parseInt(highPressure));
+      }
+      let ltsDays;
+      if (prevEntry.lts) {
+        ltsDays = daysUntilEmpty(parseInt(prevEntry.lts.pressure), prevEntry.time_out, parseInt(ltsPressure));
+      }
+      let n2Days
+      if (prevEntry.n2_pressure) {
+        n2Days = daysUntilEmpty(parseInt(prevEntry.n2_pressure), prevEntry.time_out, parseInt(n2Value));
+      }
 
       console.log(`
         Low Days: ${lowDays}
@@ -272,27 +306,27 @@ export default function AddNotes({ navigation }: NavigationType) {
         n2 Days:  ${n2Days}`);
 
       // if any of the tanks are predicted to be empty in 90 days or less, send a warning
-      if (lowDays <= 90) {
+      if (lowDays && lowDays <= 90) {
         setLowDaysRemaining(lowDays);
         setLowTankName(lowId);
         setTankPredictorVisibility(true);
       }
-      if (midDays <= 90) {
+      if (midDays && midDays <= 90) {
         setMidDaysRemaining(midDays);
         setMidTankName(midId);
         setTankPredictorVisibility(true);
       }
-      if (highDays <= 90) {
+      if (highDays && highDays <= 90) {
         setHighDaysRemaining(highDays);
         setHighTankName(highId);
         setTankPredictorVisibility(true);
       }
-      if (ltsDays <= 90) {
+      if (ltsDays && ltsDays <= 90) {
         setLtsDaysRemaining(ltsDays);
         setLtsTankName(ltsId);
         setTankPredictorVisibility(true);
       }
-      if (n2Days <= 90) {
+      if (n2Days && n2Days <= 90) {
         setN2DaysRemaining(n2Days);
         setN2TankName("N2");
         setTankPredictorVisibility(true);
@@ -376,6 +410,8 @@ export default function AddNotes({ navigation }: NavigationType) {
       const endMinutes = String(end.getUTCMinutes()).padStart(2, "0");
       const endSeconds = String(end.getUTCSeconds()).padStart(2, "0");
         
+      let tankRecordString = "";
+      console.log("creating data")
         // create an entry object data that will be sent off to the repo
         let data: Entry = 
         {
@@ -414,79 +450,111 @@ export default function AddNotes({ navigation }: NavigationType) {
           },
           additional_notes: notesValue 
         };
+        console.log("entry created")
+        const utcTime = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:${endSeconds}Z`;
+        if(networkStatus){
+          if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
+            tankRecordString += removeTankFromSite(originalLts, utcTime);
+          }
+          if (ltsTankRecord) {
+            let ltsTank = copyTankRecord(ltsTankRecord);
+            ltsTank.location = site;
+            ltsTank.updatedAt = utcTime;
+            ltsTank.pressure = parseInt(ltsPressure);
+            ltsTank.userId = nameValue;
+            console.log("calling this")
+            addEntrytoTankDictionary(ltsTank);
+            tankRecordString += buildTankRecordString(ltsTank);
+          }
+          
+          console.log("tank pressure point")
+          if (originalLow && (!lowTankRecord || (originalLow.tankId != lowTankRecord.tankId))) {
+            tankRecordString += removeTankFromSite(originalLow, utcTime);
+          }
+          console.log("tank pressure point 2")
+          if (lowTankRecord) {
+            let lowTank = copyTankRecord(lowTankRecord);
+            lowTank.location = site;
+            lowTank.updatedAt = utcTime;
+            lowTank.pressure = parseInt(lowPressure);
+            lowTank.userId = nameValue;
+            addEntrytoTankDictionary(lowTank);
+            tankRecordString += buildTankRecordString(lowTank);
+          }
 
-        const utcTime = `${endYear}-${endMonth}-${endDay} ${endHours}:${endMinutes}:${endSeconds}Z`;
-        if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
-          removeTankFromSite(originalLts, utcTime);
+          if (originalMid && (!midTankRecord || (originalMid.tankId != midTankRecord.tankId))) {
+            tankRecordString += removeTankFromSite(originalMid, utcTime);
+          }
+          if (midTankRecord) {
+            let midTank = copyTankRecord(midTankRecord);
+            midTank.location = site;
+            midTank.updatedAt = utcTime;
+            midTank.pressure = parseInt(midPressure);
+            midTank.userId = nameValue;
+            addEntrytoTankDictionary(midTank);
+            tankRecordString += buildTankRecordString(midTank);
+          }
+
+          if (originalHigh && (!highTankRecord || (originalHigh.tankId != highTankRecord.tankId))) {
+            tankRecordString += removeTankFromSite(originalHigh, utcTime);
+          }
+          if (highTankRecord) {
+            let highTank = copyTankRecord(highTankRecord);
+            highTank.location = site;
+            highTank.updatedAt = utcTime;
+            highTank.pressure = parseInt(highPressure);
+            highTank.userId = nameValue;
+            addEntrytoTankDictionary(highTank);
+            tankRecordString += buildTankRecordString(highTank);
+          }
         }
-        if (ltsTankRecord) {
-          let ltsTank = copyTankRecord(ltsTankRecord);
-          ltsTank.location = site;
-          ltsTank.updatedAt = utcTime;
-          ltsTank.pressure = parseInt(ltsPressure);
-          ltsTank.userId = nameValue;
-          addEntrytoTankDictionary(ltsTank);
-        }
-        
-        if (originalLow && (!lowTankRecord || (originalLow.tankId != lowTankRecord.tankId))) {
-          removeTankFromSite(originalLow, utcTime);
-        }
-        if (lowTankRecord) {
-          let lowTank = copyTankRecord(lowTankRecord);
-          lowTank.location = site;
-          lowTank.updatedAt = utcTime;
-          lowTank.pressure = parseInt(lowPressure);
-          lowTank.userId = nameValue;
-          addEntrytoTankDictionary(lowTank);
+        else
+        {
+          if(ltsId && ltsPressure)
+          {
+            await offlineTankEntry(ltsId, parseInt(ltsPressure), site, utcTime, nameValue)
+          }
+          if(lowId && lowPressure)
+          {
+            await offlineTankEntry(lowId, parseInt(lowPressure), site, utcTime, nameValue)
+          }
+          if(midId && midPressure)
+          {
+            await offlineTankEntry(midId, parseInt(midPressure), site, utcTime, nameValue)
+          }
+          if(highId && highPressure)
+          {
+            await offlineTankEntry(highId, parseInt(highPressure), site, utcTime, nameValue)
+          }
         }
 
-      if (originalMid && (!midTankRecord || (originalMid.tankId != midTankRecord.tankId))) {
-        removeTankFromSite(originalMid, utcTime);
-      }
-      if (midTankRecord) {
-        let midTank = copyTankRecord(midTankRecord);
-        midTank.location = site;
-        midTank.updatedAt = utcTime;
-        midTank.pressure = parseInt(midPressure);
-        midTank.userId = nameValue;
-        addEntrytoTankDictionary(midTank);
-      }
-
-      if (originalHigh && (!highTankRecord || (originalHigh.tankId != highTankRecord.tankId))) {
-        removeTankFromSite(originalHigh, utcTime);
-      }
-      if (highTankRecord) {
-        let highTank = copyTankRecord(highTankRecord);
-        highTank.location = site;
-        highTank.updatedAt = utcTime;
-        highTank.pressure = parseInt(highPressure);
-        highTank.userId = nameValue;
-        addEntrytoTankDictionary(highTank);
-      }
-
-      // send the request
-      const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
-      const tankResult = await setTankTracker();
+        console.log("sending add notes")
+        // send the request
+        const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
+        console.log("sending tank tracker")
+        const tankResult = await setTankTracker(tankRecordString);
 
         let instMaintResult;
         let instMaintResult2;
         let badDataResult;
 
-      // If a new instrument was added
-      if (instrumentInput && (!originalInstrument || (originalInstrument != instrumentInput))) {
-        if (instrumentNames.includes(instrumentInput)) {
-          const notes = installedInstrumentNotes(utcTime);
-          instMaintResult = await setInstrumentFile(`instrument_maint/LGR_UGGA/${instrumentInput}`, notes, `Updated ${instrumentInput}.md`, true, site);
+        // If a new instrument was added
+        if (instrumentInput && (!originalInstrument || (originalInstrument != instrumentInput))) {
+          if (instrumentNames.includes(instrumentInput)) {
+            const notes = installedInstrumentNotes(utcTime);
+            //console.log("sending instrument")
+            instMaintResult = await setInstrumentFile(`instrument_maint/LGR_UGGA/${instrumentInput}`, notes, `Updated ${instrumentInput}.md`, true, site);
+          }
         }
-      }
 
-      // If instrument was removed
-      if (originalInstrument && (!instrumentInput || (originalInstrument != instrumentInput))) {
-        if (instrumentNames.includes(originalInstrument)) {
-          const notes = removedInstrumentNotes(utcTime);
-          instMaintResult2 = await setInstrumentFile(`instrument_maint/LGR_UGGA/${originalInstrument}`, notes, `Updated ${originalInstrument}.md`, true, 'WBB - Spare');
+        // If instrument was removed
+        if (originalInstrument && (!instrumentInput || (originalInstrument != instrumentInput))) {
+          if (instrumentNames.includes(originalInstrument)) {
+            const notes = removedInstrumentNotes(utcTime);
+            console.log("sending instrument 2")
+            instMaintResult2 = await setInstrumentFile(`instrument_maint/LGR_UGGA/${originalInstrument}`, notes, `Updated ${originalInstrument}.md`, true, 'WBB - Spare');
+          }
         }
-      }
 
         if (addToBadData) {
           let instrument = "";
@@ -498,6 +566,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           } else if (instrumentInput.includes("6262")) {
             instrument = "licor_6262";
           }
+          console.log("sending bad data")
           badDataResult = await setBadData(
             site,
             instrument,
@@ -511,12 +580,19 @@ export default function AddNotes({ navigation }: NavigationType) {
 
         // check to see if the request was ok, give a message based on that
         if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success) && (!badDataResult || badDataResult.success)) {
+          if(networkStatus)
+          {
             setMessage("File updated successfully!");
-            setMessageColor(customTheme['color-success-700']);
+          }
+          else
+          {
+            setMessage("File updated successfully! Login when in service to upload changes")
+          }
+            setMessageStatus("success");
             retHome(true);
           } else {
             if (result.error) {
-              setMessage(`Error: ${result.error}`);
+              setMessage(`Error: ${result?.error}`);
             } else if (tankResult.error) {
               setMessage(`Error: ${tankResult.error}`);
             } else if (instMaintResult && instMaintResult.error) {
@@ -526,7 +602,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             } else if (badDataResult && badDataResult.error) {
               setMessage(`Error: ${badDataResult.error}`);
             }
-            setMessageColor(customTheme['color-danger-700']);
+            setMessageStatus("danger");
           }
           setTimeout(() => {
             setVisible(true);
@@ -539,7 +615,10 @@ export default function AddNotes({ navigation }: NavigationType) {
       if(nav){
         navigation.navigate("Home")
       }
-      setTimeout(checkIfRefillIsNeeded, 100);
+      if(networkStatus)
+      {
+        setTimeout(checkIfRefillIsNeeded, 100);
+      }
     }
 
     function navigatePlanVisit(nav:boolean){
@@ -548,13 +627,14 @@ export default function AddNotes({ navigation }: NavigationType) {
       }
     }
 
-    const removeTankFromSite = (tank: TankRecord, time: string) => {
+    const removeTankFromSite = (tank: TankRecord, time: string): string => {
       let newTankEntry = copyTankRecord(tank);
       newTankEntry.location = "ASB279";
       newTankEntry.pressure = 500;
       newTankEntry.userId = nameValue;
       newTankEntry.updatedAt = time;
       addEntrytoTankDictionary(newTankEntry);
+      return buildTankRecordString(newTankEntry);
     }
 
     const clearTankEntry = (tank: string) => {
@@ -567,8 +647,8 @@ export default function AddNotes({ navigation }: NavigationType) {
         setLowValue("");
         setLowTankRecord(undefined);
       } else if (tank == "mid") {
-        setmidId("");
-        setmidValue("");
+        setMidId("");
+        setMidValue("");
         setMidTankRecord(undefined);
       } else if (tank == "high") {
         setHighId("");
@@ -608,10 +688,19 @@ export default function AddNotes({ navigation }: NavigationType) {
             navigation.navigate('SelectTank', {
               from: 'AddNotes',
               onSelect: (tank) => {
+                if(networkStatus)
+                {
                   setLTSId(tank);
                   const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
                   setLtsTankRecord(entry);
                   setLTSValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+                }
+                else
+                {
+                  setLTSId(tank)
+                  //it won't display the tankID unless we give this an empty value, haven't a clue why
+                  setLTSValue(" ")
+                }
               }
             });
           }, 10);
@@ -620,10 +709,19 @@ export default function AddNotes({ navigation }: NavigationType) {
             navigation.navigate('SelectTank', {
               from: 'AddNotes',
               onSelect: (tank) => {
-                setLowId(tank);
-                const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
-                setLowTankRecord(entry);
-                setLowValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+                if(networkStatus)
+                {
+                  setLowId(tank);
+                  const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+                  setLowTankRecord(entry);
+                  setLowValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+                }
+                else
+                {
+                  setLowId(tank)
+                  //it won't display the tankID unless we give this an empty value, haven't a clue why
+                  setLowValue(" ")
+                }
               }
             });
           }, 10);
@@ -632,10 +730,19 @@ export default function AddNotes({ navigation }: NavigationType) {
             navigation.navigate('SelectTank', {
               from: 'AddNotes',
               onSelect: (tank) => {
-                setmidId(tank);
-                const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
-                setMidTankRecord(entry);
-                setmidValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+                if(networkStatus)
+                {
+                  setMidId(tank);
+                  const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+                  setMidTankRecord(entry);
+                  setMidValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+                }
+                else
+                {
+                  setMidId(tank)
+                  //it won't display the tankID unless we give this an empty value, haven't a clue why
+                  setMidValue(" ")
+                }
               }
             });
           } , 10);
@@ -644,10 +751,18 @@ export default function AddNotes({ navigation }: NavigationType) {
             navigation.navigate('SelectTank', {
               from: 'AddNotes',
               onSelect: (tank) => {
-                setHighId(tank);
-                const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
-                setHighTankRecord(entry);
-                setHighValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+                if(networkStatus){
+                  setHighId(tank);
+                  const entry = getLatestTankEntry(tank) || getLatestTankEntry(tank.toLowerCase());
+                  setHighTankRecord(entry);
+                  setHighValue(entry.co2.toString() + " ~ " + entry.ch4.toString());
+                }
+                else
+                {
+                  setHighId(tank)
+                  //it won't display the tankID unless we give this an empty value, haven't a clue why
+                  setHighValue(" ")
+                }
               }
             });
           }, 10);
@@ -690,8 +805,8 @@ export default function AddNotes({ navigation }: NavigationType) {
               if (midEntry) {
                 setMidTankRecord(midEntry);
                 setOriginalMid(midEntry);
-                setmidId(midEntry.tankId);
-                setmidValue(midEntry.co2.toString() + " ~ " + midEntry.ch4.toString());
+                setMidId(midEntry.tankId);
+                setMidValue(midEntry.co2.toString() + " ~ " + midEntry.ch4.toString());
               }
             } 
           }
@@ -725,15 +840,14 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* success/failure popup */}
             <PopupProp popupText={message}
-            popupColor={messageColor} 
+            popupStatus={messageStatus} 
             onPress={setVisible}
             navigateHome={navigateHome} 
             visible={visible}
             returnHome={returnHome}/>
 
             {/* popup if user has missing input */}
-            <PopupProp2Button popupText='Missing some input field(s)'
-            popupColor={customTheme['color-danger-700']}
+            <PopupProp2Button
             sendData={handleUpdate}
             removePopup={setVisible2}
             visible={visible2}/>
@@ -754,10 +868,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               removePopup={setTankPredictorVisibility}
               navigateHome={navigateHome}
               navigatePlanVisit={navigatePlanVisit} />
-              {/* ltsTankName
-              highTankName
-              midTankName
-              lowTankName */}
+              
 
             {/* loading screen */}
             <LoadingScreen visible={loadingValue} />
@@ -817,7 +928,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         {(showStartPicker && Platform.OS === "android") && (
           (
             <View style={styles.androidDateTime}>
-              <Pressable onPress={() => {showStartDatepicker(); setStartDateValue(startDateValue)}}>
+              <Pressable onPress={() => {showStartMode("date"); setStartDateValue(startDateValue)}}>
                 <Text>
                   {startDateValue.toLocaleDateString([], {
                     weekday: "short",
@@ -826,8 +937,8 @@ export default function AddNotes({ navigation }: NavigationType) {
                     day: "2-digit",
                   })}
                 </Text>
-              </Pressable>
-              <Pressable onPress={() => {showStartTimepicker(); setStartDateValue(startDateValue)}}>
+              </Pressable>              
+              <Pressable onPress={() => {setShowPicker(true); setStartDateValue(startDateValue)}}>
                 <Text>
                   {startDateValue.toLocaleTimeString([], {
                     hour: "2-digit",
@@ -835,6 +946,32 @@ export default function AddNotes({ navigation }: NavigationType) {
                   })}
                 </Text>
               </Pressable>
+              {/*Displays time picker*/}
+              <TimerPickerModal
+                  visible={showPicker}
+                  setIsVisible={setShowPicker}
+                  //makes it am/pm
+                  use12HourPicker={true}
+                  //since we don't need seconds it is hidden
+                  hideSeconds={true}
+                  //displays the little arrow for which value is being selected
+                  minuteLabel={"<"}
+                  onConfirm={(pickedDuration) => {
+                    //set time
+                    setStartDateHourMinutes(pickedDuration);                    
+                    //set time picker to false to close it
+                    setShowPicker(false);
+                  }}
+                  modalTitle="Set Time"
+                  onCancel={() => setShowPicker(false)}
+                  closeOnOverlayPress
+                  styles={{
+                      theme: isDarkMode ? "dark" : "light"
+                  }}
+                  modalProps={{
+                      overlayOpacity: 0.2,
+                  }}
+              />
             </View>
           )
         )}
@@ -869,7 +1006,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           {(showEndPicker && Platform.OS === "android") && (
           (
             <View style={styles.androidDateTime}>
-              <Pressable onPress={() => {showEndDatepicker(); setEndDateValue(endDateValue)}}>
+              <Pressable onPress={() => {showEndMode("date"); setEndDateValue(endDateValue)}}>
                 <Text>
                   {endDateValue.toLocaleDateString([], {
                     weekday: "short",
@@ -879,7 +1016,7 @@ export default function AddNotes({ navigation }: NavigationType) {
                   })}
                 </Text>
               </Pressable>
-              <Pressable onPress={() => {showEndTimepicker(); setEndDateValue(endDateValue)}}>
+              <Pressable onPress={() => {setShowPicker2(true); setEndDateValue(endDateValue)}}>
                 <Text>
                   {endDateValue.toLocaleTimeString([], {
                     hour: "2-digit",
@@ -887,6 +1024,28 @@ export default function AddNotes({ navigation }: NavigationType) {
                   })}
                 </Text>
               </Pressable>
+              <TimerPickerModal
+                  visible={showPicker2}
+                  setIsVisible={setShowPicker2}
+                  use12HourPicker={true}
+                  hideSeconds={true}
+                  minuteLabel={"<"}
+                  onConfirm={(pickedDuration) => {
+                    //set time
+                    setEndDateHourMinutes(pickedDuration);                    
+                    //set time picker to false to close it
+                    setShowPicker2(false);
+                  }}
+                  modalTitle="Set Time"
+                  onCancel={() => setShowPicker2(false)}
+                  closeOnOverlayPress
+                  styles={{
+                      theme: isDarkMode ? "dark" : "light"
+                  }}
+                  modalProps={{
+                      overlayOpacity: 0.2,
+                  }}
+              />
             </View>
           )
         )}
@@ -991,7 +1150,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               </Select>
               <TextInput labelText=' ' 
                 labelValue={midPressure} 
-                onTextChange={setmidPressure} 
+                onTextChange={setMidPressure} 
                 placeholder='psi' 
                 style={styles.tankInput} />
             </Layout>
@@ -1147,4 +1306,5 @@ export default function AddNotes({ navigation }: NavigationType) {
       flexDirection: "row",
       justifyContent: "space-around",
     },
+     
 });
