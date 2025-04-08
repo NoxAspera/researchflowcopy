@@ -502,7 +502,7 @@ export async function offlineTankEntry(tankID: string, pressure: number, site: s
             content += await FileSystem.readAsStringAsync(path)
         }
 
-        content += `{tankId: ${tankID}, pressure: ${pressure}, site: ${site}, time: ${time}, name: ${name}}\n`
+        content += `{tankId: \"${tankID}\", pressure: \"${pressure}\", site: \"${site}\", time: \"${time}\", name: \"${name}\"}\n`
 
         await FileSystem.writeAsStringAsync(path, content)
 

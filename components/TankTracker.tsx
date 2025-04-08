@@ -19,6 +19,7 @@ import { Float } from 'react-native/Libraries/Types/CodegenTypes';
 import { customTheme } from './CustomTheme'
 import LoadingScreen from "./LoadingScreen";
 import VisitPopupProp from './VisitPopup';
+import { sanitize } from '../scripts/Parsers';
 
 export default function TankTracker({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
@@ -183,7 +184,10 @@ export default function TankTracker({ navigation }: NavigationType) {
     const handleUpdate = async () => {
       // show spinner while submitting
       setLoadingValue(true);
-
+      setNameValue(sanitize(nameValue))
+      setNotesValue(sanitize(notesValue))
+      setLocationValue(sanitize(locationValue))
+      setFillIDValue(sanitize(fillIDValue))
       const entry = buildTankEntry();
       addEntrytoTankDictionary(entry);
       const tankRecordString = buildTankRecordString(entry);
