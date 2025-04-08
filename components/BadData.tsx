@@ -168,7 +168,7 @@ export default function BadData({ navigation }: NavigationType) {
       retHome(true);
     } else {
       setMessage(`Error: ${result.error}`);
-      setMessageStatus("success");
+      setMessageStatus("danger");
     }
     setTimeout(() => {
       setVisible(true);

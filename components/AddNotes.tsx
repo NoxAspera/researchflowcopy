@@ -226,6 +226,15 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [n2DaysRemaining, setN2DaysRemaining] = useState(-1);
     const [n2TankName, setN2TankName] = useState("");
 
+    /**
+     * getTimeBetweenDates
+     * 
+     * Helper function that gets the time between two dates expressed as days
+     * 
+     * @param date1 first date
+     * @param date2 second date
+     * @returns time passed between date1 and date2 in days
+     */
     function getTimeBetweenDates(date1, date2) {
       const timeDiffMs = Math.abs(date2.getTime() - date1.getTime());
       const seconds = Math.floor(timeDiffMs / 1000);
@@ -242,10 +251,21 @@ export default function AddNotes({ navigation }: NavigationType) {
       };
     }
 
+    /**
+     * daysUntilEmpty
+     * @author Blake Stambaugh 
+     * 
+     * Takes in a tanks previous pressure, previous date checked, and its current pressure and estimates the 
+     * amount of days remaining until it is empty.
+     * 
+     * @param prevPress the tanks previous pressure
+     * @param prevDate the last date the tank was visited
+     * @param currPress the current pressure of the tank
+     * @returns how many days are left until the tank is expected to be empty
+     */
     function daysUntilEmpty(prevPress, prevDate, currPress) {
       // get change of pressure over time, assume it is linear
       let changeOfPress = currPress - prevPress;
-      console.log(`${currPress} - ${prevPress} = ${changeOfPress}`);
 
       // if change of pressure is positive, then it got replaced, no need to check date
       // if change of pressure is 0, then there is no need to check date bc nothing has changed
@@ -265,16 +285,23 @@ export default function AddNotes({ navigation }: NavigationType) {
       
       let rateOfDecay = changeOfPress / changeOfDate; // measured in psi lost per day
 
-      // solve for when the tank should be under 500 psi
+      // solve for when the tank should have no pressure remaining
       let days = Math.trunc((-prevPress / rateOfDecay) - changeOfDate);
       return days;
     }
 
+    /**
+     * CheckIfRefillIsNeeded
+     * @author Blake Stambaugh 
+     * 
+     * This method gets the estimated amount of days remaining in each tank at a site and checks if any will
+     * be empty in 90 days.
+     */
     function checkIfRefillIsNeeded() {
       // get tank values from previous entries
       let prevEntry = data.entries[0];
 
-      // compare pressure from prev entry to current entry to see if tank will be empty soon
+      // see how many days are left until the tank is predicted to be empty
       let lowDays;
       if (prevEntry.low_cal) {
         lowDays = daysUntilEmpty(parseInt(prevEntry.low_cal.pressure), prevEntry.time_out, parseInt(lowPressure));
