@@ -803,46 +803,53 @@ export async function getBadDataSites()
 }
 /**
  * @author August O'Rourke, Megan Ostlie
- * This method gets bad data files fromt the bad data repository
+ * This method gets bad data files from the bad data repository
  * @param siteName - the name of the site we are getting the data from
  * @returns A json object containing a success field, and the response sent back, or an error message
  */
 export async function getBadDataFiles(siteName: string)
 {
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad/${siteName}`;
-
-    let headers = new Headers();
-    headers.append("User-Agent", "ResearchFlow");
-    headers.append("Accept", "application/vnd.github+json");
-    headers.append("Authorization", `Bearer ${githubToken}`);
-    headers.append("X-GitHub-Api-Version", "2022-11-28");
-
-    let requestOptions: RequestInfo = new Request(url, 
-        {
-            method: "GET",
-            headers: headers,
-            redirect: "follow"
-        }
-    )
-    try {
-        const response = await fetch(requestOptions);
-        if (response.ok) {
-            const data: siteResponse[] = await response.json();
-            
-            const csvFiles = data
-                .filter(item => item.name.endsWith(".csv"))
-                .map(item => item.name.replace(/\.csv$/, ""));
-
-            return {success:true, data:csvFiles};
-        } 
-        else {
-            const errorData = await response.json();
-            return { success: false, error: errorData.message };
-        }
-    } 
-    catch (error) 
+    if((await Network.getNetworkStateAsync()).isConnected)
     {
-        return { success: false, error: error };
+        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad/${siteName}`;
+
+        let headers = new Headers();
+        headers.append("User-Agent", "ResearchFlow");
+        headers.append("Accept", "application/vnd.github+json");
+        headers.append("Authorization", `Bearer ${githubToken}`);
+        headers.append("X-GitHub-Api-Version", "2022-11-28");
+
+        let requestOptions: RequestInfo = new Request(url, 
+            {
+                method: "GET",
+                headers: headers,
+                redirect: "follow"
+            }
+        )
+        try {
+            const response = await fetch(requestOptions);
+            if (response.ok) {
+                const data: siteResponse[] = await response.json();
+                
+                const csvFiles = data
+                    .filter(item => item.name.endsWith(".csv"))
+                    .map(item => item.name.replace(/\.csv$/, ""));
+
+                return {success:true, data:csvFiles};
+            } 
+            else {
+                const errorData = await response.json();
+                return { success: false, error: errorData.message };
+            }
+        } 
+        catch (error) 
+        {
+            return { success: false, error: error };
+        }
+    }
+    else
+    {
+        return {success: true, data : await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + `bad/${siteName}`)}
     }
 }
 /**
