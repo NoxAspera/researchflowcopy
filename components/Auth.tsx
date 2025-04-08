@@ -54,8 +54,11 @@ export default function App({navigation}: NavigationType) {
         const {token_type, scopes, access_token} = (await generateGithubToken(code)).data
         console.log(access_token)
         setGithubToken(access_token);
+        setLoadingText("Registering Tanks")
         await tankTrackerSpinUp();
+        setLoadingText("Updating from Offline")
         await readUpdates()
+        setLoadingText("Preparing Offline Mode")
         await updateDirectories()
         setLoadingValue(false)
         navigation.navigate("Home")
@@ -83,11 +86,11 @@ async function handlePress()
   }
   
 }
-
+const [loadingText, setLoadingText] = useState("")
   return (
     <Layout style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <LoadingScreen visible={loadingValue} />
+      <LoadingScreen visible={loadingValue} loadingText={loadingText}/>
         <HomeButtonProp
           text="Login With Github"
           color= "#FFFFFF"

@@ -10,7 +10,7 @@ describe("Popup", () => {
       <MockThemeProvider>
         <PopupProp
           popupText="test"
-          popupColor={"red"}
+          popupStatus={"red"}
           visible={true}
           onPress={action}
         />

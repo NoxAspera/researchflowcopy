@@ -10,7 +10,6 @@ import { StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { Layout, Button, Text } from '@ui-kitten/components';
-import PopupProp from './Popup';
 import { NavigationType, routeProp } from './types'
 import { ScrollView } from 'react-native-gesture-handler';
 
@@ -21,9 +20,6 @@ export default function SelectSite({navigation}: NavigationType) {
 
   // previous buttons hit, used to know where to go next
   let from = route.params?.from;
-  const [visible, setVisible] = useState(false);
-  const [messageColor, setMessageColor] = useState("");
-  const [message, setMessage] = useState("");
 
   // data for buttons
   let buttonData = [
@@ -36,17 +32,8 @@ export default function SelectSite({navigation}: NavigationType) {
   };
 
   return (
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <Layout style={styles.container}>
-
-      <PopupProp
-        popupText={message}
-        popupColor={messageColor}
-        onPress={setVisible}
-        visible={visible}
-        navigateHome={null} 
-        returnHome={false}
-      />
 
         {buttonData.map((button) => (
           <Button
@@ -66,7 +53,7 @@ export default function SelectSite({navigation}: NavigationType) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'space-around',
+    justifyContent: 'flex-start',
     padding: 20,
   },
   button: {

@@ -6,21 +6,22 @@
  * This page is responsible for planning visits.
  */
 import { StyleSheet, KeyboardAvoidingView,} from "react-native";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useRoute } from "@react-navigation/native";
-import { Button, Layout, Datepicker, Text } from "@ui-kitten/components";
+import { Button, Layout, Datepicker, Text, Card } from "@ui-kitten/components";
 import TextInput from "./TextInput";
 import { customTheme } from "./CustomTheme";
 import { NavigationType, routeProp } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
 import { ThemeContext } from "./ThemeContext";
-import { visit, setVisitFile } from "../scripts/APIRequests";
+import { visit, setVisitFile, getFileContents } from "../scripts/APIRequests";
 import PopupProp from './Popup';
 import LoadingScreen from "./LoadingScreen";
 
 export default function PlanVisit({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   let site = route.params?.site;
+  let from = route.params?.from;
   const themeContext = React.useContext(ThemeContext);
   const isDarkMode = themeContext.theme === 'dark';
 
@@ -34,10 +35,13 @@ export default function PlanVisit({ navigation }: NavigationType) {
   // used for determining if PUT request was successful
   // will set the success/fail notification to visible, aswell as the color and text
   const [visible, setVisible] = useState(false);
-  const [messageColor, setMessageColor] = useState("");
+  const [messageStatus, setMessageStatus] = useState("");
   const [message, setMessage] = useState("");
   const [returnHome, retHome] = useState(false);
   const visibleRef = useRef(false);
+
+  // used for getting notes from previous site
+  const [data, setData] = useState<string[] | null>(null);
 
   // used for loading screen
   const [loadingValue, setLoadingValue] = useState(false);
@@ -51,12 +55,55 @@ export default function PlanVisit({ navigation }: NavigationType) {
   const handleSubmit = () => {
         if (!nameValue || !dateValue) {
           setMessage("Please make sure Name and Date are filled out before submitting.");
-          setMessageColor(customTheme['color-danger-700']);
+          setMessageStatus("danger");
           setVisible(true);
           return;
         }
         handleUpdate()
   }
+
+  // Get current notes for the site
+  useEffect(() => {
+    async function fetchData() {
+      if (site && !data && route) {
+        try {
+          console.log(`${site}\n`);
+          const parsedData = await getFileContents(`/site_notes/${site}`);
+          if (parsedData.success) {
+            let fileContent = parsedData.data;
+            if (site.includes("Teledyne")) {
+              // Find the start of "Maintenance Log"
+              const maintenanceIndex = fileContent.indexOf("Maintenance Log");
+              if (maintenanceIndex !== -1) {
+                // Find the end of the "Maintenance Log" line
+                const startOfLogContent = fileContent.indexOf("\n", maintenanceIndex) + 1;
+  
+                // Keep the first line + everything after the "Maintenance Log" line
+                const firstLineEnd = fileContent.indexOf("\n");
+                fileContent =
+                  fileContent.substring(0, firstLineEnd + 1) + // Keep the first line
+                  fileContent.substring(startOfLogContent); // Skip "Maintenance Log" line
+              }
+            }
+
+            setData(
+              fileContent
+                .substring(parsedData.data.indexOf("\n"))
+                .split(new RegExp("(___|---)"))
+            );
+          } else {
+            console.log("Error getting notes: ", );
+          }
+        } catch (error) {
+          console.error("Error retreiveing  notes:", error);
+        }
+      }
+    }
+    if(!from){
+      fetchData();
+    }
+  }, [site]);
+
   const handleUpdate = async () => {
     // show loading screen while waiting for results
     setLoadingValue(true);
@@ -79,12 +126,12 @@ export default function PlanVisit({ navigation }: NavigationType) {
 
     // check to see if the request was ok, give a message based on that
     if (result.success) {
-        setMessage("File updated successfully!");
-        setMessageColor(customTheme['color-success-700']);
+        setMessage("Visit planned successfully!");
+        setMessageStatus("success");
         retHome(true);
       } else {
         setMessage(`Error: ${result.error}`);
-        setMessageColor(customTheme['color-danger-700']);
+        setMessageStatus("danger");
       }
       setTimeout(() => {
         setVisible(true);
@@ -95,9 +142,9 @@ export default function PlanVisit({ navigation }: NavigationType) {
   return (
     <KeyboardAvoidingView
       behavior = "padding"
-      style={styles.container}
+      style={{ flex: 1 }}
     >
-      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
+      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1 }}>
         <Layout style={styles.container} level="1">
           {/* header */}
           <Text category="h1" style={{ textAlign: "center" }}>
@@ -106,7 +153,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
 
           {/* success/failure popup */}
           <PopupProp popupText={message} 
-            popupColor={messageColor} 
+            popupStatus={messageStatus} 
             onPress={setVisible} 
             navigateHome={navigateHome} 
             visible={visible}
@@ -155,6 +202,22 @@ export default function PlanVisit({ navigation }: NavigationType) {
             style={styles.reasonText}
           />
 
+          {/* notes from previous site */}
+          {data !== null ? (
+              <Card>
+                <Text>
+                Previous Notes
+                </Text>
+                <Text category="p2">{data[2]}</Text>
+              </Card>
+            ) : (
+              <Card>
+                <Text>
+                No Previous Notes
+                </Text>
+              </Card>
+            )}
+
           {/* submit button */}
           <Button
             onPress={() => handleSubmit()}
@@ -173,15 +236,14 @@ export default function PlanVisit({ navigation }: NavigationType) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: "column",
     alignItems: "stretch", // has button fill space horizontally
     justifyContent: "space-evenly",
   },
   reasonText: {
-    flex: 1,
     margin: 8,
   },
   textInput: {
-    flex: 1,
     margin: 8,
   },
   submitButton:{

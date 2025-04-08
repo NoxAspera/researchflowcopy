@@ -15,7 +15,7 @@ import TextInput from './TextInput'
 import NoteInput from './NoteInput'
 import { Layout, Button, Text, Select, SelectItem, IndexPath, CheckBox, Icon, DateService } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile, setBadData, offlineTankEntry } from '../scripts/APIRequests';
+import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile, setBadData, offlineTankEntry, buildTankRecordString } from '../scripts/APIRequests';
 import { parseNotes, ParsedData, copyTankRecord } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
@@ -186,7 +186,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     // used for determining if PUT request was successful
     // will set the success/fail notification to visible, aswell as the color and text
     const [visible, setVisible] = useState(false);
-    const [messageColor, setMessageColor] = useState("");
+    const [messageStatus, setMessageStatus] = useState("");
     const [message, setMessage] = useState("");
     const [returnHome, retHome] = useState(false);
     //used for popup if info is missing
@@ -320,6 +320,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       const endMinutes = String(end.getUTCMinutes()).padStart(2, "0");
       const endSeconds = String(end.getUTCSeconds()).padStart(2, "0");
         
+      let tankRecordString = "";
         // create an entry object data that will be sent off to the repo
         let data: MobileEntry = 
         {
@@ -337,17 +338,18 @@ export default function AddNotes({ navigation }: NavigationType) {
           additional_notes: notesValue 
         };
 
-        const utcTime = `${endYear}-${endMonth}-${endDay} ${endHours}:${endMinutes}:${endSeconds}Z`;
+        const utcTime = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:${endSeconds}Z`;
         const siteName = site.replace("mobile/","");
-        if (originalTank && (!tankRecord || (originalTank.tankId != tankRecord.tankId))) {
+        if(networkStatus){
+          if (originalTank && (!tankRecord || (originalTank.tankId != tankRecord.tankId))) {
           let newTankEntry = copyTankRecord(originalTank);
           newTankEntry.location = "ASB279";
           newTankEntry.pressure = 500;
           newTankEntry.userId = nameValue;
           newTankEntry.updatedAt = utcTime;
           addEntrytoTankDictionary(newTankEntry);
+          tankRecordString += buildTankRecordString(newTankEntry);
         }
-        if(networkStatus){
           if (tankRecord) {
             let tank = copyTankRecord(tankRecord);
             tank.location = siteName;
@@ -355,6 +357,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             tank.pressure = parseInt(tankPressure);
             tank.userId = nameValue;
             addEntrytoTankDictionary(tank);
+            tankRecordString += buildTankRecordString(tank);
           }
         }
         else
@@ -363,10 +366,11 @@ export default function AddNotes({ navigation }: NavigationType) {
           {
             await offlineTankEntry(tankId, parseInt(tankPressure), site, utcTime, nameValue)
           }
+        }
 
         // send the request
         const result = await setSiteFile(site, buildMobileNotes(data), "updating notes from researchFlow");
-        const tankResult = await setTankTracker();
+        const tankResult = await setTankTracker(tankRecordString);
 
         let instMaintResult;
         let instMaintResult2;
@@ -411,7 +415,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         // check to see if the request was ok, give a message based on that
         if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success) && (!badDataResult || badDataResult.success)) {
           setMessage("File updated successfully!");
-          setMessageColor(customTheme['color-success-700']);
+          setMessageStatus("success");
           retHome(true);
         } else {
           if (result.error) {
@@ -425,14 +429,13 @@ export default function AddNotes({ navigation }: NavigationType) {
           } else if (badDataResult && badDataResult.error) {
             setMessage(`Error: ${badDataResult.error}`);
           }
-          setMessageColor(customTheme['color-danger-700']);
+          setMessageStatus("danger");
         }
         setTimeout(() => {
           setVisible(true);
           visibleRef.current = true;
         }, 100);
     };
-  }
 
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
     function navigateHome(nav:boolean){
@@ -477,15 +480,14 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* success/failure popup */}
             <PopupProp popupText={message} 
-            popupColor={messageColor} 
+            popupStatus={messageStatus} 
             onPress={setVisible} 
             navigateHome={navigateHome} 
             visible={visible}
             returnHome={returnHome}/>
 
             {/* popup if user has missing input */}
-            <PopupProp2Button popupText='Missing some input field(s)'
-            popupColor={customTheme['color-danger-700']}
+            <PopupProp2Button 
             sendData={handleUpdate}
             removePopup={setVisible2}
             visible={visible2}/>

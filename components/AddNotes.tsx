@@ -14,17 +14,35 @@ import TextInput from './TextInput'
 import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text, Icon, CheckBox } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, getLatestTankEntry, offlineTankEntry, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData } from '../scripts/APIRequests';
-import { processNotes, ParsedData } from '../scripts/Parsers'
+import { setSiteFile, getFileContents, getLatestTankEntry, offlineTankEntry, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData, buildTankRecordString } from '../scripts/APIRequests';
+import { parseNotes, ParsedData } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
 import DateTimePicker, {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
+import { TimerPickerModal } from "react-native-timer-picker";
 import * as Network from 'expo-network'
 import VisitPopupProp from './VisitPopup';
-import { TimerPickerModal } from "react-native-timer-picker";
+
+/**
+ * @author Megan Ostlie
+ *  a function that pulls the current note document for the specified site from GitHub
+ *  @param siteName the name of the site
+ * 
+ * @returns a ParsedData object that contains the information of the given document
+ */
+async function processNotes(siteName: string) {
+  const fileContents = await getFileContents(`site_notes/${siteName}`);
+  if(fileContents.data){
+    return parseNotes(fileContents.data)
+  }
+  else
+  {
+    return null
+  }
+}
 
 async function isConnected()
 {
@@ -180,7 +198,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     // used for determining if PUT request was successful
     // will set the success/fail notification to visible, aswell as the color and text
     const [visible, setVisible] = useState(false);
-    const [messageColor, setMessageColor] = useState("");
+    const [messageStatus, setMessageStatus] = useState("");
     const [message, setMessage] = useState("");
     const [returnHome, retHome] = useState(false);
     const visibleRef = useRef(false);
@@ -392,6 +410,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       const endMinutes = String(end.getUTCMinutes()).padStart(2, "0");
       const endSeconds = String(end.getUTCSeconds()).padStart(2, "0");
         
+      let tankRecordString = "";
       console.log("creating data")
         // create an entry object data that will be sent off to the repo
         let data: Entry = 
@@ -432,12 +451,11 @@ export default function AddNotes({ navigation }: NavigationType) {
           additional_notes: notesValue 
         };
         console.log("entry created")
-        const utcTime = `${endYear}-${endMonth}-${endDay} ${endHours}:${endMinutes}:${endSeconds}Z`;
-        if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
-          removeTankFromSite(originalLts, utcTime);
-        }
-        console.log(networkStatus)
+        const utcTime = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:${endSeconds}Z`;
         if(networkStatus){
+          if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
+            tankRecordString += removeTankFromSite(originalLts, utcTime);
+          }
           if (ltsTankRecord) {
             let ltsTank = copyTankRecord(ltsTankRecord);
             ltsTank.location = site;
@@ -446,11 +464,12 @@ export default function AddNotes({ navigation }: NavigationType) {
             ltsTank.userId = nameValue;
             console.log("calling this")
             addEntrytoTankDictionary(ltsTank);
+            tankRecordString += buildTankRecordString(ltsTank);
           }
           
           console.log("tank pressure point")
           if (originalLow && (!lowTankRecord || (originalLow.tankId != lowTankRecord.tankId))) {
-            removeTankFromSite(originalLow, utcTime);
+            tankRecordString += removeTankFromSite(originalLow, utcTime);
           }
           console.log("tank pressure point 2")
           if (lowTankRecord) {
@@ -460,10 +479,11 @@ export default function AddNotes({ navigation }: NavigationType) {
             lowTank.pressure = parseInt(lowPressure);
             lowTank.userId = nameValue;
             addEntrytoTankDictionary(lowTank);
+            tankRecordString += buildTankRecordString(lowTank);
           }
 
           if (originalMid && (!midTankRecord || (originalMid.tankId != midTankRecord.tankId))) {
-            removeTankFromSite(originalMid, utcTime);
+            tankRecordString += removeTankFromSite(originalMid, utcTime);
           }
           if (midTankRecord) {
             let midTank = copyTankRecord(midTankRecord);
@@ -472,10 +492,11 @@ export default function AddNotes({ navigation }: NavigationType) {
             midTank.pressure = parseInt(midPressure);
             midTank.userId = nameValue;
             addEntrytoTankDictionary(midTank);
+            tankRecordString += buildTankRecordString(midTank);
           }
 
           if (originalHigh && (!highTankRecord || (originalHigh.tankId != highTankRecord.tankId))) {
-            removeTankFromSite(originalHigh, utcTime);
+            tankRecordString += removeTankFromSite(originalHigh, utcTime);
           }
           if (highTankRecord) {
             let highTank = copyTankRecord(highTankRecord);
@@ -484,6 +505,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             highTank.pressure = parseInt(highPressure);
             highTank.userId = nameValue;
             addEntrytoTankDictionary(highTank);
+            tankRecordString += buildTankRecordString(highTank);
           }
         }
         else
@@ -510,7 +532,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         // send the request
         const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
         console.log("sending tank tracker")
-        const tankResult = await setTankTracker();
+        const tankResult = await setTankTracker(tankRecordString);
 
         let instMaintResult;
         let instMaintResult2;
@@ -558,8 +580,15 @@ export default function AddNotes({ navigation }: NavigationType) {
 
         // check to see if the request was ok, give a message based on that
         if (result.success && tankResult.success && (!instMaintResult || instMaintResult.success) && (!instMaintResult2 || instMaintResult2.success) && (!badDataResult || badDataResult.success)) {
+          if(networkStatus)
+          {
             setMessage("File updated successfully!");
-            setMessageColor(customTheme['color-success-700']);
+          }
+          else
+          {
+            setMessage("File updated successfully! Login when in service to upload changes")
+          }
+            setMessageStatus("success");
             retHome(true);
           } else {
             if (result.error) {
@@ -573,7 +602,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             } else if (badDataResult && badDataResult.error) {
               setMessage(`Error: ${badDataResult.error}`);
             }
-            setMessageColor(customTheme['color-danger-700']);
+            setMessageStatus("danger");
           }
           setTimeout(() => {
             setVisible(true);
@@ -598,13 +627,14 @@ export default function AddNotes({ navigation }: NavigationType) {
       }
     }
 
-    const removeTankFromSite = (tank: TankRecord, time: string) => {
+    const removeTankFromSite = (tank: TankRecord, time: string): string => {
       let newTankEntry = copyTankRecord(tank);
       newTankEntry.location = "ASB279";
       newTankEntry.pressure = 500;
       newTankEntry.userId = nameValue;
       newTankEntry.updatedAt = time;
       addEntrytoTankDictionary(newTankEntry);
+      return buildTankRecordString(newTankEntry);
     }
 
     const clearTankEntry = (tank: string) => {
@@ -810,15 +840,14 @@ export default function AddNotes({ navigation }: NavigationType) {
 
             {/* success/failure popup */}
             <PopupProp popupText={message}
-            popupColor={messageColor} 
+            popupStatus={messageStatus} 
             onPress={setVisible}
             navigateHome={navigateHome} 
             visible={visible}
             returnHome={returnHome}/>
 
             {/* popup if user has missing input */}
-            <PopupProp2Button popupText='Missing some input field(s)'
-            popupColor={customTheme['color-danger-700']}
+            <PopupProp2Button
             sendData={handleUpdate}
             removePopup={setVisible2}
             visible={visible2}/>
@@ -839,10 +868,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               removePopup={setTankPredictorVisibility}
               navigateHome={navigateHome}
               navigatePlanVisit={navigatePlanVisit} />
-              {/* ltsTankName
-              highTankName
-              midTankName
-              lowTankName */}
+              
 
             {/* loading screen */}
             <LoadingScreen visible={loadingValue} />

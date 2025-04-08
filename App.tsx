@@ -19,13 +19,14 @@ import * as eva from '@eva-design/eva';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
 import SelectTank from './components/SelectTank';
 import customColors from './custom-theme.json'
-import { useState } from 'react';
-import CalendarScreen from './components/Calendar';
+import Calendar from './components/Calendar';
+import { useEffect, useState } from 'react';
 import SettingsButton from './components/SettingsButton';
 import ViewNotifications from './components/ViewNotifications';
 import ContactInfo from './components/ContactInfo';
 import { NavigationType } from './components/types';
 import { Button, Icon, IconElement } from '@ui-kitten/components';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View } from 'react-native';
 import Diagnostics from './components/Diagnostics';
 
@@ -37,6 +38,31 @@ export default function App() {
   // Initialize state with a type
   //LogBox.ignoreAllLogs(true)
   const [theme, setTheme] = useState<ThemeType>('light');
+  useEffect(() => {
+    const loadTheme = async () => {
+      try {
+        const savedTheme = await AsyncStorage.getItem('theme');
+        if (savedTheme === 'light' || savedTheme === 'dark') {
+          setTheme(savedTheme);
+        }
+      } catch (e) {
+        console.error("Failed to retrieve the previous theme: ", e);
+      }
+    }
+    loadTheme();
+  }, []);
+  
+  useEffect(() => {
+    const saveTheme = async () => {
+      try {
+        await AsyncStorage.setItem('theme', theme);
+      } catch (e) {
+        console.error("Failed to save the current theme: ", e);
+      }
+    }
+    saveTheme();
+  }, [theme]);
+
 
   // Merge custom theme with Eva's base theme
   const currentTheme = { ...eva[theme], ...customColors };

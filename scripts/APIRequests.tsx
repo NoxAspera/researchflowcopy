@@ -36,6 +36,19 @@ function csvify( object: TankRecord[])
     return returnString
 }
 
+function getTankRecordHeaders() {
+    const headers = "fillId,serial,updatedAt,pressure,location,owner,co2,co2Stdev,co2Sterr,co2N,ch4,ch4Stdev,ch4Sterr,ch4N,co,coStdev,coSterr,coN,d13c,d13cStdev,d13cSterr,d13cN,d18o,d18oStdev,d18oSterr,d18oN,co2RelativeTo,comment,userId,co2InstrumentId,ch4InstrumentId,coInstrumentId,ottoCalibrationFile,co2CalibrationFile,ch4RelativeTo,ch4CalibrationFile,coRelativeTo,coCalibrationFile,tankId\n";
+    return headers;
+}
+
+export function buildTankRecordString( record: TankRecord)
+{
+    let newLine = `${record.fillId},${record.serial},${record.updatedAt},${record.pressure},${record.location},${record.owner},${record.co2},${record.co2Stdev},${record.co2Sterr},${record.co2N},${record.ch4},${record.ch4Stdev},${record.ch4Sterr},${record.ch4N},${record.co},${record.coStdev},${record.coSterr},${record.coN},${record.d13c},${record.d13cStdev},${record.d13cSterr},${record.d13cN},${record.d18o},${record.d18oStdev},${record.d18oSterr},${record.d18oN},"${record.co2RelativeTo}","${record.comment}",${record.userId},${record.co2InstrumentId},${record.ch4InstrumentId},${record.coInstrumentId},"${record.ottoCalibrationFile}","${record.co2CalibrationFile}","${record.ch4RelativeTo}","${record.ch4CalibrationFile}","${record.coRelativeTo}","${record.coCalibrationFile}",${record.tankId}\n`
+    newLine.replaceAll("undefined", "");
+
+    return newLine;
+}
+
 /**
  * This interface is taken from this public repository https://github.com/benfasoli/tank-tracker,
 */
@@ -141,7 +154,6 @@ export async function readUpdates()
             let instrument =  value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
             value = value.substring(value.indexOf(", ") + 2)
             let newEntry = value.substring(value.indexOf(": ") + 2).slice(0, -1)
-            value = value.substring(value.indexOf(", ") + 2)
 
             await setBadData(site, instrument, newEntry, "updating from offline")
             await sleep(50)
@@ -163,10 +175,9 @@ export async function readUpdates()
                 //console.log(content)
                 value = value.substring(value.indexOf(", ") + 2)
                 let needsSite =(value.substring(value.indexOf(": ") + 2 , value.indexOf(", ")) === "true")
-                //console.log(needsSite)
                 value = value.substring(value.indexOf(", ") + 2)
                 let site = value.substring(value.indexOf(": ") + 2)
-                //console.log(site)
+                console.log(site)
                 await setInstrumentFile(path,content,"updating from offline", needsSite, site)
                 await sleep(50)
             }
@@ -175,6 +186,7 @@ export async function readUpdates()
         FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/instrument_maint.txt")
         //await sleep(50)
     }
+    let tankRecordString = "";
     if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/site_notes.txt")).exists)
         {
                 let site_notes_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/site_notes.txt")).split("}\n")
@@ -186,10 +198,10 @@ export async function readUpdates()
                         //console.log(siteName)
                         value = value.substring(value.indexOf(", ") + 2)
                         let content =  value.substring(value.indexOf("content: ") + 8)
+                        let data = (await getFileContents(`site_notes/${siteName}`)).data
                         await setSiteFile(siteName, content, "updating from offline")
                         await sleep(50)
                         let notes = parseNotes(content).entries[0]
-                        let data = (await getFileContents(`site_notes/${siteName}`)).data
                         await sleep(50)
                         if(data)
                         {
@@ -205,17 +217,16 @@ export async function readUpdates()
                                 
                                 await setInstrumentFile(`instrument_maint/LGR_UGGA/${previousNotes.instrument}`,content,"updating from offline", true, siteName)
                             }
-
-                            if(previousNotes.high_cal.id !== notes.high_cal.id)
+                            if(previousNotes.lts && notes.lts && previousNotes.lts.id !== notes.lts.id)
                             {
-                                let newTankEntry = getLatestTankEntry(previousNotes.high_cal.id)
+                                let newTankEntry = getLatestTankEntry(previousNotes.lts.id)
                                 newTankEntry.location = "ASB279";
                                 newTankEntry.pressure = 500;
                                 newTankEntry.userId = previousNotes.names;
                                 newTankEntry.updatedAt = previousNotes.time_out;
                                 addEntrytoTankDictionary(newTankEntry);
+                                tankRecordString += buildTankRecordString(newTankEntry);
                             }
-
                             if(previousNotes.mid_cal.id !== notes.mid_cal.id)
                             {
                                 let newTankEntry = getLatestTankEntry(previousNotes.mid_cal.id)
@@ -224,6 +235,7 @@ export async function readUpdates()
                                 newTankEntry.userId = previousNotes.names;
                                 newTankEntry.updatedAt = previousNotes.time_out;
                                 addEntrytoTankDictionary(newTankEntry);
+                                tankRecordString += buildTankRecordString(newTankEntry);
                             }
                             if(previousNotes.low_cal.id !== notes.low_cal.id)
                             {
@@ -233,6 +245,7 @@ export async function readUpdates()
                                 newTankEntry.userId = previousNotes.names;
                                 newTankEntry.updatedAt = previousNotes.time_out;
                                 addEntrytoTankDictionary(newTankEntry);
+                                tankRecordString += buildTankRecordString(newTankEntry);
                             }
 
                             if(previousNotes.high_cal.id !== notes.high_cal.id)
@@ -243,6 +256,7 @@ export async function readUpdates()
                                 newTankEntry.userId = previousNotes.names;
                                 newTankEntry.updatedAt = previousNotes.time_out;
                                 addEntrytoTankDictionary(newTankEntry);
+                                tankRecordString += buildTankRecordString(newTankEntry);
                             }
 
                         }
@@ -257,6 +271,7 @@ export async function readUpdates()
             let tank_update_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/tank_updates.txt")).split("\n")
             tank_update_entries.forEach(async (value) => {
                 if(value !== ""){
+                    console.log(value)
                     let tankId = value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
                     value = value.substring(value.indexOf(", ") + 2)
                     let pressure =  parseInt(value.substring(value.indexOf(": ") + 2 , value.indexOf(", ")))
@@ -265,7 +280,33 @@ export async function readUpdates()
                     value = value.substring(value.indexOf(", ") + 2)
                     let time = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
                     value = value.substring(value.indexOf(", ") + 2)
-                    let name = value.substring(value.indexOf(": ") + 2).slice(0, -1)
+                    let name = ""
+                    let co2 = undefined
+                    let ch4 = undefined
+                    let comment = undefined
+                    let fillId = undefined
+                    if (value.includes("co2:"))
+                    {
+                        name = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
+                        value = value.substring(value.indexOf(", ") + 2)
+                        console.log(name)
+                        co2 = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
+                        console.log(co2)
+                        value = value.substring(value.indexOf(", ") + 2)
+                        ch4 = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
+                        console.log(ch4)
+                        value = value.substring(value.indexOf(", ") + 2)
+                        comment = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
+                        console.log(comment)
+                        value = value.substring(value.indexOf(", ") + 2)
+                        fillId = value.substring(value.indexOf(": ") + 2).slice(0, -1)
+                        console.log(fillId)
+
+                    }
+                    else
+                    {
+                        name = value.substring(value.indexOf(": ") + 2).slice(0, -1)
+                    }
 
                     let previousRecord: TankRecord = getLatestTankEntry(tankId)
 
@@ -273,16 +314,26 @@ export async function readUpdates()
                     previousRecord.location = site
                     previousRecord.updatedAt = time
                     previousRecord.userId = name
+
+                    if(co2)
+                    {
+                        previousRecord.co2 = co2
+                        previousRecord.ch4 = ch4
+                        previousRecord.comment = comment
+                        previousRecord.fillId = fillId
+                    }
                     
                     addEntrytoTankDictionary(previousRecord)
+                    tankRecordString += buildTankRecordString(previousRecord);
 
                 }
                 
             })
             FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/tank_updates.txt")
     }
-
-    await setTankTracker()
+    if (tankRecordString != "") {
+        await setTankTracker(tankRecordString);
+    } 
 }
 
 export async function tankTrackerOffline()
@@ -474,8 +525,9 @@ export async function setVisitFile(visit: visit, commitMessage: string)
     }   
 }
 
-export async function offlineTankEntry(tankID: string, pressure: number, site: string, time:string, name:string)
+export async function offlineTankEntry(tankID: string, pressure: number, site: string, time:string, name:string, co2?: number, ch4?: number, comment?: string, fillId?: string)
 {
+    console.log("called")
     try {
         let path = FileSystem.documentDirectory + "offline_updates/tank_updates.txt"
 
@@ -486,8 +538,14 @@ export async function offlineTankEntry(tankID: string, pressure: number, site: s
         }
         //console.log(content)
 
-        content += `{tankId: ${tankID}, pressure: ${pressure}, site: ${site}, time: ${time}, name: ${name}}\n`
+        content += `{tankId: ${tankID}, pressure: ${pressure}, site: ${site}, time: ${time}, name: ${name}`
 
+        if(co2 && ch4 && comment)
+        {
+            content += `, co2: ${co2}, ch4: ${ch4}, comment: ${comment}, fillId: ${fillId}`
+        }
+        content += "}\n"
+        console.log(content)
         await FileSystem.writeAsStringAsync(path, content)
 
         return {success: true}
@@ -556,10 +614,11 @@ export function addEntrytoTankDictionary(newEntry: TankRecord) {
  * @param newEntry the new entry to be added to the tank tracker csv
  * @returns a resopnse containing whether or not adding was successful, and the response data
  */
-export async function setTankTracker()
+export async function setTankTracker(newEntry: string)
 {
     if((await Network.getNetworkStateAsync()).isConnected)
     {
+        /** OLD ---
         let temp = Array.from(tankDict.values())
         let plainfullDoc: TankRecord[] = []
 
@@ -581,6 +640,48 @@ export async function setTankTracker()
         const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
         const bodyString = `{"message":"updating from research flow","content":"${fullDoc}","sha":"${tankTrackerSha}"}`
         return setFile(bodyString, url)
+        */
+
+        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
+
+    let headers = new Headers();
+    headers.append("User-Agent", "ResearchFlow");
+    headers.append("Accept", "application/vnd.github+json");
+    headers.append("Authorization", `Bearer ${githubToken}`);
+    headers.append("X-GitHub-Api-Version", "2022-11-28");
+
+    let requestOptions: RequestInfo = new Request(url, 
+        {
+            method: "GET",
+            headers: headers,
+            redirect: "follow"
+        }
+    )
+    let newFile = ""
+    let sha = ""
+    try {
+        const response = await fetch(requestOptions);
+        //console.log(response)
+        if (response.ok) {
+            const data = await response.json();
+            let plainContent = atob(data.content);
+            let entries = plainContent.substring(plainContent.indexOf("\n"))
+            let headers = plainContent.substring(0, plainContent.indexOf("\n"))
+            sha = data.sha
+            newFile = headers + entries + newEntry
+            newFile = btoa(newFile)
+            const bodyString = `{"message":"updating from research flow","content":"${newFile}","sha":"${sha}"}`
+            return setFile(bodyString, url)
+        } 
+        else {
+            const errorData = await response.json();
+            return { success: false, error: errorData.message };
+        }
+    } 
+    catch (error) 
+    {
+        return { success: false, error: error };
+    }
     }
     else
     {
