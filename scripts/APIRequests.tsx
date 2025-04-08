@@ -256,6 +256,14 @@ export async function readUpdates()
                     previousRecord.location = site
                     previousRecord.updatedAt = time
                     previousRecord.userId = name
+
+                    if(co2)
+                    {
+                        previousRecord.co2 = co2
+                        previousRecord.ch4 = ch4
+                        previousRecord.comment = comment
+                        previousRecord.fillId = fillId
+                    }
                     
                     addEntrytoTankDictionary(previousRecord)
                     tankRecordString += buildTankRecordString(previousRecord);
@@ -481,6 +489,8 @@ export async function setVisitFile(visit: visit, commitMessage: string)
         }
     }   
 }
+
+export async function offlineTankEntry(tankID: string, pressure: number, site: string, time:string, name:string, co2?: number, ch4?: number, comment?: string, fillId?: string)
 /**
  * This function adds an update for the specified tank while offline
  * @author August O'Rourke
@@ -493,6 +503,7 @@ export async function setVisitFile(visit: visit, commitMessage: string)
  */
 export async function offlineTankEntry(tankID: string, pressure: number, site: string, time:string, name:string)
 {
+    console.log("called")
     try {
         let path = FileSystem.documentDirectory + "offline_updates/tank_updates.txt"
 
@@ -502,8 +513,14 @@ export async function offlineTankEntry(tankID: string, pressure: number, site: s
             content += await FileSystem.readAsStringAsync(path)
         }
 
-        content += `{tankId: \"${tankID}\", pressure: \"${pressure}\", site: \"${site}\", time: \"${time}\", name: \"${name}\"}\n`
+        content += `{tankId: ${tankID}, pressure: ${pressure}, site: ${site}, time: ${time}, name: ${name}`
 
+        if(co2 && ch4 && comment)
+        {
+            content += `, co2: ${co2}, ch4: ${ch4}, comment: ${comment}, fillId: ${fillId}`
+        }
+        content += "}\n"
+        console.log(content)
         await FileSystem.writeAsStringAsync(path, content)
 
         return {success: true}
