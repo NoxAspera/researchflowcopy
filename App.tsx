@@ -39,7 +39,7 @@ export default function App() {
   // Initialize state with a type
   const [theme, setTheme] = useState<ThemeType>('light');
   //load stored values
-  loadStoredValues();
+  ///loadStoredValues();
   //try sending notifications if email isn't empty
   
   // Merge custom theme with Eva's base theme

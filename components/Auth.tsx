@@ -19,8 +19,12 @@ import { NavigationType } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
 import { sendEmailNotification } from "../scripts/EmailNotifications";
+import { loadStoredValues } from '../scripts/LoadStoredValues';
 
 export default function Login({ navigation }: NavigationType) {
+    const loadedVals = loadStoredValues();
+    const email = loadedVals[0]
+    const name = loadedVals[1]  
     const route = useRoute();
     
     const themeContext = React.useContext(ThemeContext);
@@ -28,7 +32,7 @@ export default function Login({ navigation }: NavigationType) {
 
     // will set the no email/password notification to visible
     const [visible, setVisible] = useState(false);
-
+    
     // helper method that will make sure the user has entered credentials
     function checkTextEntry() {
         // used for testing purposes only
@@ -37,6 +41,9 @@ export default function Login({ navigation }: NavigationType) {
         }
         else if (emailValue != "" && passwordValue != "") {
             setGithubToken(passwordValue)
+            //send email notifications
+            console.log("calling send notifs")
+            sendEmailNotification(email,name);            
             navigation.navigate('Home')
         }
         else {
