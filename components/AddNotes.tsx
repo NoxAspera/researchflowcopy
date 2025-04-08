@@ -63,101 +63,9 @@ import { processNotes } from "../scripts/Parsers";
  */
 export default function AddNotes({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
-  const {site, info} = route.params || {};
+  const { site, info } = route.params || {};
   const themeContext = React.useContext(ThemeContext);
   const isDarkMode = themeContext.theme === "dark";
-
-  //changes start date
-  const onStartChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setStartDateValue(currentDate);
-  };
-
-  //changes end date
-  const onEndChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setEndDateValue(currentDate);
-  };
-
-  //pops up date picker for start date
-  const showStartMode = (currentMode) => {
-    DateTimePickerAndroid.open({
-      value: startDateValue,
-      onChange: onStartChange,
-      mode: currentMode,
-      is24Hour: false,
-    });
-  };
-
-  //pops up date picker for end date
-  const showEndMode = (currentMode) => {
-    DateTimePickerAndroid.open({
-      value: endDateValue,
-      onChange: onEndChange,
-      mode: currentMode,
-      is24Hour: false,
-    });
-  };
-
-  //sets start date hours and minutes
-  function setStartDateHourMinutes(pickedDuration) {
-    const tempDate = startDateValue;
-    tempDate.setHours(pickedDuration.hours);
-    tempDate.setMinutes(pickedDuration.minutes);
-    setStartDateValue(tempDate);
-  }
-
-  //sets end date hours and minutes
-  function setEndDateHourMinutes(pickedDuration) {
-    const tempDate = endDateValue;
-    tempDate.setHours(pickedDuration.hours);
-    tempDate.setMinutes(pickedDuration.minutes);
-    setEndDateValue(tempDate);
-  }
-  
-  const [data, setData] = useState<ParsedData | null>(null); // State to hold parsed data
-  const [networkStatus, setNetworkStatus] = useState(true);
-
-  // Get current notes for the site
-  useEffect(() => {
-    async function fetchData() {
-      setNetworkStatus(await isConnected());
-
-      if (site && !data && networkStatus) {
-        try {
-          const parsedData = await processNotes(site);
-          setData(parsedData); // Update state with the latest entry
-          console.log("Set data");
-        } catch (error) {
-          console.error("Error processing notes:", error);
-        }
-      }
-    }
-    fetchData();
-  }, [site]); // Re-run if `site` changes
-
-  // Get list of possible instruments
-  useEffect(() => {
-    const fetchInstrumentNames = async () => {
-      try {
-        let names = await getDirectory(`instrument_maint/LGR_UGGA`);
-
-        if (names?.success) {
-          setInstrumentNames(names.data);
-        }
-      } catch (error) {
-        console.error("Error processing instrument names:", error);
-      }
-    };
-
-    fetchInstrumentNames();
-  }, [site]);
-
-  //Get latest notes entry from site
-  let latestEntry = null;
-  if (data) {
-    latestEntry = data.entries[0];
-  }
 
   // these use states to set and store values in the text inputs
   const [startDateValue, setStartDateValue] = useState(new Date());
@@ -227,6 +135,221 @@ export default function AddNotes({ navigation }: NavigationType) {
   const [n2DaysRemaining, setN2DaysRemaining] = useState(-1);
   const [n2TankName, setN2TankName] = useState("");
 
+  const [data, setData] = useState<ParsedData | null>(null); // State to hold parsed data
+  const [networkStatus, setNetworkStatus] = useState(true);
+
+  // Get current notes for the site
+  useEffect(() => {
+    async function fetchData() {
+      setNetworkStatus(await isConnected());
+
+      if (site && !data && networkStatus) {
+        try {
+          const parsedData = await processNotes(site);
+          setData(parsedData); // Update state with the latest entry
+          console.log("Set data");
+        } catch (error) {
+          console.error("Error processing notes:", error);
+        }
+      }
+    }
+    fetchData();
+  }, [site]); // Re-run if `site` changes
+
+  //Get latest notes entry from site
+  let latestEntry = null;
+  if (data) {
+    latestEntry = data.entries[0];
+  }
+
+  // Get list of possible instruments
+  useEffect(() => {
+    const fetchInstrumentNames = async () => {
+      try {
+        let names = await getDirectory(`instrument_maint/LGR_UGGA`);
+
+        if (names?.success) {
+          setInstrumentNames(names.data);
+        }
+      } catch (error) {
+        console.error("Error processing instrument names:", error);
+      }
+    };
+
+    fetchInstrumentNames();
+  }, [site]);
+
+  //Set tank ids, values, and instruments if available in parsed data
+  useEffect(() => {
+    if (latestEntry) {
+      if (latestEntry.lts) {
+        const ltsID = latestEntry.lts.id.split("_").pop();
+        if (ltsID) {
+          const ltsEntry =
+            getLatestTankEntry(ltsID) ||
+            getLatestTankEntry(ltsID.toLowerCase());
+          if (ltsEntry) {
+            setLtsTankRecord(ltsEntry);
+            setOriginalLts(ltsEntry);
+            setLTSId(ltsEntry.tankId);
+            setLTSValue(
+              ltsEntry.co2.toString() + " ~ " + ltsEntry.ch4.toString()
+            );
+          }
+        }
+      }
+      if (latestEntry.low_cal) {
+        const lowID = latestEntry.low_cal.id.split("_").pop();
+        if (lowID) {
+          const lowEntry =
+            getLatestTankEntry(lowID) ||
+            getLatestTankEntry(lowID.toLowerCase());
+          if (lowEntry) {
+            setLowTankRecord(lowEntry);
+            setOriginalLow(lowEntry);
+            setLowId(lowEntry.tankId);
+            setLowValue(
+              lowEntry.co2.toString() + " ~ " + lowEntry.ch4.toString()
+            );
+          }
+        }
+      }
+      if (latestEntry.mid_cal) {
+        const midID = latestEntry.mid_cal.id.split("_").pop();
+        if (midID) {
+          const midEntry =
+            getLatestTankEntry(midID) ||
+            getLatestTankEntry(midID.toLowerCase());
+          if (midEntry) {
+            setMidTankRecord(midEntry);
+            setOriginalMid(midEntry);
+            setMidId(midEntry.tankId);
+            setMidValue(
+              midEntry.co2.toString() + " ~ " + midEntry.ch4.toString()
+            );
+          }
+        }
+      }
+      if (latestEntry.high_cal) {
+        const highID = latestEntry.high_cal.id.split("_").pop();
+        if (highID) {
+          const highEntry =
+            getLatestTankEntry(highID) ||
+            getLatestTankEntry(highID.toLowerCase());
+          if (highEntry) {
+            setHighTankRecord(highEntry);
+            setOriginalHigh(highEntry);
+            setHighId(highEntry.tankId);
+            setHighValue(
+              highEntry.co2.toString() + " ~ " + highEntry.ch4.toString()
+            );
+          }
+        }
+      }
+      if (latestEntry.instrument) {
+        setInstrumentInput(latestEntry.instrument);
+        setOriginalInstrument(latestEntry.instrument);
+      }
+    }
+  }, [latestEntry]);
+
+  // Change tank 
+  useEffect(() => {
+    if (selectedTank) {
+      if (selectedTank == "lts") {
+        setTimeout(() => {
+          navigation.navigate("SelectTank", {
+            from: "AddNotes",
+            onSelect: (tank) => {
+              if (networkStatus) {
+                setLTSId(tank);
+                const entry =
+                  getLatestTankEntry(tank) ||
+                  getLatestTankEntry(tank.toLowerCase());
+                setLtsTankRecord(entry);
+                setLTSValue(
+                  entry.co2.toString() + " ~ " + entry.ch4.toString()
+                );
+              } else {
+                setLTSId(tank);
+                //it won't display the tankID unless we give this an empty value, haven't a clue why
+                setLTSValue(" ");
+              }
+            },
+          });
+        }, 10);
+      } else if (selectedTank == "low") {
+        setTimeout(() => {
+          navigation.navigate("SelectTank", {
+            from: "AddNotes",
+            onSelect: (tank) => {
+              if (networkStatus) {
+                setLowId(tank);
+                const entry =
+                  getLatestTankEntry(tank) ||
+                  getLatestTankEntry(tank.toLowerCase());
+                setLowTankRecord(entry);
+                setLowValue(
+                  entry.co2.toString() + " ~ " + entry.ch4.toString()
+                );
+              } else {
+                setLowId(tank);
+                //it won't display the tankID unless we give this an empty value, haven't a clue why
+                setLowValue(" ");
+              }
+            },
+          });
+        }, 10);
+      } else if (selectedTank == "mid") {
+        setTimeout(() => {
+          navigation.navigate("SelectTank", {
+            from: "AddNotes",
+            onSelect: (tank) => {
+              if (networkStatus) {
+                setMidId(tank);
+                const entry =
+                  getLatestTankEntry(tank) ||
+                  getLatestTankEntry(tank.toLowerCase());
+                setMidTankRecord(entry);
+                setMidValue(
+                  entry.co2.toString() + " ~ " + entry.ch4.toString()
+                );
+              } else {
+                setMidId(tank);
+                //it won't display the tankID unless we give this an empty value, haven't a clue why
+                setMidValue(" ");
+              }
+            },
+          });
+        }, 10);
+      } else if (selectedTank == "high") {
+        setTimeout(() => {
+          navigation.navigate("SelectTank", {
+            from: "AddNotes",
+            onSelect: (tank) => {
+              if (networkStatus) {
+                setHighId(tank);
+                const entry =
+                  getLatestTankEntry(tank) ||
+                  getLatestTankEntry(tank.toLowerCase());
+                setHighTankRecord(entry);
+                setHighValue(
+                  entry.co2.toString() + " ~ " + entry.ch4.toString()
+                );
+              } else {
+                setHighId(tank);
+                //it won't display the tankID unless we give this an empty value, haven't a clue why
+                setHighValue(" ");
+              }
+            },
+          });
+        }, 10);
+      }
+      setSelectedTank("");
+    }
+  }, [selectedTank]);
+
+  // function that checks if any of the tanks will need to be changed in the next 90 days
   function checkIfRefillIsNeeded() {
     // get tank values from previous entries
     let prevEntry = data.entries[0];
@@ -306,7 +429,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
   }
 
-  //method will warn user if fields haven't been input
+  //method will warn user if fields haven't been inputted
   function checkTextEntries() {
     if (
       nameValue == "" ||
@@ -331,6 +454,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
   }
 
+  // Builds note string for instrument that is newly installed at site
   const installedInstrumentNotes = (time: string): string => {
     let result: string = `- Time in: ${time}\n`;
 
@@ -341,6 +465,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     return result;
   };
 
+  // Builds note string for instrument that is removed from site
   const removedInstrumentNotes = (time: string): string => {
     let result: string = `- Time in: ${time}\n`;
 
@@ -351,6 +476,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     return result;
   };
 
+  // Builds string for bad data input
   const buildBadDataString = (): string => {
     const startTime = startDateValue.toISOString().split(".")[0] + "Z";
     const endTime = endDateValue.toISOString().split(".")[0] + "Z";
@@ -360,6 +486,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     return result;
   };
 
+  // Adds entry to tank tracker for a tank that is removed from the site
   const removeTankFromSite = (tank: TankRecord, time: string): string => {
     let newTankEntry = copyTankRecord(tank);
     newTankEntry.location = "ASB279";
@@ -370,7 +497,12 @@ export default function AddNotes({ navigation }: NavigationType) {
     return buildTankRecordString(newTankEntry);
   };
 
-  const updateTank = (tank: TankRecord, time: string, pressure: string): string => {
+  // Adds entry to tank tracker with new tank pressure
+  const updateTank = (
+    tank: TankRecord,
+    time: string,
+    pressure: string
+  ): string => {
     let updatedTank = copyTankRecord(tank);
     updatedTank.location = site;
     updatedTank.updatedAt = time;
@@ -378,7 +510,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     updatedTank.userId = nameValue;
     addEntrytoTankDictionary(updatedTank);
     return buildTankRecordString(updatedTank);
-  }
+  };
 
   // will call setFile to send the PUT request.
   // If it is successful it will display a success message
@@ -561,6 +693,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         );
       }
     }
+    // If user wants to add time period to bad data
     if (addToBadData) {
       let instrument = "";
       const badDataString = buildBadDataString();
@@ -600,7 +733,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       setMessageStatus("success");
       retHome(true);
     } else {
-      let errorMessage = "There was an error updating the following files: "
+      let errorMessage = "There was an error updating the following files: ";
       if (result.error) {
         errorMessage += "\nSite notes";
       } else if (tankResult.error) {
@@ -610,7 +743,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       } else if (instMaintResult2 && instMaintResult2.error) {
         errorMessage += `\nInstrument Maintenance for ${originalInstrument}`;
       } else if (badDataResult && badDataResult.error) {
-        errorMessage += "\nBad Data"
+        errorMessage += "\nBad Data";
       }
       errorMessage += "\nPlease update the listed file(s) manually";
       setMessage(errorMessage);
@@ -632,12 +765,14 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
   }
 
+  //method that will navigate to Plan Visit screen if user chooses this option in the popup warning about tanks being empty soon
   function navigatePlanVisit(nav: boolean) {
     if (nav) {
       navigation.navigate("PlanVisit", { site: site });
     }
   }
 
+  // Will clear the id, value, and tank record state when user selects "clear tank" option
   const clearTankEntry = (tank: string) => {
     if (tank == "lts") {
       setLTSId("");
@@ -658,10 +793,12 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
   };
 
+  // Handles tank change updates
   const handleTankChange = (tank: string) => {
     setSelectedTank(tank);
   };
 
+  // Determines new instrument based on option that user selects from instrument dropdown
   const handleInstrumentUpdate = (index: IndexPath | IndexPath[]) => {
     const selectedRow = (index as IndexPath).row;
     if (selectedRow === instrumentNames?.length) {
@@ -674,6 +811,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
   };
 
+  // Sets modal to visible if user wants to input a custom instrument
   const addCustomInstrument = () => {
     if (customInstrument.trim() !== "") {
       setInstrumentInput(customInstrument);
@@ -682,174 +820,53 @@ export default function AddNotes({ navigation }: NavigationType) {
     setModalVisible(false);
   };
 
-  useEffect(() => {
-    if (selectedTank) {
-      if (selectedTank == "lts") {
-        setTimeout(() => {
-          navigation.navigate("SelectTank", {
-            from: "AddNotes",
-            onSelect: (tank) => {
-              if (networkStatus) {
-                setLTSId(tank);
-                const entry =
-                  getLatestTankEntry(tank) ||
-                  getLatestTankEntry(tank.toLowerCase());
-                setLtsTankRecord(entry);
-                setLTSValue(
-                  entry.co2.toString() + " ~ " + entry.ch4.toString()
-                );
-              } else {
-                setLTSId(tank);
-                //it won't display the tankID unless we give this an empty value, haven't a clue why
-                setLTSValue(" ");
-              }
-            },
-          });
-        }, 10);
-      } else if (selectedTank == "low") {
-        setTimeout(() => {
-          navigation.navigate("SelectTank", {
-            from: "AddNotes",
-            onSelect: (tank) => {
-              if (networkStatus) {
-                setLowId(tank);
-                const entry =
-                  getLatestTankEntry(tank) ||
-                  getLatestTankEntry(tank.toLowerCase());
-                setLowTankRecord(entry);
-                setLowValue(
-                  entry.co2.toString() + " ~ " + entry.ch4.toString()
-                );
-              } else {
-                setLowId(tank);
-                //it won't display the tankID unless we give this an empty value, haven't a clue why
-                setLowValue(" ");
-              }
-            },
-          });
-        }, 10);
-      } else if (selectedTank == "mid") {
-        setTimeout(() => {
-          navigation.navigate("SelectTank", {
-            from: "AddNotes",
-            onSelect: (tank) => {
-              if (networkStatus) {
-                setMidId(tank);
-                const entry =
-                  getLatestTankEntry(tank) ||
-                  getLatestTankEntry(tank.toLowerCase());
-                setMidTankRecord(entry);
-                setMidValue(
-                  entry.co2.toString() + " ~ " + entry.ch4.toString()
-                );
-              } else {
-                setMidId(tank);
-                //it won't display the tankID unless we give this an empty value, haven't a clue why
-                setMidValue(" ");
-              }
-            },
-          });
-        }, 10);
-      } else if (selectedTank == "high") {
-        setTimeout(() => {
-          navigation.navigate("SelectTank", {
-            from: "AddNotes",
-            onSelect: (tank) => {
-              if (networkStatus) {
-                setHighId(tank);
-                const entry =
-                  getLatestTankEntry(tank) ||
-                  getLatestTankEntry(tank.toLowerCase());
-                setHighTankRecord(entry);
-                setHighValue(
-                  entry.co2.toString() + " ~ " + entry.ch4.toString()
-                );
-              } else {
-                setHighId(tank);
-                //it won't display the tankID unless we give this an empty value, haven't a clue why
-                setHighValue(" ");
-              }
-            },
-          });
-        }, 10);
-      }
-      setSelectedTank("");
-    }
-  }, [selectedTank]);
+  //changes start date
+  const onStartChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setStartDateValue(currentDate);
+  };
 
-  //Set tank ids, values, and instruments if available in parsed data
-  useEffect(() => {
-    if (latestEntry) {
-      if (latestEntry.lts) {
-        const ltsID = latestEntry.lts.id.split("_").pop();
-        if (ltsID) {
-          const ltsEntry =
-            getLatestTankEntry(ltsID) ||
-            getLatestTankEntry(ltsID.toLowerCase());
-          if (ltsEntry) {
-            setLtsTankRecord(ltsEntry);
-            setOriginalLts(ltsEntry);
-            setLTSId(ltsEntry.tankId);
-            setLTSValue(
-              ltsEntry.co2.toString() + " ~ " + ltsEntry.ch4.toString()
-            );
-          }
-        }
-      }
-      if (latestEntry.low_cal) {
-        const lowID = latestEntry.low_cal.id.split("_").pop();
-        if (lowID) {
-          const lowEntry =
-            getLatestTankEntry(lowID) ||
-            getLatestTankEntry(lowID.toLowerCase());
-          if (lowEntry) {
-            setLowTankRecord(lowEntry);
-            setOriginalLow(lowEntry);
-            setLowId(lowEntry.tankId);
-            setLowValue(
-              lowEntry.co2.toString() + " ~ " + lowEntry.ch4.toString()
-            );
-          }
-        }
-      }
-      if (latestEntry.mid_cal) {
-        const midID = latestEntry.mid_cal.id.split("_").pop();
-        if (midID) {
-          const midEntry =
-            getLatestTankEntry(midID) ||
-            getLatestTankEntry(midID.toLowerCase());
-          if (midEntry) {
-            setMidTankRecord(midEntry);
-            setOriginalMid(midEntry);
-            setMidId(midEntry.tankId);
-            setMidValue(
-              midEntry.co2.toString() + " ~ " + midEntry.ch4.toString()
-            );
-          }
-        }
-      }
-      if (latestEntry.high_cal) {
-        const highID = latestEntry.high_cal.id.split("_").pop();
-        if (highID) {
-          const highEntry =
-            getLatestTankEntry(highID) ||
-            getLatestTankEntry(highID.toLowerCase());
-          if (highEntry) {
-            setHighTankRecord(highEntry);
-            setOriginalHigh(highEntry);
-            setHighId(highEntry.tankId);
-            setHighValue(
-              highEntry.co2.toString() + " ~ " + highEntry.ch4.toString()
-            );
-          }
-        }
-      }
-      if (latestEntry.instrument) {
-        setInstrumentInput(latestEntry.instrument);
-        setOriginalInstrument(latestEntry.instrument);
-      }
-    }
-  }, [latestEntry]);
+  //changes end date
+  const onEndChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setEndDateValue(currentDate);
+  };
+
+  //pops up date picker for start date
+  const showStartMode = (currentMode) => {
+    DateTimePickerAndroid.open({
+      value: startDateValue,
+      onChange: onStartChange,
+      mode: currentMode,
+      is24Hour: false,
+    });
+  };
+
+  //pops up date picker for end date
+  const showEndMode = (currentMode) => {
+    DateTimePickerAndroid.open({
+      value: endDateValue,
+      onChange: onEndChange,
+      mode: currentMode,
+      is24Hour: false,
+    });
+  };
+
+  //sets start date hours and minutes
+  function setStartDateHourMinutes(pickedDuration) {
+    const tempDate = startDateValue;
+    tempDate.setHours(pickedDuration.hours);
+    tempDate.setMinutes(pickedDuration.minutes);
+    setStartDateValue(tempDate);
+  }
+
+  //sets end date hours and minutes
+  function setEndDateHourMinutes(pickedDuration) {
+    const tempDate = endDateValue;
+    tempDate.setHours(pickedDuration.hours);
+    tempDate.setMinutes(pickedDuration.minutes);
+    setEndDateValue(tempDate);
+  }
 
   return (
     <KeyboardAvoidingView behavior="padding" style={styles.container}>
