@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import * as WebBrowser from 'expo-web-browser';
-import * as config from "../config"
 import { makeRedirectUri, useAuthRequest, AuthSessionResult} from 'expo-auth-session';
 import { generateGithubToken, readUpdates, setGithubToken, tankTrackerOffline, tankTrackerSpinUp, updateDirectories } from '../scripts/APIRequests';
 import { StyleSheet, ScrollView} from 'react-native';
@@ -18,7 +17,7 @@ WebBrowser.maybeCompleteAuthSession();
 const discovery = {
   authorizationEndpoint: 'https://github.com/login/oauth/authorize',
   tokenEndpoint: 'https://github.com/login/oauth/access_token',
-  revocationEndpoint: 'https://github.com/settings/connections/applications/Ov23lizfwfjG9hB6JIf9',
+  revocationEndpoint: `https://github.com/settings/connections/applications/${process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID}`,
 };
 
 
@@ -35,7 +34,7 @@ export default function App({navigation}: NavigationType) {
   console.log(makeRedirectUri({scheme: 'researchflowuofu'}))
   const [request, response, promptAsync] = useAuthRequest(
     {
-      clientId: config.GITHUB_CLIENT_ID,
+      clientId: process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID,
       scopes: ['repo'],
       redirectUri: makeRedirectUri({
         scheme: 'researchflowuofu'

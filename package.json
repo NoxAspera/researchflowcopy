@@ -5,7 +5,7 @@
   "expo-modules-autolinking": "",
   "scripts": {
     "eas-build-pre-install": "echo node-linker=holisted >> ../../.nprmc",
-    "preinstall": "npx only-allow pnpm",
+    "preinstall": "npx only-allow yarn",
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
@@ -33,7 +33,7 @@
     "expo-auth-session": "~6.0.2",
     "expo-calendar": "^14.0.6",
     "expo-crypto": "^14.0.2",
-    "expo-dev-client": "~5.0.10",
+    "expo-dev-client": "^5.0.20",
     "expo-file-system": "~18.0.12",
     "expo-linking": "~7.0.4",
     "expo-network": "^7.0.2",
@@ -49,8 +49,8 @@
     "path": "^0.12.7",
     "react": "18.3.1",
     "react-native": "0.76.7",
-    "react-native-chart-kit": "^6.12.0",
     "react-native-calendars": "^1.1310.0",
+    "react-native-chart-kit": "^6.12.0",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-netinfo": "^1.1.0",
     "react-native-reanimated": "~3.16.7",
@@ -73,6 +73,5 @@
     "ts-jest": "^29.3.0",
     "typescript": "~5.3.3"
   },
-  "private": true,
-  "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0"
+  "private": true
 }

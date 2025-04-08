@@ -3,7 +3,6 @@ import csv from 'csvtojson';
 import * as FileSystem from 'expo-file-system'
 import * as Network from 'expo-network'
 import { parseNotes, parseVisits, VisitList } from './Parsers';
-import InstrumentMaintenance from '../components/InstrumentMaintenance';
 
 /**
  * @author August O'Rourke
@@ -562,7 +561,7 @@ export async function offlineTankEntry(tankID: string, pressure: number, site: s
  * @param token The personal access token from the login screen.
  */
 export async function generateGithubToken(code: string) {
-    const url = `https://github.com/login/oauth/access_token?client_id=${variables.GITHUB_CLIENT_ID}&client_secret=${variables.GITHUB_CLIENT_SECRET}&code=${code}`;
+    const url = `https://github.com/login/oauth/access_token?client_id=${process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID}&client_secret=${process.env.EXPO_PUBLIC_GITHUB_CLIENT_SECRET}&code=${code}`;
 
     const headers = new Headers();
     headers.append("Accept", "application/json");

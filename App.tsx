@@ -29,6 +29,7 @@ import { Button, Icon, IconElement } from '@ui-kitten/components';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View } from 'react-native';
 import Diagnostics from './components/Diagnostics';
+import CalendarScreen from './components/Calendar';
 
 const Stack = createStackNavigator();
 type ThemeType = 'light' | 'dark';
