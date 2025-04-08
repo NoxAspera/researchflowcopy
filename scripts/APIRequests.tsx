@@ -117,11 +117,11 @@ export async function readUpdates()
         let bad_data_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/baddata.txt")).split("\n")
 
         for (let value of bad_data_entries){
-            let site = value.substring(value.indexOf(": \"") + 2 , value.indexOf(", \""))
-            value = value.substring(value.indexOf(", \"") + 2)
-            let instrument =  value.substring(value.indexOf(": \"") + 2 , value.indexOf(", \""))
-            value = value.substring(value.indexOf(", \"") + 2)
-            let newEntry = value.substring(value.indexOf(": \"") + 2).slice(0, -1)
+            let site = value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", "))
+            value = value.substring(value.indexOf("\", ") + 3)
+            let instrument =  value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", "))
+            value = value.substring(value.indexOf("\", ") + 3)
+            let newEntry = value.substring(value.indexOf(": \"") + 3).slice(0, -1)
 
             await setBadData(site, instrument, newEntry, "updating from offline")
             await sleep(50)
@@ -137,13 +137,13 @@ export async function readUpdates()
 
         for (let value of instrument_maintence_entries){
             if(value !== ""){
-                let path = value.substring(value.indexOf(": \"") + 2 , value.indexOf(", \""))
-                value = value.substring(value.indexOf(", \"") + 2)
-                let content =  value.substring(value.indexOf("content: \"") + 8 , value.indexOf("\", mobile:"))
+                let path = value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", "))
+                value = value.substring(value.indexOf("\", ") + 3)
+                let content =  value.substring(value.indexOf("content: \"") + 10 , value.indexOf("\", mobile:"))
                 value = value.substring(value.indexOf(", ") + 2)
-                let needsSite =(value.substring(value.indexOf(": \"") + 2 , value.indexOf(", \"")) === "true")
-                value = value.substring(value.indexOf(", \"") + 2)
-                let site = value.substring(value.indexOf(": \"") + 2)
+                let needsSite =(value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", ")) === "true")
+                value = value.substring(value.indexOf("\", ") + 3)
+                let site = value.substring(value.indexOf(": \"") + 3)
                 await setInstrumentFile(path,content,"updating from offline", needsSite, site)
                 await sleep(50)
             }
@@ -159,9 +159,9 @@ export async function readUpdates()
                 for(let value of site_notes_entries){
                     if(value !== "")
                     {
-                        let siteName = value.substring(value.indexOf(": \"") + 2 , value.indexOf(", \""))
-                        value = value.substring(value.indexOf(", \"") + 2)
-                        let content =  value.substring(value.indexOf("content: \"") + 8)
+                        let siteName = value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", "))
+                        value = value.substring(value.indexOf("\", ") + 3)
+                        let content =  value.substring(value.indexOf("content: \"") + 10).slice(0, -1)
                         let data = (await getFileContents(`site_notes/${siteName}`)).data
                         
                         await setSiteFile(siteName, content, "updating from offline")
@@ -240,14 +240,14 @@ export async function readUpdates()
             let tank_update_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/tank_updates.txt")).split("\n")
             tank_update_entries.forEach(async (value) => {
                 if(value !== ""){
-                    let tankId = value.substring(value.indexOf(": \"") + 2 , value.indexOf(", \""))
-                    value = value.substring(value.indexOf(", \"") + 2)
-                    let pressure =  parseInt(value.substring(value.indexOf(": \"") + 2 , value.indexOf(", \"")))
-                    value = value.substring(value.indexOf(", \"") + 2)
-                    let site =value.substring(value.indexOf(": \"") + 2 , value.indexOf(", \""))
-                    value = value.substring(value.indexOf(", \"") + 2)
-                    let time = value.substring(value.indexOf(": \"") + 2, value.indexOf(", \""))
-                    value = value.substring(value.indexOf(", \"") + 2)
+                    let tankId = value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", "))
+                    value = value.substring(value.indexOf("\", ") + 3)
+                    let pressure =  parseInt(value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", ")))
+                    value = value.substring(value.indexOf("\", ") + 3)
+                    let site =value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", "))
+                    value = value.substring(value.indexOf("\", ") + 3)
+                    let time = value.substring(value.indexOf(": \"") + 3, value.indexOf("\", "))
+                    value = value.substring(value.indexOf("\", ") + 3)
                     let name = ""
                     let co2 = undefined
                     let ch4 = undefined
@@ -255,25 +255,20 @@ export async function readUpdates()
                     let fillId = undefined
                     if (value.includes("co2:"))
                     {
-                        name = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
-                        value = value.substring(value.indexOf(", ") + 2)
-                        console.log(name)
-                        co2 = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
-                        console.log(co2)
-                        value = value.substring(value.indexOf(", ") + 2)
-                        ch4 = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
-                        console.log(ch4)
-                        value = value.substring(value.indexOf(", ") + 2)
-                        comment = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
-                        console.log(comment)
-                        value = value.substring(value.indexOf(", ") + 2)
-                        fillId = value.substring(value.indexOf(": ") + 2).slice(0, -1)
-                        console.log(fillId)
+                        name = value.substring(value.indexOf(": \"") + 3, value.indexOf(", "))
+                        value = value.substring(value.indexOf("\", ") + 3)
+                        co2 = value.substring(value.indexOf(": \"") + 3, value.indexOf("\", "))
+                        value = value.substring(value.indexOf("\", ") + 3)
+                        ch4 = value.substring(value.indexOf(": \"") + 3, value.indexOf(", "))
+                        value = value.substring(value.indexOf(", \"") + 3)
+                        comment = value.substring(value.indexOf(": \"") + 3, value.indexOf(", "))
+                        value = value.substring(value.indexOf("\", ") + 3)
+                        fillId = value.substring(value.indexOf(": \"") + 3).slice(0, -1)
 
                     }
                     else
                     {
-                        name = value.substring(value.indexOf(": ") + 2).slice(0, -1)
+                        name = value.substring(value.indexOf(": \"") + 3).slice(0, -1)
                     }
 
                     let previousRecord: TankRecord = getLatestTankEntry(tankId)
@@ -378,11 +373,11 @@ export async function updateDirectories()
     })
     await FileSystem.writeAsStringAsync(FileSystem.documentDirectory + "tank_tracker/names", names)
 
-    FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + "bad_data")
+    FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + "bad")
     response = await getBadDataSites()
     let entries = response.data
     entries.forEach(element => {
-        loop(`bad_data/${element}`)
+        writeBadDataSites(element)
     });
 
     let result = await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates")
@@ -392,7 +387,14 @@ export async function updateDirectories()
         FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + "offline_updates")
     }
 }
-   
+ async function writeBadDataSites(site: string) 
+ {
+    let entries = (await getBadDataFiles(site)).data
+    await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + `bad/${site}`)
+    entries.forEach(element => {
+        FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + `bad/${site}/${element}`)
+    })
+ }  
 /**
  * This is a helper function for saving the directories required for offline navigation
  * @param path -the file path to create
@@ -531,7 +533,6 @@ export async function offlineTankEntry(tankID: string, pressure: number, site: s
  */
 export async function offlineTankEntry(tankID: string, pressure: number, site: string, time:string, name:string, co2?: number, ch4?: number, comment?: string, fillId?: string)
 {
-    console.log("called")
     try {
         let path = FileSystem.documentDirectory + "offline_updates/tank_updates.txt"
 
@@ -540,16 +541,14 @@ export async function offlineTankEntry(tankID: string, pressure: number, site: s
         {
             content += await FileSystem.readAsStringAsync(path)
         }
-        //console.log(content)
 
         content += `{tankId: \"${tankID}\", pressure: \"${pressure}\", site: \"${site}\", time: \"${time}\", name: \"${name}\"`
 
         if(co2 && ch4 && comment)
         {
-            content += `, co2: \"${co2}\", ch4: \"${ch4}\", comment: \"${comment}\", fillId: \"${fillId}\"`
+            content += `, co2: \"${co2}\", ch4: \"${ch4}\", comment: \"${comment}\", fillId: \"${fillId}`
         }
         content += "}\n"
-        console.log(content)
         await FileSystem.writeAsStringAsync(path, content)
 
         return {success: true}
@@ -761,7 +760,7 @@ export async function getBadDataSites()
 
     if(!check.isConnected)
         {
-           return {success: true, data: await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + "bad_data")}
+           return {success: true, data: await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + "bad")}
         }
 
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad`;
@@ -1056,7 +1055,8 @@ export async function getDirectory(path: string)
             options = data
                 .filter((item: any) => item.type === "dir")
                 .map((item: any) => item.name); 
-        } else {
+        } 
+        else {
             options = data
                 .filter(item => item.name.endsWith(".md"))
                 .map(item => item.name.replace(/\.md$/, ""));
