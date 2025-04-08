@@ -15,7 +15,7 @@ import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text, Icon, CheckBox } from '@ui-kitten/components';
 import { customTheme } from './CustomTheme'
 import { setSiteFile, getFileContents, getLatestTankEntry, offlineTankEntry, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData, buildTankRecordString } from '../scripts/APIRequests';
-import { parseNotes, ParsedData } from '../scripts/Parsers'
+import { parseNotes, ParsedData, sanitize } from '../scripts/Parsers'
 import PopupProp from './Popup';
 import PopupProp2Button from './Popup2Button';
 import { NavigationType, routeProp } from './types'
@@ -360,7 +360,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     const installedInstrumentNotes = (time: string): string => {
       let result: string = `- Time in: ${time}\n`;
   
-      result += `- Name: ${nameValue}\n`;
+      result += `- Name: ${sanitize(nameValue)}\n`;
       result += `- Notes: Installed at ${site}\n`;
       result += "---\n";
   
@@ -370,7 +370,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     const removedInstrumentNotes = (time: string): string => {
       let result: string = `- Time in: ${time}\n`;
   
-      result += `- Name: ${nameValue}\n`;
+      result += `- Name: ${sanitize(nameValue)}\n`;
       result += `- Notes: Removed from ${site}\n`;
       result += "---\n";
   
@@ -381,7 +381,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       const startTime = startDateValue.toISOString().split(".")[0] + "Z";
       const endTime = endDateValue.toISOString().split(".")[0] + "Z";
       const currentTime = (new Date()).toISOString().split(".")[0] + "Z";
-      let result: string = `${startTime},${endTime},all,NA,${currentTime},${nameValue},${badDataReason}`;
+      let result: string = `${startTime},${endTime},all,NA,${currentTime},${sanitize(nameValue)},${sanitize(badDataReason)}`;
   
       return result;
     };
@@ -417,7 +417,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         {
           time_in: `${startYear}-${startMonth}-${startDay} ${startHours}:${startMinutes}`,
           time_out: `${endYear}-${endMonth}-${endDay} ${endHours}:${endMinutes}`,
-          names: nameValue,
+          names: sanitize(nameValue),
           instrument: instrumentInput ? instrumentInput: null,
           n2_pressure: n2Value ? n2Value: null,
           lts: LTSignored ? null:
@@ -448,7 +448,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             unit: "ppm",
             pressure: highPressure
           },
-          additional_notes: notesValue 
+          additional_notes: sanitize(notesValue)
         };
         console.log("entry created")
         const utcTime = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:${endSeconds}Z`;
@@ -461,7 +461,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             ltsTank.location = site;
             ltsTank.updatedAt = utcTime;
             ltsTank.pressure = parseInt(ltsPressure);
-            ltsTank.userId = nameValue;
+            ltsTank.userId = sanitize(nameValue);
             console.log("calling this")
             addEntrytoTankDictionary(ltsTank);
             tankRecordString += buildTankRecordString(ltsTank);
@@ -477,7 +477,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             lowTank.location = site;
             lowTank.updatedAt = utcTime;
             lowTank.pressure = parseInt(lowPressure);
-            lowTank.userId = nameValue;
+            lowTank.userId = sanitize(nameValue);
             addEntrytoTankDictionary(lowTank);
             tankRecordString += buildTankRecordString(lowTank);
           }
@@ -490,7 +490,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             midTank.location = site;
             midTank.updatedAt = utcTime;
             midTank.pressure = parseInt(midPressure);
-            midTank.userId = nameValue;
+            midTank.userId = sanitize(nameValue);
             addEntrytoTankDictionary(midTank);
             tankRecordString += buildTankRecordString(midTank);
           }
@@ -503,7 +503,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             highTank.location = site;
             highTank.updatedAt = utcTime;
             highTank.pressure = parseInt(highPressure);
-            highTank.userId = nameValue;
+            highTank.userId = sanitize(nameValue);
             addEntrytoTankDictionary(highTank);
             tankRecordString += buildTankRecordString(highTank);
           }
@@ -512,19 +512,19 @@ export default function AddNotes({ navigation }: NavigationType) {
         {
           if(ltsId && ltsPressure)
           {
-            await offlineTankEntry(ltsId, parseInt(ltsPressure), site, utcTime, nameValue)
+            await offlineTankEntry(ltsId, parseInt(ltsPressure), site, utcTime, sanitize(nameValue))
           }
           if(lowId && lowPressure)
           {
-            await offlineTankEntry(lowId, parseInt(lowPressure), site, utcTime, nameValue)
+            await offlineTankEntry(lowId, parseInt(lowPressure), site, utcTime, sanitize(nameValue))
           }
           if(midId && midPressure)
           {
-            await offlineTankEntry(midId, parseInt(midPressure), site, utcTime, nameValue)
+            await offlineTankEntry(midId, parseInt(midPressure), site, utcTime, sanitize(nameValue))
           }
           if(highId && highPressure)
           {
-            await offlineTankEntry(highId, parseInt(highPressure), site, utcTime, nameValue)
+            await offlineTankEntry(highId, parseInt(highPressure), site, utcTime, sanitize(nameValue))
           }
         }
 
@@ -631,7 +631,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       let newTankEntry = copyTankRecord(tank);
       newTankEntry.location = "ASB279";
       newTankEntry.pressure = 500;
-      newTankEntry.userId = nameValue;
+      newTankEntry.userId = sanitize(nameValue);
       newTankEntry.updatedAt = time;
       addEntrytoTankDictionary(newTankEntry);
       return buildTankRecordString(newTankEntry);

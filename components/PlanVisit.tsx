@@ -17,6 +17,7 @@ import { ThemeContext } from "./ThemeContext";
 import { visit, setVisitFile, getFileContents } from "../scripts/APIRequests";
 import PopupProp from './Popup';
 import LoadingScreen from "./LoadingScreen";
+import { sanitize } from "../scripts/Parsers";
 
 export default function PlanVisit({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -113,10 +114,10 @@ export default function PlanVisit({ navigation }: NavigationType) {
     }
     let visit: visit = {
       date: dateValue.toDateString(),
-      name: nameValue,
+      name: sanitize(nameValue),
       site: site,
-      equipment: notesValue,
-      notes: additionalNotesValue
+      equipment: sanitize(notesValue),
+      notes: sanitize(additionalNotesValue)
     }
 
     const result = await setVisitFile(visit, "Adding site visit");

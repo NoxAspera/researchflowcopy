@@ -16,30 +16,11 @@ export interface siteResponse
 }
 
 /**
- * @author August O'Rourke
- * This method turns an array of tankRecords into a csv string
- * @param object -an array of TankRecord Objects
- * @returns a csv-ifyed string
+ *  This method is for building a tank record string from a given entry
+ * @author Megan Ostlie
+ * @param record the tank record we are building a string of
+ * @returns the resulting string
  */
-function csvify( object: TankRecord[])
-{
-    let returnString = "fillId,serial,updatedAt,pressure,location,owner,co2,co2Stdev,co2Sterr,co2N,ch4,ch4Stdev,ch4Sterr,ch4N,co,coStdev,coSterr,coN,d13c,d13cStdev,d13cSterr,d13cN,d18o,d18oStdev,d18oSterr,d18oN,co2RelativeTo,comment,userId,co2InstrumentId,ch4InstrumentId,coInstrumentId,ottoCalibrationFile,co2CalibrationFile,ch4RelativeTo,ch4CalibrationFile,coRelativeTo,coCalibrationFile,tankId\n"
-    object.forEach(value => 
-        { 
-            //i really don't like this but i don't know how else to do it, this sucks
-            let newLine = `${value.fillId},${value.serial},${value.updatedAt},${value.pressure},${value.location},${value.owner},${value.co2},${value.co2Stdev},${value.co2Sterr},${value.co2N},${value.ch4},${value.ch4Stdev},${value.ch4Sterr},${value.ch4N},${value.co},${value.coStdev},${value.coSterr},${value.coN},${value.d13c},${value.d13cStdev},${value.d13cSterr},${value.d13cN},${value.d18o},${value.d18oStdev},${value.d18oSterr},${value.d18oN},"${value.co2RelativeTo}","${value.comment}",${value.userId},${value.co2InstrumentId},${value.ch4InstrumentId},${value.coInstrumentId},"${value.ottoCalibrationFile}","${value.co2CalibrationFile}","${value.ch4RelativeTo}","${value.ch4CalibrationFile}","${value.coRelativeTo}","${value.coCalibrationFile}",${value.tankId}\n`
-            returnString += newLine.replaceAll("undefined", "")
-            //console.log("finished loop")
-        })
-
-    return returnString
-}
-
-function getTankRecordHeaders() {
-    const headers = "fillId,serial,updatedAt,pressure,location,owner,co2,co2Stdev,co2Sterr,co2N,ch4,ch4Stdev,ch4Sterr,ch4N,co,coStdev,coSterr,coN,d13c,d13cStdev,d13cSterr,d13cN,d18o,d18oStdev,d18oSterr,d18oN,co2RelativeTo,comment,userId,co2InstrumentId,ch4InstrumentId,coInstrumentId,ottoCalibrationFile,co2CalibrationFile,ch4RelativeTo,ch4CalibrationFile,coRelativeTo,coCalibrationFile,tankId\n";
-    return headers;
-}
-
 export function buildTankRecordString( record: TankRecord)
 {
     let newLine = `${record.fillId},${record.serial},${record.updatedAt},${record.pressure},${record.location},${record.owner},${record.co2},${record.co2Stdev},${record.co2Sterr},${record.co2N},${record.ch4},${record.ch4Stdev},${record.ch4Sterr},${record.ch4N},${record.co},${record.coStdev},${record.coSterr},${record.coN},${record.d13c},${record.d13cStdev},${record.d13cSterr},${record.d13cN},${record.d18o},${record.d18oStdev},${record.d18oSterr},${record.d18oN},"${record.co2RelativeTo}","${record.comment}",${record.userId},${record.co2InstrumentId},${record.ch4InstrumentId},${record.coInstrumentId},"${record.ottoCalibrationFile}","${record.co2CalibrationFile}","${record.ch4RelativeTo}","${record.ch4CalibrationFile}","${record.coRelativeTo}","${record.coCalibrationFile}",${record.tankId}\n`
@@ -108,51 +89,41 @@ let githubToken: string | null = null;
 let tankDict: Map<string, TankRecord[]>;
 
 let tankTrackerSha = ""
-
+/**
+ * Typescript doesn't have a built in sleep function, so this function does that for us. This code was "generated" by Google Gemini
+ * @param ms the milliseconds you want to sleep for
+ * @returns void
+ */
 export const sleep = async (ms: number): Promise<void> => {
     return new Promise((resolve) => setTimeout(resolve, ms));
   };
 
-async function loop(path: string)
-{
-    FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + path)
-    //console.log("here")
-    let response = (await getDirectory(path))
-    if(response.success)
-    {
-        response.data.forEach(element => {
-            //console.log(FileSystem.documentDirectory + path + `/${element}`)
-            loop(path + `/${element}`)
-        });
-    }
-}
-
+/**
+ * @author August O'Rourke, Megan Ostlie
+ * This function reads updates that were input during the offline mode. Every request made is followed by a 50 ms sleep, this is becaus the github
+ * api can error when requests are made too frequently.
+ */
 export async function readUpdates()
-{
+{   
+    //this block reads and updates visits
     if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/visitfile.txt")).exists)
     {
         let visits: VisitList = parseVisits(await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/visitfile.txt"))
-        //console.log("passed visits")
-        //console.log(visits)
         await setVisitFileOffline(visits)
         FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/visitfile.txt")
         await sleep(50)
     }
-
-    
-    
-    //console.log(await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + "offline_updates"))
-
+    //this block reads and updates bad data
     if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/baddata.txt")).exists)
     {
         let bad_data_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/baddata.txt")).split("\n")
 
         for (let value of bad_data_entries){
-            let site = value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
-            value = value.substring(value.indexOf(", ") + 2)
-            let instrument =  value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
-            value = value.substring(value.indexOf(", ") + 2)
-            let newEntry = value.substring(value.indexOf(": ") + 2).slice(0, -1)
+            let site = value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", "))
+            value = value.substring(value.indexOf("\", ") + 3)
+            let instrument =  value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", "))
+            value = value.substring(value.indexOf("\", ") + 3)
+            let newEntry = value.substring(value.indexOf(": \"") + 3).slice(0, -1)
 
             await setBadData(site, instrument, newEntry, "updating from offline")
             await sleep(50)
@@ -161,51 +132,49 @@ export async function readUpdates()
         FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/baddata.txt")
         
     }
+    //this block reads and updates instrument maintance
     if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/instrument_maint.txt")).exists)
     {
         let instrument_maintence_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/instrument_maint.txt")).split("}\n")
-        //console.log(instrument_maintence_entries)
+
         for (let value of instrument_maintence_entries){
             if(value !== ""){
-                let path = value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
-                //console.log(path)
+                let path = value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", "))
+                value = value.substring(value.indexOf("\", ") + 3)
+                let content =  value.substring(value.indexOf("content: \"") + 10 , value.indexOf("\", mobile:"))
                 value = value.substring(value.indexOf(", ") + 2)
-                let content =  value.substring(value.indexOf("content: ") + 8 , value.indexOf(", mobile:"))
-                //console.log(content)
-                value = value.substring(value.indexOf(", ") + 2)
-                let needsSite =(value.substring(value.indexOf(": ") + 2 , value.indexOf(", ")) === "true")
-                value = value.substring(value.indexOf(", ") + 2)
-                let site = value.substring(value.indexOf(": ") + 2)
-                console.log(site)
+                let needsSite =(value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", ")) === "true")
+                value = value.substring(value.indexOf("\", ") + 3)
+                let site = value.substring(value.indexOf(": \"") + 3)
                 await setInstrumentFile(path,content,"updating from offline", needsSite, site)
                 await sleep(50)
             }
             
         }
         FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/instrument_maint.txt")
-        //await sleep(50)
     }
+    //this block updates the site_notes file, as well as generates some additional updates to instrument_maintence and tank tracker based on what is in the site file
     let tankRecordString = "";
     if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/site_notes.txt")).exists)
         {
                 let site_notes_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/site_notes.txt")).split("}\n")
-                //console.log(site_notes_entries)
                 for(let value of site_notes_entries){
                     if(value !== "")
                     {
-                        let siteName = value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
-                        //console.log(siteName)
-                        value = value.substring(value.indexOf(", ") + 2)
-                        let content =  value.substring(value.indexOf("content: ") + 8)
+                        let siteName = value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", "))
+                        value = value.substring(value.indexOf("\", ") + 3)
+                        let content =  value.substring(value.indexOf("content: \"") + 10).slice(0, -1)
                         let data = (await getFileContents(`site_notes/${siteName}`)).data
+                        
                         await setSiteFile(siteName, content, "updating from offline")
                         await sleep(50)
                         let notes = parseNotes(content).entries[0]
                         await sleep(50)
+                        //if there are previous notes...
                         if(data)
                         {
                             let previousNotes = parseNotes(data).entries[0]
-
+                            //and the instrument doesn't match the last one, create an entry for the previous instrument
                             if(previousNotes.instrument !== notes.instrument)
                             {
                                 let newNotes: string = `- Time in: ${notes.time_in}\n`;
@@ -216,6 +185,7 @@ export async function readUpdates()
                                 
                                 await setInstrumentFile(`instrument_maint/LGR_UGGA/${previousNotes.instrument}`,content,"updating from offline", true, siteName)
                             }
+                            //and if one of thanks has changed, create an entry for the previous tank
                             if(previousNotes.lts && notes.lts && previousNotes.lts.id !== notes.lts.id)
                             {
                                 let newTankEntry = getLatestTankEntry(previousNotes.lts.id)
@@ -265,20 +235,21 @@ export async function readUpdates()
                 FileSystem.deleteAsync(FileSystem.documentDirectory + "offline_updates/site_notes.txt")
                 await sleep(50)
         }
+
+        //this block updates the tank tracker 
     if((await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates/tank_updates.txt")).exists)
     {
             let tank_update_entries = (await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "offline_updates/tank_updates.txt")).split("\n")
             tank_update_entries.forEach(async (value) => {
                 if(value !== ""){
-                    console.log(value)
-                    let tankId = value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
-                    value = value.substring(value.indexOf(", ") + 2)
-                    let pressure =  parseInt(value.substring(value.indexOf(": ") + 2 , value.indexOf(", ")))
-                    value = value.substring(value.indexOf(", ") + 2)
-                    let site =value.substring(value.indexOf(": ") + 2 , value.indexOf(", "))
-                    value = value.substring(value.indexOf(", ") + 2)
-                    let time = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
-                    value = value.substring(value.indexOf(", ") + 2)
+                    let tankId = value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", "))
+                    value = value.substring(value.indexOf("\", ") + 3)
+                    let pressure =  parseInt(value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", ")))
+                    value = value.substring(value.indexOf("\", ") + 3)
+                    let site =value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", "))
+                    value = value.substring(value.indexOf("\", ") + 3)
+                    let time = value.substring(value.indexOf(": \"") + 3, value.indexOf("\", "))
+                    value = value.substring(value.indexOf("\", ") + 3)
                     let name = ""
                     let co2 = undefined
                     let ch4 = undefined
@@ -286,25 +257,20 @@ export async function readUpdates()
                     let fillId = undefined
                     if (value.includes("co2:"))
                     {
-                        name = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
-                        value = value.substring(value.indexOf(", ") + 2)
-                        console.log(name)
-                        co2 = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
-                        console.log(co2)
-                        value = value.substring(value.indexOf(", ") + 2)
-                        ch4 = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
-                        console.log(ch4)
-                        value = value.substring(value.indexOf(", ") + 2)
-                        comment = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
-                        console.log(comment)
-                        value = value.substring(value.indexOf(", ") + 2)
-                        fillId = value.substring(value.indexOf(": ") + 2).slice(0, -1)
-                        console.log(fillId)
+                        name = value.substring(value.indexOf(": \"") + 3, value.indexOf(", "))
+                        value = value.substring(value.indexOf("\", ") + 3)
+                        co2 = value.substring(value.indexOf(": \"") + 3, value.indexOf("\", "))
+                        value = value.substring(value.indexOf("\", ") + 3)
+                        ch4 = value.substring(value.indexOf(": \"") + 3, value.indexOf(", "))
+                        value = value.substring(value.indexOf(", \"") + 3)
+                        comment = value.substring(value.indexOf(": \"") + 3, value.indexOf(", "))
+                        value = value.substring(value.indexOf("\", ") + 3)
+                        fillId = value.substring(value.indexOf(": \"") + 3).slice(0, -1)
 
                     }
                     else
                     {
-                        name = value.substring(value.indexOf(": ") + 2).slice(0, -1)
+                        name = value.substring(value.indexOf(": \"") + 3).slice(0, -1)
                     }
 
                     let previousRecord: TankRecord = getLatestTankEntry(tankId)
@@ -321,6 +287,7 @@ export async function readUpdates()
                         previousRecord.comment = comment
                         previousRecord.fillId = fillId
                     }
+
                     
                     addEntrytoTankDictionary(previousRecord)
                     tankRecordString += buildTankRecordString(previousRecord);
@@ -335,10 +302,51 @@ export async function readUpdates()
     } 
 }
 
+/**
+ * @author August O'Rourke
+ * This is a helper function that facilitates offline updates for the visits
+ * @param visits - the visits entered from the offline mode
+ * @returns 
+ */
+async function setVisitFileOffline(visits: VisitList)
+{
+    const pullResponse = (await getFile(`researchflow_data/visits`))
+        let existingContent = ""
+        let hash = ""
+        
+        if(pullResponse.success)
+        {
+            hash = pullResponse.data.sha
+            existingContent = atob(pullResponse.data.content)       
+        }
+        visits.visits.forEach((value) => 
+        {
+            if(value != undefined)
+            {
+                existingContent += `{"date":"${value.date}","name":"${value.name}","site":"${value.site}","equipment":"${value.equipment}","notes":"${value.notes}"}\n`
+            }
+        })    
+        let fullDoc = btoa(existingContent)
+        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/researchflow_data/visits.md`;
+        let bodyString = `{"message":"updating from offline","content":"${fullDoc}"`
+        if (hash!== "")
+        {
+            bodyString+= `,"sha":"${hash}"}`
+        }
+        else
+        {
+            bodyString += '}'
+        }
+        return setFile(bodyString, url)
+}
+
+/**
+ * @author August O'Rourke
+ * This function starts the tank Dictionary when the app is offline
+ */
 export async function tankTrackerOffline()
 {
     let string = await FileSystem.readAsStringAsync(FileSystem.documentDirectory + "tank_tracker/names")
-    //console.log(string)
     let names = string.split("\n")
     tankDict = new Map()
     names.forEach(element => {
@@ -346,6 +354,10 @@ export async function tankTrackerOffline()
     })
 }
 
+/**
+ * @author August O'Rourke
+ * This function starts the process of placing a file structure the offline mode can understand, uses the loop method recursively
+ */
 export async function updateDirectories()
 {
     let response = (await getDirectory(""))
@@ -356,7 +368,6 @@ export async function updateDirectories()
         });
     }
     loop("site_notes/mobile")
-    //await tankTrackerSpinUp()
     let list = getTankList()
     let names = ""
     list.forEach(value => {
@@ -364,11 +375,11 @@ export async function updateDirectories()
     })
     await FileSystem.writeAsStringAsync(FileSystem.documentDirectory + "tank_tracker/names", names)
 
-    FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + "bad_data")
+    FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + "bad")
     response = await getBadDataSites()
     let entries = response.data
     entries.forEach(element => {
-        loop(`bad_data/${element}`)
+        writeBadDataSites(element)
     });
 
     let result = await FileSystem.getInfoAsync(FileSystem.documentDirectory + "offline_updates")
@@ -377,9 +388,30 @@ export async function updateDirectories()
     {
         FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + "offline_updates")
     }
-    console.log("update complete")
 }
-   
+ async function writeBadDataSites(site: string) 
+ {
+    let entries = (await getBadDataFiles(site)).data
+    await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + `bad/${site}`)
+    entries.forEach(element => {
+        FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + `bad/${site}/${element}`)
+    })
+ }  
+/**
+ * This is a helper function for saving the directories required for offline navigation
+ * @param path -the file path to create
+ */
+async function loop(path: string)
+{
+    FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + path)
+    let response = (await getDirectory(path))
+    if(response.success)
+    {
+        response.data.forEach(element => {
+            loop(path + `/${element}`)
+        });
+    }
+}
 
 /**
  * 
@@ -408,7 +440,6 @@ async function setFile(bodyString: string, url: string)
     
     try {
         const response = await fetch(requestOptions);
-        //console.log(response)
         if (response.ok) {
             const data = await response.json();
             return { success: true, data };
@@ -420,39 +451,6 @@ async function setFile(bodyString: string, url: string)
         return { success: false, error: error };
     }
     
-}
-
-async function setVisitFileOffline(visits: VisitList)
-{
-    const pullResponse = (await getFile(`researchflow_data/visits`))
-        let existingContent = ""
-        let hash = ""
-        
-        if(pullResponse.success)
-        {
-            hash = pullResponse.data.sha
-            existingContent = atob(pullResponse.data.content)       
-        }
-        visits.visits.forEach((value) => 
-        {
-            if(value != undefined)
-            {
-                existingContent += `{"date":"${value.date}","name":"${value.name}","site":"${value.site}","equipment":"${value.equipment}","notes":"${value.notes}"}\n`
-            }
-        })    
-        //console.log("exited loop")
-        let fullDoc = btoa(existingContent)
-        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/researchflow_data/visits.md`;
-        let bodyString = `{"message":"updating from offline","content":"${fullDoc}"`
-        if (hash!== "")
-        {
-            bodyString+= `,"sha":"${hash}"}`
-        }
-        else
-        {
-            bodyString += '}'
-        }
-        return setFile(bodyString, url)
 }
 
 /**
@@ -495,7 +493,6 @@ export async function setVisitFile(visit: visit, commitMessage: string)
         try
         {
             let path = FileSystem.documentDirectory + "offline_updates/visitfile.txt"
-            //(path)
             let exists = (await FileSystem.getInfoAsync(path)).exists
             let content = ""
             if(exists)
@@ -506,7 +503,7 @@ export async function setVisitFile(visit: visit, commitMessage: string)
             {
                 
             }
-            content += `{"date":"${visit.date}","name":"${visit.name}","site":"${visit.site}","equipment":"${visit.equipment}","notes":"${visit.notes}"}\n`
+            content += `{"date:"${visit.date}","name":"${visit.name}","site":"${visit.site}","equipment":"${visit.equipment}","notes":"${visit.notes}"}\n`
             let result = await FileSystem.writeAsStringAsync(path, content, {})
             if(await FileSystem.readAsStringAsync(path) === content)
             {
@@ -525,8 +522,19 @@ export async function setVisitFile(visit: visit, commitMessage: string)
 }
 
 export async function offlineTankEntry(tankID: string, pressure: number, site: string, time:string, name:string, co2?: number, ch4?: number, comment?: string, fillId?: string)
+/**
+ * This function adds an update for the specified tank while offline
+ * @author August O'Rourke
+ * @param tankID -the tanks id
+ * @param pressure - the tanks pressure
+ * @param site - the tanks site
+ * @param time  - the time the record was created
+ * @param name - who created the record
+ * @param 
+ * @returns void
+ */
+export async function offlineTankEntry(tankID: string, pressure: number, site: string, time:string, name:string, co2?: number, ch4?: number, comment?: string, fillId?: string)
 {
-    console.log("called")
     try {
         let path = FileSystem.documentDirectory + "offline_updates/tank_updates.txt"
 
@@ -535,16 +543,14 @@ export async function offlineTankEntry(tankID: string, pressure: number, site: s
         {
             content += await FileSystem.readAsStringAsync(path)
         }
-        //console.log(content)
 
-        content += `{tankId: ${tankID}, pressure: ${pressure}, site: ${site}, time: ${time}, name: ${name}`
+        content += `{tankId: \"${tankID}\", pressure: \"${pressure}\", site: \"${site}\", time: \"${time}\", name: \"${name}\"`
 
         if(co2 && ch4 && comment)
         {
-            content += `, co2: ${co2}, ch4: ${ch4}, comment: ${comment}, fillId: ${fillId}`
+            content += `, co2: \"${co2}\", ch4: \"${ch4}\", comment: \"${comment}\", fillId: \"${fillId}`
         }
         content += "}\n"
-        console.log(content)
         await FileSystem.writeAsStringAsync(path, content)
 
         return {success: true}
@@ -554,6 +560,7 @@ export async function offlineTankEntry(tankID: string, pressure: number, site: s
         return {success: true, error: error}
     } 
 }
+
 
 /**
  * @author August O'Rourke
@@ -593,9 +600,13 @@ export function setGithubToken(token: string) {
     githubToken = token;
 }
 
+/**
+ * This method adds a new entry to the tank Dictionary
+ * @author August O'Rourke
+ * @param newEntry 
+ */
 export function addEntrytoTankDictionary(newEntry: TankRecord) {
     let tankEntries = tankDict.get(newEntry.tankId);
-    //console.log(newEntry)
     if (tankEntries == undefined)
     {
         tankDict.set(newEntry.tankId, [newEntry])
@@ -617,30 +628,6 @@ export async function setTankTracker(newEntry: string)
 {
     if((await Network.getNetworkStateAsync()).isConnected)
     {
-        /** OLD ---
-        let temp = Array.from(tankDict.values())
-        let plainfullDoc: TankRecord[] = []
-
-        temp.forEach(value =>
-            {
-                value.forEach(value =>
-                {
-                    //console.log("looping forever")
-                    plainfullDoc.push(value)
-                })
-            }
-        )
-
-        let newContent = csvify(plainfullDoc)
-        //console.log("getting to request")
-   
-        const fullDoc = btoa(newContent)
-
-        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
-        const bodyString = `{"message":"updating from research flow","content":"${fullDoc}","sha":"${tankTrackerSha}"}`
-        return setFile(bodyString, url)
-        */
-
         const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
 
     let headers = new Headers();
@@ -660,7 +647,6 @@ export async function setTankTracker(newEntry: string)
     let sha = ""
     try {
         const response = await fetch(requestOptions);
-        //console.log(response)
         if (response.ok) {
             const data = await response.json();
             let plainContent = atob(data.content);
@@ -697,7 +683,12 @@ export function getTankEntries(key:string)
 {
     return tankDict.get(key)
 }
-
+/**
+ * This method retrieves the latest entry of a specific tank from the dictionary
+ * @author Megan Ostlie
+ * @param key - the tank Id
+ * @returns The latest Tank Entry
+ */
 export function getLatestTankEntry(key:string): TankRecord | undefined {
     let entries = getTankEntries(key);
     if (entries) {
@@ -714,7 +705,6 @@ export function getLatestTankEntry(key:string): TankRecord | undefined {
  */
 export function getTankList()
 {   
-    //console.log(tankDict)
     return Array.from(tankDict.keys())
 }
 /**
@@ -783,7 +773,6 @@ export async function tankTrackerSpinUp()
                     tankDict?.set(value.tankId, temp ? temp: [])
                 })
 
-            console.log("spin-up complete")
             return {success: true}
         } else {
             return {success: false, status: response.status, message: response.statusText}
@@ -803,7 +792,7 @@ export async function getBadDataSites()
 
     if(!check.isConnected)
         {
-           return {success: true, data: await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + "bad_data")}
+           return {success: true, data: await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + "bad")}
         }
 
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad`;
@@ -844,7 +833,7 @@ export async function getBadDataSites()
 }
 /**
  * @author August O'Rourke, Megan Ostlie
- * This method gets the data files from this site
+ * This method gets bad data files fromt the bad data repository
  * @param siteName - the name of the site we are getting the data from
  * @returns A json object containing a success field, and the response sent back, or an error message
  */
@@ -901,46 +890,45 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
 
     if((await Network.getNetworkStateAsync()).isConnected)
     {
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad/${siteName}/${instrument}.csv`;
+        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad/${siteName}/${instrument}.csv`;
 
-    let headers = new Headers();
-    headers.append("User-Agent", "ResearchFlow");
-    headers.append("Accept", "application/vnd.github+json");
-    headers.append("Authorization", `Bearer ${githubToken}`);
-    headers.append("X-GitHub-Api-Version", "2022-11-28");
+        let headers = new Headers();
+        headers.append("User-Agent", "ResearchFlow");
+        headers.append("Accept", "application/vnd.github+json");
+        headers.append("Authorization", `Bearer ${githubToken}`);
+        headers.append("X-GitHub-Api-Version", "2022-11-28");
 
-    let requestOptions: RequestInfo = new Request(url, 
-        {
-            method: "GET",
-            headers: headers,
-            redirect: "follow"
-        }
-    )
-    let newFile = ""
-    let sha = ""
-    try {
-        const response = await fetch(requestOptions);
-        console.log(response)
-        if (response.ok) {
-            const data = await response.json();
-            let plainContent = atob(data.content);
-            let entries = plainContent.substring(plainContent.indexOf("\n"))
-            let headers = plainContent.substring(0, plainContent.indexOf("\n"))
-            sha = data.sha
-            newFile = headers + entries + '\n' + newEntry
-            newFile = btoa(newFile)
-            const bodyString = `{"message":"${commitMessage}","content":"${newFile}","sha":"${sha}"}`
-            return setFile(bodyString, url)
+        let requestOptions: RequestInfo = new Request(url, 
+            {
+                method: "GET",
+                headers: headers,
+                redirect: "follow"
+            }
+        )
+        let newFile = ""
+        let sha = ""
+        try {
+            const response = await fetch(requestOptions);
+            if (response.ok) {
+                const data = await response.json();
+                let plainContent = atob(data.content);
+                let entries = plainContent.substring(plainContent.indexOf("\n"))
+                let headers = plainContent.substring(0, plainContent.indexOf("\n"))
+                sha = data.sha
+                newFile = headers + entries + '\n' + newEntry
+                newFile = btoa(newFile)
+                const bodyString = `{"message":"${commitMessage}","content":"${newFile}","sha":"${sha}"}`
+                return setFile(bodyString, url)
+            } 
+            else {
+                const errorData = await response.json();
+                return { success: false, error: errorData.message };
+            }
         } 
-        else {
-            const errorData = await response.json();
-            return { success: false, error: errorData.message };
+        catch (error) 
+        {
+            return { success: false, error: error };
         }
-    } 
-    catch (error) 
-    {
-        return { success: false, error: error };
-    }
     }
 
     else
@@ -948,7 +936,6 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
         try
         {
             let path = FileSystem.documentDirectory + "offline_updates/baddata.txt"
-            //console.log(path)
             let exists = (await FileSystem.getInfoAsync(path)).exists
             let content = ""
             if(exists)
@@ -959,7 +946,7 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
             {
                 
             }
-            content += `{siteName: ${siteName}, instrument: ${instrument}, newEntry: ${newEntry}}\n`
+            content += `{siteName: \"${siteName}\", instrument: \"${instrument}\", newEntry: \"${newEntry}\"}\n`
             let result = await FileSystem.writeAsStringAsync(path, content, {})
             if(await FileSystem.readAsStringAsync(path) === content)
             {
@@ -990,17 +977,17 @@ export async function getInstrumentSite(path: string) {
     }
     const existingContent = atob(pullResponse.data.content)
     const match = existingContent.match(/Currently at (.*)/);
-    //return match ? match[1] : null;
     return { success: true, data: match ? match[1] : null };
 }
 
 /**
  * @author August O'Rourke
- * This appends the string in the content field the contents of a markdown file in the site notes folder from the CS_4000_mock_docs repository, if it exists,
- * this method could also create a new file, but that has not been tested/ won't be used in the final app (at least right now)
- * @param siteName the name of the site that we are trying to edit the notes for 
+ * This method sets an instrument file in the repository for instrument maintence
+ * @param path the path of the instrument file
  * @param content the content we are going to append to the exitsting file
  * @param commitMessage the commit message that will go on gitHub
+ * @param mobile, wheter or not the site is a mobile site.
+ * @param site, the site of the instrument file
  * @returns the contents of the file as a string
  */
 export async function setInstrumentFile(path: string, content: string, commitMessage: string, mobile:boolean, site?: string) {
@@ -1034,18 +1021,17 @@ export async function setInstrumentFile(path: string, content: string, commitMes
         try
         {
             let filePath = FileSystem.documentDirectory + "offline_updates/instrument_maint.txt"
-            //console.log(path)
             let exists = (await FileSystem.getInfoAsync(filePath)).exists
             let newContent = ""
             if(exists)
             {
                 newContent = await FileSystem.readAsStringAsync(filePath)
             }
-            newContent += `{path: ${path}, content: ${content}, mobile: ${mobile}}\n`
+            newContent += `{path: \"${path}\", content: \"${content}\", mobile: \"${mobile}}\"\n`
             if(site)
             {
                 newContent = newContent.substring(0, newContent.length - 2)
-                newContent += `, site: ${site}}\n`
+                newContent += `, site: \"${site}\"}\n`
             }
 
             let result = await FileSystem.writeAsStringAsync(filePath, newContent, {})
@@ -1067,13 +1053,13 @@ export async function setInstrumentFile(path: string, content: string, commitMes
 
 /**
  * @author August O'Rourke
- *  This method gets a list of sites from the CS_4000_mock_docs repository
- * @returns returns a list of sites with the type of siteReåsponse
+ *  This method gets a list of items in a given Directory, it works for both the git repository as well as the phone's file system for offline mode
+ * @param path, the file path to look inside
+ * @returns returns a list of sites with the type of siteResponse
  */
 export async function getDirectory(path: string)
 {
     let check = await Network.getNetworkStateAsync()
-    //console.log(!(check.isConnected))
     if(!(check.isConnected))
     {
        return {success: true, data: await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + path)}
@@ -1095,14 +1081,14 @@ export async function getDirectory(path: string)
     )
     try{
         const response = await fetch(requestOptions);
-        //console.log(response)
         const data: siteResponse[] = await response.json();
         let options;
         if (path === "instrument_maint" || path === "") {
             options = data
                 .filter((item: any) => item.type === "dir")
                 .map((item: any) => item.name); 
-        } else {
+        } 
+        else {
             options = data
                 .filter(item => item.name.endsWith(".md"))
                 .map(item => item.name.replace(/\.md$/, ""));
@@ -1122,7 +1108,6 @@ export async function getDirectory(path: string)
  */
 async function getFile(path: string)
 {
-    //path.toLowerCase()
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}.md`;
 
     const headers = new Headers();
@@ -1142,7 +1127,6 @@ async function getFile(path: string)
     )
     try {
         const response = await fetch(requestOptions);
-        //console.log(response)
         if (response.ok) {
             const data = await response.json();
             return { success: true, data };
@@ -1166,7 +1150,6 @@ async function getFile(path: string)
 
 export async function getFileContents(path: string)
 {   
-    //path = path.toLowerCase();
     const response = await getFile(path)
     if(response.success)
     {
@@ -1179,12 +1162,11 @@ export async function getFileContents(path: string)
 }
 /**
  * @author August O'Rourke
- * This appends the string in the content field the contents of a markdown file in the site notes folder from the CS_4000_mock_docs repository, if it exists,
- * this method could also create a new file, but that has not been tested/ won't be used in the final app (at least right now)
+ * This appends the string in the content field the contents of a markdown file in the site notes folder from the CS_4000_mock_docs repository, if it exists
  * @param siteName the name of the site that we are trying to edit the notes for 
  * @param content the content we are going to append to the exitsting file
  * @param commitMessage the commit message that will go on gitHub
- * @returns the contents of the file as a string
+ * @returns a json object contatining a success message, as well as a data field or error field, if needed
  */
 export async function setSiteFile(siteName: string, content: string, commitMessage: string) {
     console.log("getting called")
@@ -1225,7 +1207,6 @@ export async function setSiteFile(siteName: string, content: string, commitMessa
         try
         {
             let path = FileSystem.documentDirectory + "offline_updates/site_notes.txt"
-            //console.log(path)
             let exists = (await FileSystem.getInfoAsync(path)).exists
             let newContent = ""
             if(exists)
@@ -1236,7 +1217,7 @@ export async function setSiteFile(siteName: string, content: string, commitMessa
             {
                 
             }
-            newContent += `{siteName: ${siteName}, content: ${content}}\n`
+            newContent += `{siteName: \"${siteName}\", content: \"${content}\"}\n`
             let result = await FileSystem.writeAsStringAsync(path, newContent, {})
             if(await FileSystem.readAsStringAsync(path) === newContent)
             {
