@@ -19,7 +19,6 @@ import { NavigationType } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
 import { sendEmailNotification } from "../scripts/EmailNotifications";
-import { loadStoredValues } from '../scripts/LoadStoredValues';
 
 export default function Login({ navigation }: NavigationType) {
      
@@ -32,7 +31,7 @@ export default function Login({ navigation }: NavigationType) {
     const [visible, setVisible] = useState(false);
     
     // helper method that will make sure the user has entered credentials
-    function checkTextEntry() {
+    async function checkTextEntry() {
         // used for testing purposes only
         if (emailValue == "admin" && passwordValue == "1234"){ 
             navigation.navigate('Home')
@@ -40,8 +39,7 @@ export default function Login({ navigation }: NavigationType) {
         else if (emailValue != "" && passwordValue != "") {
             setGithubToken(passwordValue)
             //send email notifications
-            console.log("calling send notifs")
-            sendEmailNotification("Auth","Load")                       
+            await sendEmailNotification("Auth","Load")                       
             navigation.navigate('Home')
         }
         else {
@@ -94,7 +92,7 @@ export default function Login({ navigation }: NavigationType) {
             {/* Sign in button */}
             <Button
                 testID='AuthButton'
-                onPress={() => {checkTextEntry()}}
+                onPress={checkTextEntry}
                 appearance='filled'
                 status='primary'
                 style={{margin: 15, backgroundColor: "#06b4e0"}}>

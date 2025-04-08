@@ -1,7 +1,7 @@
 /**
  * Email Notifications
  * @author David Schiwal
- * Updated: 4/6/25 - DS
+ * Updated: 4/8/25 - DS
  *
  * This code is made to send out notifications as needed to the person using the app,
  * assuming they have enabled them
@@ -22,20 +22,15 @@ import { loadStoredValues } from '../scripts/LoadStoredValues';
  * @param name the name of the person in site notes/plan visits
  */
 export async function sendEmailNotification(emailAddress: string, name: string){
-  console.log("in send notifs name: " + name)  
-  if(emailAddress == "Auth" && name == "Load"){
-    //console.log("Calling loadStoredValues")    
+  if(emailAddress == "Auth" && name == "Load"){ 
     const loadedVals = await loadStoredValues();
-    //console.log("email loaded: " + loadedVals[0])
-    //console.log("name loaded: " + loadedVals[1])
     emailAddress = loadedVals[0]
     name = loadedVals[1] 
   }
   if(emailAddress == null || name == null){
     return
-  }   
-  console.log("calling remove old dates")
-  await checkAndRemoveOldDates();
+  }
+  await checkAndRemoveOldDates(name);
   //Holds parsed data
   let data = null;
   // Get current visits
@@ -90,17 +85,14 @@ export async function sendEmailNotification(emailAddress: string, name: string){
               //now visitData has all the visits after today and sorted so find the ones within two weeks of now                  
               var notifDate = new Date();
               //currently notifications set to when site visit is within two weeks(14 days)
-              //to change change value being added to notifDate.getDate()
+              //to change when sent out change value being added to notifDate.getDate()
               notifDate.setDate(notifDate.getDate() + 14); //this is how you have to update the date to take care of incrementing months properly
               let notifyVisits = [];
               //checks for date being within notification range then for name match
               for(var i = 0; i < visitData.length; i++){
                 if(new Date(visitData[i].visit.date) <= notifDate){
                   if(visitData[i].visit.name == name){
-                    //check for site already being notified for
-                    console.log("load " + visitData[i].visit.site +" date call returns: " + await loadSiteDate(visitData[i].visit.site))
-                    if(await loadSiteDate(visitData[i].visit.site) == null){
-                      console.log("adding site to notifyVisits")
+                    if(await loadSiteDate(visitData[i].visit.site, name) == null){
                       notifyVisits.push(visitData[i])
                     }                    
                   }                    
@@ -108,53 +100,47 @@ export async function sendEmailNotification(emailAddress: string, name: string){
               }
               //this adds the sites and dates to a string and formats it for the email
               var messageString = "";
-              console.log("making message string")
               for(var i = 0; i < notifyVisits.length; i++){                
                 messageString = messageString + notifyVisits[i].visit.site + " on: " + notifyVisits[i].visit.date + "\n"
                 //save every site date that was notified
-                console.log("saving site date");
-                saveSiteDate(notifyVisits[i].visit.site, notifyVisits[i].visit.date)
-              }
-              
-              console.log("printing message")
-              console.log("message: \n" + messageString);
-              for(var i = 0; i < notifyVisits.length; i++){
-
+                saveSiteDate(notifyVisits[i].visit.site, notifyVisits[i].visit.date, name)
               }
               //send the email
-              /*try {
-                await send(
-                  'service_uv8moms',
-                  'template_wzdnmd1',
-                  {
-                    email: emailAddress,
-                    message: messageString,
-                  },
-                  {
-                    publicKey: '0wkPKMrUY3hyX3Tsu',
-                  },
-                );
-
-                console.log('SUCCESS!');
-              } catch (err) {
-                if (err instanceof EmailJSResponseStatus) {
-                  console.log('EmailJS Request Failed...', err);
+              if(messageString != ""){
+                try {
+                  await send(
+                    //if need to replace
+                    //put service id here
+                    'service_uv8moms',
+                    //put template id here
+                    'template_wzdnmd1',
+                    {
+                      email: emailAddress,
+                      message: messageString,
+                    },
+                    {
+                      publicKey: '0wkPKMrUY3hyX3Tsu',
+                    },
+                  );
+                } catch (err) {
+                  if (err instanceof EmailJSResponseStatus) {
+                    console.log('EmailJS Request Failed...', err);
+                  }
+                  console.log('ERROR', err);
                 }
-
-                console.log('ERROR', err);
-              }*/
+              }
+              
           } catch (error) {
               console.error("Error processing notes:", error);
           }
       }
   }
-  fetchData();
+  await fetchData();
+  return
 }
 /**
  * @author Megan Ostlie
- *  a function that pulls the current note document for the specified site from GitHub
- *  @param siteName the name of the site
- * 
+ * a function that pulls the current note document for the specified site from GitHub 
  * @returns a VisitsList object that contains the information of the given document
  */
 async function processVisits() {
@@ -173,10 +159,11 @@ async function processVisits() {
  * This method saves the given site and date of the site visit to the device
  * @param site the site to save the visit notification date sent out for
  * @param date the date of the site visit
+ * @param name the name of person being notified
  */
-async function saveSiteDate(site: string, date: string) {
+async function saveSiteDate(site: string, date: string, name: string) {
   try {
-    await AsyncStorage.setItem(site, date);
+    await AsyncStorage.setItem(site + name, date);
   } catch (e) {
     console.error("Failed to save the current site: ", e);
   }
@@ -184,15 +171,14 @@ async function saveSiteDate(site: string, date: string) {
 
 /**
  * @author David Schiwal
- * This method saves the given site and date of the site visit to the device
+ * This method loads the given site and date of the site visit from the device
  * @param site the site to see if there is a saved date for
+ * @param name the name of person being notified
  * @returns null if no saved visit notification date, otherwise date of site visit that was notified
  */
-async function loadSiteDate(site: string){
+async function loadSiteDate(site: string, name: string){
   try {
-    //console.log("loadingSiteDate")
-    const savedDate = await AsyncStorage.getItem(site);
-    //console.log("loeaded: " + savedDate)
+    const savedDate = await AsyncStorage.getItem(site + name);
     return savedDate;
   } catch (e) {
     console.error("Failed to retrieve the previous siteDate: ", e);
@@ -215,7 +201,7 @@ async function fetchSiteNames(): Promise<string[]>{
         names.data.push(...mobile_names.data.map(item => "mobile/" + item));
       }
       return(names.data);
-    } // Set the fetched site names
+    }
   }
   catch (error)
   {
@@ -223,20 +209,23 @@ async function fetchSiteNames(): Promise<string[]>{
   }
 };
 
-
-async function checkAndRemoveOldDates(){
+/**
+ * @author David Schiwal
+ * Checks old notified dates and clears them if date has passed
+ * @param name the name of the person who was notified
+ */
+async function checkAndRemoveOldDates(name: string){
   const currDate = new Date();
-  //currDate.setDate(currDate.getDate() + 14);
   var siteList: string[] = await fetchSiteNames();
   //checks every site to see if it has a saved date  
   for(var i = 0; i < siteList.length; i++){
-    var siteDateString: string = await loadSiteDate(siteList[i])
+    var siteDateString: string = await loadSiteDate(siteList[i], name)
     if(siteDateString != null){
       //if it has a saved date check if todays date is after that date
       var siteDate: Date = new Date(siteDateString);
       if(siteDate < currDate){
         //if todays date is after saved date, reset saved date to null
-        removeSiteDate(siteList[i])
+        removeSiteDate(siteList[i], name)
       }
     }    
   }
@@ -244,13 +233,13 @@ async function checkAndRemoveOldDates(){
 
 /**
  * @author David Schiwal
- * This method saves the given site and date of the site visit to the device
+ * This method removes the given site and date of the site visit to the device
  * @param site the site to save the visit notification date sent out for
- * @param date the date of the site visit
+ * @param name the name of person who was notified
  */
-async function removeSiteDate(site: string) {
+async function removeSiteDate(site: string, name: string) {
   try {
-    await AsyncStorage.removeItem(site);
+    await AsyncStorage.removeItem(site + name);
   } catch (e) {
     console.error("Failed to save the current site: ", e);
   }

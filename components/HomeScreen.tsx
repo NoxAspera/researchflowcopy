@@ -16,7 +16,6 @@ import { tankTrackerSpinUp} from '../scripts/APIRequests';
 import NoteInput from './NoteInput'
 
 export default function HomeScreen({ navigation }: NavigationType) {
-
   tankTrackerSpinUp()
   return (
     <Layout style={styles.container}>
