@@ -4,14 +4,10 @@ import { Layout } from "@ui-kitten/components";
 import React, {useEffect, useState} from "react";
 import { NavigationType } from "./types";
 const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
-import * as calendar from 'expo-calendar';
 import { getFileContents, visit } from "../scripts/APIRequests";
 import { processVisits } from "../scripts/Parsers";
-import { DateData, LocaleConfig} from 'react-native-calendars'
-import { Calendar, CalendarList,Agenda } from "react-native-calendars";
+import { Calendar} from "react-native-calendars";
 import { customTheme } from './CustomTheme';
-import PlanVisit from "./PlanVisit";
-import ViewNotes from "./ViewNotes";
 import * as Network from "expo-network"
 
 let visitDict: Map<string, visit[]>
