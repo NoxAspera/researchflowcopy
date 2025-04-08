@@ -122,7 +122,7 @@ export async function readUpdates()
             value = value.substring(value.indexOf("\", ") + 3)
             let instrument =  value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", "))
             value = value.substring(value.indexOf("\", ") + 3)
-            let newEntry = value.substring(value.indexOf(": \"") + 3).slice(0, -1)
+            let newEntry = value.substring(value.indexOf(": \"") + 3).slice(0, -2)
 
             await setBadData(site, instrument, newEntry, "updating from offline")
             await sleep(50)
@@ -683,7 +683,6 @@ export function getTankList()
  */
 export async function tankTrackerSpinUp()
 {
-    console.log("called")
     tankDict= new Map()
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
 
@@ -722,7 +721,6 @@ export async function tankTrackerSpinUp()
                 }
             // Decode base64 content
             let decodedContent = Buffer.from(data.content, 'base64').toString('utf-8')
-            console.log(decodedContent)
             // Remove UTF-8 BOM if it exists (0xEF, 0xBB, 0xBF)
             if (decodedContent.charCodeAt(0) === 0xEF && decodedContent.charCodeAt(1) === 0xBB && decodedContent.charCodeAt(2) === 0xBF) {
                 // Remove the BOM (first 3 characters)
@@ -1127,7 +1125,6 @@ export async function getFileContents(path: string)
     const response = await getFile(path)
     if(response.success)
     {
-        console.log(Buffer.from(response.data.content, 'base64').toString('utf-8'))
         return {success: true, data:Buffer.from(response.data.content, 'base64').toString('utf-8')}
     }
     else
