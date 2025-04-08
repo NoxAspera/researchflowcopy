@@ -7,26 +7,33 @@
  * a date range, the data, and why it is bad. The code will format and
  * submit that request to the github repo.
  */
-import { StyleSheet, KeyboardAvoidingView} from "react-native";
+import { StyleSheet, KeyboardAvoidingView } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import { useRoute } from "@react-navigation/native";
 import TextInput from "./TextInput";
 import NoteInput from "./NoteInput";
-import { Button, Layout, Text, Datepicker, Select, SelectItem, IndexPath,} from "@ui-kitten/components";
-import { customTheme } from "./CustomTheme";
+import {
+  Button,
+  Layout,
+  Text,
+  Datepicker,
+  Select,
+  SelectItem,
+  IndexPath,
+} from "@ui-kitten/components";
 import { NavigationType, routeProp } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
 import { setBadData, getBadDataFiles } from "../scripts/APIRequests";
-import PopupProp from "./Popup"
-import { ThemeContext } from './ThemeContext';
+import PopupProp from "./Popup";
+import { ThemeContext } from "./ThemeContext";
 import LoadingScreen from "./LoadingScreen";
-import * as Network from 'expo-network'
+import * as Network from "expo-network";
 
 export default function BadData({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   let site = route.params?.site;
   const themeContext = React.useContext(ThemeContext);
-  const isDarkMode = themeContext.theme === 'dark';
+  const isDarkMode = themeContext.theme === "dark";
 
   // these use states to set and store values in the text inputs
   const [oldIDValue, setOldIDValue] = useState("all");
@@ -39,7 +46,9 @@ export default function BadData({ navigation }: NavigationType) {
   const [endStatusValue, setEndStatusValue] = useState("basic");
   const [nameValue, setNameValue] = useState("");
   const [reasonValue, setReasonValue] = useState("");
-  const [selectedFileIndex, setSelectedFileIndex] = useState<IndexPath | undefined>(undefined);
+  const [selectedFileIndex, setSelectedFileIndex] = useState<
+    IndexPath | undefined
+  >(undefined);
   const [fileOptions, setFileOptions] = useState<string[]>([]);
   const [instrument, setInstrument] = useState("");
 
@@ -47,19 +56,18 @@ export default function BadData({ navigation }: NavigationType) {
   const [loadingValue, setLoadingValue] = useState(false);
 
   //method to navigate home to send to popup so it can happen after dismiss button is clicked
-  function navigateHome(nav:boolean){
-    if(nav){
-      navigation.navigate("Home")
+  function navigateHome(nav: boolean) {
+    if (nav) {
+      navigation.navigate("Home");
     }
   }
 
+  // Get list of instrument installed at that site
   useEffect(() => {
     const fetchBadDataFiles = async () => {
-      let check = await  Network.getNetworkStateAsync()
-      if(check.isConnected)
-      {
+      let check = await Network.getNetworkStateAsync();
+      if (check.isConnected) {
         try {
-          
           const response = await getBadDataFiles(site);
           if (response.success) {
             setFileOptions(response.data || []); // Set the file names as options
@@ -80,11 +88,13 @@ export default function BadData({ navigation }: NavigationType) {
     return date ? date.toISOString().split("T")[0] : "";
   };
 
+  // Function that validates that the time input is in HH:MM:SS format
   const validateTime = (time: string) => {
     const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
     return timeRegex.test(time); // Returns true if the time matches HH:MM:SS format
   };
 
+  // Returns the current time in utc
   const getCurrentUtcDateTime = () => {
     const now = new Date();
     const year = now.getUTCFullYear();
@@ -99,6 +109,7 @@ export default function BadData({ navigation }: NavigationType) {
     return utcDateTime;
   };
 
+  // Builds string for bad data input
   const buildBadDataString = (): string => {
     const currentTime = getCurrentUtcDateTime();
     return `${formatDate(startDateValue)}T${startTimeValue}Z,${formatDate(
@@ -106,6 +117,7 @@ export default function BadData({ navigation }: NavigationType) {
     )}T${endTimeValue}Z,${oldIDValue},${newIDValue},${currentTime},${nameValue},${reasonValue}`;
   };
 
+  // Handles when user selects instrument from dropdown
   const handleFileSelection = (index: IndexPath) => {
     setSelectedFileIndex(index);
     setInstrument(fileOptions[index.row]);
@@ -116,10 +128,10 @@ export default function BadData({ navigation }: NavigationType) {
   const [visible, setVisible] = useState(false);
   const [messageStatus, setMessageStatus] = useState("");
   const [message, setMessage] = useState("");
-  const [visible2, setVisible2] = useState(false);
   const [returnHome, retHome] = useState(false);
   const visibleRef = useRef(false);
 
+  // Checks if any fields are missing
   const handleSubmit = () => {
     if (
       !oldIDValue ||
@@ -131,14 +143,12 @@ export default function BadData({ navigation }: NavigationType) {
       !reasonValue ||
       !instrument
     ) {
-      //alert("Please fill out all fields before submitting.");
       setMessage("Please fill out all fields before submitting.");
       setMessageStatus("danger");
       setVisible(true);
       return;
     }
     if (!validateTime(startTimeValue) || !validateTime(endTimeValue)) {
-      //alert("Please make sure time entries follow the HH:MM:SS format");
       setMessage("Please make sure time entries follow the HH:MM:SS format.");
       setMessageStatus("danger");
       setVisible(true);
@@ -147,6 +157,7 @@ export default function BadData({ navigation }: NavigationType) {
     handleUpdate();
   };
 
+  // Sends PUT request to bad data file
   const handleUpdate = async () => {
     // show loading screen
     setLoadingValue(true);
@@ -161,13 +172,15 @@ export default function BadData({ navigation }: NavigationType) {
 
     // hide loading screen when we recieve results
     setLoadingValue(false);
-    
+
     if (result.success) {
       setMessage("File updated successfully!");
       setMessageStatus("success");
       retHome(true);
     } else {
-      setMessage(`Error: ${result.error}`);
+      setMessage(
+        `There was an error updating the file. Please update file manually.`
+      );
       setMessageStatus("success");
     }
     setTimeout(() => {
@@ -177,11 +190,12 @@ export default function BadData({ navigation }: NavigationType) {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior = "padding"
-      style={styles.container}
-    >
-      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1 }}>
+    <KeyboardAvoidingView behavior="padding" style={styles.container}>
+      <ScrollView
+        automaticallyAdjustKeyboardInsets={true}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
         <Layout style={styles.container} level="1">
           {/* header */}
           <Text category="h1" style={{ textAlign: "center" }}>
@@ -193,7 +207,7 @@ export default function BadData({ navigation }: NavigationType) {
             popupText={message}
             popupStatus={messageStatus}
             onPress={setVisible}
-            navigateHome={navigateHome} 
+            navigateHome={navigateHome}
             visible={visible}
             returnHome={returnHome}
           />
@@ -204,7 +218,15 @@ export default function BadData({ navigation }: NavigationType) {
           {/* text inputs */}
           {/* select instrument */}
           <Select
-            label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Instrument</Text>}
+            label={(evaProps) => (
+              <Text
+                {...evaProps}
+                category="p2"
+                style={{ color: isDarkMode ? "white" : "black" }}
+              >
+                Instrument
+              </Text>
+            )}
             selectedIndex={selectedFileIndex}
             onSelect={(index) => handleFileSelection(index as IndexPath)}
             placeholder="Choose an instrument"
@@ -240,11 +262,22 @@ export default function BadData({ navigation }: NavigationType) {
 
           {/* start date input */}
           <Datepicker
-            label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>Start Date</Text>}
+            label={(evaProps) => (
+              <Text
+                {...evaProps}
+                category="p2"
+                style={{ color: isDarkMode ? "white" : "black" }}
+              >
+                Start Date
+              </Text>
+            )}
             date={startDateValue}
             //changing the status here works because the mapping.json file (researchflow\node_modules\@eva-design\eva\mapping.json)
             //has a different textColor in the primary field for Datepicker
-            onSelect={(date) => {setStartDateValue(date as Date); setStartStatusValue("primary")}}
+            onSelect={(date) => {
+              setStartDateValue(date as Date);
+              setStartStatusValue("primary");
+            }}
             min={new Date(1900, 0, 1)}
             max={new Date(2500, 12, 31)}
             placeholder="Start Date"
@@ -263,11 +296,22 @@ export default function BadData({ navigation }: NavigationType) {
 
           {/* end date input */}
           <Datepicker
-            label={evaProps => <Text {...evaProps} category="p2" style={{color: isDarkMode ? "white" : "black"}}>End Date</Text>}
+            label={(evaProps) => (
+              <Text
+                {...evaProps}
+                category="p2"
+                style={{ color: isDarkMode ? "white" : "black" }}
+              >
+                End Date
+              </Text>
+            )}
             date={endDateValue}
             //changing the status here works because the mapping.json file (researchflow\node_modules\@eva-design\eva\mapping.json)
             //has a different textColor in the primary field for Datepicker
-            onSelect={(date) => {setEndDateValue(date as Date); setEndStatusValue("primary")}}
+            onSelect={(date) => {
+              setEndDateValue(date as Date);
+              setEndStatusValue("primary");
+            }}
             min={new Date(1900, 0, 1)}
             max={new Date(2500, 12, 31)}
             placeholder="End Date"
@@ -310,7 +354,11 @@ export default function BadData({ navigation }: NavigationType) {
             status="primary"
             style={styles.submitButton}
           >
-          {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Submit</Text>}
+            {(evaProps) => (
+              <Text {...evaProps} category="h6" style={{ color: "black" }}>
+                Submit
+              </Text>
+            )}
           </Button>
         </Layout>
       </ScrollView>
@@ -332,8 +380,8 @@ const styles = StyleSheet.create({
     margin: 6,
     flex: 1,
   },
-  submitButton:{
-    margin: 20, 
+  submitButton: {
+    margin: 20,
     backgroundColor: "#06b4e0",
   },
 });
