@@ -248,7 +248,33 @@ export async function readUpdates()
                     value = value.substring(value.indexOf(", \"") + 2)
                     let time = value.substring(value.indexOf(": \"") + 2, value.indexOf(", \""))
                     value = value.substring(value.indexOf(", \"") + 2)
-                    let name = value.substring(value.indexOf(": \"") + 2).slice(0, -1)
+                    let name = ""
+                    let co2 = undefined
+                    let ch4 = undefined
+                    let comment = undefined
+                    let fillId = undefined
+                    if (value.includes("co2:"))
+                    {
+                        name = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
+                        value = value.substring(value.indexOf(", ") + 2)
+                        console.log(name)
+                        co2 = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
+                        console.log(co2)
+                        value = value.substring(value.indexOf(", ") + 2)
+                        ch4 = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
+                        console.log(ch4)
+                        value = value.substring(value.indexOf(", ") + 2)
+                        comment = value.substring(value.indexOf(": ") + 2, value.indexOf(", "))
+                        console.log(comment)
+                        value = value.substring(value.indexOf(", ") + 2)
+                        fillId = value.substring(value.indexOf(": ") + 2).slice(0, -1)
+                        console.log(fillId)
+
+                    }
+                    else
+                    {
+                        name = value.substring(value.indexOf(": ") + 2).slice(0, -1)
+                    }
 
                     let previousRecord: TankRecord = getLatestTankEntry(tankId)
 
@@ -264,6 +290,7 @@ export async function readUpdates()
                         previousRecord.comment = comment
                         previousRecord.fillId = fillId
                     }
+
                     
                     addEntrytoTankDictionary(previousRecord)
                     tankRecordString += buildTankRecordString(previousRecord);
@@ -499,9 +526,10 @@ export async function offlineTankEntry(tankID: string, pressure: number, site: s
  * @param site - the tanks site
  * @param time  - the time the record was created
  * @param name - who created the record
+ * @param 
  * @returns void
  */
-export async function offlineTankEntry(tankID: string, pressure: number, site: string, time:string, name:string)
+export async function offlineTankEntry(tankID: string, pressure: number, site: string, time:string, name:string, co2?: number, ch4?: number, comment?: string, fillId?: string)
 {
     console.log("called")
     try {
@@ -512,12 +540,13 @@ export async function offlineTankEntry(tankID: string, pressure: number, site: s
         {
             content += await FileSystem.readAsStringAsync(path)
         }
+        //console.log(content)
 
-        content += `{tankId: ${tankID}, pressure: ${pressure}, site: ${site}, time: ${time}, name: ${name}`
+        content += `{tankId: \"${tankID}\", pressure: \"${pressure}\", site: \"${site}\", time: \"${time}\", name: \"${name}\"`
 
         if(co2 && ch4 && comment)
         {
-            content += `, co2: ${co2}, ch4: ${ch4}, comment: ${comment}, fillId: ${fillId}`
+            content += `, co2: \"${co2}\", ch4: \"${ch4}\", comment: \"${comment}\", fillId: \"${fillId}\"`
         }
         content += "}\n"
         console.log(content)
@@ -530,6 +559,7 @@ export async function offlineTankEntry(tankID: string, pressure: number, site: s
         return {success: true, error: error}
     } 
 }
+
 
 /**
  * Sets the GitHub token for subsequent API requests.
