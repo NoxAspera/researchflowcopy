@@ -147,7 +147,6 @@ export default function AddNotes({ navigation }: NavigationType) {
         try {
           const parsedData = await processNotes(site);
           setData(parsedData); // Update state with the latest entry
-          console.log("Set data");
         } catch (error) {
           console.error("Error processing notes:", error);
         }
@@ -253,7 +252,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
   }, [latestEntry]);
 
-  // Change tank 
+  // Change tank
   useEffect(() => {
     if (selectedTank) {
       if (selectedTank == "lts") {
@@ -727,7 +726,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         setMessage("All files updated successfully!");
       } else {
         setMessage(
-          "File updated successfully! Login when in service to upload changes"
+          "File updated successfully! Login when in service to upload changes."
         );
       }
       setMessageStatus("success");
