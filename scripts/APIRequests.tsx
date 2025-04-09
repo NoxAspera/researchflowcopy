@@ -326,7 +326,7 @@ async function setVisitFileOffline(visits: VisitList)
             }
         })    
         let fullDoc = btoa(existingContent)
-        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/researchflow_data/visits.md`;
+        const url = `https://api.github.com/repos/NoxAspera/CS_4000_mock_docs/contents/researchflow_data/visits.md`;
         let bodyString = `{"message":"updating from offline","content":"${fullDoc}"`
         if (hash!== "")
         {
@@ -475,7 +475,7 @@ export async function setVisitFile(visit: visit, commitMessage: string)
         }
         const fullDoc = btoa(existingContent + `{"date":"${visit.date}","name":"${visit.name}","site":"${visit.site}","equipment":"${visit.equipment}","notes":"${visit.notes}"}\n`)
 
-        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/researchflow_data/visits.md`;
+        const url = `https://api.github.com/repos/NoxAspera/CS_4000_mock_docs/contents/researchflow_data/visits.md`;
         let bodyString = `{"message":"${commitMessage}","content":"${fullDoc}"`
         if (hash!== "")
         {
@@ -627,7 +627,7 @@ export async function setTankTracker(newEntry: string)
 {
     if((await Network.getNetworkStateAsync()).isConnected)
     {
-        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
+        const url = `https://api.github.com/repos/NoxAspera/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
 
     let headers = new Headers();
     headers.append("User-Agent", "ResearchFlow");
@@ -715,7 +715,7 @@ export function getTankList()
 export async function tankTrackerSpinUp()
 {
     tankDict= new Map()
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
+    const url = `https://api.github.com/repos/NoxAspera/CS_4000_mock_docs/contents/tank_tracker/tank_db.csv`;
 
     const headers = new Headers();
     headers.append("User-Agent", "ResearchFlow");
@@ -738,7 +738,7 @@ export async function tankTrackerSpinUp()
 
             if(data._links)
                 {
-                   let url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/git/blobs/${tankTrackerSha}`
+                   let url = `https://api.github.com/repos/NoxAspera/CS_4000_mock_docs/git/blobs/${tankTrackerSha}`
                    const requestOptions: RequestInfo = new Request(url, 
                     {
                         method: "GET",
@@ -794,7 +794,7 @@ export async function getBadDataSites()
            return {success: true, data: await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + "bad")}
         }
 
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad`;
+    const url = `https://api.github.com/repos/NoxAspera/CS_4000_mock_data-pipeline/contents/bad`;
 
     let headers = new Headers();
     headers.append("User-Agent", "ResearchFlow");
@@ -838,7 +838,7 @@ export async function getBadDataSites()
  */
 export async function getBadDataFiles(siteName: string)
 {
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad/${siteName}`;
+    const url = `https://api.github.com/repos/NoxAspera/CS_4000_mock_data-pipeline/contents/bad/${siteName}`;
 
     let headers = new Headers();
     headers.append("User-Agent", "ResearchFlow");
@@ -889,7 +889,7 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
 
     if((await Network.getNetworkStateAsync()).isConnected)
     {
-        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad/${siteName}/${instrument}.csv`;
+        const url = `https://api.github.com/repos/NoxAspera/CS_4000_mock_data-pipeline/contents/bad/${siteName}/${instrument}.csv`;
 
         let headers = new Headers();
         headers.append("User-Agent", "ResearchFlow");
@@ -1011,7 +1011,7 @@ export async function setInstrumentFile(path: string, content: string, commitMes
         const existingNotes = existingContent.substring(existingContent.indexOf(maintenanceHeader) + maintenanceHeader.length) 
         const fullDoc = btoa(staticHeader +"\n" + content + existingNotes)
 
-        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}.md`;
+        const url = `https://api.github.com/repos/NoxAspera/CS_4000_mock_docs/contents/${path}.md`;
         const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`
         return setFile(bodyString, url)
     }
@@ -1064,7 +1064,7 @@ export async function getDirectory(path: string)
        return {success: true, data: await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + path)}
     }
 
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}`
+    const url = `https://api.github.com/repos/NoxAspera/CS_4000_mock_docs/contents/${path}`
     const headers = new Headers();
     headers.append("User-Agent", "ResearchFlow");
     headers.append("Accept", "application/vnd.github.raw+json");
@@ -1107,7 +1107,7 @@ export async function getDirectory(path: string)
  */
 async function getFile(path: string)
 {
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}.md`;
+    const url = `https://api.github.com/repos/NoxAspera/CS_4000_mock_docs/contents/${path}.md`;
 
     const headers = new Headers();
     headers.append("Authorization", `Bearer ${githubToken}`);
@@ -1196,7 +1196,7 @@ export async function setSiteFile(siteName: string, content: string, commitMessa
         //console.log("encrypting") 
         const fullDoc = btoa(siteHeader +"\n" + content + existingNotes)
 
-        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/site_notes/${siteName}.md`;
+        const url = `https://api.github.com/repos/NoxAspera/CS_4000_mock_docs/contents/site_notes/${siteName}.md`;
         const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`
         //console.log("sent requestß")
         return setFile(bodyString, url)
