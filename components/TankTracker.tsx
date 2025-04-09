@@ -16,9 +16,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import PopupProp from './Popup';
 import { getLatestTankEntry, setTankTracker, TankRecord, addEntrytoTankDictionary, buildTankRecordString } from '../scripts/APIRequests';
 import { Float } from 'react-native/Libraries/Types/CodegenTypes';
-import { customTheme } from './CustomTheme'
 import LoadingScreen from "./LoadingScreen";
-import VisitPopupProp from './VisitPopup';
 
 export default function TankTracker({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
@@ -51,6 +49,7 @@ export default function TankTracker({ navigation }: NavigationType) {
     // used for loading screen
     const [loadingValue, setLoadingValue] = useState(false);
 
+    // Autofills fields based on tank entry
     useEffect(() => {
       if (tank) {
         const entry = getLatestTankEntry(tank);
@@ -89,6 +88,7 @@ export default function TankTracker({ navigation }: NavigationType) {
       return utcDateTime;
     };
 
+    // Builds new tank entry with updated values
     const buildTankEntry = (): TankRecord => {
       const currentTime = getCurrentUtcDateTime();
       let newEntry: TankRecord = {
@@ -135,6 +135,7 @@ export default function TankTracker({ navigation }: NavigationType) {
       return newEntry;
     };
 
+    // Checks if certain fields are missing
     const handleSubmit = () => {
       if (!nameValue || !locationValue || !PSIValue) {
         setMessage("Please make sure Name, Location, and PSI are filled out before submitting.");
@@ -145,41 +146,7 @@ export default function TankTracker({ navigation }: NavigationType) {
       handleUpdate();
     }
 
-    function daysUntilEmpty(currPress: Float, currDate: string, prevPress: Float, prevDate: string) {
-      // account for edge case where tank is replaced, so its prev pressure is at 0
-      if (prevPress == 0) {
-        return 365;
-      }
-      // get change of pressure over time, assume it is linear
-      let changeOfPress = currPress - prevPress;
-
-      // if change of pressure is positive, then it got replaced, no need to check date
-      if (changeOfPress > 0) {
-        return 365;
-      }
-
-      // get date difference
-      let currTime = new Date(currDate).getTime();
-      let prevTime = new Date(prevDate).getTime();
-      let changeOfDate = (currTime - prevTime) / (864000000); // get the difference of time in days
-
-      let rateOfDecay = changeOfPress / changeOfDate; // measured in psi lost per day
-
-      // solve for when the tank should be under 500 psi
-      let days = -1600 / rateOfDecay;
-      console.log(days);
-      return days;
-    }
-
-    function checkIfRefillIsNeeded() {
-      // compare pressure from prev entry to current entry to see if tank will be empty soon
-      console.log("checking tank algo");
-      let days = daysUntilEmpty(PSIValue, dateValue, prevPressure, prevDate);
-      if (days <= 90) {
-        setTankPredictorVisibility(true);
-      }
-    }
-
+    // Sends PUT request to GitHub
     const handleUpdate = async () => {
       // show spinner while submitting
       setLoadingValue(true);
@@ -196,7 +163,7 @@ export default function TankTracker({ navigation }: NavigationType) {
         setMessageStatus("success");
         retHome(true);
       } else {
-        setMessage(`Error: ${result.error}`);
+        setMessage(`There was an error updating the file. Please update tank tracker manually.`);
         setMessageStatus("danger");
       }
       setTimeout(() => {
@@ -209,12 +176,6 @@ export default function TankTracker({ navigation }: NavigationType) {
     function navigateHome(nav:boolean){
       if(nav){
         navigation.navigate("Home")
-      }
-    }
-    
-    function navigatePlanVisit(nav:boolean){
-      if(nav){
-        navigation.navigate("PlanVisit")
       }
     }
 
