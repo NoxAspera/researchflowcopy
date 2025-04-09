@@ -205,6 +205,28 @@ export function buildMobileNotes(data: MobileEntry): string
     return result
 }
 
+ /**
+  * small function taken from https://stackoverflow.com/questions/13089306/escape-special-characters-in-a-string
+  * @param str 
+  * @returns 
+  */
+export function sanitize(str) {
+    return str.replace(/[\b\f\n\r\t\v\0\'\"\\]/g, match => {
+      return {
+        '\b': '\\b',
+        '\f': '\\f',
+        '\n': '\\n',
+        '\r': '\\r',
+        '\t': '\\t',
+        '\v': '\\v',
+        '\0': '\\0',
+        '\'': '\\\'',
+        '\"': '\\\"',
+        '\\': '\\\\'
+      }[match]
+    })
+}
+
 /**
  * @author Megan Ostlie
  * 
