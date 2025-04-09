@@ -30,7 +30,6 @@ const SuccessFailurePopup: React.FC<SFProp> = ({ popupText, popupStatus,  visibl
       <Modal
         visible={visible}
         backdropStyle={styles.backdrop}
-        onBackdropPress={() => onPress(false)}
       >
         <Card
           disabled={true}

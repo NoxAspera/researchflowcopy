@@ -18,7 +18,7 @@ interface HBProp {
 
 const HomeButtonProp: React.FC<HBProp> = ({ text, color, onPress }) => {
   return (
-    <Layout level="2">
+    <Layout level="1">
       <Button
         //makes a stylesheet with styles.tab stylesheet and the new thing you take in
         style={[styles.tab, { backgroundColor: color }]}

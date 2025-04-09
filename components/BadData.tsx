@@ -169,6 +169,7 @@ export default function BadData({ navigation }: NavigationType) {
     } else {
       setMessage(`Error: ${result.error}`);
       setMessageStatus("danger");
+      retHome(true);
     }
     setTimeout(() => {
       setVisible(true);
@@ -181,7 +182,7 @@ export default function BadData({ navigation }: NavigationType) {
       behavior = "padding"
       style={styles.container}
     >
-      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
+      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1 }}>
         <Layout style={styles.container} level="1">
           {/* header */}
           <Text category="h1" style={{ textAlign: "center" }}>

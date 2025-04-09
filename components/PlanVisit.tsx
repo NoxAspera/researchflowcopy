@@ -97,7 +97,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
       behavior = "padding"
       style={styles.container}
     >
-      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
+      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1 }}>
         <Layout style={styles.container} level="1">
           {/* header */}
           <Text category="h1" style={{ textAlign: "center" }}>
@@ -174,14 +174,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "stretch", // has button fill space horizontally
-    justifyContent: "space-evenly",
+    justifyContent: "flex-start",
   },
   reasonText: {
-    flex: 1,
+    // flex: 1,
     margin: 8,
   },
   textInput: {
-    flex: 1,
+    // flex: 1,
     margin: 8,
   },
   submitButton:{

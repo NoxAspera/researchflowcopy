@@ -613,6 +613,7 @@ export default function AddNotes({ navigation }: NavigationType) {
               setMessage(`Error: ${badDataResult.error}`);
             }
             setMessageStatus("danger");
+            retHome(true);
           }
           setTimeout(() => {
             setVisible(true);
