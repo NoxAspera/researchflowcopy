@@ -16,7 +16,6 @@ import { NavigationType, routeProp } from './types'
 import { getBadDataSites, getDirectory, getTankList } from '../scripts/APIRequests';
 import { ScrollView } from 'react-native-gesture-handler';
 
-
 export default function SelectSite({navigation}: NavigationType) {
   // type routeProp = RouteProp<{params: RouteParams}, 'params'>;
   const route = useRoute<routeProp>();
@@ -34,7 +33,6 @@ export default function SelectSite({navigation}: NavigationType) {
         let mobile_names;
         if (from === 'AddNotes' || from === 'ViewNotes' || from === 'PlanVisit' || from === 'Diagnostics') {
           names = await getDirectory("site_notes");
-          //console.log(names)
           mobile_names = await getDirectory("site_notes/mobile");
         } else if (from === 'BadData') {
           names = await getBadDataSites();
@@ -63,6 +61,7 @@ export default function SelectSite({navigation}: NavigationType) {
   // data for buttons
   let buttonData = [];
 
+  // Creates buttons for each site
   if (siteNames) {
     for (let i = 0; i < siteNames.length; i++) {
       if (siteNames[i]) {
@@ -77,6 +76,7 @@ export default function SelectSite({navigation}: NavigationType) {
 
   }
 
+  // Determines which screen to navigate to next
   const handleConfirm = (selectedSite: string) => {
     if(from === 'AddNotes')
     {
