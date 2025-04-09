@@ -32,7 +32,6 @@ export default function App({navigation}: NavigationType) {
   const [networkStatus, setNetworkStatus] = useState(true)
   const [loadingValue, setLoadingValue] = useState(false);
 
-  console.log(makeRedirectUri({scheme: 'researchflowuofu'}))
   const [request, response, promptAsync] = useAuthRequest(
     {
       clientId: process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID,
@@ -48,11 +47,8 @@ export default function App({navigation}: NavigationType) {
   {
     if (response?.type === 'success') {
       setLoadingValue(true)
-      console.log(response)
         const { code } = response.params;
-        
         const {token_type, scopes, access_token} = (await generateGithubToken(code)).data
-        console.log(access_token)
         setGithubToken(access_token);
         setLoadingText("Registering Tanks")
         await tankTrackerSpinUp();
@@ -72,7 +68,6 @@ export default function App({navigation}: NavigationType) {
 async function handlePress()
 {
   setNetworkStatus(await isConnected())
-  console.log(networkStatus)
   if(networkStatus)
   {
     await promptAsync();

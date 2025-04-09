@@ -18,8 +18,10 @@ interface LoadingScreenProp {
 }
 
 const LoadingScreen: React.FC<LoadingScreenProp> = ({ visible, loadingText }) => {
+  if(loadingText)
+  {
   return (
-    <Layout style={styles.container}>
+    <Layout>
       
       <Modal
         visible={visible}
@@ -34,19 +36,29 @@ const LoadingScreen: React.FC<LoadingScreenProp> = ({ visible, loadingText }) =>
       
     </Layout>
   );
-};
+  }
+  else{
+    return (
+      <Layout>
+        
+        <Modal
+          visible={visible}
+          backdropStyle={styles.backdrop}
+        >
+          {/* onShow component for modal may be useful to make the spinner disappear */}
+            <Spinner size="giant" style={{alignContent: 'center'}}/>
+        </Modal>
+        
+      </Layout>
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   backdrop: {
     backgroundColor: "rgba(0, 0, 0, 0.7)",
     paddingHorizontal: 100,
   },
-  container:
-  {
-    alignContent: 'center',
-    paddingHorizontal: 10,
-    flex: 1
-  }
 });
 
 export default LoadingScreen;
