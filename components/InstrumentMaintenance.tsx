@@ -22,6 +22,7 @@ import LoadingScreen from "./LoadingScreen";
 import DateTimePicker , {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
 import { TimerPickerModal } from "react-native-timer-picker";
 import * as Network from 'expo-network'
+import { sanitize } from "../scripts/Parsers";
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
@@ -134,8 +135,8 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
     let result: string = `- Time in: ${year}-${month}-${day} ${hours}:${minutes}Z\n`;
 
-    result += `- Name: ${nameValue}\n`;
-    result += `- Notes: ${notesValue}\n`;
+    result += `- Name: ${sanitize(nameValue)}\n`;
+    result += `- Notes: ${sanitize(notesValue)}\n`;
     result += "---\n";
 
     return result;
@@ -145,7 +146,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     const startTime = startDateValue.toISOString().split(".")[0] + "Z";
     const endTime = endDateValue.toISOString().split(".")[0] + "Z";
     const currentTime = (new Date()).toISOString().split(".")[0] + "Z";
-    let result: string = `${startTime},${endTime},all,NA,${currentTime},${nameValue},${badDataReason}`;
+    let result: string = `${startTime},${endTime},all,NA,${currentTime},${sanitize(nameValue)},${sanitize(badDataReason)}`;
 
     return result;
   };
@@ -186,19 +187,19 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
         instrument = "teledyne_" + instrumentName.toLowerCase();
       }
       badResult = await setBadData(
-        location,
-        instrument,
+        sanitize(location),
+        sanitize(instrument),
         badDataString,
         `Update ${instrument}.csv`
       );
     }
 
     const result = await setInstrumentFile(
-      site,
-      instrumentNotes,
+      sanitize(site),
+      sanitize(instrumentNotes),
       `Update ${instrumentName}.md`,
       needsLocation,
-      siteValue
+      sanitize(siteValue)
     );
 
     // hide loading screen when we have results

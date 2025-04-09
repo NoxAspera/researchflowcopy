@@ -20,6 +20,7 @@ import { customTheme } from './CustomTheme'
 import LoadingScreen from "./LoadingScreen";
 import * as Network from "expo-network"
 import VisitPopupProp from './VisitPopup';
+import { sanitize } from '../scripts/Parsers';
 
 async function isConnected()
 {
@@ -150,6 +151,7 @@ export default function TankTracker({ navigation }: NavigationType) {
     };
 
     const handleSubmit = () => {
+
       if (!nameValue || !locationValue || !PSIValue) {
         setMessage("Please make sure Name, Location, and PSI are filled out before submitting.");
         setMessageStatus("danger");
@@ -185,19 +187,15 @@ export default function TankTracker({ navigation }: NavigationType) {
       return days;
     }
 
-    function checkIfRefillIsNeeded() {
-      // compare pressure from prev entry to current entry to see if tank will be empty soon
-      console.log("checking tank algo");
-      let days = daysUntilEmpty(parseFloat(PSIValue), dateValue, prevPressure, prevDate);
-      if (days <= 90) {
-        setTankPredictorVisibility(true);
-      }
-    }
-
     const handleUpdate = async () => {
       // show spinner while submitting
       setLoadingValue(true);
-      console.log(networkStatus)
+      setNameValue(sanitize(nameValue))
+      setNotesValue(sanitize(notesValue))
+      setLocationValue(sanitize(locationValue))
+      setFillIDValue(sanitize(fillIDValue))
+      const entry = buildTankEntry();
+      addEntrytoTankDictionary(entry);
       let result = undefined
       if(networkStatus)
       {
