@@ -16,7 +16,6 @@ import { customTheme } from "./CustomTheme";
 import { NavigationType, routeProp } from "./types";
 import {setInstrumentFile, getInstrumentSite, setBadData} from "../scripts/APIRequests";
 import { ScrollView } from "react-native-gesture-handler";
-import { ThemeContext } from './ThemeContext';
 import PopupProp from './Popup';
 import LoadingScreen from "./LoadingScreen";
 import DateTimePicker , {DateTimePickerAndroid} from '@react-native-community/datetimepicker';

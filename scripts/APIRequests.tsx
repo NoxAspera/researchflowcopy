@@ -1,3 +1,4 @@
+import * as variables from "../config"
 import csv from 'csvtojson';
 import * as FileSystem from 'expo-file-system'
 import * as Network from 'expo-network'
@@ -84,6 +85,7 @@ export interface visit
 }
 
 let githubToken: string | null = null;
+
 
 let tankDict: Map<string, TankRecord[]>;
 
@@ -561,9 +563,39 @@ export async function offlineTankEntry(tankID: string, pressure: number, site: s
 
 
 /**
- * Sets the GitHub token for subsequent API requests.
+ * @author August O'Rourke
+ * generates a GithubToken using the code from the first half of the OAuth response given from the Auth Component
  * @param token The personal access token from the login screen.
  */
+export async function generateGithubToken(code: string) {
+    const url = `https://github.com/login/oauth/access_token?client_id=${process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID}&client_secret=${process.env.EXPO_PUBLIC_GITHUB_CLIENT_SECRET}&code=${code}`;
+
+    const headers = new Headers();
+    headers.append("Accept", "application/json");
+    headers.append("Content-Type", "application/json");
+
+    const requestOptions: RequestInfo = new Request(url, 
+        {
+            method: "POST",
+            headers: headers,
+            redirect: "follow"
+        }
+    )
+    try {
+        const response = await fetch(requestOptions);
+
+        if (response.ok) {
+            const data = await response.json();
+            return { success: true, data };
+        } else {
+            const errorData = await response.json();
+            return { success: false, error: errorData.message };
+        }
+    } catch (error) {
+        return { success: false, error: error };
+    }
+}
+
 export function setGithubToken(token: string) {
     githubToken = token;
 }
@@ -1086,10 +1118,12 @@ async function getFile(path: string)
     const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}.md`;
 
     const headers = new Headers();
+    headers.append("Authorization", `Bearer ${githubToken}`);
     headers.append("User-Agent", "ResearchFlow");
     headers.append("Accept", "application/vnd.github+json");
-    headers.append("Authorization", `Bearer ${githubToken}`);
     headers.append("X-GitHub-Api-Version", "2022-11-28");
+
+    //console.log(githubToken)
 
     const requestOptions: RequestInfo = new Request(url, 
         {
@@ -1105,6 +1139,7 @@ async function getFile(path: string)
             return { success: true, data };
         } else {
             const errorData = await response.json();
+            console.log(errorData)
             return { success: false, error: errorData.message };
         }
     } catch (error) {
@@ -1145,6 +1180,7 @@ export async function setSiteFile(siteName: string, content: string, commitMessa
 
     if((await Network.getNetworkStateAsync()).isConnected)
     {
+        //console.log("passing check")
         const pullResponse = (await getFile(`site_notes/${siteName}`))
         if(pullResponse.error)
         {
@@ -1159,6 +1195,7 @@ export async function setSiteFile(siteName: string, content: string, commitMessa
             siteHeader += existingContent.split("\n")[1];
             
         } else {
+            //console.log("line 1110")
             siteHeader = `# Site id: **${siteName}**`
         }
         const existingNotes = existingContent.substring(siteHeader.length, existingContent.length -1) 
@@ -1166,6 +1203,7 @@ export async function setSiteFile(siteName: string, content: string, commitMessa
 
         const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/site_notes/${siteName}.md`;
         const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`
+        //console.log("sent requestß")
         return setFile(bodyString, url)
     }
     else

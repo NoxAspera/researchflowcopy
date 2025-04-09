@@ -32,6 +32,7 @@ import { View } from 'react-native';
 import { loadStoredValues } from './scripts/LoadStoredValues';
 
 import Diagnostics from './components/Diagnostics';
+import CalendarScreen from './components/Calendar';
 
 const Stack = createStackNavigator();
 type ThemeType = 'light' | 'dark';
@@ -39,6 +40,7 @@ type ThemeType = 'light' | 'dark';
 export default function App() {
   // used for swapping between light and dark mode
   // Initialize state with a type
+  //LogBox.ignoreAllLogs(true)
   const [theme, setTheme] = useState<ThemeType>('light');
   useEffect(() => {
     const loadTheme = async () => {
@@ -319,7 +321,7 @@ export default function App() {
                 </View>
               ),
             })}/>
-            <Stack.Screen name="Calendar" component={Calendar} options={({ navigation }) => ({
+            <Stack.Screen name="Calendar" component={CalendarScreen} options={({ navigation }) => ({
               headerRight: () => (
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Button testID='infoButton'

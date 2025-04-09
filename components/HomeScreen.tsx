@@ -12,7 +12,6 @@ import { Layout } from "@ui-kitten/components";
 import React, { useState, useEffect } from 'react';
 import { NavigationType } from "./types";
 //const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
-import {updateDirectories, tankTrackerOffline, readUpdates, tankTrackerSpinUp} from '../scripts/APIRequests';
 import NoteInput from './NoteInput'
 import LoadingScreen from './LoadingScreen';
 import * as Network from 'expo-network'
@@ -81,9 +80,9 @@ export default function HomeScreen({ navigation }: NavigationType) {
           }
         />
 
-        {/* CALENDAR */}
+        {/* PLAN A VISIT */}
         <HomeButtonProp
-          text="CALENDAR"
+          text="PLAN A VISIT"
           color="#FFC581"
           onPress={() =>
             navigation.navigate('Calendar')
