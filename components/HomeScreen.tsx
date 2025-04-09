@@ -12,9 +12,6 @@ import { Layout } from "@ui-kitten/components";
 import React, { useState, useEffect } from 'react';
 import { NavigationType } from "./types";
 //const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
-import NoteInput from './NoteInput'
-import LoadingScreen from './LoadingScreen';
-import * as Network from 'expo-network'
 
 export default function HomeScreen({ navigation }: NavigationType) {
 

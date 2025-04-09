@@ -9,6 +9,7 @@ import {Layout} from '@ui-kitten/components'
 import HomeButtonProp from './HomeButtonProp';
 import * as Network from 'expo-network'
 import LoadingScreen from './LoadingScreen';
+import { sendEmailNotification } from "../scripts/EmailNotifications";
 
 
 WebBrowser.maybeCompleteAuthSession();
@@ -30,6 +31,7 @@ async function isConnected()
 export default function App({navigation}: NavigationType) {
   const [networkStatus, setNetworkStatus] = useState(true)
   const [loadingValue, setLoadingValue] = useState(false);
+  console.log(makeRedirectUri({scheme: 'researchflowuofu'}))
   const [request, response, promptAsync] = useAuthRequest(
     {
       clientId: process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID,
@@ -46,7 +48,6 @@ export default function App({navigation}: NavigationType) {
     if (response?.type === 'success') {
       setLoadingValue(true)
         const { code } = response.params;
-        
         const {token_type, scopes, access_token} = (await generateGithubToken(code)).data
         setGithubToken(access_token);
         setLoadingText("Registering Tanks")

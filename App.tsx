@@ -24,10 +24,14 @@ import { useEffect, useState } from 'react';
 import SettingsButton from './components/SettingsButton';
 import ViewNotifications from './components/ViewNotifications';
 import ContactInfo from './components/ContactInfo';
+import EmailSetup from './components/EmailSetup';
 import { NavigationType } from './components/types';
 import { Button, Icon, IconElement } from '@ui-kitten/components';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View } from 'react-native';
+import { LogBox } from 'react-native';
+import { loadStoredValues } from './scripts/LoadStoredValues';
+
 import Diagnostics from './components/Diagnostics';
 import CalendarScreen from './components/Calendar';
 
@@ -37,7 +41,7 @@ type ThemeType = 'light' | 'dark';
 export default function App() {
   // used for swapping between light and dark mode
   // Initialize state with a type
-  //LogBox.ignoreAllLogs(true)
+  LogBox.ignoreAllLogs(true)
   const [theme, setTheme] = useState<ThemeType>('light');
   useEffect(() => {
     const loadTheme = async () => {
@@ -74,6 +78,7 @@ export default function App() {
   };
   const bellIcon = (props): IconElement => <Icon {...props} name='bell-outline' />;
   const infoIcon = (props): IconElement => <Icon {...props} name='info-outline' />;
+  const emailIcon = (props): IconElement => <Icon {...props} name='email-outline' />;
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
@@ -90,13 +95,19 @@ export default function App() {
                   appearance="ghost"
                   accessoryLeft={infoIcon} 
                   size='large'
+                  style={{ marginHorizontal: -15 }}/>
+                  <Button testID='notificationsButton'
+                  onPress={() => navigation.navigate('ViewNotifications')} 
+                  appearance="ghost"
+                  accessoryLeft={bellIcon} 
+                  size='large'
                   style={{ marginHorizontal: -10 }}/>
                   <Button testID='notificationsButton'
-                    onPress={() => navigation.navigate('ViewNotifications')} 
-                    appearance="ghost"
-                    accessoryLeft={bellIcon} 
-                    size='large'
-                    style={{ marginHorizontal: -10 }}/>
+                  onPress={() => navigation.navigate('EmailSetup')} 
+                  appearance="ghost"
+                  accessoryLeft={emailIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -15 }}/>
                 <SettingsButton/>
                 </View>
               ),
@@ -320,12 +331,12 @@ export default function App() {
                   accessoryLeft={infoIcon} 
                   size='large'
                   style={{ marginHorizontal: -10 }}/>
-                  <Button testID='notificationsButton'
-                    onPress={() => navigation.navigate('ViewNotifications')} 
-                    appearance="ghost"
-                    accessoryLeft={bellIcon} 
-                    size='large'
-                    style={{ marginHorizontal: -10 }}/>
+                <Button testID='notificationsButton'
+                  onPress={() => navigation.navigate('ViewNotifications')} 
+                  appearance="ghost"
+                  accessoryLeft={bellIcon} 
+                  size='large'
+                  style={{ marginHorizontal: -10 }}/>
                 <SettingsButton/>
                 </View>
               ),
@@ -351,6 +362,7 @@ export default function App() {
             })}/>
             <Stack.Screen name="ViewNotifications" component={ViewNotifications} options={{ headerRight: () => <SettingsButton/>}}/>
             <Stack.Screen name="ContactInfo" component={ContactInfo} options={{ headerRight: () => <SettingsButton/>}}/>
+            <Stack.Screen name="EmailSetup" component={EmailSetup} options={{ headerRight: () => <SettingsButton/>}}/>
           </Stack.Navigator>
         </NavigationContainer>
       </ApplicationProvider>
