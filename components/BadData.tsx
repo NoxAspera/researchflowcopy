@@ -23,11 +23,12 @@ import {
 } from "@ui-kitten/components";
 import { NavigationType, routeProp } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
-import { setBadData, getBadDataFiles } from "../scripts/APIRequests";
-import PopupProp from "./Popup";
-import { ThemeContext } from "./ThemeContext";
+import { setBadData, getBadDataFiles} from "../scripts/APIRequests";
+import PopupProp from "./Popup"
+import { ThemeContext } from './ThemeContext';
 import LoadingScreen from "./LoadingScreen";
-import * as Network from "expo-network";
+import * as Network from 'expo-network'
+import { sanitize } from "../scripts/Parsers";
 
 export default function BadData({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -65,8 +66,6 @@ export default function BadData({ navigation }: NavigationType) {
   // Get list of instrument installed at that site
   useEffect(() => {
     const fetchBadDataFiles = async () => {
-      let check = await Network.getNetworkStateAsync();
-      if (check.isConnected) {
         try {
           const response = await getBadDataFiles(site);
           if (response.success) {
@@ -77,8 +76,7 @@ export default function BadData({ navigation }: NavigationType) {
         } catch (error) {
           console.error("Error fetching bad data files:", error);
         }
-      }
-    };
+      };
 
     fetchBadDataFiles();
   }, [site]);
@@ -114,7 +112,7 @@ export default function BadData({ navigation }: NavigationType) {
     const currentTime = getCurrentUtcDateTime();
     return `${formatDate(startDateValue)}T${startTimeValue}Z,${formatDate(
       endDateValue
-    )}T${endTimeValue}Z,${oldIDValue},${newIDValue},${currentTime},${nameValue},${reasonValue}`;
+    )}T${endTimeValue}Z,${sanitize(oldIDValue)},${sanitize(newIDValue)},${currentTime},${sanitize(nameValue)},${sanitize(reasonValue)}`;
   };
 
   // Handles when user selects instrument from dropdown

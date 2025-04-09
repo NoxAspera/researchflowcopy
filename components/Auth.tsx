@@ -8,7 +8,7 @@
  * a later update.
  */
 import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { Button, Layout, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
@@ -19,8 +19,10 @@ import * as Network from 'expo-network'
 import { NavigationType } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
+import { sendEmailNotification } from "../scripts/EmailNotifications";
 
 export default function Login({ navigation }: NavigationType) {
+     
     const route = useRoute();
     
     const themeContext = React.useContext(ThemeContext);
@@ -50,7 +52,7 @@ export default function Login({ navigation }: NavigationType) {
 
     // will set the no email/password notification to visible
     const [visible, setVisible] = useState(false);
-
+    
     // helper method that will make sure the user has entered credentials
     async function checkTextEntry() {
         // used for testing purposes only
@@ -59,6 +61,8 @@ export default function Login({ navigation }: NavigationType) {
         }
         else if (emailValue != "" && passwordValue != "") {
             setGithubToken(passwordValue)
+            //send email notifications
+            await sendEmailNotification("Auth","Load")                       
             await startup()
             navigation.navigate('Home')
         }
