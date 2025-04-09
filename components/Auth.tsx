@@ -9,6 +9,7 @@ import {Layout} from '@ui-kitten/components'
 import HomeButtonProp from './HomeButtonProp';
 import * as Network from 'expo-network'
 import LoadingScreen from './LoadingScreen';
+import { sendEmailNotification } from "../scripts/EmailNotifications";
 
 
 WebBrowser.maybeCompleteAuthSession();
@@ -79,6 +80,7 @@ async function handlePress()
   else
   {
     setLoadingValue(true)
+    setLoadingText("Registering Tanks")
     await tankTrackerOffline()
     setLoadingValue(false)
     navigation.navigate("Home")

@@ -2,7 +2,8 @@ import * as variables from "../config"
 import csv from 'csvtojson';
 import * as FileSystem from 'expo-file-system'
 import * as Network from 'expo-network'
-import { parseNotes, parseVisits, VisitList } from './Parsers';
+import { Buffer } from 'buffer';
+import { parseNotes, parseVisits, sanitize, VisitList } from './Parsers';
 
 /**
  * @author August O'Rourke
@@ -123,7 +124,7 @@ export async function readUpdates()
             value = value.substring(value.indexOf("\", ") + 3)
             let instrument =  value.substring(value.indexOf(": \"") + 3 , value.indexOf("\", "))
             value = value.substring(value.indexOf("\", ") + 3)
-            let newEntry = value.substring(value.indexOf(": \"") + 3).slice(0, -1)
+            let newEntry = value.substring(value.indexOf(": \"") + 3).slice(0, -2)
 
             await setBadData(site, instrument, newEntry, "updating from offline")
             await sleep(50)
@@ -317,7 +318,7 @@ async function setVisitFileOffline(visits: VisitList)
         if(pullResponse.success)
         {
             hash = pullResponse.data.sha
-            existingContent = atob(pullResponse.data.content)       
+            existingContent = Buffer.from(pullResponse.data.content, 'base64').toString('utf-8')     
         }
         visits.visits.forEach((value) => 
         {
@@ -326,7 +327,7 @@ async function setVisitFileOffline(visits: VisitList)
                 existingContent += `{"date":"${value.date}","name":"${value.name}","site":"${value.site}","equipment":"${value.equipment}","notes":"${value.notes}"}\n`
             }
         })    
-        let fullDoc = btoa(existingContent)
+        let fullDoc = Buffer.from(existingContent, 'utf-8').toString('base64')
         const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/researchflow_data/visits.md`;
         let bodyString = `{"message":"updating from offline","content":"${fullDoc}"`
         if (hash!== "")
@@ -472,10 +473,9 @@ export async function setVisitFile(visit: visit, commitMessage: string)
         if(pullResponse.success)
         {
             hash = pullResponse.data.sha
-            existingContent = atob(pullResponse.data.content)       
+            existingContent = Buffer.from(pullResponse.data.content, 'base64').toString('utf-8')       
         }
-        const fullDoc = btoa(existingContent + `{"date":"${visit.date}","name":"${visit.name}","site":"${visit.site}","equipment":"${visit.equipment}","notes":"${visit.notes}"}\n`)
-
+        const fullDoc = Buffer.from((existingContent + `{"date":"${visit.date}","name":"${visit.name}","site":"${visit.site}","equipment":"${visit.equipment}","notes":"${visit.notes}"}\n`), 'utf-8').toString('base64')
         const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/researchflow_data/visits.md`;
         let bodyString = `{"message":"${commitMessage}","content":"${fullDoc}"`
         if (hash!== "")
@@ -649,12 +649,12 @@ export async function setTankTracker(newEntry: string)
         const response = await fetch(requestOptions);
         if (response.ok) {
             const data = await response.json();
-            let plainContent = atob(data.content);
+            let plainContent = Buffer.from(data.content, 'base64').toString('utf-8')
             let entries = plainContent.substring(plainContent.indexOf("\n"))
             let headers = plainContent.substring(0, plainContent.indexOf("\n"))
             sha = data.sha
             newFile = headers + entries + newEntry
-            newFile = btoa(newFile)
+            newFile = Buffer.from(newFile, 'utf-8').toString('base64')
             const bodyString = `{"message":"updating from research flow","content":"${newFile}","sha":"${sha}"}`
             return setFile(bodyString, url)
         } 
@@ -752,7 +752,7 @@ export async function tankTrackerSpinUp()
                 
                 }
             // Decode base64 content
-            let decodedContent = atob(data.content);
+            let decodedContent = Buffer.from(data.content, 'base64').toString('utf-8')
             // Remove UTF-8 BOM if it exists (0xEF, 0xBB, 0xBF)
             if (decodedContent.charCodeAt(0) === 0xEF && decodedContent.charCodeAt(1) === 0xBB && decodedContent.charCodeAt(2) === 0xBF) {
                 // Remove the BOM (first 3 characters)
@@ -833,46 +833,53 @@ export async function getBadDataSites()
 }
 /**
  * @author August O'Rourke, Megan Ostlie
- * This method gets bad data files fromt the bad data repository
+ * This method gets bad data files from the bad data repository
  * @param siteName - the name of the site we are getting the data from
  * @returns A json object containing a success field, and the response sent back, or an error message
  */
 export async function getBadDataFiles(siteName: string)
 {
-    const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad/${siteName}`;
-
-    let headers = new Headers();
-    headers.append("User-Agent", "ResearchFlow");
-    headers.append("Accept", "application/vnd.github+json");
-    headers.append("Authorization", `Bearer ${githubToken}`);
-    headers.append("X-GitHub-Api-Version", "2022-11-28");
-
-    let requestOptions: RequestInfo = new Request(url, 
-        {
-            method: "GET",
-            headers: headers,
-            redirect: "follow"
-        }
-    )
-    try {
-        const response = await fetch(requestOptions);
-        if (response.ok) {
-            const data: siteResponse[] = await response.json();
-            
-            const csvFiles = data
-                .filter(item => item.name.endsWith(".csv"))
-                .map(item => item.name.replace(/\.csv$/, ""));
-
-            return {success:true, data:csvFiles};
-        } 
-        else {
-            const errorData = await response.json();
-            return { success: false, error: errorData.message };
-        }
-    } 
-    catch (error) 
+    if((await Network.getNetworkStateAsync()).isConnected)
     {
-        return { success: false, error: error };
+        const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_data-pipeline/contents/bad/${siteName}`;
+
+        let headers = new Headers();
+        headers.append("User-Agent", "ResearchFlow");
+        headers.append("Accept", "application/vnd.github+json");
+        headers.append("Authorization", `Bearer ${githubToken}`);
+        headers.append("X-GitHub-Api-Version", "2022-11-28");
+
+        let requestOptions: RequestInfo = new Request(url, 
+            {
+                method: "GET",
+                headers: headers,
+                redirect: "follow"
+            }
+        )
+        try {
+            const response = await fetch(requestOptions);
+            if (response.ok) {
+                const data: siteResponse[] = await response.json();
+                
+                const csvFiles = data
+                    .filter(item => item.name.endsWith(".csv"))
+                    .map(item => item.name.replace(/\.csv$/, ""));
+
+                return {success:true, data:csvFiles};
+            } 
+            else {
+                const errorData = await response.json();
+                return { success: false, error: errorData.message };
+            }
+        } 
+        catch (error) 
+        {
+            return { success: false, error: error };
+        }
+    }
+    else
+    {
+        return {success: true, data : await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + `bad/${siteName}`)}
     }
 }
 /**
@@ -911,12 +918,12 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
             const response = await fetch(requestOptions);
             if (response.ok) {
                 const data = await response.json();
-                let plainContent = atob(data.content);
+                let plainContent = Buffer.from(data.content, 'base64').toString('utf-8')
                 let entries = plainContent.substring(plainContent.indexOf("\n"))
                 let headers = plainContent.substring(0, plainContent.indexOf("\n"))
                 sha = data.sha
                 newFile = headers + entries + '\n' + newEntry
-                newFile = btoa(newFile)
+                newFile = Buffer.from(newFile, 'utf-8').toString('base64')
                 const bodyString = `{"message":"${commitMessage}","content":"${newFile}","sha":"${sha}"}`
                 return setFile(bodyString, url)
             } 
@@ -975,7 +982,7 @@ export async function getInstrumentSite(path: string) {
     {
         return {success: false, error: pullResponse.error}
     }
-    const existingContent = atob(pullResponse.data.content)
+    const existingContent = Buffer.from(pullResponse.data.content, 'base64').toString('utf-8')
     const match = existingContent.match(/Currently at (.*)/);
     return { success: true, data: match ? match[1] : null };
 }
@@ -1000,7 +1007,7 @@ export async function setInstrumentFile(path: string, content: string, commitMes
             return {success: false, error: pullResponse.error}
         }
         const hash = pullResponse.data.sha
-        const existingContent = atob(pullResponse.data.content)
+        const existingContent = Buffer.from(pullResponse.data.content, 'base64').toString('utf-8')
         const maintenanceHeader = `Maintenance Log\n---`
         let staticHeader = existingContent.substring(0,existingContent.indexOf(maintenanceHeader) + maintenanceHeader.length)
         if(mobile && site)
@@ -1010,7 +1017,7 @@ export async function setInstrumentFile(path: string, content: string, commitMes
             staticHeader = staticHeaderNoLocation + locationHeader
         }
         const existingNotes = existingContent.substring(existingContent.indexOf(maintenanceHeader) + maintenanceHeader.length) 
-        const fullDoc = btoa(staticHeader +"\n" + content + existingNotes)
+        const fullDoc = Buffer.from((staticHeader +"\n" + content + existingNotes), 'utf-8').toString('base64')
 
         const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/${path}.md`;
         const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`
@@ -1153,7 +1160,7 @@ export async function getFileContents(path: string)
     const response = await getFile(path)
     if(response.success)
     {
-        return {success: true, data: atob(response.data.content)}
+        return {success: true, data:Buffer.from(response.data.content, 'base64').toString('utf-8')}
     }
     else
     {
@@ -1169,8 +1176,8 @@ export async function getFileContents(path: string)
  * @returns a json object contatining a success message, as well as a data field or error field, if needed
  */
 export async function setSiteFile(siteName: string, content: string, commitMessage: string) {
-    console.log("getting called")
-    siteName = siteName.toLowerCase()
+    siteName = siteName.toLowerCase();
+
     if((await Network.getNetworkStateAsync()).isConnected)
     {
         //console.log("passing check")
@@ -1180,8 +1187,7 @@ export async function setSiteFile(siteName: string, content: string, commitMessa
             return {success: false, error: pullResponse.error}
         }
         const hash = pullResponse.data.sha
-        const existingContent = atob(pullResponse.data.content)
-        //console.log("pulled notes")
+        const existingContent = Buffer.from(pullResponse.data.content, 'base64').toString('utf-8')
         let siteHeader;
         if (siteName.includes("mobile/")) {
             const site = siteName.replace("mobile/", "");
@@ -1192,10 +1198,8 @@ export async function setSiteFile(siteName: string, content: string, commitMessa
             //console.log("line 1110")
             siteHeader = `# Site id: **${siteName}**`
         }
-        console.log("removing header")
-        const existingNotes = existingContent.substring(siteHeader.length, existingContent.length -1)
-        //console.log("encrypting") 
-        const fullDoc = btoa(siteHeader +"\n" + content + existingNotes)
+        const existingNotes = existingContent.substring(siteHeader.length, existingContent.length -1) 
+        const fullDoc = Buffer.from((siteHeader +"\n" + content + existingNotes), 'utf-8').toString('base64')
 
         const url = `https://api.github.com/repos/Mostlie/CS_4000_mock_docs/contents/site_notes/${siteName}.md`;
         const bodyString = `{"message":"${commitMessage}","content":"${fullDoc}","sha":"${hash}"}`

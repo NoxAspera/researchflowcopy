@@ -17,6 +17,7 @@ import LoadingScreen from './LoadingScreen';
 import * as Network from 'expo-network'
 
 export default function HomeScreen({ navigation }: NavigationType) {
+  tankTrackerSpinUp()
 
   const openURL = async () => {
     const url =
