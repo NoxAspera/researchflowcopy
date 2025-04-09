@@ -64,10 +64,6 @@ export default function TankTracker({ navigation }: NavigationType) {
         setFillIDValue(entry.fillId);
         setPSIValue(entry.pressure);
         setLatestEntry(entry);
-
-        // save previous date and pressure for tank predictor
-        prevDate = entry.updatedAt;
-        prevPressure = entry.pressure;
       }
     }
   }, [tank]);
@@ -164,12 +160,11 @@ export default function TankTracker({ navigation }: NavigationType) {
     if (result.success) {
       setMessage("File updated successfully!");
       setMessageStatus("success");
-      retHome(true);
     } else {
       setMessage(`Error: ${result.error}`);
       setMessageStatus("danger");
-      retHome(true);
     }
+    retHome(true);
     setTimeout(() => {
       setVisible(true);
       visibleRef.current = true;

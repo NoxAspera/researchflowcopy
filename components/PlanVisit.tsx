@@ -10,7 +10,6 @@ import React, { useState, useRef } from "react";
 import { useRoute } from "@react-navigation/native";
 import { Button, Layout, Datepicker, Text } from "@ui-kitten/components";
 import TextInput from "./TextInput";
-import { customTheme } from "./CustomTheme";
 import { NavigationType, routeProp } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
 import { ThemeContext } from "./ThemeContext";
@@ -81,11 +80,11 @@ export default function PlanVisit({ navigation }: NavigationType) {
     if (result.success) {
         setMessage("Visit planned successfully!");
         setMessageStatus("success");
-        retHome(true);
       } else {
         setMessage(`Error: ${result.error}`);
         setMessageStatus("danger");
       }
+      retHome(true);
       setTimeout(() => {
         setVisible(true);
         visibleRef.current = true;

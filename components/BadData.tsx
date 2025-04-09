@@ -165,12 +165,11 @@ export default function BadData({ navigation }: NavigationType) {
     if (result.success) {
       setMessage("File updated successfully!");
       setMessageStatus("success");
-      retHome(true);
     } else {
       setMessage(`Error: ${result.error}`);
       setMessageStatus("danger");
-      retHome(true);
     }
+    retHome(true);
     setTimeout(() => {
       setVisible(true);
       visibleRef.current = true;
