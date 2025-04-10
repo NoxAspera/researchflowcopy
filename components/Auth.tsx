@@ -26,7 +26,7 @@ export default function App({navigation}: NavigationType) {
 
   useEffect(() => {
     async function checkConnection() {
-      setNetworkStatus(await isConnected())
+      await isConnected()
     }
     checkConnection()
   }, [navigation])

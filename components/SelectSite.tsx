@@ -13,7 +13,7 @@ import React, { useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { Layout, Button, Text } from '@ui-kitten/components';
 import { NavigationType, routeProp } from './types'
-import { getBadDataSites, getDirectory, getTankList } from '../scripts/APIRequests';
+import { getBadDataSites, getDirectory, getTankList, tankTrackerSpinUp } from '../scripts/APIRequests';
 import { ScrollView } from 'react-native-gesture-handler';
 
 export default function SelectSite({navigation}: NavigationType) {
@@ -39,6 +39,8 @@ export default function SelectSite({navigation}: NavigationType) {
         } else if (from === 'InstrumentMaintenance' || from === 'InstrumentMaintenanceNotes') {
           names = await getDirectory("instrument_maint");
         } else if (from === 'TankTracker') {
+          //names = getTankList();
+          await tankTrackerSpinUp()
           setSiteNames(getTankList());
         }
         if(names?.success)
@@ -137,6 +139,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     padding: 20,
+    paddingVertical: 20,
   },
   button: {
     paddingVertical: 15,
@@ -146,4 +149,5 @@ const styles = StyleSheet.create({
     backgroundColor: "#06b4e0",
     margin: 8
   },
+  
 });

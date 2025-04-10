@@ -1,3 +1,4 @@
+import * as variables from "../config"
 import csv from 'csvtojson';
 import * as FileSystem from 'expo-file-system'
 import * as Network from 'expo-network'

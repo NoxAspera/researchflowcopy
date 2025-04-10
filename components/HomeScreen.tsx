@@ -1,7 +1,7 @@
 /**
  * Home Screen
- * @author Blake Stambaugh, August O'Rourke
- * 11/26/2024
+ * @author Blake Stambaugh, August O'Rourke, Megan Ostlie
+ * 4/10/2025
  *
  * The follow code represents the home page the user sees when they first launch our app.
  * It has a button for each section of the app that will take them to the next page.
