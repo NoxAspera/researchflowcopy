@@ -8,9 +8,8 @@ import React from 'react';
 import {Layout} from '@ui-kitten/components'
 import HomeButtonProp from './HomeButtonProp';
 import * as Network from 'expo-network'
+import { isConnected } from '../scripts/Helpers';
 import LoadingScreen from './LoadingScreen';
-import { sendEmailNotification } from "../scripts/EmailNotifications";
-
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -21,16 +20,16 @@ const discovery = {
   revocationEndpoint: `https://github.com/settings/connections/applications/${process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID}`,
 };
 
-
-async function isConnected()
-{
-  let check = (await Network.getNetworkStateAsync()).isConnected
-  return check
-}
-
 export default function App({navigation}: NavigationType) {
   const [networkStatus, setNetworkStatus] = useState(true)
   const [loadingValue, setLoadingValue] = useState(false);
+
+  useEffect(() => {
+    async function checkConnection() {
+      await isConnected()
+    }
+    checkConnection()
+  }, [navigation])
 
   const [request, response, promptAsync] = useAuthRequest(
     {

@@ -8,8 +8,7 @@
  */
 import { Button, Card, Icon, Layout, Modal, Text } from '@ui-kitten/components';
 import React, { useContext } from 'react'
-import { StyleSheet, ColorValue } from "react-native"
-import { NavigationType } from './types';
+import { StyleSheet} from "react-native"
 import { customTheme } from './CustomTheme';
 import { ThemeContext } from './ThemeContext';
 

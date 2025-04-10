@@ -9,14 +9,11 @@ import { useRoute } from '@react-navigation/native';
 import { Card, Layout, Text } from '@ui-kitten/components';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
-import { getFileContents, visit } from '../scripts/APIRequests';
+import { getFileContents} from '../scripts/APIRequests';
 import { Entry } from '../scripts/Parsers';
-import { customTheme } from './CustomTheme';
 import { ScrollView } from 'react-native-gesture-handler';
 import { NavigationType, routeProp } from './types'
 import { parseVisits, VisitList } from '../scripts/Parsers'
-
-
 
 /**
  * @author David Schiwal
@@ -43,7 +40,6 @@ export default function ViewNotifications({ navigation }: NavigationType) {
       }
       fetchData();
   },[]);
-
 
   // checks if visit is today or later and adds it to list to display if so
   let visitData = [];
@@ -105,6 +101,7 @@ export default function ViewNotifications({ navigation }: NavigationType) {
     </ScrollView>
   );
 }
+
 /**
  * @author Megan Ostlie
  *  a function that pulls the current note document for the specified site from GitHub

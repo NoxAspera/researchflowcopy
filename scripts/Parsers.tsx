@@ -317,23 +317,18 @@ export function parseVisits(text: string): VisitList{
         // Parse date
         const dateMatch = block.match(datePattern);
         const date = dateMatch ? dateMatch[1] : null;
-        console.log("Inside parseVisits date is: " + date)
         // Parse name
         const nameMatch = block.match(namePattern);
         const name = nameMatch ? nameMatch[1] : null;
-        console.log("Inside parseVisits name is: " + name)
         // Parse site
         const siteMatch = block.match(sitePattern);
         const site = siteMatch ? siteMatch[1] : null;
-        console.log("Inside parseVisits site is: " + site)
         // Parse equipment
         const equipmentMatch = block.match(equipmentPattern);
         const equipment = equipmentMatch ? equipmentMatch[1] : null;
-        console.log("Inside parseVisits equipment is: " + equipment)
         // Parse notes
         const notesMatch = block.match(notesPattern);
         const notes = notesMatch ? notesMatch[1] : null;
-        console.log("Inside parseVisits notes is: " + notes)
         if(date != null){
             return{
                 date: date,
