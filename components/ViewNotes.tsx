@@ -10,33 +10,19 @@ import { Card, Layout, Text } from '@ui-kitten/components';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { getFileContents } from '../scripts/APIRequests';
-import { Entry } from '../scripts/Parsers';
-import { customTheme } from './CustomTheme';
 import { ScrollView } from 'react-native-gesture-handler';
 import { NavigationType, routeProp } from './types'
-import LoadingScreen from './LoadingScreen';
-
 
 function retrieveHeader(site: string)
 {
   return site.split('/').pop()
 }
 
-
-/**
- * @author Blake Stambaugh, August O'Rourke
- * @returns The view notes page in our app
- */
 export default function ViewNotes({navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   let site = route.params?.site;
   let from = route.params?.from;
   let visits = route.params?.visits;
-  let notes: Entry[] = [];
-
-  const [visible, setVisible] = useState(false);
-  const [messageColor, setMessageColor] = useState("");
-  const [message, setMessage] = useState("");
 
   const [data, setData] = useState<string[] | null>(null);
 
@@ -69,11 +55,7 @@ export default function ViewNotes({navigation }: NavigationType) {
                 .substring(parsedData.data.indexOf("\n"))
                 .split(new RegExp("(___|---)"))
             );
-          } else {
-            setMessage(`Error: ${parsedData.error}`);
-            setMessageColor(customTheme["color-danger-700"]);
-            setVisible(true);
-          }
+          } 
         } catch (error) {
           console.error("Error retreiveing  notes:", error);
         }

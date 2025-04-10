@@ -13,7 +13,6 @@ import { Layout, Button, Text } from '@ui-kitten/components';
 import { NavigationType, routeProp } from './types'
 import { ScrollView } from 'react-native-gesture-handler';
 
-
 export default function SelectSite({navigation}: NavigationType) {
   // type routeProp = RouteProp<{params: RouteParams}, 'params'>;
   const route = useRoute<routeProp>();

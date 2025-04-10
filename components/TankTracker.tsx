@@ -1,6 +1,6 @@
 /**
  * Tank Tracker
- * @author Blake Stambaugh, David Schiwal, Megan Ostlie
+ * @author Blake Stambaugh, David Schiwal, Megan Ostlie, August O'Rourke
  * Updated 1/27/25
  * 
  * This page is responsible for tracking tank statuses. Will look at previous
@@ -15,19 +15,9 @@ import { NavigationType, routeProp } from './types'
 import { ScrollView } from 'react-native-gesture-handler';
 import PopupProp from './Popup';
 import { getLatestTankEntry, setTankTracker, TankRecord, addEntrytoTankDictionary, buildTankRecordString, offlineTankEntry } from '../scripts/APIRequests';
-import { Float } from 'react-native/Libraries/Types/CodegenTypes';
-import { customTheme } from './CustomTheme'
-import LoadingScreen from "./LoadingScreen";
-import * as Network from "expo-network"
-import VisitPopupProp from './VisitPopup';
+import { isConnected } from '../scripts/Helpers';
 import { sanitize } from '../scripts/Parsers';
-
-async function isConnected()
-{
-  let check = (await Network.getNetworkStateAsync()).isConnected
-  console.log(check)
-  return check
-}
+import LoadingScreen from "./LoadingScreen";
 
 export default function TankTracker({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
@@ -36,7 +26,6 @@ export default function TankTracker({ navigation }: NavigationType) {
     // used for setting and remembering the input values
     const [networkStatus, setNetworkStatus] = useState(true)
     const [nameValue, setNameValue] = useState("");
-    const [dateValue, setDateValue] = useState("");
     const [PSIValue, setPSIValue] = useState("");
     const [CO2Value, setCO2Value] = useState("");
     const [CH4Value, setCH4Value] = useState("");
@@ -44,6 +33,7 @@ export default function TankTracker({ navigation }: NavigationType) {
     const [fillIDValue, setFillIDValue] = useState("");
     const [locationValue, setLocationValue] = useState("");
     const [latestEntry, setLatestEntry] = useState<TankRecord>(undefined);
+
     
     // used for determining if PUT request was successful
     // will set the success/fail notification to visible, aswell as the color and text
@@ -56,39 +46,34 @@ export default function TankTracker({ navigation }: NavigationType) {
     // tank predictor
     let prevDate = "";
     let prevPressure = 0;
-    const [tankPredictorVisibility, setTankPredictorVisibility] = useState(false);
 
     // used for loading screen
     const [loadingValue, setLoadingValue] = useState(false);
 
+    // Autofills fields based on tank entry
     useEffect(() => {
       const fetchTank = async () => {
-      setNetworkStatus(await isConnected())
-      if (tank) {
-       
-        const entry = getLatestTankEntry(tank);
-        console.log("Latest Entry:");
-        console.log(entry);
-        if (entry) {
-          setLocationValue(entry.location);
-          setCO2Value(entry.co2.toString());
-          setCH4Value(entry.ch4.toString());
-          setFillIDValue(entry.fillId);
-          setPSIValue(entry.pressure.toString());
-          setLatestEntry(entry);
-
-          // save previous date and pressure for tank predictor
-          prevDate = entry.updatedAt;
-          prevPressure = entry.pressure;
+        setNetworkStatus(await isConnected())
+        if (tank) {
+         
+          const entry = getLatestTankEntry(tank);
+          if (entry) {
+            setLocationValue(entry.location);
+            setCO2Value(entry.co2.toString());
+            setCH4Value(entry.ch4.toString());
+            setFillIDValue(entry.fillId);
+            setPSIValue(entry.pressure.toString());
+            setLatestEntry(entry);
+  
+            // save previous date and pressure for tank predictor
+            prevDate = entry.updatedAt;
+            prevPressure = entry.pressure;
+  
+          }
         }
       }
-    }
-    fetchTank()
+      fetchTank()
     }, [tank]);
-
-    // Use IndexPath for selected index for drop down menu
-    const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
-    const tanks = ['Tank 1', 'Tank 2', 'Tank 3']
 
     const getCurrentUtcDateTime = () => {
       const now = new Date();
@@ -104,6 +89,7 @@ export default function TankTracker({ navigation }: NavigationType) {
       return utcDateTime;
     };
 
+    // Builds new tank entry with updated values
     const buildTankEntry = (): TankRecord => {
       const currentTime = getCurrentUtcDateTime();
       let newEntry: TankRecord = {
@@ -129,7 +115,7 @@ export default function TankTracker({ navigation }: NavigationType) {
         coRelativeTo: latestEntry ? latestEntry.coRelativeTo : "",
         coStdev: latestEntry ? latestEntry.coStdev : undefined,
         coSterr: latestEntry ? latestEntry.coSterr : undefined,
-        comment: notesValue,
+        comment: sanitize(notesValue),
         d13c: latestEntry ? latestEntry.d13c : undefined,
         d13cN: latestEntry ? latestEntry.d13cN : undefined,
         d13cStdev: latestEntry ? latestEntry.d13cStdev : undefined,
@@ -138,20 +124,20 @@ export default function TankTracker({ navigation }: NavigationType) {
         d18oN: latestEntry ? latestEntry.d18oN : undefined,
         d18oStdev: latestEntry ? latestEntry.d18oStdev : undefined,
         d18oSterr: latestEntry ? latestEntry.d18oSterr : undefined,
-        location: locationValue,
+        location: sanitize(locationValue),
         ottoCalibrationFile: latestEntry ? latestEntry.ottoCalibrationFile : "",
         owner: latestEntry ? latestEntry.owner : "",
         pressure: parseFloat(PSIValue),
         tankId: tank,
         updatedAt: currentTime,
-        userId: nameValue,
-        fillId: fillIDValue
+        userId: sanitize(nameValue),
+        fillId: sanitize(fillIDValue)
     };
       return newEntry;
     };
 
+    // Checks if certain fields are missing
     const handleSubmit = () => {
-
       if (!nameValue || !locationValue || !PSIValue) {
         setMessage("Please make sure Name, Location, and PSI are filled out before submitting.");
         setMessageStatus("danger");
@@ -161,80 +147,45 @@ export default function TankTracker({ navigation }: NavigationType) {
       handleUpdate();
     }
 
-    function daysUntilEmpty(currPress: Float, currDate: string, prevPress: Float, prevDate: string) {
-      // account for edge case where tank is replaced, so its prev pressure is at 0
-      if (prevPress == 0) {
-        return 365;
-      }
-      // get change of pressure over time, assume it is linear
-      let changeOfPress = currPress - prevPress;
-
-      // if change of pressure is positive, then it got replaced, no need to check date
-      if (changeOfPress > 0) {
-        return 365;
-      }
-
-      // get date difference
-      let currTime = new Date(currDate).getTime();
-      let prevTime = new Date(prevDate).getTime();
-      let changeOfDate = (currTime - prevTime) / (864000000); // get the difference of time in days
-
-      let rateOfDecay = changeOfPress / changeOfDate; // measured in psi lost per day
-
-      // solve for when the tank should be under 500 psi
-      let days = -1600 / rateOfDecay;
-      console.log(days);
-      return days;
-    }
-
+    // Sends PUT request to GitHub
     const handleUpdate = async () => {
-      // show spinner while submitting
-      setLoadingValue(true);
-      setNameValue(sanitize(nameValue))
-      setNotesValue(sanitize(notesValue))
-      setLocationValue(sanitize(locationValue))
-      setFillIDValue(sanitize(fillIDValue))
-      const entry = buildTankEntry();
-      addEntrytoTankDictionary(entry);
-      let result = undefined
-      if(networkStatus)
-      {
-        const entry = buildTankEntry();
-        addEntrytoTankDictionary(entry);
-        const tankRecordString = buildTankRecordString(entry);
-        result = await setTankTracker(tankRecordString);
-      }
-      else
-      {
-        result = await  offlineTankEntry(tank, parseFloat(PSIValue), locationValue, getCurrentUtcDateTime(), nameValue, parseFloat(CO2Value), parseFloat(CH4Value), notesValue, fillIDValue)
-      }
-
-      // remove spinner once we have results back
-      setLoadingValue(false);
-      if (result.success) {
-        setMessage("File updated successfully!");
-        setMessageStatus("success");
-        retHome(true);
-      } else {
-        setMessage(`Error: ${result.error}`);
-        setMessageStatus("danger");
-      }
-      setTimeout(() => {
-        setVisible(true);
-        visibleRef.current = true;
-      }, 100);
+           // show spinner while submitting
+           setLoadingValue(true);
+           const entry = buildTankEntry();
+           addEntrytoTankDictionary(entry);
+           let result = undefined
+           if(networkStatus)
+           {
+             const entry = buildTankEntry();
+             addEntrytoTankDictionary(entry);
+             const tankRecordString = buildTankRecordString(entry);
+             result = await setTankTracker(tankRecordString);
+           }
+           else
+           {
+             result = await  offlineTankEntry(tank, parseFloat(PSIValue), locationValue, getCurrentUtcDateTime(), nameValue, parseFloat(CO2Value), parseFloat(CH4Value), notesValue, fillIDValue)
+           }
+     
+           // remove spinner once we have results back
+           setLoadingValue(false);
+           if (result.success) {
+             setMessage("File updated successfully!");
+             setMessageStatus("success");
+             retHome(true);
+           } else {
+             setMessage(`Error: ${result.error}`);
+             setMessageStatus("danger");
+           }
+           setTimeout(() => {
+             setVisible(true);
+             visibleRef.current = true;
+           }, 100);
     }
 
     //method to navigate home to send to popup so it can happen after dismiss button is clicked
     function navigateHome(nav:boolean){
       if(nav){
         navigation.navigate("Home")
-      }
-    }
-    
-    function navigatePlanVisit(nav:boolean){
-      if(nav){
-        navigation.navigate("PlanVisit")
       }
     }
 
@@ -301,7 +252,7 @@ export default function TankTracker({ navigation }: NavigationType) {
               {/* C02 entry */}
               <TextInput
                 labelText="CO2"
-                labelValue={CO2Value !== undefined ? CO2Value : ""}
+                labelValue={CO2Value !== undefined ? CO2Value: ""}
                 onTextChange={setCO2Value}
                 placeholder="CO2"
                 style={styles.textInput}
@@ -312,6 +263,7 @@ export default function TankTracker({ navigation }: NavigationType) {
                 labelText="CH4"
                 labelValue={CH4Value !== undefined ? CH4Value : ""}
                 onTextChange={setCH4Value}
+                placeholder="CH4"
                 style={styles.textInput}
               />
 

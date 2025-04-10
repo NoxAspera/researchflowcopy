@@ -1,31 +1,27 @@
 /**
  * Home Screen
- * @author Blake Stambaugh
- * 11/26/2024
+ * @author Blake Stambaugh, August O'Rourke, Megan Ostlie
+ * 4/10/2025
  *
  * The follow code represents the home page the user sees when they first launch our app.
  * It has a button for each section of the app that will take them to the next page.
  **/
-import { StyleSheet, ScrollView, Dimensions, Linking, Platform, PermissionsAndroid } from "react-native";
+import { ScrollView, StyleSheet} from "react-native";
 import HomeButtonProp from "./HomeButtonProp";
 import { Layout } from "@ui-kitten/components";
 import React, { useState, useEffect } from 'react';
+import { isConnected } from "../scripts/Helpers";
 import { NavigationType } from "./types";
-//const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
 
 export default function HomeScreen({ navigation }: NavigationType) {
+  const [networkStatus, setNetworkStatus] = useState(true)
 
-  const openURL = async () => {
-    const url =
-    "https://air.utah.edu/s/diagnostics/?_inputs_&remove_failed_qc=false&color_by=%22QAQC_Flag%22&dates=%5B%222025-02-20%22%2C%222025-03-06%22%5D&column=%22%22&lvl=%22%22&instrument=%22%22&stid=%22%22&submit=0&sidebarCollapsed=false&sidebarItemExpanded=null";
-
-    const supported = await Linking.canOpenURL(url);
-    if (supported) {
-      await Linking.openURL(url);
-    } else {
-      alert("Cannot open the URL");
+  useEffect(() => {
+    async function fetchData() {
+      setNetworkStatus(await isConnected());
     }
-  };
+    fetchData();
+  }, []);
 
   return (
     <Layout style={styles.container}>
@@ -76,9 +72,9 @@ export default function HomeScreen({ navigation }: NavigationType) {
           }
         />
 
-        {/* PLAN A VISIT */}
+        {/* CALENDAR */}
         <HomeButtonProp
-          text="PLAN A VISIT"
+          text="CALENDAR"
           color="#FFC581"
           onPress={() =>
             navigation.navigate('Calendar')
@@ -86,6 +82,7 @@ export default function HomeScreen({ navigation }: NavigationType) {
         />
 
         {/* DIAGNOSTICS */}
+        {networkStatus && (
         <HomeButtonProp
           text="DIAGNOSTICS"
           color="#C3A2E4"
@@ -93,6 +90,7 @@ export default function HomeScreen({ navigation }: NavigationType) {
             navigation.navigate("SelectSite", { from: "Diagnostics" })
           }
         />
+        )}
       </ScrollView>
     </Layout>
   );

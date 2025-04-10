@@ -7,7 +7,7 @@
  */
 import { Button, Card, Icon, IconElement, Layout, Modal, Text } from "@ui-kitten/components";
 import React, { useContext } from "react";
-import { StyleSheet, ColorValue } from "react-native";
+import { StyleSheet} from "react-native";
 import { customTheme } from "./CustomTheme";
 import { ThemeContext } from "./ThemeContext";
 

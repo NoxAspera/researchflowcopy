@@ -3,7 +3,7 @@ import csv from 'csvtojson';
 import * as FileSystem from 'expo-file-system'
 import * as Network from 'expo-network'
 import { Buffer } from 'buffer';
-import { parseNotes, parseVisits, sanitize, VisitList } from './Parsers';
+import { parseNotes, parseVisits, VisitList } from './Parsers';
 
 /**
  * @author August O'Rourke
@@ -90,6 +90,7 @@ let githubToken: string | null = null;
 let tankDict: Map<string, TankRecord[]>;
 
 let tankTrackerSha = ""
+
 /**
  * Typescript doesn't have a built in sleep function, so this function does that for us. This code was "generated" by Google Gemini
  * @param ms the milliseconds you want to sleep for
@@ -521,7 +522,6 @@ export async function setVisitFile(visit: visit, commitMessage: string)
     }   
 }
 
-export async function offlineTankEntry(tankID: string, pressure: number, site: string, time:string, name:string, co2?: number, ch4?: number, comment?: string, fillId?: string)
 /**
  * This function adds an update for the specified tank while offline
  * @author August O'Rourke
@@ -530,7 +530,9 @@ export async function offlineTankEntry(tankID: string, pressure: number, site: s
  * @param site - the tanks site
  * @param time  - the time the record was created
  * @param name - who created the record
- * @param 
+ * @param co2 - co2 level, can only be edited from Tank Tracker
+ * @param ch4 - ch4 level, can only be edited from Tank Tracker
+ * @param comment - a small note about the change, can only be edited from Tank Tracker
  * @returns void
  */
 export async function offlineTankEntry(tankID: string, pressure: number, site: string, time:string, name:string, co2?: number, ch4?: number, comment?: string, fillId?: string)
@@ -560,7 +562,6 @@ export async function offlineTankEntry(tankID: string, pressure: number, site: s
         return {success: true, error: error}
     } 
 }
-
 
 /**
  * @author August O'Rourke
@@ -673,6 +674,7 @@ export async function setTankTracker(newEntry: string)
        return {success: true}
     }   
 }
+
 /**
  * This method returns a list of Tank Entries for a specific tank 
  * @author August O'Rourke
@@ -683,6 +685,7 @@ export function getTankEntries(key:string)
 {
     return tankDict.get(key)
 }
+
 /**
  * This method retrieves the latest entry of a specific tank from the dictionary
  * @author Megan Ostlie
@@ -707,6 +710,7 @@ export function getTankList()
 {   
     return Array.from(tankDict.keys())
 }
+
 /**
  * @author August O'Rourke, Megan Ostlie
  * This method prepares the code to run other various methods relating to the tank tracker, it needs to be called during the main menu, after authorization has already occured
@@ -781,6 +785,7 @@ export async function tankTrackerSpinUp()
         return {sucess: false, error: error}
     }
 }
+
 /**
  * @author August O'Rourke, Megan Ostlie
  * This method returns all the sites in the Bad Data folder
@@ -831,6 +836,7 @@ export async function getBadDataSites()
         return { success: false, error: error };
     }
 }
+
 /**
  * @author August O'Rourke, Megan Ostlie
  * This method gets bad data files from the bad data repository
@@ -882,6 +888,7 @@ export async function getBadDataFiles(siteName: string)
         return {success: true, data : await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + `bad/${siteName}`)}
     }
 }
+
 /**
  * @author - August O'Rourke 
  * This method sets a Bad Data file
@@ -970,6 +977,7 @@ export async function setBadData(siteName: string, instrument: string, newEntry:
         }
     }  
 }
+
 /**
  * This method gets the site of the Instrument specified
  * @author Megan Ostlie
@@ -1107,6 +1115,7 @@ export async function getDirectory(path: string)
         return {success: false, error: error}
     }
 }
+
 /**
  * @author August O'Rourke
  * this is a small helper method to request a file from the CS_4000_mock repository, since it is something we do frequently
@@ -1167,6 +1176,7 @@ export async function getFileContents(path: string)
         return response
     }
 }
+
 /**
  * @author August O'Rourke
  * This appends the string in the content field the contents of a markdown file in the site notes folder from the CS_4000_mock_docs repository, if it exists
