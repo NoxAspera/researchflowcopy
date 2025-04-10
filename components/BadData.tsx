@@ -1,6 +1,6 @@
 /**
  * Bad Data Page
- * @author David Schiwal, Blake Stambaugh, Megan Ostlie
+ * @author David Schiwal, Blake Stambaugh, Megan Ostlie, August O'Rourke
  * Updated: 3/23/25 - DS
  *
  * This page allows the user to mark data as bad. They will enter in
@@ -27,7 +27,7 @@ import { setBadData, getBadDataFiles} from "../scripts/APIRequests";
 import PopupProp from "./Popup"
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from "./LoadingScreen";
-import * as Network from 'expo-network'
+import { isConnected } from "../scripts/Helpers";
 import { sanitize } from "../scripts/Parsers";
 
 export default function BadData({ navigation }: NavigationType) {

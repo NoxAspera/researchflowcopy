@@ -35,7 +35,11 @@ import Diagnostics from './components/Diagnostics';
 
 const Stack = createStackNavigator();
 type ThemeType = 'light' | 'dark';
-
+/**
+ * @author Blake Stambaugh, August O'Rourke, David Schiwal, Megan Ostlie 
+ * This is the function Expo uses to glue all the individual Screens together, any app wide changes are also made here
+ * @returns void
+ */
 export default function App() {
   // used for swapping between light and dark mode
   // Initialize state with a type

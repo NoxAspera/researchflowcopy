@@ -1,6 +1,6 @@
 /**
  * Tank Tracker
- * @author Blake Stambaugh, David Schiwal, Megan Ostlie
+ * @author Blake Stambaugh, David Schiwal, Megan Ostlie, August O'Rourke
  * Updated 1/27/25
  * 
  * This page is responsible for tracking tank statuses. Will look at previous
@@ -15,16 +15,9 @@ import { NavigationType, routeProp } from './types'
 import { ScrollView } from 'react-native-gesture-handler';
 import PopupProp from './Popup';
 import { getLatestTankEntry, setTankTracker, TankRecord, addEntrytoTankDictionary, buildTankRecordString, offlineTankEntry } from '../scripts/APIRequests';
-import * as Network from 'expo-network'
+import { isConnected } from '../scripts/Helpers';
 import { sanitize } from '../scripts/Parsers';
 import LoadingScreen from "./LoadingScreen";
-
-async function isConnected()
-{
-  let check = (await Network.getNetworkStateAsync()).isConnected
-  return check
-}
-
 
 export default function TankTracker({ navigation }: NavigationType) {
     const route = useRoute<routeProp>();
@@ -33,7 +26,6 @@ export default function TankTracker({ navigation }: NavigationType) {
     // used for setting and remembering the input values
     const [networkStatus, setNetworkStatus] = useState(true)
     const [nameValue, setNameValue] = useState("");
-    const [dateValue, setDateValue] = useState("");
     const [PSIValue, setPSIValue] = useState("");
     const [CO2Value, setCO2Value] = useState("");
     const [CH4Value, setCH4Value] = useState("");
@@ -54,7 +46,6 @@ export default function TankTracker({ navigation }: NavigationType) {
     // tank predictor
     let prevDate = "";
     let prevPressure = 0;
-    const [tankPredictorVisibility, setTankPredictorVisibility] = useState(false);
 
     // used for loading screen
     const [loadingValue, setLoadingValue] = useState(false);
@@ -81,11 +72,8 @@ export default function TankTracker({ navigation }: NavigationType) {
           }
         }
       }
+      fetchTank()
     }, [tank]);
-
-    // Use IndexPath for selected index for drop down menu
-    const [selectedIndex, setSelectedIndex] = useState<IndexPath>(new IndexPath(0)); // Default to first item
-    const tanks = ['Tank 1', 'Tank 2', 'Tank 3']
 
     const getCurrentUtcDateTime = () => {
       const now = new Date();
@@ -127,7 +115,7 @@ export default function TankTracker({ navigation }: NavigationType) {
         coRelativeTo: latestEntry ? latestEntry.coRelativeTo : "",
         coStdev: latestEntry ? latestEntry.coStdev : undefined,
         coSterr: latestEntry ? latestEntry.coSterr : undefined,
-        comment: notesValue,
+        comment: sanitize(notesValue),
         d13c: latestEntry ? latestEntry.d13c : undefined,
         d13cN: latestEntry ? latestEntry.d13cN : undefined,
         d13cStdev: latestEntry ? latestEntry.d13cStdev : undefined,
@@ -136,14 +124,14 @@ export default function TankTracker({ navigation }: NavigationType) {
         d18oN: latestEntry ? latestEntry.d18oN : undefined,
         d18oStdev: latestEntry ? latestEntry.d18oStdev : undefined,
         d18oSterr: latestEntry ? latestEntry.d18oSterr : undefined,
-        location: locationValue,
+        location: sanitize(locationValue),
         ottoCalibrationFile: latestEntry ? latestEntry.ottoCalibrationFile : "",
         owner: latestEntry ? latestEntry.owner : "",
         pressure: parseFloat(PSIValue),
         tankId: tank,
         updatedAt: currentTime,
-        userId: nameValue,
-        fillId: fillIDValue
+        userId: sanitize(nameValue),
+        fillId: sanitize(fillIDValue)
     };
       return newEntry;
     };
@@ -163,10 +151,6 @@ export default function TankTracker({ navigation }: NavigationType) {
     const handleUpdate = async () => {
            // show spinner while submitting
            setLoadingValue(true);
-           setNameValue(sanitize(nameValue))
-           setNotesValue(sanitize(notesValue))
-           setLocationValue(sanitize(locationValue))
-           setFillIDValue(sanitize(fillIDValue))
            const entry = buildTankEntry();
            addEntrytoTankDictionary(entry);
            let result = undefined
@@ -259,7 +243,7 @@ export default function TankTracker({ navigation }: NavigationType) {
               {/* PSI input */}
               <TextInput
                 labelText="PSI"
-                labelValue={PSIValue !== undefined ? PSIValue.toString() : ""}
+                labelValue={PSIValue !== undefined ? PSIValue : ""}
                 onTextChange={setPSIValue}
                 placeholder="PSI"
                 style={styles.textInput}
@@ -268,7 +252,7 @@ export default function TankTracker({ navigation }: NavigationType) {
               {/* C02 entry */}
               <TextInput
                 labelText="CO2"
-                labelValue={CO2Value !== undefined ? CO2Value.toString() : ""}
+                labelValue={CO2Value !== undefined ? CO2Value: ""}
                 onTextChange={setCO2Value}
                 placeholder="CO2"
                 style={styles.textInput}
@@ -277,7 +261,7 @@ export default function TankTracker({ navigation }: NavigationType) {
               {/* CH4 entry */}
               <TextInput
                 labelText="CH4"
-                labelValue={CH4Value !== undefined ? CH4Value.toString() : ""}
+                labelValue={CH4Value !== undefined ? CH4Value : ""}
                 onTextChange={setCH4Value}
                 placeholder="CH4"
                 style={styles.textInput}

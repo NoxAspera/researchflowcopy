@@ -33,9 +33,7 @@ const hospitals = [
   { id: "2", name: "Vernal", address: "150 W 100 N, Vernal, UT 84078" },
 ];
 
-export default function ContactInfo({ navigation }: NavigationType) {
-  const route = useRoute<routeProp>();
-
+export default function ContactInfo() {
   // Calls provided phone number
   const callContact = (phone) => {
     Linking.openURL(`tel:${phone}`);

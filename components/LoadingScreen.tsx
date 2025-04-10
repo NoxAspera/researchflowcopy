@@ -1,7 +1,7 @@
 /**
  * Loading Screen
- * By Blake Stambaugh
- * 2/18/2025
+ * By Blake Stambaugh, August O'Rourke
+ * 4/10/2025
  * 
  * The loading screen component that appears when the user submits to github
  * Not a real screen, just a popup.
@@ -20,16 +20,17 @@ interface LoadingScreenProp {
 const LoadingScreen: React.FC<LoadingScreenProp> = ({ visible, loadingText }) => {
   return (
     <Layout style={styles.container}>
-      
       <Modal
         visible={visible}
         backdropStyle={styles.backdrop}
       >
         {/* onShow component for modal may be useful to make the spinner disappear */}
           <Spinner size="giant" style={{alignContent: 'center'}}/>
+          { loadingText &&(
           <Card>
             <Text category='h6'>{loadingText}</Text>
           </Card>
+          )}
       </Modal>
       
     </Layout>

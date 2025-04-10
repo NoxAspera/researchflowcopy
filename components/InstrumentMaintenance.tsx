@@ -1,6 +1,6 @@
 /**
  * Instrument Maintenance Page
- * @author David Schiwal, Blake Stambaugh, Megan Ostlie
+ * @author David Schiwal, Blake Stambaugh, Megan Ostlie, August O'Rourke
  * Updated: 3/29/25 - DS
  *
  * This is the page for instrument maintenance. It will take in the user input, format
@@ -33,7 +33,7 @@ import DateTimePicker, {
   DateTimePickerAndroid,
 } from "@react-native-community/datetimepicker";
 import { TimerPickerModal } from "react-native-timer-picker";
-import * as Network from 'expo-network'
+import { isConnected } from "../scripts/Helpers";
 import { sanitize } from "../scripts/Parsers";
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
@@ -72,8 +72,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   // Get site location if the instrument is a LGR
   useEffect(() => {
     const fetchSite = async () => {
-      let check = await Network.getNetworkStateAsync();
-      if (site.includes("LGR") && check.isConnected) {
+      if (site.includes("LGR") && await isConnected()) {
         try {
           const response = await getInstrumentSite(site);
           if (response.success) {

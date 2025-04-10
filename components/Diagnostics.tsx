@@ -109,8 +109,6 @@ const groupTankData = (entries: Entry[]) => {
 export default function Diagnostics({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   let site = route.params?.site;
-  const themeContext = React.useContext(ThemeContext);
-  const isDarkMode = themeContext.theme === "dark";
   let siteName = site;
   if (site.includes("mobile/")) {
     siteName = site.replace("mobile/", "");

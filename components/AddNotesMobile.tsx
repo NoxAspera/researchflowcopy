@@ -32,7 +32,6 @@ import {
 } from "@ui-kitten/components";
 import {
   setSiteFile,
-  getFileContents,
   TankRecord,
   getLatestTankEntry,
   addEntrytoTankDictionary,
@@ -43,7 +42,7 @@ import {
   offlineTankEntry,
   buildTankRecordString,
 } from "../scripts/APIRequests";
-import { processNotes, ParsedData, copyTankRecord } from "../scripts/Parsers";
+import { processNotes, ParsedData, copyTankRecord, sanitize } from "../scripts/Parsers";
 import PopupProp from "./Popup";
 import PopupProp2Button from "./Popup2Button";
 import { NavigationType, routeProp } from "./types";
@@ -243,7 +242,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     let siteName = site.replace("mobile/", "");
     let result: string = `- Time in: ${time}\n`;
 
-    result += `- Name: ${nameValue}\n`;
+    result += `- Name: ${sanitize(nameValue)}\n`;
     result += `- Notes: Installed at ${siteName}\n`;
     result += "---\n";
 
@@ -255,7 +254,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     let siteName = site.replace("mobile/", "");
     let result: string = `- Time in: ${time}\n`;
 
-    result += `- Name: ${nameValue}\n`;
+    result += `- Name: ${sanitize(nameValue)}\n`;
     result += `- Notes: Removed from ${siteName}\n`;
     result += "---\n";
 
@@ -276,7 +275,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     const startTime = startDateValue.toISOString().split(".")[0] + "Z";
     const endTime = endDateValue.toISOString().split(".")[0] + "Z";
     const currentTime = new Date().toISOString().split(".")[0] + "Z";
-    let result: string = `${startTime},${endTime},all,NA,${currentTime},${nameValue},${badDataReason}`;
+    let result: string = `${startTime},${endTime},all,NA,${currentTime},${sanitize(nameValue)},${sanitize(badDataReason)}`;
 
     return result;
   };
@@ -359,7 +358,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     let data: MobileEntry = {
       time_in: `${startYear}-${startMonth}-${startDay} ${startHours}:${startMinutes}`,
       time_out: `${endYear}-${endMonth}-${endDay} ${endHours}:${endMinutes}`,
-      names: nameValue,
+      names: sanitize(nameValue),
       instrument: instrumentInput.trim() ? instrumentInput : null,
       tank: Tankignored
         ? null
@@ -382,7 +381,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         let newTankEntry = copyTankRecord(originalTank);
         newTankEntry.location = "ASB279";
         newTankEntry.pressure = 500;
-        newTankEntry.userId = nameValue;
+        newTankEntry.userId = sanitize(nameValue);
         newTankEntry.updatedAt = utcTime;
         addEntrytoTankDictionary(newTankEntry);
         tankRecordString += buildTankRecordString(newTankEntry);
@@ -392,7 +391,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         tank.location = siteName;
         tank.updatedAt = utcTime;
         tank.pressure = parseInt(tankPressure);
-        tank.userId = nameValue;
+        tank.userId = sanitize(nameValue);
         addEntrytoTankDictionary(tank);
         tankRecordString += buildTankRecordString(tank);
       }
@@ -403,7 +402,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           parseInt(tankPressure),
           site,
           utcTime,
-          nameValue
+          sanitize(nameValue)
         );
       }
     }

@@ -5,27 +5,52 @@
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
-import { StyleSheet, KeyboardAvoidingView, Modal, View, TouchableOpacity, Platform  } from 'react-native';
-import React, { useState, useEffect, useRef } from 'react';
-import { RouteProp, useRoute } from '@react-navigation/native';
-import { ScrollView, Pressable } from 'react-native-gesture-handler';
-import { buildNotes, copyTankRecord, Entry } from '../scripts/Parsers';
-import TextInput from './TextInput'
-import NoteInput from './NoteInput'
-import { IndexPath, Layout, Select, SelectItem, Button, Text, Icon, CheckBox } from '@ui-kitten/components';
-import { customTheme } from './CustomTheme'
-import { setSiteFile, getFileContents, getLatestTankEntry, offlineTankEntry, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData, buildTankRecordString } from '../scripts/APIRequests';
-import { parseNotes, ParsedData, sanitize } from '../scripts/Parsers'
-import PopupProp from './Popup';
-import PopupProp2Button from './Popup2Button';
-import { NavigationType, routeProp } from './types'
-import { ThemeContext } from './ThemeContext';
-import LoadingScreen from './LoadingScreen';
-import DateTimePicker, {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
+import {
+  StyleSheet,
+  KeyboardAvoidingView,
+  Modal,
+  View,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { useRoute } from "@react-navigation/native";
+import { ScrollView, Pressable } from "react-native-gesture-handler";
+import { buildNotes, copyTankRecord, Entry } from "../scripts/Parsers";
+import TextInput from "./TextInput";
+import NoteInput from "./NoteInput";
+import {
+  IndexPath,
+  Layout,
+  Select,
+  SelectItem,
+  Button,
+  Text,
+  Icon,
+  CheckBox,
+} from "@ui-kitten/components";
+import {
+  setSiteFile,
+  getLatestTankEntry,
+  offlineTankEntry,
+  TankRecord,
+  setTankTracker,
+  addEntrytoTankDictionary,
+  getDirectory,
+  setInstrumentFile,
+  setBadData,
+  buildTankRecordString,
+} from "../scripts/APIRequests";
+import { ParsedData } from "../scripts/Parsers";
+import PopupProp from "./Popup";
+import PopupProp2Button from "./Popup2Button";
+import { NavigationType, routeProp } from "./types";
+import { ThemeContext } from "./ThemeContext";
+import LoadingScreen from "./LoadingScreen";
 import { TimerPickerModal } from "react-native-timer-picker";
 import { isConnected, daysUntilEmpty } from "../scripts/Helpers";
 import VisitPopupProp from "./VisitPopup";
-import { processNotes } from "../scripts/Parsers";
+import { processNotes, sanitize } from "../scripts/Parsers";
 
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
@@ -524,112 +549,109 @@ export default function AddNotes({ navigation }: NavigationType) {
             unit: "ppm",
             pressure: ltsPressure,
           },
-          low_cal:
-          {
-            id:lowId,
-            value:lowValue,
-            unit:"ppm",
-            pressure: lowPressure
-          },
-          mid_cal:
-          {
-            id:midId,
-            value:midValue,
-            unit: "ppm",
-            pressure: midPressure
-          },
-          high_cal:
-          {
-            id:highId,
-            value:highValue,
-            unit: "ppm",
-            pressure: highPressure
-          },
-          additional_notes: sanitize(notesValue)
-        };
-        console.log("entry created")
-        const utcTime = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:${endSeconds}Z`;
-        if(networkStatus){
-          if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
-            tankRecordString += removeTankFromSite(originalLts, utcTime);
-          }
-          if (ltsTankRecord) {
-            let ltsTank = copyTankRecord(ltsTankRecord);
-            ltsTank.location = site;
-            ltsTank.updatedAt = utcTime;
-            ltsTank.pressure = parseInt(ltsPressure);
-            ltsTank.userId = sanitize(nameValue);
-            console.log("calling this")
-            addEntrytoTankDictionary(ltsTank);
-            tankRecordString += buildTankRecordString(ltsTank);
-          }
-          
-          console.log("tank pressure point")
-          if (originalLow && (!lowTankRecord || (originalLow.tankId != lowTankRecord.tankId))) {
-            tankRecordString += removeTankFromSite(originalLow, utcTime);
-          }
-          console.log("tank pressure point 2")
-          if (lowTankRecord) {
-            let lowTank = copyTankRecord(lowTankRecord);
-            lowTank.location = site;
-            lowTank.updatedAt = utcTime;
-            lowTank.pressure = parseInt(lowPressure);
-            lowTank.userId = sanitize(nameValue);
-            addEntrytoTankDictionary(lowTank);
-            tankRecordString += buildTankRecordString(lowTank);
-          }
-
-          if (originalMid && (!midTankRecord || (originalMid.tankId != midTankRecord.tankId))) {
-            tankRecordString += removeTankFromSite(originalMid, utcTime);
-          }
-          if (midTankRecord) {
-            let midTank = copyTankRecord(midTankRecord);
-            midTank.location = site;
-            midTank.updatedAt = utcTime;
-            midTank.pressure = parseInt(midPressure);
-            midTank.userId = sanitize(nameValue);
-            addEntrytoTankDictionary(midTank);
-            tankRecordString += buildTankRecordString(midTank);
-          }
-
-          if (originalHigh && (!highTankRecord || (originalHigh.tankId != highTankRecord.tankId))) {
-            tankRecordString += removeTankFromSite(originalHigh, utcTime);
-          }
-          if (highTankRecord) {
-            let highTank = copyTankRecord(highTankRecord);
-            highTank.location = site;
-            highTank.updatedAt = utcTime;
-            highTank.pressure = parseInt(highPressure);
-            highTank.userId = sanitize(nameValue);
-            addEntrytoTankDictionary(highTank);
-            tankRecordString += buildTankRecordString(highTank);
-          }
-        }
-        else
-        {
-          if(ltsId && ltsPressure)
-          {
-            await offlineTankEntry(ltsId, parseInt(ltsPressure), site, utcTime, sanitize(nameValue))
-          }
-          if(lowId && lowPressure)
-          {
-            await offlineTankEntry(lowId, parseInt(lowPressure), site, utcTime, sanitize(nameValue))
-          }
-          if(midId && midPressure)
-          {
-            await offlineTankEntry(midId, parseInt(midPressure), site, utcTime, sanitize(nameValue))
-          }
-          if(highId && highPressure)
-          {
-            await offlineTankEntry(highId, parseInt(highPressure), site, utcTime, sanitize(nameValue))
-          }
-        }
-
-        console.log("sending add notes")
-        // send the request
-        const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
-        console.log("sending tank tracker")
-        const tankResult = await setTankTracker(tankRecordString);
+      low_cal: {
+        id: lowId,
+        value: lowValue,
+        unit: "ppm",
+        pressure: lowPressure,
+      },
+      mid_cal: {
+        id: midId,
+        value: midValue,
+        unit: "ppm",
+        pressure: midPressure,
+      },
+      high_cal: {
+        id: highId,
+        value: highValue,
+        unit: "ppm",
+        pressure: highPressure,
+      },
+      additional_notes: sanitize(notesValue),
+    };
+    const utcTime = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:${endSeconds}Z`;
+    if (networkStatus) {
+      if (
+        originalLts &&
+        (!ltsTankRecord || originalLts.tankId != ltsTankRecord.tankId)
+      ) {
+        tankRecordString += removeTankFromSite(originalLts, utcTime);
+      }
+      if (ltsTankRecord) {
+        tankRecordString += updateTank(ltsTankRecord, utcTime, ltsPressure);
+      }
+      if (
+        originalLow &&
+        (!lowTankRecord || originalLow.tankId != lowTankRecord.tankId)
+      ) {
+        tankRecordString += removeTankFromSite(originalLow, utcTime);
+      }
+      if (lowTankRecord) {
+        tankRecordString += updateTank(lowTankRecord, utcTime, lowPressure);
+      }
+      if (
+        originalMid &&
+        (!midTankRecord || originalMid.tankId != midTankRecord.tankId)
+      ) {
+        tankRecordString += removeTankFromSite(originalMid, utcTime);
+      }
+      if (midTankRecord) {
+        tankRecordString += updateTank(midTankRecord, utcTime, midPressure);
+      }
+      if (
+        originalHigh &&
+        (!highTankRecord || originalHigh.tankId != highTankRecord.tankId)
+      ) {
+        tankRecordString += removeTankFromSite(originalHigh, utcTime);
+      }
+      if (highTankRecord) {
+        tankRecordString += updateTank(highTankRecord, utcTime, highPressure);
+      }
+    } else {
+      if (ltsId && ltsPressure) {
+        await offlineTankEntry(
+          ltsId,
+          parseInt(ltsPressure),
+          site,
+          utcTime,
+          sanitize(nameValue)
+        );
+      }
+      if (lowId && lowPressure) {
+        await offlineTankEntry(
+          lowId,
+          parseInt(lowPressure),
+          site,
+          utcTime,
+          sanitize(nameValue)
+        );
+      }
+      if (midId && midPressure) {
+        await offlineTankEntry(
+          midId,
+          parseInt(midPressure),
+          site,
+          utcTime,
+          sanitize(nameValue)
+        );
+      }
+      if (highId && highPressure) {
+        await offlineTankEntry(
+          highId,
+          parseInt(highPressure),
+          site,
+          utcTime,
+          sanitize(nameValue)
+        );
+      }
+    }
+    // send the request
+    const result = await setSiteFile(
+      site,
+      buildNotes(data),
+      "updating notes from researchFlow"
+    );
+    const tankResult = await setTankTracker(tankRecordString);
 
     let instMaintResult;
     let instMaintResult2;
