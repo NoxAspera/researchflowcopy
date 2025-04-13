@@ -69,6 +69,7 @@ export default function SelectTank({ navigation }: NavigationType) {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.flexContainer}
+      contentContainerStyle={{ flexGrow: 1 }}
     >
       <View style={styles.container}>
         {/* Search Input */}
