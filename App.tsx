@@ -92,6 +92,7 @@ export default function App() {
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                   <InfoButton navigation={navigation} />
                   <NotificationsButton navigation={navigation} />
+                  <EmailButton navigation={navigation}/>
                   <SettingsButton />
                 </View>
               ),
@@ -123,6 +124,16 @@ export default function App() {
               })}
             />
             <Stack.Screen name="ContactInfo" component={ContactInfo}
+              options={({ navigation }) => ({
+                headerRight: () => (
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <NotificationsButton navigation={navigation} />
+                    <SettingsButton />
+                  </View>
+                ),
+              })}
+            />
+            <Stack.Screen name="EmailSetup" component={EmailSetup}
               options={({ navigation }) => ({
                 headerRight: () => (
                   <View style={{ flexDirection: "row", alignItems: "center" }}>

@@ -13,7 +13,7 @@ import TextInput from "./TextInput";
 import { customTheme } from "./CustomTheme";
 import { NavigationType } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
-import PopupProp from './Popup';
+import SuccessFailurePopup from "./SuccessFailurePopup";
 import { ThemeContext } from './ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { sendEmailNotification } from "../scripts/EmailNotifications";
@@ -97,12 +97,13 @@ export default function EmailSetup( { navigation }: NavigationType) {
 
           {/* text inputs */}
           {/* success/failure popup */}
-          <PopupProp popupText={message} 
-            popupColor={messageColor} 
-            onPress={() => setVisible(false)} 
+          <SuccessFailurePopup popupText={message} 
+            popupStatus={message} 
+            onPress={setVisible} 
             navigateHome={navigateHome} 
             visible={visible}
-            returnHome={returnHome}/>
+            returnHome={returnHome}
+          />
 
           {/* Name input */}
           <TextInput
