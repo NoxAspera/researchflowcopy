@@ -23,8 +23,8 @@ import {
 } from "@ui-kitten/components";
 import { NavigationType, routeProp } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
-import { setBadData, getBadDataFiles} from "../scripts/APIRequests";
-import PopupProp from "./Popup"
+import { setBadData, getBadDataFiles } from "../scripts/APIRequests";
+import SuccessFailurePopup from "./SuccessFailurePopup"
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from "./LoadingScreen";
 import { isConnected } from "../scripts/Helpers";
@@ -174,13 +174,13 @@ export default function BadData({ navigation }: NavigationType) {
     if (result.success) {
       setMessage("File updated successfully!");
       setMessageStatus("success");
-      retHome(true);
     } else {
       setMessage(
         `There was an error updating the file. Please update file manually.`
       );
       setMessageStatus("success");
     }
+    retHome(true);
     setTimeout(() => {
       setVisible(true);
       visibleRef.current = true;
@@ -188,7 +188,9 @@ export default function BadData({ navigation }: NavigationType) {
   };
 
   return (
-    <KeyboardAvoidingView behavior="padding" style={styles.container}>
+    <KeyboardAvoidingView 
+      behavior="padding" 
+      style={styles.container}>
       <ScrollView
         automaticallyAdjustKeyboardInsets={true}
         keyboardShouldPersistTaps="handled"
@@ -201,7 +203,7 @@ export default function BadData({ navigation }: NavigationType) {
           </Text>
 
           {/* success/failure popup */}
-          <PopupProp
+          <SuccessFailurePopup
             popupText={message}
             popupStatus={messageStatus}
             onPress={setVisible}

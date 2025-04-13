@@ -2,26 +2,35 @@
  * Tank Tracker
  * @author Blake Stambaugh, David Schiwal, Megan Ostlie, August O'Rourke
  * Updated 1/27/25
- * 
+ *
  * This page is responsible for tracking tank statuses. Will look at previous
  * data and determine when it will most likely run out and need replacement.
  */
-import { StyleSheet, KeyboardAvoidingView } from 'react-native';
-import React, { useEffect, useState, useRef } from 'react';
-import { useRoute } from '@react-navigation/native';
-import { Button, IndexPath, Layout, Text } from '@ui-kitten/components';
-import TextInput from './TextInput'
-import { NavigationType, routeProp } from './types'
-import { ScrollView } from 'react-native-gesture-handler';
-import PopupProp from './Popup';
-import { getLatestTankEntry, setTankTracker, TankRecord, addEntrytoTankDictionary, buildTankRecordString, offlineTankEntry } from '../scripts/APIRequests';
-import { isConnected } from '../scripts/Helpers';
-import { sanitize } from '../scripts/Parsers';
+import { StyleSheet, KeyboardAvoidingView } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { useRoute } from "@react-navigation/native";
+import { Button, IndexPath, Layout, Text } from "@ui-kitten/components";
+import TextInput from "./TextInput";
+import { NavigationType, routeProp } from "./types";
+import { ScrollView } from "react-native-gesture-handler";
+import SuccessFailurePopup from "./SuccessFailurePopup";
+import {
+  getLatestTankEntry,
+  setTankTracker,
+  TankRecord,
+  addEntrytoTankDictionary,
+  buildTankRecordString,
+  offlineTankEntry
+} from "../scripts/APIRequests";
+import { Float } from "react-native/Libraries/Types/CodegenTypes";
+import { customTheme } from "./CustomTheme";
 import LoadingScreen from "./LoadingScreen";
+import { isConnected } from "../scripts/Helpers";
+import { sanitize } from "../scripts/Parsers";
 
 export default function TankTracker({ navigation }: NavigationType) {
-    const route = useRoute<routeProp>();
-    let tank = route.params?.site;
+  const route = useRoute<routeProp>();
+  let tank = route.params?.site;
 
     // used for setting and remembering the input values
     const [networkStatus, setNetworkStatus] = useState(true)
@@ -47,8 +56,8 @@ export default function TankTracker({ navigation }: NavigationType) {
     let prevDate = "";
     let prevPressure = 0;
 
-    // used for loading screen
-    const [loadingValue, setLoadingValue] = useState(false);
+  // used for loading screen
+  const [loadingValue, setLoadingValue] = useState(false);
 
     // Autofills fields based on tank entry
     useEffect(() => {
@@ -75,19 +84,19 @@ export default function TankTracker({ navigation }: NavigationType) {
       fetchTank()
     }, [tank]);
 
-    const getCurrentUtcDateTime = () => {
-      const now = new Date();
-      const year = now.getUTCFullYear();
-      const month = String(now.getUTCMonth() + 1).padStart(2, "0");
-      const day = String(now.getUTCDate()).padStart(2, "0");
-      const hours = String(now.getUTCHours()).padStart(2, "0");
-      const minutes = String(now.getUTCMinutes()).padStart(2, "0");
-      const seconds = String(now.getUTCSeconds()).padStart(2, "0");
-  
-      // Format as "YYYY-MM-DDTHH:MM:SSZ"
-      const utcDateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
-      return utcDateTime;
-    };
+  const getCurrentUtcDateTime = () => {
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = String(now.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(now.getUTCDate()).padStart(2, "0");
+    const hours = String(now.getUTCHours()).padStart(2, "0");
+    const minutes = String(now.getUTCMinutes()).padStart(2, "0");
+    const seconds = String(now.getUTCSeconds()).padStart(2, "0");
+
+    // Format as "YYYY-MM-DDTHH:MM:SSZ"
+    const utcDateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
+    return utcDateTime;
+  };
 
     // Builds new tank entry with updated values
     const buildTankEntry = (): TankRecord => {
@@ -133,13 +142,15 @@ export default function TankTracker({ navigation }: NavigationType) {
         userId: sanitize(nameValue),
         fillId: sanitize(fillIDValue)
     };
-      return newEntry;
-    };
+    return newEntry;
+  };
 
     // Checks if certain fields are missing
     const handleSubmit = () => {
       if (!nameValue || !locationValue || !PSIValue) {
-        setMessage("Please make sure Name, Location, and PSI are filled out before submitting.");
+        setMessage(
+          "Please make sure Name, Location, and PSI are filled out before submitting."
+        );
         setMessageStatus("danger");
         setVisible(true);
         return;
@@ -182,63 +193,68 @@ export default function TankTracker({ navigation }: NavigationType) {
            }, 100);
     }
 
-    //method to navigate home to send to popup so it can happen after dismiss button is clicked
-    function navigateHome(nav:boolean){
-      if(nav){
-        navigation.navigate("Home")
-      }
+  //method to navigate home to send to popup so it can happen after dismiss button is clicked
+  function navigateHome(nav: boolean) {
+    if (nav) {
+      navigation.navigate("Home");
     }
+  }
 
-    return (
-      <KeyboardAvoidingView
-                  behavior = "padding"
-                  style={{flex: 1}}>
-          <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1 }}>
-            <Layout style={styles.container} level="1">
-              
-              {/* header */}
-              <Text category="h1" style={{ textAlign: "center" }}>
-                {tank}
-              </Text>
+  return (
+    <KeyboardAvoidingView 
+    behavior="padding" 
+    style={{flex: 1}}>
+      <ScrollView
+        automaticallyAdjustKeyboardInsets={true}
+        keyboardShouldPersistTaps="handled"
+        style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
+        <Layout style={styles.container} level="1">
+          {/* header */}
+          <Text category="h1" style={{ textAlign: "center" }}>
+            {tank}
+          </Text>
 
-              {/* loading screen */}
-              <LoadingScreen visible={loadingValue} />
+          {/* loading screen */}
+          <LoadingScreen visible={loadingValue} />
 
-              {/* success/failure popup */}
-              <PopupProp popupText={message} 
-                popupStatus={messageStatus} 
-                onPress={setVisible} 
-                navigateHome={navigateHome} 
-                visible={visible}
-                returnHome={returnHome}
-              />
+          {/* success/failure popup */}
+          <SuccessFailurePopup
+            popupText={message}
+            popupStatus={messageStatus}
+            onPress={setVisible}
+            navigateHome={navigateHome}
+            visible={visible}
+            returnHome={returnHome}
+          />
 
-            {/* Name input */}
-            <TextInput
-              labelText="Name"
-              labelValue={nameValue}
-              onTextChange={setNameValue}
-              placeholder="First Last"
-              style={styles.textInput}
-            />
+          {/* Name input */}
+          <TextInput
+            labelText="Name"
+            labelValue={nameValue}
+            onTextChange={setNameValue}
+            placeholder="First Last"
+            style={styles.textInput}
+          />
 
-              {/* FillID input */}
-              <TextInput
-                labelText="Fill ID"
-                labelValue={fillIDValue}
-                onTextChange={setFillIDValue}
-                placeholder="ID"
-                style={styles.textInput}
-              />
+          {/* FillID input */}
+          <TextInput
+            labelText="Fill ID"
+            labelValue={fillIDValue}
+            onTextChange={setFillIDValue}
+            placeholder="ID"
+            style={styles.textInput}
+          />
 
-              {/* Location input */}
-              <TextInput
-                labelText="Location"
-                labelValue={locationValue}
-                onTextChange={setLocationValue}
-                placeholder="Enter location"
-                style={styles.textInput}
-              />
+          {/* Location input */}
+          <TextInput
+            labelText="Location"
+            labelValue={locationValue}
+            onTextChange={setLocationValue}
+            placeholder="Enter location"
+            style={styles.textInput}
+          />
 
               {/* PSI input */}
               <TextInput
@@ -267,47 +283,48 @@ export default function TankTracker({ navigation }: NavigationType) {
                 style={styles.textInput}
               />
 
-            {/* notes entry */}
-            <TextInput
-              labelText="Notes"
-              labelValue={notesValue}
-              onTextChange={setNotesValue}
-              placeholder="Notes"
-              style={styles.reasonText}
-            />
+          {/* notes entry */}
+          <TextInput
+            labelText="Notes"
+            labelValue={notesValue}
+            onTextChange={setNotesValue}
+            placeholder="Notes"
+            style={styles.reasonText}
+          />
 
-              {/* submit button */}
-              <Button
-                onPress={() => handleSubmit()}
-                appearance="filled"
-                status="primary"
-                style={styles.submitButton}
-              >
-              {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Submit</Text>}
-              </Button>
-            </Layout>
-          </ScrollView>
-      </KeyboardAvoidingView>
-    );
-  }
+          {/* submit button */}
+          <Button
+            onPress={() => handleSubmit()}
+            appearance="filled"
+            status="primary"
+            style={styles.submitButton}
+          >
+            {(evaProps) => (
+              <Text {...evaProps} category="h6" style={{ color: "black" }}>
+                Submit
+              </Text>
+            )}
+          </Button>
+        </Layout>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      flexDirection: "column",
-      alignItems: 'stretch',        // has button fill space horizontally
-      justifyContent: 'flex-start',
-    },
-    reasonText: {
-      flex: 1,
-      margin: 8
-    },
-    textInput: {
-      flex: 1,
-      margin: 8
-    },
-    submitButton:{
-      margin: 20, 
-      backgroundColor: "#06b4e0",
-    },
-});
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "stretch", // has button fill space horizontally
+    justifyContent: "flex-start",
+  },
+  reasonText: {
+    margin: 8,
+  },
+  textInput: {
+    margin: 8,
+  },
+  submitButton: {
+    margin: 20,
+    backgroundColor: "#06b4e0",
+  },
+})

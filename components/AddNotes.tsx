@@ -42,11 +42,13 @@ import {
   buildTankRecordString,
 } from "../scripts/APIRequests";
 import { ParsedData } from "../scripts/Parsers";
-import PopupProp from "./Popup";
+import SuccessFailurePopup from './SuccessFailurePopup';
+import MissingInputPopup from './MissingInputPopup';
 import PopupProp2Button from "./Popup2Button";
 import { NavigationType, routeProp } from "./types";
 import { ThemeContext } from "./ThemeContext";
 import LoadingScreen from "./LoadingScreen";
+import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { TimerPickerModal } from "react-native-timer-picker";
 import { isConnected, daysUntilEmpty } from "../scripts/Helpers";
 import VisitPopupProp from "./VisitPopup";
@@ -876,18 +878,17 @@ export default function AddNotes({ navigation }: NavigationType) {
             {site}
           </Text>
 
-          {/* success/failure popup */}
-          <PopupProp
-            popupText={message}
-            popupStatus={messageStatus}
+            {/* success/failure popup */}
+            <SuccessFailurePopup popupText={message}
+            popupStatus={messageStatus} 
             onPress={setVisible}
             navigateHome={navigateHome}
             visible={visible}
             returnHome={returnHome}
           />
 
-          {/* popup if user has missing input */}
-          <PopupProp2Button
+            {/* popup if user has missing input */}
+            <MissingInputPopup
             sendData={handleUpdate}
             removePopup={setVisible2}
             visible={visible2}

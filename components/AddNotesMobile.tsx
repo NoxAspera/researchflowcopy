@@ -43,8 +43,8 @@ import {
   buildTankRecordString,
 } from "../scripts/APIRequests";
 import { processNotes, ParsedData, copyTankRecord, sanitize } from "../scripts/Parsers";
-import PopupProp from "./Popup";
-import PopupProp2Button from "./Popup2Button";
+import SuccessFailurePopup from './SuccessFailurePopup';
+import MissingInputPopup from './MissingInputPopup';
 import { NavigationType, routeProp } from "./types";
 import { ThemeContext } from "./ThemeContext";
 import LoadingScreen from "./LoadingScreen";
@@ -534,18 +534,17 @@ export default function AddNotes({ navigation }: NavigationType) {
           {/* loading screen */}
           <LoadingScreen visible={loadingValue} />
 
-          {/* success/failure popup */}
-          <PopupProp
-            popupText={message}
-            popupStatus={messageStatus}
-            onPress={setVisible}
-            navigateHome={navigateHome}
+            {/* success/failure popup */}
+            <SuccessFailurePopup popupText={message} 
+            popupStatus={messageStatus} 
+            onPress={setVisible} 
+            navigateHome={navigateHome} 
             visible={visible}
             returnHome={returnHome}
           />
 
-          {/* popup if user has missing input */}
-          <PopupProp2Button
+            {/* popup if user has missing input */}
+            <MissingInputPopup 
             sendData={handleUpdate}
             removePopup={setVisible2}
             visible={visible2}

@@ -1,6 +1,6 @@
 /**
  * Loading Screen
- * By Blake Stambaugh, August O'Rourke
+ * @author Blake Stambaugh, August O'Rourke
  * 4/10/2025
  * 
  * The loading screen component that appears when the user submits to github

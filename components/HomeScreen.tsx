@@ -6,7 +6,7 @@
  * The follow code represents the home page the user sees when they first launch our app.
  * It has a button for each section of the app that will take them to the next page.
  **/
-import { ScrollView, StyleSheet} from "react-native";
+import { StyleSheet, ScrollView} from "react-native";
 import HomeButtonProp from "./HomeButtonProp";
 import { Layout } from "@ui-kitten/components";
 import React, { useState, useEffect } from 'react';
