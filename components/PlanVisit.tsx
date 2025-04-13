@@ -10,12 +10,11 @@ import React, { useState, useRef, useEffect } from "react";
 import { useRoute } from "@react-navigation/native";
 import { Button, Layout, Datepicker, Text, Card } from "@ui-kitten/components";
 import TextInput from "./TextInput";
-import { customTheme } from "./CustomTheme";
 import { NavigationType, routeProp } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
 import { ThemeContext } from "./ThemeContext";
 import { visit, setVisitFile, getFileContents } from "../scripts/APIRequests";
-import PopupProp from './Popup';
+import SuccessFailurePopup from './SuccessFailurePopup';
 import LoadingScreen from "./LoadingScreen";
 import { sanitize } from "../scripts/Parsers";
 
@@ -129,11 +128,11 @@ export default function PlanVisit({ navigation }: NavigationType) {
     if (result.success) {
         setMessage("Visit planned successfully!");
         setMessageStatus("success");
-        retHome(true);
       } else {
         setMessage(`Error: ${result.error}`);
         setMessageStatus("danger");
       }
+      retHome(true);
       setTimeout(() => {
         setVisible(true);
         visibleRef.current = true;
@@ -153,7 +152,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
           </Text>
 
           {/* success/failure popup */}
-          <PopupProp popupText={message} 
+          <SuccessFailurePopup popupText={message} 
             popupStatus={messageStatus} 
             onPress={setVisible} 
             navigateHome={navigateHome} 
@@ -239,7 +238,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
     alignItems: "stretch", // has button fill space horizontally
-    justifyContent: "space-evenly",
+    justifyContent: "flex-start",
   },
   reasonText: {
     margin: 8,

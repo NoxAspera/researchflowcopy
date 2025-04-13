@@ -1,3 +1,9 @@
+/** Calendar Screen
+ * @author August O'Rourke
+ * Last Updated 4/10/25
+ * 
+ * This is the screen that pops up after the user selects "Calendar"
+ */
 import { StyleSheet, Dimensions } from "react-native";
 import HomeButtonProp from "./HomeButtonProp";
 import { Layout } from "@ui-kitten/components";
@@ -6,26 +12,25 @@ import { NavigationType } from "./types";
 const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
 import { getFileContents, visit } from "../scripts/APIRequests";
 import { processVisits } from "../scripts/Parsers";
-import { Calendar} from "react-native-calendars";
+import { Calendar } from "react-native-calendars";
 import { customTheme } from './CustomTheme';
-import * as Network from "expo-network"
+import { isConnected } from "../scripts/Helpers";
 
 let visitDict: Map<string, visit[]>
 
-let online = false
 
 export default function CalendarScreen({ navigation }: NavigationType) {
   const [markedDates, setMarkedDates] = useState({});
   const [visible, setVisible] = useState(false);
   const [messageColor, setMessageColor] = useState("");
   const [message, setMessage] = useState("");
+  const [networkStatus, setNetworkStatus] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try{
-        let check = await (Network.getNetworkStateAsync())
-        online = check.isConnected
-        if(check.isConnected)
+        setNetworkStatus(await isConnected())
+        if(networkStatus)
         {
           let response = await getFileContents("researchflow_data/visits")
           if (response.success)
@@ -38,7 +43,6 @@ export default function CalendarScreen({ navigation }: NavigationType) {
                 let temp = visitDict.get(value.date)
                 temp.push(value)
                 visitDict.set(value.date,temp)
-                console.log("overlap")
               }
               else
               {
@@ -50,7 +54,6 @@ export default function CalendarScreen({ navigation }: NavigationType) {
                 setMarkedDates(prevmarkedDates => ({...prevmarkedDates,[value.date] :{marked: true, dotColor: 'blue'}}))
               }
             })
-            //console.log(visitDict.size)
           }
           else
           {
@@ -62,7 +65,7 @@ export default function CalendarScreen({ navigation }: NavigationType) {
       }
       catch(error)
       {
-        console.log(error)
+        console.error(error)
       }
     }
     fetchData();
@@ -80,7 +83,8 @@ export default function CalendarScreen({ navigation }: NavigationType) {
         />
         <Calendar
           onDayPress={Date => {
-            if (online && visitDict.has(Date.dateString)){
+            if (networkStatus && visitDict.has(Date.dateString)){
+
               navigation.push("ViewNotes", {site: "", from: "Calendar", visits: visitDict.get(Date.dateString)})
             }
           }}
