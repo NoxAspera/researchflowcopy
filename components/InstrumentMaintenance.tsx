@@ -27,7 +27,7 @@ import {
 } from "../scripts/APIRequests";
 import { ScrollView } from "react-native-gesture-handler";
 import { ThemeContext } from "./ThemeContext";
-import PopupProp from "./Popup";
+import SuccessFailurePopup from "./SuccessFailurePopup";
 import LoadingScreen from "./LoadingScreen";
 import DateTimePicker, {
   DateTimePickerAndroid,
@@ -258,7 +258,9 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   }
 
   return (
-    <KeyboardAvoidingView behavior="padding" style={styles.container}>
+    <KeyboardAvoidingView 
+      behavior="padding" 
+      style={styles.container}>
       <ScrollView
         automaticallyAdjustKeyboardInsets={true}
         keyboardShouldPersistTaps="handled"
@@ -271,7 +273,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
           {/* text inputs */}
           {/* success/failure popup */}
-          <PopupProp
+          <SuccessFailurePopup
             popupText={message}
             popupStatus={messageStatus}
             onPress={() => setVisible(false)}
@@ -283,7 +285,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
           {/* loading screen */}
           <LoadingScreen visible={loadingValue} />
 
-          {/* Time input */}
+          {/* Location input */}
           {needsLocation && (
             <TextInput
               labelText="Location"
@@ -580,15 +582,16 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: "column",
     alignItems: "stretch", // has button fill space horizontally
     justifyContent: "flex-start",
   },
   requestText: {
-    flex: 1,
+    // flex: 1,
     margin: 15,
   },
   textInput: {
-    flex: 1,
+    // flex: 1,
     margin: 15,
   },
   submitButton: {
@@ -609,7 +612,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
   },
   androidDateTime: {
+    // flex: 1,
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "flex-end",
   },
 });
