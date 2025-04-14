@@ -27,7 +27,7 @@ export default function SettingsButton() {
         size="large"
         style={{ marginHorizontal: -10 }}
       />
-      <SettingsPage visibility={visible} onPress={setVisible} />
+      <SettingsPage visibility={visible} onPress = {setVisible}/>
     </View>
   );
 }

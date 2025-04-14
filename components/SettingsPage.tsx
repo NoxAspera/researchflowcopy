@@ -23,7 +23,6 @@ const SettingsPage: React.FC<SettingsPageProp> = ({ visibility, onPress }) => {
   };
 
   return (
-    <Layout testID="Background">
       <Modal
         testID="SettingsPage"
         backdropStyle={styles.backdrop}
@@ -42,10 +41,8 @@ const SettingsPage: React.FC<SettingsPageProp> = ({ visibility, onPress }) => {
           >
             Enable Dark Mode
           </Toggle>
-          
         </Card>
       </Modal>
-    </Layout>
   );
 };
 

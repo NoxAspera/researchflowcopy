@@ -98,7 +98,14 @@ export default function App() {
               ),
             })}
           >
-            <Stack.Screen name="Login" component={Auth} />
+            <Stack.Screen name="Login" component={Auth} 
+              options={({ navigation }) => ({
+                headerRight: () => (
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <InfoButton navigation={navigation} />
+                  </View>
+                ),
+              })}/>
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="SelectSite" component={SelectSite} />
             <Stack.Screen name="AddNotes" component={AddNotes} />
@@ -117,8 +124,9 @@ export default function App() {
               options={({ navigation }) => ({
                 headerRight: () => (
                   <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <SettingsButton/>
                     <InfoButton navigation={navigation} />
-                    <SettingsButton />
+                    <EmailButton navigation={navigation}/>
                   </View>
                 ),
               })}
@@ -128,7 +136,8 @@ export default function App() {
                 headerRight: () => (
                   <View style={{ flexDirection: "row", alignItems: "center" }}>
                     <NotificationsButton navigation={navigation} />
-                    <SettingsButton />
+                    <EmailButton navigation={navigation}/>
+                    <SettingsButton/>
                   </View>
                 ),
               })}
@@ -138,7 +147,8 @@ export default function App() {
                 headerRight: () => (
                   <View style={{ flexDirection: "row", alignItems: "center" }}>
                     <NotificationsButton navigation={navigation} />
-                    <SettingsButton />
+                    <SettingsButton/>
+                    <InfoButton navigation={navigation} />
                   </View>
                 ),
               })}
