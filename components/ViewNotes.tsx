@@ -14,7 +14,6 @@ import { Entry } from '../scripts/Parsers';
 import { customTheme } from './CustomTheme';
 import { ScrollView } from 'react-native-gesture-handler';
 import { NavigationType, routeProp } from './types'
-import LoadingScreen from './LoadingScreen';
 
 
 function retrieveHeader(site: string)
@@ -32,11 +31,6 @@ export default function ViewNotes({navigation }: NavigationType) {
   let site = route.params?.site;
   let from = route.params?.from;
   let visits = route.params?.visits;
-  let notes: Entry[] = [];
-
-  const [visible, setVisible] = useState(false);
-  const [messageColor, setMessageColor] = useState("");
-  const [message, setMessage] = useState("");
 
   const [data, setData] = useState<string[] | null>(null);
 
@@ -70,9 +64,7 @@ export default function ViewNotes({navigation }: NavigationType) {
                 .split(new RegExp("(___|---)"))
             );
           } else {
-            setMessage(`Error: ${parsedData.error}`);
-            setMessageColor(customTheme["color-danger-700"]);
-            setVisible(true);
+            console.error(parsedData.error);
           }
         } catch (error) {
           console.error("Error retreiveing  notes:", error);

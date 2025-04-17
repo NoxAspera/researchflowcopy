@@ -23,10 +23,6 @@ import { parseVisits, VisitList } from '../scripts/Parsers'
  * @returns The view notifications page in our app
  */
 export default function ViewNotifications({ navigation }: NavigationType) {
-  const route = useRoute<routeProp>();
-  let site = route.params?.site;
-  let notes: Entry[] = [];
-
   // State to hold parsed data
   const [data, setData] = useState<VisitList>(null);
   // Get current visits
@@ -107,8 +103,8 @@ export default function ViewNotifications({ navigation }: NavigationType) {
 }
 /**
  * @author Megan Ostlie
- *  a function that pulls the current note document for the specified site from GitHub
- *  @param siteName the name of the site
+ * a function that pulls the current note document for the specified site from GitHub
+ * @param siteName the name of the site
  * 
  * @returns a VisitsList object that contains the information of the given document
  */

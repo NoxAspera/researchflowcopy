@@ -9,8 +9,7 @@
  */
 import { Button, Card, Icon, Layout, Modal, Text } from '@ui-kitten/components';
 import React, { useContext } from 'react'
-import { StyleSheet, ColorValue, useColorScheme } from "react-native"
-import { customTheme } from './CustomTheme';
+import { StyleSheet } from "react-native"
 import { ThemeContext } from './ThemeContext';
 
 interface PUProp{

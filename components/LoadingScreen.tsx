@@ -1,6 +1,6 @@
 /**
  * Loading Screen
- * By Blake Stambaugh
+ * @author Blake Stambaugh
  * 2/18/2025
  * 
  * The loading screen component that appears when the user submits to github
@@ -14,7 +14,6 @@ import { StyleSheet} from "react-native";
 interface LoadingScreenProp {
     visible: boolean;
     loadingText?: string
-    // onPress: (arg0: boolean) => void;
 }
 
 const LoadingScreen: React.FC<LoadingScreenProp> = ({ visible, loadingText }) => {

@@ -101,7 +101,6 @@ function getTimeBetweenDates(date1, date2) {
 function daysUntilEmpty(prevPress, prevDate, currPress, currDate) {
   // get change of pressure over time, assume it is linear
   let changeOfPress = currPress - prevPress;
-  console.log(`${currPress} - ${prevPress} = ${changeOfPress}`);
 
   // if change of pressure is positive, then it got replaced, no need to check date
   // if change of pressure is 0, then there is no need to check date bc nothing has changed
@@ -113,7 +112,6 @@ function daysUntilEmpty(prevPress, prevDate, currPress, currDate) {
   let currTime = new Date(currDate);
   let prevTime = new Date(prevDate);
   let changeOfDate = getTimeBetweenDates(prevTime, currTime).days; // get the difference of time in days
-  console.log(`Days between: ${changeOfDate}`);
 
   // if changeOfDate is 0, then the previous entry was also made today
   if (changeOfDate == 0) {
@@ -121,7 +119,6 @@ function daysUntilEmpty(prevPress, prevDate, currPress, currDate) {
   }
   
   let rateOfDecay = changeOfPress / changeOfDate; // measured in psi lost per day
-  console.log(`Rate of decay: ${changeOfPress} / ${changeOfDate} = ${rateOfDecay}`);
 
   // solve for when the tank should be under 500 psi
   let days = Math.trunc((-prevPress / rateOfDecay) - changeOfDate);
@@ -131,8 +128,6 @@ function daysUntilEmpty(prevPress, prevDate, currPress, currDate) {
 export default function Diagnostics({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   let site = route.params?.site;
-  const themeContext = React.useContext(ThemeContext);
-  const isDarkMode = themeContext.theme === 'dark';
   let siteName = site;
   if (site.includes("mobile/")) {
     siteName = site.replace("mobile/", "");

@@ -18,11 +18,6 @@ export default function SelectTank({navigation}: NavigationType) {
   const route = useRoute<routeProp>();
   const onSelect = route.params?.onSelect; // Get the onSelect function if passed
 
-  // previous buttons hit, used to know where to go next
-  let from = route.params?.from;
-  const [visible, setVisible] = useState(false);
-  const [messageColor, setMessageColor] = useState("");
-  const [message, setMessage] = useState("");
   // State to hold the list of site names
   const [tankNames, setTankNames] = useState<string[]>();
   const [searchQuery, setSearchQuery] = useState<string>(""); // Search input state
@@ -33,7 +28,6 @@ export default function SelectTank({navigation}: NavigationType) {
     const fetchTankNames = async () => {
       try {
         const tanks = getTankList(); // Ensure getTankList is returning a valid list
-        //console.log(tanks)
         const validTanks = tanks.filter(tank => tank && tank.trim() !== "");
         setTankNames(validTanks);
         setFilteredTanks(validTanks); // Initialize filtered list

@@ -13,14 +13,12 @@ import { useRoute } from "@react-navigation/native";
 import TextInput from "./TextInput";
 import NoteInput from "./NoteInput";
 import { Button, Layout, Text, Datepicker, Select, SelectItem, IndexPath,} from "@ui-kitten/components";
-import { customTheme } from "./CustomTheme";
 import { NavigationType, routeProp } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
-import { setBadData, getBadDataFiles, getDirectory } from "../scripts/APIRequests";
+import { setBadData, getBadDataFiles } from "../scripts/APIRequests";
 import PopupProp from "./Popup"
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from "./LoadingScreen";
-import * as Network from 'expo-network'
 import { sanitize } from "../scripts/Parsers";
 
 export default function BadData({ navigation }: NavigationType) {
@@ -110,10 +108,9 @@ export default function BadData({ navigation }: NavigationType) {
 
   // used for determining if PUT request was successful
   // will set the success/fail notification to visible, aswell as the color and text
-  const [visible, setVisible] = useState(false);
+  const [successFailureVisible, setSuccessFailureVisible] = useState(false);
   const [messageStatus, setMessageStatus] = useState("");
   const [message, setMessage] = useState("");
-  const [visible2, setVisible2] = useState(false);
   const [returnHome, retHome] = useState(false);
   const visibleRef = useRef(false);
 
@@ -131,14 +128,14 @@ export default function BadData({ navigation }: NavigationType) {
       //alert("Please fill out all fields before submitting.");
       setMessage("Please fill out all fields before submitting.");
       setMessageStatus("danger");
-      setVisible(true);
+      setSuccessFailureVisible(true);
       return;
     }
     if (!validateTime(startTimeValue) || !validateTime(endTimeValue)) {
       //alert("Please make sure time entries follow the HH:MM:SS format");
       setMessage("Please make sure time entries follow the HH:MM:SS format.");
       setMessageStatus("danger");
-      setVisible(true);
+      setSuccessFailureVisible(true);
       return;
     }
     handleUpdate();
@@ -168,7 +165,7 @@ export default function BadData({ navigation }: NavigationType) {
       setMessageStatus("success");
     }
     setTimeout(() => {
-      setVisible(true);
+      setSuccessFailureVisible(true);
       visibleRef.current = true;
     }, 100);
   };
@@ -189,9 +186,9 @@ export default function BadData({ navigation }: NavigationType) {
           <PopupProp
             popupText={message}
             popupStatus={messageStatus}
-            onPress={setVisible}
+            onPress={setSuccessFailureVisible}
             navigateHome={navigateHome} 
-            visible={visible}
+            visible={successFailureVisible}
             returnHome={returnHome}
           />
 

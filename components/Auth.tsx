@@ -1,6 +1,6 @@
 /**
  * Login Page
- * By Blake Stambaugh
+ * @author Blake Stambaugh
  * 12/2/2024
  * 
  * This is the login page for the app. As of 12/2, it just has a text input
@@ -8,7 +8,7 @@
  * a later update.
  */
 import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { Button, Layout, Text } from '@ui-kitten/components';
 import TextInput from './TextInput'
@@ -33,7 +33,6 @@ export default function Login({ navigation }: NavigationType) {
     {
       setLoadingValue(true)
       let check = (await Network.getNetworkStateAsync()).isConnected
-      //console.log(check)
       if(check)
         {
           setLoadingText("Registering Tanks")

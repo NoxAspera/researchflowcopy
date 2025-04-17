@@ -10,7 +10,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { useRoute } from "@react-navigation/native";
 import { Button, Layout, Datepicker, Text, Card } from "@ui-kitten/components";
 import TextInput from "./TextInput";
-import { customTheme } from "./CustomTheme";
 import { NavigationType, routeProp } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
 import { ThemeContext } from "./ThemeContext";
@@ -68,7 +67,6 @@ export default function PlanVisit({ navigation }: NavigationType) {
     async function fetchData() {
       if (site && !data && route) {
         try {
-          console.log(`${site}\n`);
           const parsedData = await getFileContents(`/site_notes/${site}`);
           if (parsedData.success) {
             let fileContent = parsedData.data;
@@ -93,7 +91,7 @@ export default function PlanVisit({ navigation }: NavigationType) {
                 .split(new RegExp("(___|---)"))
             );
           } else {
-            console.log("Error getting notes: ", );
+            console.error("Error getting notes: ", );
           }
         } catch (error) {
           console.error("Error retreiveing  notes:", error);

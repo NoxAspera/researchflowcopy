@@ -13,8 +13,7 @@ import { ScrollView, Pressable } from 'react-native-gesture-handler';
 import { buildMobileNotes, MobileEntry } from '../scripts/Parsers';
 import TextInput from './TextInput'
 import NoteInput from './NoteInput'
-import { Layout, Button, Text, Select, SelectItem, IndexPath, CheckBox, Icon, DateService } from '@ui-kitten/components';
-import { customTheme } from './CustomTheme'
+import { Layout, Button, Text, Select, SelectItem, IndexPath, CheckBox, Icon } from '@ui-kitten/components';
 import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile, setBadData, offlineTankEntry, buildTankRecordString } from '../scripts/APIRequests';
 import { parseNotes, ParsedData, copyTankRecord } from '../scripts/Parsers'
 import PopupProp from './Popup';
@@ -110,7 +109,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     };
 
     const route = useRoute<routeProp>();
-    const { site, info } = route.params || {}
+    const { site } = route.params || {}
     const themeContext = React.useContext(ThemeContext);
     const isDarkMode = themeContext.theme === 'dark';
 

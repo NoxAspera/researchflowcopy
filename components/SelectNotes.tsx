@@ -7,20 +7,13 @@
  * maintenance notes
  */
 import { StyleSheet } from 'react-native';
-import React, { useState } from 'react';
-import { useRoute } from '@react-navigation/native';
+import React from 'react';
 import { Layout, Button, Text } from '@ui-kitten/components';
-import { NavigationType, routeProp } from './types'
+import { NavigationType } from './types'
 import { ScrollView } from 'react-native-gesture-handler';
 
 
 export default function SelectSite({navigation}: NavigationType) {
-  // type routeProp = RouteProp<{params: RouteParams}, 'params'>;
-  const route = useRoute<routeProp>();
-
-  // previous buttons hit, used to know where to go next
-  let from = route.params?.from;
-
   // data for buttons
   let buttonData = [
       { id: 1, label: 'Site Notes', onPress: () => handleConfirm('ViewNotes')},

@@ -59,7 +59,6 @@ const SettingsPage: React.FC<SettingsPageProp> = ({ visibility, onPress }) => {
       flex: 1,
       flexDirection: 'row',
       alignItems: 'flex-start',
-      // paddingTop: '5%'
     }
   });
 

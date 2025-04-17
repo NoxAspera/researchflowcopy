@@ -12,7 +12,6 @@ import { useRoute } from "@react-navigation/native";
 import { Button, Layout, Text, CheckBox, Icon } from "@ui-kitten/components";
 import TextInput from "./TextInput";
 import NoteInput from "./NoteInput";
-import { customTheme } from "./CustomTheme";
 import { NavigationType, routeProp } from "./types";
 import {setInstrumentFile, getInstrumentSite, setBadData} from "../scripts/APIRequests";
 import { ScrollView } from "react-native-gesture-handler";

@@ -13,7 +13,6 @@ import { buildNotes, copyTankRecord, Entry } from '../scripts/Parsers';
 import TextInput from './TextInput'
 import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text, Icon, CheckBox } from '@ui-kitten/components';
-import { customTheme } from './CustomTheme'
 import { setSiteFile, getFileContents, getLatestTankEntry, offlineTankEntry, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData, buildTankRecordString } from '../scripts/APIRequests';
 import { parseNotes, ParsedData, sanitize } from '../scripts/Parsers'
 import PopupProp from './Popup';
@@ -60,7 +59,7 @@ async function isConnected()
 export default function AddNotes({ navigation }: NavigationType) {
     
     const route = useRoute<routeProp>();
-    const { site, info } = route.params || {}
+    const { site } = route.params || {}
     const themeContext = React.useContext(ThemeContext);
     const isDarkMode = themeContext.theme === 'dark';
 
@@ -245,7 +244,6 @@ export default function AddNotes({ navigation }: NavigationType) {
     function daysUntilEmpty(prevPress, prevDate, currPress) {
       // get change of pressure over time, assume it is linear
       let changeOfPress = currPress - prevPress;
-      console.log(`${currPress} - ${prevPress} = ${changeOfPress}`);
 
       // if change of pressure is positive, then it got replaced, no need to check date
       // if change of pressure is 0, then there is no need to check date bc nothing has changed
@@ -257,7 +255,6 @@ export default function AddNotes({ navigation }: NavigationType) {
       let currTime = endDateValue;
       let prevTime = new Date(prevDate);
       let changeOfDate = getTimeBetweenDates(prevTime, currTime).days; // get the difference of time in days
-      console.log(`Days between: ${changeOfDate}`);
 
       // if changeOfDate is 0, then the previous entry was also made today
       if (changeOfDate == 0) {
@@ -265,7 +262,6 @@ export default function AddNotes({ navigation }: NavigationType) {
       }
       
       let rateOfDecay = changeOfPress / changeOfDate; // measured in psi lost per day
-      console.log(`Rate of decay: ${changeOfPress} / ${changeOfDate} = ${rateOfDecay}`);
 
       // solve for when the tank should be under 500 psi
       let days = Math.trunc((-prevPress / rateOfDecay) - changeOfDate);

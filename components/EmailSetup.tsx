@@ -10,17 +10,13 @@ import { StyleSheet, KeyboardAvoidingView } from "react-native";
 import React, { useState} from "react";
 import { Button, Layout, Text } from "@ui-kitten/components";
 import TextInput from "./TextInput";
-import { customTheme } from "./CustomTheme";
 import { NavigationType } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
 import PopupProp from './Popup';
-import { ThemeContext } from './ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { sendEmailNotification } from "../scripts/EmailNotifications";
 
 export default function EmailSetup( { navigation }: NavigationType) {
-  const themeContext = React.useContext(ThemeContext);
-
   // used for setting and remembering the input values
   const [emailValue, setEmailValue] = useState("");
   const [nameValue, setNameValue] = useState("");
@@ -30,7 +26,6 @@ export default function EmailSetup( { navigation }: NavigationType) {
   const [visible, setVisible] = useState(false);
   const [messageColor, setMessageColor] = useState("");
   const [message, setMessage] = useState("");
-  const [returnHome, retHome] = useState(false);
 
   /**
    * @author David Schiwal
@@ -62,7 +57,7 @@ export default function EmailSetup( { navigation }: NavigationType) {
   function handleSubmit() {
     if (!emailValue) {
       setMessage("Please fill out all fields before submitting.");
-      setMessageColor(customTheme["color-danger-700"]);
+      setMessageColor("danger");
       setVisible(true);
       return;
     }
@@ -98,11 +93,11 @@ export default function EmailSetup( { navigation }: NavigationType) {
           {/* text inputs */}
           {/* success/failure popup */}
           <PopupProp popupText={message} 
-            popupColor={messageColor} 
+            popupStatus={messageColor} 
             onPress={() => setVisible(false)} 
             navigateHome={navigateHome} 
             visible={visible}
-            returnHome={returnHome}/>
+            returnHome={false}/>
 
           {/* Name input */}
           <TextInput

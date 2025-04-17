@@ -9,28 +9,24 @@
 import { StyleSheet, ScrollView, Dimensions, Linking, Platform, PermissionsAndroid } from "react-native";
 import HomeButtonProp from "./HomeButtonProp";
 import { Layout } from "@ui-kitten/components";
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { NavigationType } from "./types";
-//const { width, height } = Dimensions.get("window"); //this pulls in the screen width and height to use for scalars
-import {updateDirectories, tankTrackerOffline, readUpdates, tankTrackerSpinUp} from '../scripts/APIRequests';
-import NoteInput from './NoteInput'
-import LoadingScreen from './LoadingScreen';
-import * as Network from 'expo-network'
+import { tankTrackerSpinUp } from '../scripts/APIRequests';
 
 export default function HomeScreen({ navigation }: NavigationType) {
   tankTrackerSpinUp()
 
-  const openURL = async () => {
-    const url =
-    "https://air.utah.edu/s/diagnostics/?_inputs_&remove_failed_qc=false&color_by=%22QAQC_Flag%22&dates=%5B%222025-02-20%22%2C%222025-03-06%22%5D&column=%22%22&lvl=%22%22&instrument=%22%22&stid=%22%22&submit=0&sidebarCollapsed=false&sidebarItemExpanded=null";
+  // const openURL = async () => {
+  //   const url =
+  //   "https://air.utah.edu/s/diagnostics/?_inputs_&remove_failed_qc=false&color_by=%22QAQC_Flag%22&dates=%5B%222025-02-20%22%2C%222025-03-06%22%5D&column=%22%22&lvl=%22%22&instrument=%22%22&stid=%22%22&submit=0&sidebarCollapsed=false&sidebarItemExpanded=null";
 
-    const supported = await Linking.canOpenURL(url);
-    if (supported) {
-      await Linking.openURL(url);
-    } else {
-      alert("Cannot open the URL");
-    }
-  };
+  //   const supported = await Linking.canOpenURL(url);
+  //   if (supported) {
+  //     await Linking.openURL(url);
+  //   } else {
+  //     alert("Cannot open the URL");
+  //   }
+  // };
 
   return (
     <Layout style={styles.container}>
