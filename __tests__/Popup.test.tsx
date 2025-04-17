@@ -1,14 +1,14 @@
 import { fireEvent, render } from "@testing-library/react-native";
 import React from "react";
 import { MockThemeProvider } from "../components/MockThemeProvider";
-import PopupProp from "../components/Popup";
+import SuccessFailurePopup from "../components/SuccessFailurePopup";
 
 describe("Popup", () => {
   test("button works", () => {
     const action = jest.fn();
     const { getByTestId } = render(
       <MockThemeProvider>
-        <PopupProp
+        <SuccessFailurePopup
           popupText="test"
           popupStatus={"red"}
           visible={true}

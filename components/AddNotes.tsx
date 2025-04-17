@@ -15,8 +15,8 @@ import NoteInput from './NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text, Icon, CheckBox } from '@ui-kitten/components';
 import { setSiteFile, getFileContents, getLatestTankEntry, offlineTankEntry, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData, buildTankRecordString } from '../scripts/APIRequests';
 import { parseNotes, ParsedData, sanitize } from '../scripts/Parsers'
-import PopupProp from './Popup';
-import PopupProp2Button from './Popup2Button';
+import SuccessFailurePopup from './SuccessFailurePopup';
+import MissingInputPopup from './MissingInputPopup';
 import { NavigationType, routeProp } from './types'
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from './LoadingScreen';
@@ -835,7 +835,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             <Text category='h1' style={{textAlign: 'center'}}>{site}</Text>
 
             {/* success/failure popup */}
-            <PopupProp popupText={message}
+            <SuccessFailurePopup popupText={message}
             popupStatus={messageStatus} 
             onPress={setVisible}
             navigateHome={navigateHome} 
@@ -843,7 +843,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             returnHome={returnHome}/>
 
             {/* popup if user has missing input */}
-            <PopupProp2Button
+            <MissingInputPopup
             sendData={handleUpdate}
             removePopup={setVisible2}
             visible={visible2}/>

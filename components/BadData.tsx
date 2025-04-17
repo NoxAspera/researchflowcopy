@@ -16,7 +16,7 @@ import { Button, Layout, Text, Datepicker, Select, SelectItem, IndexPath,} from 
 import { NavigationType, routeProp } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
 import { setBadData, getBadDataFiles } from "../scripts/APIRequests";
-import PopupProp from "./Popup"
+import SuccessFailurePopup from "./SuccessFailurePopup"
 import { ThemeContext } from './ThemeContext';
 import LoadingScreen from "./LoadingScreen";
 import { sanitize } from "../scripts/Parsers";
@@ -183,7 +183,7 @@ export default function BadData({ navigation }: NavigationType) {
           </Text>
 
           {/* success/failure popup */}
-          <PopupProp
+          <SuccessFailurePopup
             popupText={message}
             popupStatus={messageStatus}
             onPress={setSuccessFailureVisible}

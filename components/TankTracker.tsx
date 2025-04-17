@@ -13,7 +13,7 @@ import { Button, Layout, Text } from "@ui-kitten/components";
 import TextInput from "./TextInput";
 import { NavigationType, routeProp } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
-import PopupProp from "./Popup";
+import SuccessFailurePopup from "./SuccessFailurePopup";
 import {
   getLatestTankEntry,
   setTankTracker,
@@ -216,7 +216,7 @@ export default function TankTracker({ navigation }: NavigationType) {
           <LoadingScreen visible={loadingValue} />
 
           {/* success/failure popup */}
-          <PopupProp
+          <SuccessFailurePopup
             popupText={message}
             popupStatus={messageStatus}
             onPress={setVisible}

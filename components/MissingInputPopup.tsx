@@ -1,11 +1,11 @@
 /**
- * Popup 2 buttons
+ * Missing Input Popup
  * @author David Schiwal and Blake Stambaugh
  * 12/5/24
  * 
- * This is another pop up property but has two buttons, both do different actions. 
- * As of writing this, it is used only for the 'missing data are you sure you want
- * to submit' pop up
+ * This popup appears when the user attempts to submit data but is missing input. Since
+ * not all input is needed, it gives them the option to submit anyways, or fill in the
+ * missing info.
  */
 import { Button, Card, Icon, Layout, Modal, Text } from '@ui-kitten/components';
 import React, { useContext } from 'react'
@@ -18,7 +18,7 @@ interface PUProp{
     removePopup: (arg1: boolean) => void;
 }
 
-const PopupProp2Button: React.FC<PUProp> = ({ visible, sendData, removePopup }) => {
+const MissingInputPopup: React.FC<PUProp> = ({ visible, sendData, removePopup }) => {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
     return (
@@ -89,4 +89,4 @@ const styles = StyleSheet.create({
     }
     });
 
-  export default PopupProp2Button;
+  export default MissingInputPopup;

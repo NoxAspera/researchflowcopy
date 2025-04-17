@@ -20,7 +20,7 @@ interface PUProp {
   navigateHome: (arg0: boolean) => void;
 }
 
-const PopupProp: React.FC<PUProp> = ({ popupText, popupStatus, visible, returnHome, onPress, navigateHome }) => {
+const SuccessFailurePopup: React.FC<PUProp> = ({ popupText, popupStatus, visible, returnHome, onPress, navigateHome }) => {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   return (
@@ -85,4 +85,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default PopupProp;
+export default SuccessFailurePopup;

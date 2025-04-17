@@ -12,7 +12,7 @@ import { Button, Layout, Text } from "@ui-kitten/components";
 import TextInput from "./TextInput";
 import { NavigationType } from "./types";
 import { ScrollView } from "react-native-gesture-handler";
-import PopupProp from './Popup';
+import SuccessFailurePopup from './SuccessFailurePopup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { sendEmailNotification } from "../scripts/EmailNotifications";
 
@@ -92,7 +92,7 @@ export default function EmailSetup( { navigation }: NavigationType) {
 
           {/* text inputs */}
           {/* success/failure popup */}
-          <PopupProp popupText={message} 
+          <SuccessFailurePopup popupText={message} 
             popupStatus={messageColor} 
             onPress={() => setVisible(false)} 
             navigateHome={navigateHome} 
