@@ -15,6 +15,7 @@ import { processNotes, ParsedData, Entry, TankInfo } from "../scripts/Parsers";
 import { LineChart, XAxis, YAxis } from 'react-native-svg-charts';
 import { Svg, Line, Rect } from 'react-native-svg';
 import * as scale from 'd3-scale';
+import { daysUntilEmpty } from "../scripts/TankPredictor";
 
 const extractNumericValue = (pressure: string | null): number | null => {
   if (!pressure) return null; // Handle null or undefined
@@ -80,49 +81,6 @@ const groupTankData = (entries: Entry[]) => {
 
   return tankMap;
 };
-
-function getTimeBetweenDates(date1, date2) {
-  const timeDiffMs = Math.abs(date2.getTime() - date1.getTime());
-  const seconds = Math.floor(timeDiffMs / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
-  return {
-    days,
-    hours: hours % 24,
-    minutes: minutes % 60,
-    seconds: seconds % 60,
-    milliseconds: timeDiffMs % 1000
-  };
-}
-
-function daysUntilEmpty(prevPress, prevDate, currPress, currDate) {
-  // get change of pressure over time, assume it is linear
-  let changeOfPress = currPress - prevPress;
-
-  // if change of pressure is positive, then it got replaced, no need to check date
-  // if change of pressure is 0, then there is no need to check date bc nothing has changed
-  if (changeOfPress >= 0) {
-    return 365;
-  }
-
-  // get date difference
-  let currTime = new Date(currDate);
-  let prevTime = new Date(prevDate);
-  let changeOfDate = getTimeBetweenDates(prevTime, currTime).days; // get the difference of time in days
-
-  // if changeOfDate is 0, then the previous entry was also made today
-  if (changeOfDate == 0) {
-    return 365;
-  }
-  
-  let rateOfDecay = changeOfPress / changeOfDate; // measured in psi lost per day
-
-  // solve for when the tank should be under 500 psi
-  let days = Math.trunc((-prevPress / rateOfDecay) - changeOfDate);
-  return days;
-}
 
 export default function Diagnostics({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -223,7 +181,7 @@ export default function Diagnostics({ navigation }: NavigationType) {
           // Compute the x-position for the predicted zero-pressure date
           let daysUntilZero;
           if (validData.length >= 2) {
-            daysUntilZero = daysUntilEmpty(pressures[pressures.length - 2], timestamps[timestamps.length - 2], pressures[pressures.length - 1], timestamps[timestamps.length - 1]);
+            daysUntilZero = daysUntilEmpty(pressures[pressures.length - 2], new Date(timestamps[timestamps.length - 2]), pressures[pressures.length - 1], new Date(timestamps[timestamps.length - 1]));
           } else {
             daysUntilZero = 365;
           }
