@@ -1,8 +1,8 @@
 import { StyleSheet } from "react-native";
-import HomeButtonProp from "./HomeButtonProp";
+import HomeButtonProp from "../components/HomeButtonProp";
 import { Layout } from "@ui-kitten/components";
 import React, {useEffect, useState} from "react";
-import { NavigationType } from "./types";
+import { NavigationType } from "../components/types";
 import { getFileContents, visit } from "../scripts/APIRequests";
 import { processVisits } from "../scripts/Parsers";
 import { Calendar } from "react-native-calendars";

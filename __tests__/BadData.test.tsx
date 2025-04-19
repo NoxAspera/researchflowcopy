@@ -2,7 +2,7 @@ import { render } from '@testing-library/react-native'
 import { NaviProp } from '../components/types';
 import React from 'react';
 import { MockThemeProvider } from '../components/MockThemeProvider';
-import BadData from '../components/BadData';
+import BadData from '../pages/BadData';
 
 const mockNavigation: NaviProp = {
   dispatch: jest.fn(),

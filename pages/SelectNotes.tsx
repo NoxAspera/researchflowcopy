@@ -9,7 +9,7 @@
 import { StyleSheet } from 'react-native';
 import React from 'react';
 import { Layout, Button, Text } from '@ui-kitten/components';
-import { NavigationType } from './types'
+import { NavigationType } from '../components/types'
 import { ScrollView } from 'react-native-gesture-handler';
 
 

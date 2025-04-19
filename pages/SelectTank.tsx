@@ -10,7 +10,7 @@ import { StyleSheet, KeyboardAvoidingView, Platform, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { Button, Text } from '@ui-kitten/components';
-import { NavigationType, routeProp } from './types'
+import { NavigationType, routeProp } from '../components/types'
 import { getTankList } from '../scripts/APIRequests';
 import { ScrollView, TextInput} from 'react-native-gesture-handler';
 

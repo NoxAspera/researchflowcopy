@@ -6,11 +6,11 @@
  * The follow code represents the home page the user sees when they first launch our app.
  * It has a button for each section of the app that will take them to the next page.
  **/
-import { StyleSheet, ScrollView, Dimensions, Linking, Platform, PermissionsAndroid } from "react-native";
-import HomeButtonProp from "./HomeButtonProp";
+import { StyleSheet, ScrollView } from "react-native";
+import HomeButtonProp from "../components/HomeButtonProp";
 import { Layout } from "@ui-kitten/components";
 import React from 'react';
-import { NavigationType } from "./types";
+import { NavigationType } from "../components/types";
 import { tankTrackerSpinUp } from '../scripts/APIRequests';
 
 export default function HomeScreen({ navigation }: NavigationType) {

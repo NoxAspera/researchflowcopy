@@ -10,10 +10,10 @@ import { StyleSheet, KeyboardAvoidingView } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
 import { useRoute } from "@react-navigation/native";
 import { Button, Layout, Text } from "@ui-kitten/components";
-import TextInput from "./TextInput";
-import { NavigationType, routeProp } from "./types";
+import TextInput from "../components/TextInput";
+import { NavigationType, routeProp } from "../components/types";
 import { ScrollView } from "react-native-gesture-handler";
-import SuccessFailurePopup from "./SuccessFailurePopup";
+import SuccessFailurePopup from "../components/SuccessFailurePopup";
 import {
   getLatestTankEntry,
   setTankTracker,
@@ -22,7 +22,7 @@ import {
   buildTankRecordString,
   offlineTankEntry,
 } from "../scripts/APIRequests";
-import LoadingScreen from "./LoadingScreen";
+import LoadingScreen from "../components/LoadingScreen";
 import * as Network from "expo-network";
 import { sanitize } from "../scripts/Parsers";
 

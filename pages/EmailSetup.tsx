@@ -9,10 +9,10 @@
 import { StyleSheet, KeyboardAvoidingView } from "react-native";
 import React, { useState} from "react";
 import { Button, Layout, Text } from "@ui-kitten/components";
-import TextInput from "./TextInput";
-import { NavigationType } from "./types";
+import TextInput from "../components/TextInput";
+import { NavigationType } from "../components/types";
 import { ScrollView } from "react-native-gesture-handler";
-import SuccessFailurePopup from './SuccessFailurePopup';
+import SuccessFailurePopup from '../components/SuccessFailurePopup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { sendEmailNotification } from "../scripts/EmailNotifications";
 

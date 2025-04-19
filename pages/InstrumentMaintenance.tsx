@@ -10,14 +10,14 @@ import { StyleSheet, KeyboardAvoidingView, TouchableOpacity, View, Platform, Pre
 import React, { useState, useEffect, useRef } from "react";
 import { useRoute } from "@react-navigation/native";
 import { Button, Layout, Text, CheckBox, Icon } from "@ui-kitten/components";
-import TextInput from "./TextInput";
-import NoteInput from "./NoteInput";
-import { NavigationType, routeProp } from "./types";
+import TextInput from "../components/TextInput";
+import NoteInput from "../components/NoteInput";
+import { NavigationType, routeProp } from "../components/types";
 import {setInstrumentFile, getInstrumentSite, setBadData} from "../scripts/APIRequests";
 import { ScrollView } from "react-native-gesture-handler";
-import { ThemeContext } from './ThemeContext';
-import SuccessFailurePopup from './SuccessFailurePopup';
-import LoadingScreen from "./LoadingScreen";
+import { ThemeContext } from '../components/ThemeContext';
+import SuccessFailurePopup from '../components/SuccessFailurePopup';
+import LoadingScreen from "../components/LoadingScreen";
 import DateTimePicker , {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
 import { TimerPickerModal } from "react-native-timer-picker";
 import * as Network from 'expo-network'

@@ -6,12 +6,11 @@
  * This page is used for plotting up tank values and connecting to air.utah.edu diagnostics
  */
 import { StyleSheet, KeyboardAvoidingView, Linking, Dimensions, View} from "react-native";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useRoute } from "@react-navigation/native";
 import { Button, Text } from "@ui-kitten/components";
-import { NavigationType, routeProp } from "./types";
+import { NavigationType, routeProp } from "../components/types";
 import { ScrollView } from "react-native-gesture-handler";
-import { ThemeContext } from "./ThemeContext";
 import { processNotes, ParsedData, Entry, TankInfo } from "../scripts/Parsers";
 import { LineChart, XAxis, YAxis } from 'react-native-svg-charts';
 import { Svg, Line, Rect } from 'react-native-svg';

@@ -1,37 +1,34 @@
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import SelectSite from './components/SelectSite'
-import HomeScreen from './components/HomeScreen'
-import AddNotes from './components/AddNotes'
+import SelectSite from './pages/SelectSite'
+import HomeScreen from './pages/HomeScreen'
+import AddNotes from './pages/AddNotes'
 import ViewNotes from './components/ViewNotes'
-import BadData from './components/BadData'
-import InstrumentMaintenance from './components/InstrumentMaintenance'
-import TankTracker from './components/TankTracker'
-import Auth from './components/Auth'
-import SelectInstrument from './components/SelectInstrument';
-import PlanVisit from './components/PlanVisit';
-import AddNotesMobile from './components/AddNotesMobile';
-import SelectNotes from './components/SelectNotes';
+import BadData from './pages/BadData'
+import InstrumentMaintenance from './pages/InstrumentMaintenance'
+import TankTracker from './pages/TankTracker'
+import Auth from './pages/Auth'
+import SelectInstrument from './pages/SelectInstrument';
+import PlanVisit from './pages/PlanVisit';
+import AddNotesMobile from './pages/AddNotesMobile';
+import SelectNotes from './pages/SelectNotes';
 import { ThemeContext } from './components/ThemeContext'
 import { ApplicationProvider, IconRegistry } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
-import SelectTank from './components/SelectTank';
-import customColors from './custom-theme.json'
-import Calendar from './components/Calendar';
+import SelectTank from './pages/SelectTank';
+import customColors from './custom-theme.json';
+import Calendar from './pages/Calendar';
 import { useEffect, useState } from 'react';
 import SettingsButton from './components/SettingsButton';
 import ViewNotifications from './components/ViewNotifications';
-import ContactInfo from './components/ContactInfo';
-import EmailSetup from './components/EmailSetup';
-import { NavigationType } from './components/types';
+import ContactInfo from './pages/ContactInfo';
+import EmailSetup from './pages/EmailSetup';
 import { Button, Icon, IconElement } from '@ui-kitten/components';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View } from 'react-native';
-import { loadStoredValues } from './scripts/LoadStoredValues';
-
-import Diagnostics from './components/Diagnostics';
+import Diagnostics from './pages/Diagnostics';
 
 const Stack = createStackNavigator();
 type ThemeType = 'light' | 'dark';

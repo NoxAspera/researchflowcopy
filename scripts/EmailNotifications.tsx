@@ -124,9 +124,9 @@ export async function sendEmailNotification(emailAddress: string, name: string){
                   );
                 } catch (err) {
                   if (err instanceof EmailJSResponseStatus) {
-                    console.log('EmailJS Request Failed...', err);
+                    console.error('EmailJS Request Failed...', err);
                   }
-                  console.log('ERROR', err);
+                  console.error('ERROR', err);
                 }
               }
               

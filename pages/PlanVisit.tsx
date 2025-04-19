@@ -9,13 +9,13 @@ import { StyleSheet, KeyboardAvoidingView,} from "react-native";
 import React, { useState, useRef, useEffect } from "react";
 import { useRoute } from "@react-navigation/native";
 import { Button, Layout, Datepicker, Text, Card } from "@ui-kitten/components";
-import TextInput from "./TextInput";
-import { NavigationType, routeProp } from "./types";
+import TextInput from "../components/TextInput";
+import { NavigationType, routeProp } from "../components/types";
 import { ScrollView } from "react-native-gesture-handler";
-import { ThemeContext } from "./ThemeContext";
+import { ThemeContext } from "../components/ThemeContext";
 import { visit, setVisitFile, getFileContents } from "../scripts/APIRequests";
-import SuccessFailurePopup from './SuccessFailurePopup';
-import LoadingScreen from "./LoadingScreen";
+import SuccessFailurePopup from '../components/SuccessFailurePopup';
+import LoadingScreen from "../components/LoadingScreen";
 import { sanitize } from "../scripts/Parsers";
 
 export default function PlanVisit({ navigation }: NavigationType) {

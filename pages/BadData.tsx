@@ -10,15 +10,15 @@
 import { StyleSheet, KeyboardAvoidingView} from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import { useRoute } from "@react-navigation/native";
-import TextInput from "./TextInput";
-import NoteInput from "./NoteInput";
+import TextInput from "../components/TextInput";
+import NoteInput from "../components/NoteInput";
 import { Button, Layout, Text, Datepicker, Select, SelectItem, IndexPath,} from "@ui-kitten/components";
-import { NavigationType, routeProp } from "./types";
+import { NavigationType, routeProp } from "../components/types";
 import { ScrollView } from "react-native-gesture-handler";
 import { setBadData, getBadDataFiles } from "../scripts/APIRequests";
-import SuccessFailurePopup from "./SuccessFailurePopup"
-import { ThemeContext } from './ThemeContext';
-import LoadingScreen from "./LoadingScreen";
+import SuccessFailurePopup from "../components/SuccessFailurePopup"
+import { ThemeContext } from '../components/ThemeContext';
+import LoadingScreen from "../components/LoadingScreen";
 import { sanitize } from "../scripts/Parsers";
 
 export default function BadData({ navigation }: NavigationType) {

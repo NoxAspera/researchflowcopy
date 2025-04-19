@@ -10,20 +10,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { ScrollView, Pressable } from 'react-native-gesture-handler';
 import { buildNotes, copyTankRecord, Entry } from '../scripts/Parsers';
-import TextInput from './TextInput'
-import NoteInput from './NoteInput'
+import TextInput from '../components/TextInput'
+import NoteInput from '../components/NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text, Icon, CheckBox } from '@ui-kitten/components';
 import { setSiteFile, getFileContents, getLatestTankEntry, offlineTankEntry, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData, buildTankRecordString } from '../scripts/APIRequests';
 import { parseNotes, ParsedData, sanitize } from '../scripts/Parsers'
-import SuccessFailurePopup from './SuccessFailurePopup';
-import MissingInputPopup from './MissingInputPopup';
-import { NavigationType, routeProp } from './types'
-import { ThemeContext } from './ThemeContext';
-import LoadingScreen from './LoadingScreen';
+import SuccessFailurePopup from '../components/SuccessFailurePopup';
+import MissingInputPopup from '../components/MissingInputPopup';
+import { NavigationType, routeProp } from '../components/types'
+import { ThemeContext } from '../components/ThemeContext';
+import LoadingScreen from '../components/LoadingScreen';
 import DateTimePicker, {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
 import { TimerPickerModal } from "react-native-timer-picker";
 import * as Network from 'expo-network'
-import VisitPopupProp from './VisitPopup';
+import VisitPopupProp from '../components/VisitPopup';
 
 /**
  * @author Megan Ostlie
@@ -294,13 +294,6 @@ export default function AddNotes({ navigation }: NavigationType) {
         n2Days = daysUntilEmpty(parseInt(prevEntry.n2_pressure), prevEntry.time_out, parseInt(n2Value));
       }
 
-      console.log(`
-        Low Days: ${lowDays}
-        Mid Days: ${midDays}
-        highDays: ${highDays}
-        lts Days: ${ltsDays}
-        n2 Days:  ${n2Days}`);
-
       // if any of the tanks are predicted to be empty in 90 days or less, send a warning
       if (lowDays && lowDays <= 90) {
         setLowDaysRemaining(lowDays);
@@ -407,7 +400,6 @@ export default function AddNotes({ navigation }: NavigationType) {
       const endSeconds = String(end.getUTCSeconds()).padStart(2, "0");
         
       let tankRecordString = "";
-      console.log("creating data")
         // create an entry object data that will be sent off to the repo
         let data: Entry = 
         {
@@ -446,7 +438,6 @@ export default function AddNotes({ navigation }: NavigationType) {
           },
           additional_notes: sanitize(notesValue)
         };
-        console.log("entry created")
         const utcTime = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:${endSeconds}Z`;
         if(networkStatus){
           if (originalLts && (!ltsTankRecord || (originalLts.tankId != ltsTankRecord.tankId))) {
@@ -458,16 +449,13 @@ export default function AddNotes({ navigation }: NavigationType) {
             ltsTank.updatedAt = utcTime;
             ltsTank.pressure = parseInt(ltsPressure);
             ltsTank.userId = sanitize(nameValue);
-            console.log("calling this")
             addEntrytoTankDictionary(ltsTank);
             tankRecordString += buildTankRecordString(ltsTank);
           }
           
-          console.log("tank pressure point")
           if (originalLow && (!lowTankRecord || (originalLow.tankId != lowTankRecord.tankId))) {
             tankRecordString += removeTankFromSite(originalLow, utcTime);
           }
-          console.log("tank pressure point 2")
           if (lowTankRecord) {
             let lowTank = copyTankRecord(lowTankRecord);
             lowTank.location = site;
@@ -524,10 +512,8 @@ export default function AddNotes({ navigation }: NavigationType) {
           }
         }
 
-        console.log("sending add notes")
         // send the request
         const result = await setSiteFile(site, buildNotes(data), "updating notes from researchFlow");
-        console.log("sending tank tracker")
         const tankResult = await setTankTracker(tankRecordString);
 
         let instMaintResult;
@@ -538,7 +524,6 @@ export default function AddNotes({ navigation }: NavigationType) {
         if (instrumentInput && (!originalInstrument || (originalInstrument != instrumentInput))) {
           if (instrumentNames.includes(instrumentInput)) {
             const notes = installedInstrumentNotes(utcTime);
-            //console.log("sending instrument")
             instMaintResult = await setInstrumentFile(`instrument_maint/LGR_UGGA/${instrumentInput}`, notes, `Updated ${instrumentInput}.md`, true, site);
           }
         }
@@ -547,7 +532,6 @@ export default function AddNotes({ navigation }: NavigationType) {
         if (originalInstrument && (!instrumentInput || (originalInstrument != instrumentInput))) {
           if (instrumentNames.includes(originalInstrument)) {
             const notes = removedInstrumentNotes(utcTime);
-            console.log("sending instrument 2")
             instMaintResult2 = await setInstrumentFile(`instrument_maint/LGR_UGGA/${originalInstrument}`, notes, `Updated ${originalInstrument}.md`, true, 'WBB - Spare');
           }
         }
@@ -562,7 +546,6 @@ export default function AddNotes({ navigation }: NavigationType) {
           } else if (instrumentInput.includes("6262")) {
             instrument = "licor_6262";
           }
-          console.log("sending bad data")
           badDataResult = await setBadData(
             site,
             instrument,

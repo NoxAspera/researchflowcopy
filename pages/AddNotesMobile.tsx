@@ -11,17 +11,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { ScrollView, Pressable } from 'react-native-gesture-handler';
 import { buildMobileNotes, MobileEntry } from '../scripts/Parsers';
-import TextInput from './TextInput'
-import NoteInput from './NoteInput'
+import TextInput from '../components/TextInput'
+import NoteInput from '../components/NoteInput'
 import { Layout, Button, Text, Select, SelectItem, IndexPath, CheckBox, Icon } from '@ui-kitten/components';
 import { setSiteFile, getFileContents, TankRecord, getLatestTankEntry, addEntrytoTankDictionary, setTankTracker, getDirectory, setInstrumentFile, setBadData, offlineTankEntry, buildTankRecordString } from '../scripts/APIRequests';
 import { parseNotes, ParsedData, copyTankRecord } from '../scripts/Parsers'
-import SuccessFailurePopup from './SuccessFailurePopup';
-import MissingInputPopup from './MissingInputPopup';
-import { NavigationType, routeProp } from './types'
-import { ThemeContext } from './ThemeContext';
+import SuccessFailurePopup from '../components/SuccessFailurePopup';
+import MissingInputPopup from '../components/MissingInputPopup';
+import { NavigationType, routeProp } from '../components/types'
+import { ThemeContext } from '../components/ThemeContext';
 import  * as Network from 'expo-network'
-import LoadingScreen from "./LoadingScreen";
+import LoadingScreen from "../components/LoadingScreen";
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { TimerPickerModal } from "react-native-timer-picker";
 

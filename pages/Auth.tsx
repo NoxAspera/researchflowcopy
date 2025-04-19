@@ -11,14 +11,14 @@ import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { Button, Layout, Text } from '@ui-kitten/components';
-import TextInput from './TextInput'
-import { customTheme } from './CustomTheme'
-import SuccessFailurePopup from './SuccessFailurePopup';
+import TextInput from '../components/TextInput'
+import { customTheme } from '../components/CustomTheme'
+import SuccessFailurePopup from '../components/SuccessFailurePopup';
 import { setGithubToken,  tankTrackerSpinUp, readUpdates, updateDirectories, tankTrackerOffline} from '../scripts/APIRequests';
 import * as Network from 'expo-network'
-import { NavigationType } from './types'
-import { ThemeContext } from './ThemeContext';
-import LoadingScreen from './LoadingScreen';
+import { NavigationType } from '../components/types'
+import { ThemeContext } from '../components/ThemeContext';
+import LoadingScreen from '../components/LoadingScreen';
 import { sendEmailNotification } from "../scripts/EmailNotifications";
 
 export default function Login({ navigation }: NavigationType) {
