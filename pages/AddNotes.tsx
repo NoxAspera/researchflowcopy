@@ -24,6 +24,7 @@ import DateTimePicker, {DateTimePickerAndroid} from '@react-native-community/dat
 import { TimerPickerModal } from "react-native-timer-picker";
 import * as Network from 'expo-network'
 import VisitPopupProp from '../components/VisitPopup';
+import { checkIfRefillIsNeeded } from '../scripts/TankPredictor';
 
 /**
  * @author Megan Ostlie
@@ -224,103 +225,6 @@ export default function AddNotes({ navigation }: NavigationType) {
     const [ltsTankName, setLtsTankName] = useState("");
     const [n2DaysRemaining, setN2DaysRemaining] = useState(-1);
     const [n2TankName, setN2TankName] = useState("");
-
-    function getTimeBetweenDates(date1, date2) {
-      const timeDiffMs = Math.abs(date2.getTime() - date1.getTime());
-      const seconds = Math.floor(timeDiffMs / 1000);
-      const minutes = Math.floor(seconds / 60);
-      const hours = Math.floor(minutes / 60);
-      const days = Math.floor(hours / 24);
-    
-      return {
-        days,
-        hours: hours % 24,
-        minutes: minutes % 60,
-        seconds: seconds % 60,
-        milliseconds: timeDiffMs % 1000
-      };
-    }
-
-    function daysUntilEmpty(prevPress, prevDate, currPress) {
-      // get change of pressure over time, assume it is linear
-      let changeOfPress = currPress - prevPress;
-
-      // if change of pressure is positive, then it got replaced, no need to check date
-      // if change of pressure is 0, then there is no need to check date bc nothing has changed
-      if (changeOfPress >= 0) {
-        return 365;
-      }
-
-      // get date difference
-      let currTime = endDateValue;
-      let prevTime = new Date(prevDate);
-      let changeOfDate = getTimeBetweenDates(prevTime, currTime).days; // get the difference of time in days
-
-      // if changeOfDate is 0, then the previous entry was also made today
-      if (changeOfDate == 0) {
-        return 365;
-      }
-      
-      let rateOfDecay = changeOfPress / changeOfDate; // measured in psi lost per day
-
-      // solve for when the tank should be under 500 psi
-      let days = Math.trunc((-prevPress / rateOfDecay) - changeOfDate);
-      return days;
-    }
-
-    function checkIfRefillIsNeeded() {
-      // get tank values from previous entries
-      let prevEntry = data.entries[0];
-
-      // compare pressure from prev entry to current entry to see if tank will be empty soon
-      let lowDays;
-      if (prevEntry.low_cal) {
-        lowDays = daysUntilEmpty(parseInt(prevEntry.low_cal.pressure), prevEntry.time_out, parseInt(lowPressure));
-      }
-      let midDays;
-      if (prevEntry.mid_cal) {
-        midDays = daysUntilEmpty(parseInt(prevEntry.mid_cal.pressure), prevEntry.time_out, parseInt(midPressure));
-      }
-      let highDays;
-      if (prevEntry.high_cal) {
-        highDays = daysUntilEmpty(parseInt(prevEntry.high_cal.pressure), prevEntry.time_out, parseInt(highPressure));
-      }
-      let ltsDays;
-      if (prevEntry.lts) {
-        ltsDays = daysUntilEmpty(parseInt(prevEntry.lts.pressure), prevEntry.time_out, parseInt(ltsPressure));
-      }
-      let n2Days
-      if (prevEntry.n2_pressure) {
-        n2Days = daysUntilEmpty(parseInt(prevEntry.n2_pressure), prevEntry.time_out, parseInt(n2Value));
-      }
-
-      // if any of the tanks are predicted to be empty in 90 days or less, send a warning
-      if (lowDays && lowDays <= 90) {
-        setLowDaysRemaining(lowDays);
-        setLowTankName(lowId);
-        setTankPredictorVisibility(true);
-      }
-      if (midDays && midDays <= 90) {
-        setMidDaysRemaining(midDays);
-        setMidTankName(midId);
-        setTankPredictorVisibility(true);
-      }
-      if (highDays && highDays <= 90) {
-        setHighDaysRemaining(highDays);
-        setHighTankName(highId);
-        setTankPredictorVisibility(true);
-      }
-      if (ltsDays && ltsDays <= 90) {
-        setLtsDaysRemaining(ltsDays);
-        setLtsTankName(ltsId);
-        setTankPredictorVisibility(true);
-      }
-      if (n2Days && n2Days <= 90) {
-        setN2DaysRemaining(n2Days);
-        setN2TankName("N2");
-        setTankPredictorVisibility(true);
-      }
-    }
 
     //method will warn user if fields haven't been input
     function checkTextEntries(){
@@ -596,7 +500,32 @@ export default function AddNotes({ navigation }: NavigationType) {
       }
       if(networkStatus)
       {
-        setTimeout(checkIfRefillIsNeeded, 100);
+        setTimeout(() => {
+          checkIfRefillIsNeeded(
+            data,
+            lowPressure,
+            midPressure,
+            highPressure,
+            ltsPressure,
+            n2Value,
+            endDateValue,
+            setLowDaysRemaining,
+            setMidDaysRemaining,
+            setHighDaysRemaining,
+            setLtsDaysRemaining,
+            setN2DaysRemaining,
+            setLowTankName,
+            setMidTankName,
+            setHighTankName,
+            setLtsTankName,
+            setN2TankName,
+            setTankPredictorVisibility,
+            lowId,
+            midId,
+            highId,
+            ltsId
+          );
+        }, 100);
       }
     }
 
