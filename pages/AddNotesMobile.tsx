@@ -10,7 +10,7 @@ import { StyleSheet, KeyboardAvoidingView, Platform, Modal, View, TouchableOpaci
 import React, { useState, useEffect, useRef } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { ScrollView, Pressable } from 'react-native-gesture-handler';
-import { buildMobileNotes, MobileEntry } from '../scripts/Parsers';
+import { buildBadDataString, buildMobileNotes, installedInstrumentNotes, MobileEntry, removedInstrumentNotes } from '../scripts/Parsers';
 import TextInput from '../components/TextInput'
 import NoteInput from '../components/NoteInput'
 import { Layout, Button, Text, Select, SelectItem, IndexPath, CheckBox, Icon } from '@ui-kitten/components';
@@ -256,43 +256,12 @@ export default function AddNotes({ navigation }: NavigationType) {
       }
     };
 
-    const installedInstrumentNotes = (time: string): string => {
-      let siteName = site.replace("mobile/","");
-      let result: string = `- Time in: ${time}\n`;
-  
-      result += `- Name: ${nameValue}\n`;
-      result += `- Notes: Installed at ${siteName}\n`;
-      result += "---\n";
-  
-      return result;
-    };
-
-    const removedInstrumentNotes = (time: string): string => {
-      let siteName = site.replace("mobile/","");
-      let result: string = `- Time in: ${time}\n`;
-  
-      result += `- Name: ${nameValue}\n`;
-      result += `- Notes: Removed from ${siteName}\n`;
-      result += "---\n";
-  
-      return result;
-    };
-
     const addCustomInstrument = () => {
       if (customInstrument.trim() !== "") {
         setInstrumentInput(customInstrument);
         setCustomInstrument("");
       }
       setModalVisible(false);
-    };
-
-    const buildBadDataString = (): string => {
-      const startTime = startDateValue.toISOString().split(".")[0] + "Z";
-      const endTime = endDateValue.toISOString().split(".")[0] + "Z";
-      const currentTime = (new Date()).toISOString().split(".")[0] + "Z";
-      let result: string = `${startTime},${endTime},all,NA,${currentTime},${nameValue},${badDataReason}`;
-  
-      return result;
     };
 
     // will call setFile to send the PUT request. 
@@ -378,7 +347,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         // If a new instrument was added
         if (instrumentInput && (!originalInstrument || (originalInstrument != instrumentInput))) {
           if (instrumentNames.includes(instrumentInput)) {
-            const notes = installedInstrumentNotes(utcTime);
+            const notes = installedInstrumentNotes(utcTime, nameValue, site);
             instMaintResult = await setInstrumentFile(`instrument_maint/LGR_UGGA/${instrumentInput}`, notes, `Updated ${instrumentInput}.md`, true, siteName);
           }
         }
@@ -386,14 +355,14 @@ export default function AddNotes({ navigation }: NavigationType) {
         // If instrument was removed
         if (originalInstrument && (!instrumentInput || (originalInstrument != instrumentInput))) {
           if (instrumentNames.includes(originalInstrument)) {
-            const notes = removedInstrumentNotes(utcTime);
+            const notes = removedInstrumentNotes(utcTime, nameValue, site);
             instMaintResult2 = await setInstrumentFile(`instrument_maint/LGR_UGGA/${originalInstrument}`, notes, `Updated ${originalInstrument}.md`, true, 'WBB - Spare');
           }
         }
 
         if (addToBadData) {
           let instrument = "";
-          const badDataString = buildBadDataString();
+          const badDataString = buildBadDataString(startDateValue, endDateValue, "all", "NA", nameValue, badDataReason, true);
           if (instrumentInput.includes("LGR")) {
             instrument = "lgr_ugga";
           }

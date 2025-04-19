@@ -102,7 +102,7 @@ export function parseNotes(text: string): ParsedData {
             high_cal: null,
             tank: null,
         };
-        let tankMatch;
+        let tankMatch: any[];
         while ((tankMatch = tankPattern.exec(block)) !== null) {
             const tankType = tankMatch[1].toLowerCase().replace(" ", "_") as keyof typeof tanks;
             tanks[tankType] = {
@@ -210,8 +210,8 @@ export function buildMobileNotes(data: MobileEntry): string
   * @param str 
   * @returns 
   */
-export function sanitize(str) {
-    return str.replace(/[\b\f\n\r\t\v\0\'\"\\]/g, match => {
+export function sanitize(str: string) {
+    return str.replace(/[\b\f\n\r\t\v\0\'\"\\]/g, (match: string | number) => {
       return {
         '\b': '\\b',
         '\f': '\\f',
@@ -435,3 +435,47 @@ export async function processNotes(siteName: string) {
       return null
     }
   }
+
+export function installedInstrumentNotes(time: string, name: string, site: string): string {
+    let result: string = `- Time in: ${time}\n`;
+
+    result += `- Name: ${sanitize(name)}\n`;
+    result += `- Notes: Installed at ${site}\n`;
+    result += "---\n";
+
+    return result;
+}
+
+export function removedInstrumentNotes(time: string, name: string, site: string): string {
+    let result: string = `- Time in: ${time}\n`;
+
+    result += `- Name: ${sanitize(name)}\n`;
+    result += `- Notes: Removed from ${site}\n`;
+    result += "---\n";
+
+    return result;
+}
+
+// Function to format the date
+function formatDate(date: Date | null): string {
+    return date ? date.toISOString().split("T")[0] : "";
+};
+
+export function buildBadDataString(startDate: Date, endDate: Date, oldID: string, newID: string, name: string, reason: string, fromAddNotes: boolean): string {
+    const startTime = startDate.toISOString().split(".")[0] + "Z";
+    const endTime = endDate.toISOString().split(".")[0] + "Z";
+    const currentTime = new Date().toISOString().split(".")[0] + "Z";
+    // console.log(path);
+
+    if (fromAddNotes) {
+        console.log("add notes")
+        var result: string = `${startTime},${endTime},${oldID},${newID},${currentTime},${sanitize(name)},${sanitize(reason)}`;
+    }
+    else {
+        console.log("bad data")
+        var result: string = `${formatDate(startDate)}T${startTime},${formatDate(endDate)}T${endTime},${oldID},${newID},${currentTime},${sanitize(name)},${sanitize(reason)}`;
+    }
+
+    console.log("done")
+    return result;
+}

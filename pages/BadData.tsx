@@ -19,7 +19,7 @@ import { setBadData, getBadDataFiles } from "../scripts/APIRequests";
 import SuccessFailurePopup from "../components/SuccessFailurePopup"
 import { ThemeContext } from '../components/ThemeContext';
 import LoadingScreen from "../components/LoadingScreen";
-import { sanitize } from "../scripts/Parsers";
+import { buildBadDataString, sanitize } from "../scripts/Parsers";
 
 export default function BadData({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -70,35 +70,9 @@ export default function BadData({ navigation }: NavigationType) {
     fetchBadDataFiles();
   }, [site]);
 
-  // Function to format the date
-  const formatDate = (date: Date | null): string => {
-    return date ? date.toISOString().split("T")[0] : "";
-  };
-
   const validateTime = (time: string) => {
     const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
     return timeRegex.test(time); // Returns true if the time matches HH:MM:SS format
-  };
-
-  const getCurrentUtcDateTime = () => {
-    const now = new Date();
-    const year = now.getUTCFullYear();
-    const month = String(now.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(now.getUTCDate()).padStart(2, "0");
-    const hours = String(now.getUTCHours()).padStart(2, "0");
-    const minutes = String(now.getUTCMinutes()).padStart(2, "0");
-    const seconds = String(now.getUTCSeconds()).padStart(2, "0");
-
-    // Format as "YYYY-MM-DDTHH:MM:SSZ"
-    const utcDateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
-    return utcDateTime;
-  };
-
-  const buildBadDataString = (): string => {
-    const currentTime = getCurrentUtcDateTime();
-    return `${formatDate(startDateValue)}T${startTimeValue}Z,${formatDate(
-      endDateValue
-    )}T${endTimeValue}Z,${sanitize(oldIDValue)},${sanitize(newIDValue)},${currentTime},${sanitize(nameValue)},${sanitize(reasonValue)}`;
   };
 
   const handleFileSelection = (index: IndexPath) => {
@@ -145,7 +119,7 @@ export default function BadData({ navigation }: NavigationType) {
     // show loading screen
     setLoadingValue(true);
 
-    const badDataString = buildBadDataString();
+    const badDataString = buildBadDataString(startDateValue, endDateValue, oldIDValue, newIDValue, nameValue, reasonValue, false);
     const result = await setBadData(
       site,
       instrument,
