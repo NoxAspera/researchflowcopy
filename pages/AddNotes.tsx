@@ -22,33 +22,9 @@ import { ThemeContext } from '../components/ThemeContext';
 import LoadingScreen from '../components/LoadingScreen';
 import DateTimePicker, {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
 import { TimerPickerModal } from "react-native-timer-picker";
-import * as Network from 'expo-network'
 import VisitPopupProp from '../components/VisitPopup';
 import { checkIfRefillIsNeeded } from '../scripts/TankPredictor';
-
-/**
- * @author Megan Ostlie
- *  a function that pulls the current note document for the specified site from GitHub
- *  @param siteName the name of the site
- * 
- * @returns a ParsedData object that contains the information of the given document
- */
-async function processNotes(siteName: string) {
-  const fileContents = await getFileContents(`site_notes/${siteName}`);
-  if(fileContents.data){
-    return parseNotes(fileContents.data)
-  }
-  else
-  {
-    return null
-  }
-}
-
-async function isConnected()
-{
-  let check = (await Network.getNetworkStateAsync()).isConnected
-  return check
-}
+import { fetchData, fetchInstrumentNames } from '../scripts/DataFetching';
 
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
@@ -111,120 +87,94 @@ export default function AddNotes({ navigation }: NavigationType) {
     tempDate.setMinutes(pickedDuration.minutes)
     setEndDateValue(tempDate);
   };
-    // State to hold parsed data
-    const [data, setData] = useState<ParsedData | null>(null);
-    const [networkStatus, setNetworkStatus] = useState(true)
 
-    // Get current notes for the site
-    useEffect(() => {
-        async function fetchData() {
-          setNetworkStatus(await isConnected())
+  // State to hold parsed data
+  const [data, setData] = useState<ParsedData | null>(null);
+  const [networkStatus, setNetworkStatus] = useState(true)
 
-            if (site && !data && networkStatus) {
-                try {
-                    const parsedData = await processNotes(site);
-                    setData(parsedData); // Update state with the latest entry
-                } catch (error) {
-                    console.error("Error processing notes:", error);
-                }
-            }
-        }
-        fetchData();
-    }, [site]); // Re-run if `site` changes
+  // Get current notes for the site
+  useEffect(() => {
+    fetchData(setNetworkStatus, setData, site, data, networkStatus);
+  }, [site]); // Re-run if `site` changes
 
-    // Get list of possible instruments
-    useEffect(() => {
-        const fetchInstrumentNames = async () => {
-          try {
-            let names = await getDirectory(`instrument_maint/LGR_UGGA`);
-    
-            if(names?.success)
-            {
-              setInstrumentNames(names.data);
-            }
-        }
-          catch (error)
-          {
-            console.error("Error processing instrument names:", error);
-          }
-        };
-    
-        fetchInstrumentNames();
-      }, [site]);
+  // Get list of possible instruments
+  useEffect(() => {
+    fetchInstrumentNames(setInstrumentNames, null);
+  }, [site]);
 
-    //Get latest notes entry from site
-    let latestEntry = null;
-    if (data) {
-      latestEntry = data.entries[0];
-    }
-    
-    // these use states to set and store values in the text inputs
-    const [startDateValue, setStartDateValue] = useState(new Date());
-    const [endDateValue, setEndDateValue] = useState(new Date());
-    const [nameValue, setNameValue] = useState("");
-    const [ltsId, setLTSId] = useState("");
-    const [ltsValue, setLTSValue] = useState("");
-    const [ltsPressure, setLTSPressure] = useState("");
-    const [lowId, setLowId] = useState("");
-    const [lowValue, setLowValue] = useState("");
-    const [lowPressure, setLowPressure] = useState("");
-    const [midId, setMidId] = useState("");
-    const [midValue, setMidValue] = useState("");
-    const [midPressure, setMidPressure] = useState("");
-    const [highId, setHighId] = useState("");
-    const [highValue, setHighValue] = useState("");
-    const [highPressure, setHighPressure] = useState("");
-    const [n2Value, setN2Value] = useState("");
-    const [notesValue, setNotesValue] = useState("");
-    const [instrumentInput, setInstrumentInput] = useState("");
-    const [ltsTankRecord, setLtsTankRecord] = useState<TankRecord>(undefined);
-    const [originalLts, setOriginalLts] = useState<TankRecord>(undefined);
-    const [lowTankRecord, setLowTankRecord] = useState<TankRecord>(undefined);
-    const [originalLow, setOriginalLow] = useState<TankRecord>(undefined);
-    const [midTankRecord, setMidTankRecord] = useState<TankRecord>(undefined);
-    const [originalMid, setOriginalMid] = useState<TankRecord>(undefined);
-    const [highTankRecord, setHighTankRecord] = useState<TankRecord>(undefined);
-    const [originalHigh, setOriginalHigh] = useState<TankRecord>(undefined);
-    const [instrumentNames, setInstrumentNames] = useState<string[]>();
-    const [originalInstrument, setOriginalInstrument] = useState("");
-    const [modalVisible, setModalVisible] = useState<boolean>(false);
-    const [customInstrument, setCustomInstrument] = useState<string>("");
-    const [addToBadData, setAddToBadData] = useState(false);
-    const [badDataReason, setBadDataReason] = useState("");
-    const [showStartPicker, setShowStartPicker] = useState(false);
-    const [showEndPicker, setShowEndPicker] = useState(false);
-    const [selectedTank, setSelectedTank] = useState("");
+  //Get latest notes entry from site
+  let latestEntry = null;
+  if (data) {
+    latestEntry = data.entries[0];
+  }
+  
+  // these use states to set and store values in the text inputs
+  const [startDateValue, setStartDateValue] = useState(new Date());
+  const [endDateValue, setEndDateValue] = useState(new Date());
+  const [nameValue, setNameValue] = useState("");
+  const [ltsId, setLTSId] = useState("");
+  const [ltsValue, setLTSValue] = useState("");
+  const [ltsPressure, setLTSPressure] = useState("");
+  const [lowId, setLowId] = useState("");
+  const [lowValue, setLowValue] = useState("");
+  const [lowPressure, setLowPressure] = useState("");
+  const [midId, setMidId] = useState("");
+  const [midValue, setMidValue] = useState("");
+  const [midPressure, setMidPressure] = useState("");
+  const [highId, setHighId] = useState("");
+  const [highValue, setHighValue] = useState("");
+  const [highPressure, setHighPressure] = useState("");
+  const [n2Value, setN2Value] = useState("");
+  const [notesValue, setNotesValue] = useState("");
+  const [instrumentInput, setInstrumentInput] = useState("");
+  const [ltsTankRecord, setLtsTankRecord] = useState<TankRecord>(undefined);
+  const [originalLts, setOriginalLts] = useState<TankRecord>(undefined);
+  const [lowTankRecord, setLowTankRecord] = useState<TankRecord>(undefined);
+  const [originalLow, setOriginalLow] = useState<TankRecord>(undefined);
+  const [midTankRecord, setMidTankRecord] = useState<TankRecord>(undefined);
+  const [originalMid, setOriginalMid] = useState<TankRecord>(undefined);
+  const [highTankRecord, setHighTankRecord] = useState<TankRecord>(undefined);
+  const [originalHigh, setOriginalHigh] = useState<TankRecord>(undefined);
+  const [instrumentNames, setInstrumentNames] = useState<string[]>();
+  const [originalInstrument, setOriginalInstrument] = useState("");
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [customInstrument, setCustomInstrument] = useState<string>("");
+  const [addToBadData, setAddToBadData] = useState(false);
+  const [badDataReason, setBadDataReason] = useState("");
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+  const [selectedTank, setSelectedTank] = useState("");
 
-    // used for determining if PUT request was successful
-    // will set the success/fail notification to visible, aswell as the color and text
-    const [visible, setVisible] = useState(false);
-    const [messageStatus, setMessageStatus] = useState("");
-    const [message, setMessage] = useState("");
-    const [returnHome, retHome] = useState(false);
-    const visibleRef = useRef(false);
+  // used for determining if PUT request was successful
+  // will set the success/fail notification to visible, aswell as the color and text
+  const [visible, setVisible] = useState(false);
+  const [messageStatus, setMessageStatus] = useState("");
+  const [message, setMessage] = useState("");
+  const [returnHome, retHome] = useState(false);
+  const visibleRef = useRef(false);
 
-    // used for popup if info is missing
-    const [visible2, setVisible2] = useState(false);
+  // used for popup if info is missing
+  const [visible2, setVisible2] = useState(false);
 
-    // used for loading screen
-    const [loadingValue, setLoadingValue] = useState(false);
+  // used for loading screen
+  const [loadingValue, setLoadingValue] = useState(false);
 
-    //used for date/time pickers
-    const [showPicker, setShowPicker] = useState(false);
-    const [showPicker2, setShowPicker2] = useState(false);
-    
-    // tank predictor
-    const [tankPredictorVisibility, setTankPredictorVisibility] = useState(false);
-    const [lowTankName, setLowTankName] = useState("");
-    const [lowDaysRemaining, setLowDaysRemaining] = useState(-1);
-    const [midDaysRemaining, setMidDaysRemaining] = useState(-1);
-    const [midTankName, setMidTankName] = useState("");
-    const [highDaysRemaining, setHighDaysRemaining] = useState(-1);
-    const [highTankName, setHighTankName] = useState("");
-    const [ltsDaysRemaining, setLtsDaysRemaining] = useState(-1);
-    const [ltsTankName, setLtsTankName] = useState("");
-    const [n2DaysRemaining, setN2DaysRemaining] = useState(-1);
-    const [n2TankName, setN2TankName] = useState("");
+  //used for date/time pickers
+  const [showPicker, setShowPicker] = useState(false);
+  const [showPicker2, setShowPicker2] = useState(false);
+  
+  // tank predictor
+  const [tankPredictorVisibility, setTankPredictorVisibility] = useState(false);
+  const [lowTankName, setLowTankName] = useState("");
+  const [lowDaysRemaining, setLowDaysRemaining] = useState(-1);
+  const [midDaysRemaining, setMidDaysRemaining] = useState(-1);
+  const [midTankName, setMidTankName] = useState("");
+  const [highDaysRemaining, setHighDaysRemaining] = useState(-1);
+  const [highTankName, setHighTankName] = useState("");
+  const [ltsDaysRemaining, setLtsDaysRemaining] = useState(-1);
+  const [ltsTankName, setLtsTankName] = useState("");
+  const [n2DaysRemaining, setN2DaysRemaining] = useState(-1);
+  const [n2TankName, setN2TankName] = useState("");
 
     //method will warn user if fields haven't been input
     function checkTextEntries(){
@@ -413,9 +363,7 @@ export default function AddNotes({ navigation }: NavigationType) {
 
         if (addToBadData) {
           let instrument = "";
-          console.log("before")
           const badDataString = buildBadDataString(startDateValue, endDateValue, "all", "NA", nameValue, badDataReason, true);
-          console.log("after")
           if (instrumentInput.includes("LGR")) {
             instrument = "lgr_ugga";
           } else if (instrumentInput.includes("7000")) {

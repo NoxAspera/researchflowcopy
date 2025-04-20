@@ -25,6 +25,7 @@ import {
 import LoadingScreen from "../components/LoadingScreen";
 import * as Network from "expo-network";
 import { sanitize } from "../scripts/Parsers";
+import { fetchTank } from "../scripts/DataFetching";
 
 async function isConnected() {
   let check = (await Network.getNetworkStateAsync()).isConnected;
@@ -58,21 +59,7 @@ export default function TankTracker({ navigation }: NavigationType) {
   const [loadingValue, setLoadingValue] = useState(false);
 
   useEffect(() => {
-    const fetchTank = async () => {
-      setNetworkStatus(await isConnected());
-      if (tank) {
-        const entry = getLatestTankEntry(tank);
-        if (entry) {
-          setLocationValue(entry.location);
-          setCO2Value(entry.co2.toString());
-          setCH4Value(entry.ch4.toString());
-          setFillIDValue(entry.fillId);
-          setPSIValue(entry.pressure.toString());
-          setLatestEntry(entry);
-        }
-      }
-    };
-    fetchTank();
+    fetchTank(tank, setNetworkStatus, setLatestEntry, setCO2Value, setCH4Value, setFillIDValue, setPSIValue, setLatestEntry);
   }, [tank]);
 
   const getCurrentUtcDateTime = () => {

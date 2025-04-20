@@ -15,6 +15,7 @@ import { Layout, Button, Text } from '@ui-kitten/components';
 import { NavigationType, routeProp } from '../components/types'
 import { getBadDataSites, getDirectory, getTankList } from '../scripts/APIRequests';
 import { ScrollView } from 'react-native-gesture-handler';
+import { fetchSiteNames } from '../scripts/DataFetching';
 
 
 export default function SelectSite({navigation}: NavigationType) {
@@ -28,35 +29,7 @@ export default function SelectSite({navigation}: NavigationType) {
 
   // Fetch site names from GitHub Repo
   useEffect(() => {
-    const fetchSiteNames = async () => {
-      try {
-        let names;
-        let mobile_names;
-        if (from === 'AddNotes' || from === 'ViewNotes' || from === 'PlanVisit' || from === 'Diagnostics') {
-          names = await getDirectory("site_notes");
-          mobile_names = await getDirectory("site_notes/mobile");
-        } else if (from === 'BadData') {
-          names = await getBadDataSites();
-        } else if (from === 'InstrumentMaintenance' || from === 'InstrumentMaintenanceNotes') {
-          names = await getDirectory("instrument_maint");
-        } else if (from === 'TankTracker') {
-          setSiteNames(getTankList());
-        }
-        if(names?.success)
-        {
-          if (mobile_names?.success) {
-            names.data.push(...mobile_names.data.map(item => "mobile/" + item));
-          }
-          setSiteNames(names.data);
-        } // Set the fetched site names
-    }
-      catch (error)
-      {
-        console.error("Error processing site names:", error);
-      }
-    };
-
-    fetchSiteNames();
+    fetchSiteNames(from, setSiteNames);
   }, [from]);
 
   // data for buttons

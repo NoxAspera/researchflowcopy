@@ -16,6 +16,7 @@ import { LineChart, XAxis, YAxis } from 'react-native-svg-charts';
 import { Svg, Line, Rect } from 'react-native-svg';
 import * as scale from 'd3-scale';
 import { daysUntilEmpty } from "../scripts/TankPredictor";
+import { fetchDiagnosticData } from "../scripts/DataFetching";
 
 const extractNumericValue = (pressure: string | null): number | null => {
   if (!pressure) return null; // Handle null or undefined
@@ -118,17 +119,7 @@ export default function Diagnostics({ navigation }: NavigationType) {
   
   // Get current notes for the site
   useEffect(() => {
-    async function fetchData() {
-      if (site && !data) {
-        try {
-          const parsedData = await processNotes(site);
-          setData(parsedData); // Update state with the latest entry
-        } catch (error) {
-            console.error("Error processing notes:", error);
-        }
-      }
-    }
-    fetchData();
+    fetchDiagnosticData(site, data, setData);
   }, [site]); // Re-run if `site` changes
 
   const [tankData, setTankData] = useState<Record<string, { time: string; pressure: number }[]>>({});

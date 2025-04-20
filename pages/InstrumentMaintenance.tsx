@@ -21,7 +21,8 @@ import LoadingScreen from "../components/LoadingScreen";
 import DateTimePicker , {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
 import { TimerPickerModal } from "react-native-timer-picker";
 import * as Network from 'expo-network'
-import { sanitize } from "../scripts/Parsers";
+import { buildBadDataString, buildInstrumentNotes, sanitize } from "../scripts/Parsers";
+import { fetchSite } from "../scripts/DataFetching";
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
@@ -106,49 +107,8 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   const [showPicker2, setShowPicker2] = useState(false);
 
   useEffect(() => {
-    const fetchSite = async () => {
-      let check = await Network.getNetworkStateAsync()
-      if (site.includes("LGR") && check.isConnected) {
-        try {
-          const response = await getInstrumentSite(site);
-          if (response.success) {
-            setSiteValue(response.data || ""); // Set the file names as options
-          } else {
-            alert(`Error fetching site: ${response.error}`);
-          }
-        } catch (error) {
-          console.error("Error fetching instrument site:", error);
-        }
-      }
-    };
-    fetchSite();
+    fetchSite(site, setSiteValue);
   }, [site]);
-
-  const buildInstrumentNotes = (): string => {
-    const time = new Date(startDateValue);
-    const year = time.getFullYear().toString()
-    const month = (time.getMonth() + 1).toString() // now.getMonth() is zero-base (i.e. January is 0), likely due to something with Oracle's implementation - August
-    const day = time.getDate().toString()
-    const hours= time.getHours().toString()
-    const minutes = time.getMinutes().toString()
-
-    let result: string = `- Time in: ${year}-${month}-${day} ${hours}:${minutes}Z\n`;
-
-    result += `- Name: ${sanitize(nameValue)}\n`;
-    result += `- Notes: ${sanitize(notesValue)}\n`;
-    result += "---\n";
-
-    return result;
-  };
-
-  const buildBadDataString = (): string => {
-    const startTime = startDateValue.toISOString().split(".")[0] + "Z";
-    const endTime = endDateValue.toISOString().split(".")[0] + "Z";
-    const currentTime = (new Date()).toISOString().split(".")[0] + "Z";
-    let result: string = `${startTime},${endTime},all,NA,${currentTime},${sanitize(nameValue)},${sanitize(badDataReason)}`;
-
-    return result;
-  };
 
   const handleSubmit = () => {
     if (
@@ -171,11 +131,11 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     // display loading screen while while awaiting for results
     setLoadingValue(true);
 
-    const instrumentNotes = buildInstrumentNotes();
+    const instrumentNotes = buildInstrumentNotes(startDateValue, nameValue, notesValue);
 
     let badResult;
     if (addToBadData) {
-      const badDataString = buildBadDataString();
+      const badDataString = buildBadDataString(startDateValue, endDateValue, "all", "NA", nameValue, badDataReason, true);
       let location;
       let instrument;
       if (needsLocation) {

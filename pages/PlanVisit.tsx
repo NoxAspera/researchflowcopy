@@ -17,6 +17,7 @@ import { visit, setVisitFile, getFileContents } from "../scripts/APIRequests";
 import SuccessFailurePopup from '../components/SuccessFailurePopup';
 import LoadingScreen from "../components/LoadingScreen";
 import { sanitize } from "../scripts/Parsers";
+import { fetchPrevNotes } from "../scripts/DataFetching";
 
 export default function PlanVisit({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -64,42 +65,8 @@ export default function PlanVisit({ navigation }: NavigationType) {
 
   // Get current notes for the site
   useEffect(() => {
-    async function fetchData() {
-      if (site && !data && route) {
-        try {
-          const parsedData = await getFileContents(`/site_notes/${site}`);
-          if (parsedData.success) {
-            let fileContent = parsedData.data;
-            if (site.includes("Teledyne")) {
-              // Find the start of "Maintenance Log"
-              const maintenanceIndex = fileContent.indexOf("Maintenance Log");
-              if (maintenanceIndex !== -1) {
-                // Find the end of the "Maintenance Log" line
-                const startOfLogContent = fileContent.indexOf("\n", maintenanceIndex) + 1;
-  
-                // Keep the first line + everything after the "Maintenance Log" line
-                const firstLineEnd = fileContent.indexOf("\n");
-                fileContent =
-                  fileContent.substring(0, firstLineEnd + 1) + // Keep the first line
-                  fileContent.substring(startOfLogContent); // Skip "Maintenance Log" line
-              }
-            }
-
-            setData(
-              fileContent
-                .substring(parsedData.data.indexOf("\n"))
-                .split(new RegExp("(___|---)"))
-            );
-          } else {
-            console.error("Error getting notes: ", );
-          }
-        } catch (error) {
-          console.error("Error retreiveing  notes:", error);
-        }
-      }
-    }
     if(!from){
-      fetchData();
+      fetchPrevNotes(site, data, route, setData);
     }
   }, [site]);
 

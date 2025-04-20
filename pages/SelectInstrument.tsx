@@ -13,8 +13,8 @@ import React, { useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { Layout, Button, Text } from '@ui-kitten/components';
 import { NavigationType, routeProp } from '../components/types'
-import { getDirectory } from '../scripts/APIRequests';
 import { ScrollView } from 'react-native-gesture-handler';
+import { fetchInstrumentNames, fetchSiteNames } from '../scripts/DataFetching';
 
 
 export default function SelectInstrument({navigation}: NavigationType) {
@@ -25,24 +25,8 @@ export default function SelectInstrument({navigation}: NavigationType) {
   // State to hold the list of site names
   const [instrumentNames, setInstrumentNames] = useState<string[]>();
 
-  // Fetch site names from GitHub Repo
   useEffect(() => {
-    const fetchSiteNames = async () => {
-      try {
-        let names = await getDirectory(`instrument_maint/${from}`);
-
-        if(names?.success)
-        {
-          setInstrumentNames(names.data);
-        } // Set the fetched site names
-    }
-      catch (error)
-      {
-        console.error("Error processing instrument names:", error);
-      }
-    };
-
-    fetchSiteNames();
+    fetchInstrumentNames(setInstrumentNames, from);
   }, [from]);
 
   // data for buttons

@@ -20,6 +20,7 @@ import SuccessFailurePopup from "../components/SuccessFailurePopup"
 import { ThemeContext } from '../components/ThemeContext';
 import LoadingScreen from "../components/LoadingScreen";
 import { buildBadDataString, sanitize } from "../scripts/Parsers";
+import { fetchBadDataFiles } from "../scripts/DataFetching";
 
 export default function BadData({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -53,21 +54,7 @@ export default function BadData({ navigation }: NavigationType) {
   }
 
   useEffect(() => {
-    const fetchBadDataFiles = async () => {
-        try {
-          
-          const response = await getBadDataFiles(site);
-          if (response.success) {
-            setFileOptions(response.data || []); // Set the file names as options
-          } else {
-            alert(`Error fetching files: ${response.error}`);
-          }
-        } catch (error) {
-          console.error("Error fetching bad data files:", error);
-        }
-      };
-
-    fetchBadDataFiles();
+    fetchBadDataFiles(setFileOptions,site);
   }, [site]);
 
   const validateTime = (time: string) => {
@@ -99,14 +86,12 @@ export default function BadData({ navigation }: NavigationType) {
       !reasonValue ||
       !instrument
     ) {
-      //alert("Please fill out all fields before submitting.");
       setMessage("Please fill out all fields before submitting.");
       setMessageStatus("danger");
       setSuccessFailureVisible(true);
       return;
     }
     if (!validateTime(startTimeValue) || !validateTime(endTimeValue)) {
-      //alert("Please make sure time entries follow the HH:MM:SS format");
       setMessage("Please make sure time entries follow the HH:MM:SS format.");
       setMessageStatus("danger");
       setSuccessFailureVisible(true);

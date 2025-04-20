@@ -436,6 +436,13 @@ export async function processNotes(siteName: string) {
     }
   }
 
+/**
+ * 
+ * @param time 
+ * @param name 
+ * @param site 
+ * @returns 
+ */
 export function installedInstrumentNotes(time: string, name: string, site: string): string {
     let result: string = `- Time in: ${time}\n`;
 
@@ -446,6 +453,13 @@ export function installedInstrumentNotes(time: string, name: string, site: strin
     return result;
 }
 
+/**
+ * 
+ * @param time 
+ * @param name 
+ * @param site 
+ * @returns 
+ */
 export function removedInstrumentNotes(time: string, name: string, site: string): string {
     let result: string = `- Time in: ${time}\n`;
 
@@ -456,23 +470,48 @@ export function removedInstrumentNotes(time: string, name: string, site: string)
     return result;
 }
 
+export function buildInstrumentNotes(startDate, name, notes): string {
+    const time = new Date(startDate);
+    const year = time.getFullYear().toString()
+    const month = (time.getMonth() + 1).toString() // now.getMonth() is zero-base (i.e. January is 0), likely due to something with Oracle's implementation - August
+    const day = time.getDate().toString()
+    const hours= time.getHours().toString()
+    const minutes = time.getMinutes().toString()
+
+    let result: string = `- Time in: ${year}-${month}-${day} ${hours}:${minutes}Z\n`;
+
+    result += `- Name: ${sanitize(name)}\n`;
+    result += `- Notes: ${sanitize(notes)}\n`;
+    result += "---\n";
+
+    return result;
+  };
+
 // Function to format the date
 function formatDate(date: Date | null): string {
     return date ? date.toISOString().split("T")[0] : "";
 };
 
+/**
+ * 
+ * @param startDate 
+ * @param endDate 
+ * @param oldID 
+ * @param newID 
+ * @param name 
+ * @param reason 
+ * @param fromAddNotes 
+ * @returns 
+ */
 export function buildBadDataString(startDate: Date, endDate: Date, oldID: string, newID: string, name: string, reason: string, fromAddNotes: boolean): string {
     const startTime = startDate.toISOString().split(".")[0] + "Z";
     const endTime = endDate.toISOString().split(".")[0] + "Z";
     const currentTime = new Date().toISOString().split(".")[0] + "Z";
-    // console.log(path);
 
     if (fromAddNotes) {
-        console.log("add notes")
         var result: string = `${startTime},${endTime},${oldID},${newID},${currentTime},${sanitize(name)},${sanitize(reason)}`;
     }
     else {
-        console.log("bad data")
         var result: string = `${formatDate(startDate)}T${startTime},${formatDate(endDate)}T${endTime},${oldID},${newID},${currentTime},${sanitize(name)},${sanitize(reason)}`;
     }
 

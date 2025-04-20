@@ -9,11 +9,9 @@ import { useRoute } from '@react-navigation/native';
 import { Card, Layout, Text } from '@ui-kitten/components';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
-import { getFileContents } from '../scripts/APIRequests';
-import { Entry } from '../scripts/Parsers';
-import { customTheme } from './CustomTheme';
 import { ScrollView } from 'react-native-gesture-handler';
-import { NavigationType, routeProp } from './types'
+import { NavigationType, routeProp } from '../components/types'
+import { fetchNotes } from '../scripts/DataFetching';
 
 
 function retrieveHeader(site: string)
@@ -36,43 +34,8 @@ export default function ViewNotes({navigation }: NavigationType) {
 
   // Get current notes for the site
   useEffect(() => {
-    async function fetchData() {
-      if (site && !data && route) {
-        try {
-          const parsedData = await getFileContents(site);
-          if (parsedData.success) {
-            let fileContent = parsedData.data;
-
-            if (site.includes("Teledyne")) {
-              // Find the start of "Maintenance Log"
-              const maintenanceIndex = fileContent.indexOf("Maintenance Log");
-              if (maintenanceIndex !== -1) {
-                // Find the end of the "Maintenance Log" line
-                const startOfLogContent = fileContent.indexOf("\n", maintenanceIndex) + 1;
-  
-                // Keep the first line + everything after the "Maintenance Log" line
-                const firstLineEnd = fileContent.indexOf("\n");
-                fileContent =
-                  fileContent.substring(0, firstLineEnd + 1) + // Keep the first line
-                  fileContent.substring(startOfLogContent); // Skip "Maintenance Log" line
-              }
-            }
-
-            setData(
-              fileContent
-                .substring(parsedData.data.indexOf("\n"))
-                .split(new RegExp("(___|---)"))
-            );
-          } else {
-            console.error(parsedData.error);
-          }
-        } catch (error) {
-          console.error("Error retreiveing  notes:", error);
-        }
-      }
-    }
     if(!from){
-      fetchData();
+      fetchNotes(site, data, route, setData);
     }
   }, [site]);
   if(!from){

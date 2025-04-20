@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import SelectSite from './pages/SelectSite'
 import HomeScreen from './pages/HomeScreen'
 import AddNotes from './pages/AddNotes'
-import ViewNotes from './components/ViewNotes'
+import ViewNotes from './pages/ViewNotes'
 import BadData from './pages/BadData'
 import InstrumentMaintenance from './pages/InstrumentMaintenance'
 import TankTracker from './pages/TankTracker'

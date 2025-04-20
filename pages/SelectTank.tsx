@@ -13,6 +13,7 @@ import { Button, Text } from '@ui-kitten/components';
 import { NavigationType, routeProp } from '../components/types'
 import { getTankList } from '../scripts/APIRequests';
 import { ScrollView, TextInput} from 'react-native-gesture-handler';
+import { fetchTankNames } from '../scripts/DataFetching';
 
 export default function SelectTank({navigation}: NavigationType) {
   const route = useRoute<routeProp>();
@@ -25,18 +26,7 @@ export default function SelectTank({navigation}: NavigationType) {
 
 
   useEffect(() => {
-    const fetchTankNames = async () => {
-      try {
-        const tanks = getTankList(); // Ensure getTankList is returning a valid list
-        const validTanks = tanks.filter(tank => tank && tank.trim() !== "");
-        setTankNames(validTanks);
-        setFilteredTanks(validTanks); // Initialize filtered list
-      } catch (error) {
-        console.error("Error fetching tank names:", error);
-      }
-    };
-
-    fetchTankNames();
+    fetchTankNames(setTankNames, setFilteredTanks);
   }, []);
 
   // Handle search input change
