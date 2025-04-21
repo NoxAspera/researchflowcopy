@@ -13,7 +13,6 @@ import React, { useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { Layout, Button, Text } from '@ui-kitten/components';
 import { NavigationType, routeProp } from '../components/types'
-import { getBadDataSites, getDirectory, getTankList } from '../scripts/APIRequests';
 import { ScrollView } from 'react-native-gesture-handler';
 import { fetchSiteNames } from '../scripts/DataFetching';
 

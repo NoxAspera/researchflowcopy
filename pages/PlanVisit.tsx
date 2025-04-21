@@ -13,7 +13,7 @@ import TextInput from "../components/TextInput";
 import { NavigationType, routeProp } from "../components/types";
 import { ScrollView } from "react-native-gesture-handler";
 import { ThemeContext } from "../components/ThemeContext";
-import { visit, setVisitFile, getFileContents } from "../scripts/APIRequests";
+import { visit, setVisitFile } from "../scripts/APIRequests";
 import SuccessFailurePopup from '../components/SuccessFailurePopup';
 import LoadingScreen from "../components/LoadingScreen";
 import { sanitize } from "../scripts/Parsers";

@@ -61,6 +61,7 @@ import DateTimePicker, {
 } from "@react-native-community/datetimepicker";
 import { TimerPickerModal } from "react-native-timer-picker";
 import { fetchData, fetchInstrumentNames } from "../scripts/DataFetching";
+import { setEndDateHourMinutes, setStartDateHourMinutes, showEndMode, showStartMode } from "../scripts/Dates";
 
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
@@ -82,42 +83,6 @@ export default function AddNotes({ navigation }: NavigationType) {
     setEndDateValue(currentDate);
   };
 
-  //pops up date picker for start date
-  const showStartMode = (currentMode) => {
-    DateTimePickerAndroid.open({
-      value: startDateValue,
-      onChange: onStartChange,
-      mode: currentMode,
-      is24Hour: false,
-    });
-  };
-
-  //pops up date picker for end date
-  const showEndMode = (currentMode) => {
-    DateTimePickerAndroid.open({
-      value: endDateValue,
-      onChange: onEndChange,
-      mode: currentMode,
-      is24Hour: false,
-    });
-  };
-
-  //sets start date hours and minutes
-  function setStartDateHourMinutes(pickedDuration) {
-    const tempDate = startDateValue;
-    tempDate.setHours(pickedDuration.hours);
-    tempDate.setMinutes(pickedDuration.minutes);
-    setStartDateValue(tempDate);
-  }
-
-  //sets end date hours and minutes
-  function setEndDateHourMinutes(pickedDuration) {
-    const tempDate = endDateValue;
-    tempDate.setHours(pickedDuration.hours);
-    tempDate.setMinutes(pickedDuration.minutes);
-    setEndDateValue(tempDate);
-  }
-
   const route = useRoute<routeProp>();
   const { site } = route.params || {};
   const themeContext = React.useContext(ThemeContext);
@@ -136,7 +101,7 @@ export default function AddNotes({ navigation }: NavigationType) {
 
   // Get list of possible instruments
   useEffect(() => {
-    fetchInstrumentNames(setInstrumentNames);
+    fetchInstrumentNames(setInstrumentNames, null);
   }, [site]);
 
   //Get latest notes entry from site
@@ -598,7 +563,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             <View style={styles.androidDateTime}>
               <Pressable
                 onPress={() => {
-                  showStartMode("date");
+                  showStartMode("date", startDateValue, onStartChange);
                   setStartDateValue(startDateValue);
                 }}
               >
@@ -634,7 +599,7 @@ export default function AddNotes({ navigation }: NavigationType) {
                 minuteLabel={"<"}
                 onConfirm={(pickedDuration) => {
                   //set time
-                  setStartDateHourMinutes(pickedDuration);
+                  setStartDateHourMinutes(pickedDuration, startDateValue, setStartDateValue);
                   //set time picker to false to close it
                   setShowPicker(false);
                 }}
@@ -708,7 +673,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             <View style={styles.androidDateTime}>
               <Pressable
                 onPress={() => {
-                  showEndMode("date");
+                  showEndMode("date", endDateValue, onEndChange);
                   setEndDateValue(endDateValue);
                 }}
               >
@@ -742,7 +707,7 @@ export default function AddNotes({ navigation }: NavigationType) {
                 minuteLabel={"<"}
                 onConfirm={(pickedDuration) => {
                   //set time
-                  setEndDateHourMinutes(pickedDuration);
+                  setEndDateHourMinutes(pickedDuration, endDateValue, setEndDateValue);
                   //set time picker to false to close it
                   setShowPicker2(false);
                 }}

@@ -13,73 +13,36 @@ import { Button, Layout, Text, CheckBox, Icon } from "@ui-kitten/components";
 import TextInput from "../components/TextInput";
 import NoteInput from "../components/NoteInput";
 import { NavigationType, routeProp } from "../components/types";
-import {setInstrumentFile, getInstrumentSite, setBadData} from "../scripts/APIRequests";
+import {setInstrumentFile, setBadData} from "../scripts/APIRequests";
 import { ScrollView } from "react-native-gesture-handler";
 import { ThemeContext } from '../components/ThemeContext';
 import SuccessFailurePopup from '../components/SuccessFailurePopup';
 import LoadingScreen from "../components/LoadingScreen";
-import DateTimePicker , {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { TimerPickerModal } from "react-native-timer-picker";
-import * as Network from 'expo-network'
 import { buildBadDataString, buildInstrumentNotes, sanitize } from "../scripts/Parsers";
 import { fetchSite } from "../scripts/DataFetching";
+import { setEndDateHourMinutes, setStartDateHourMinutes, showEndMode, showStartMode } from "../scripts/Dates";
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
+  //changes start date
+  const onStartChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setStartDateValue(currentDate);
+  };
 
-      //changes start date
-      const onStartChange = (event, selectedDate) => {
-        const currentDate = selectedDate;
-        setStartDateValue(currentDate);
-      };
-    
-      //changes end date
-      const onEndChange = (event, selectedDate) => {
-        const currentDate = selectedDate;
-        setEndDateValue(currentDate);
-      };
-    
-      //pops up date picker for start date
-      const showStartMode = (currentMode) => {
-        DateTimePickerAndroid.open({
-          value: startDateValue,
-          onChange: onStartChange,
-          mode: currentMode,
-          is24Hour: false,
-        });
-      };
-    
-      //pops up date picker for end date
-      const showEndMode = (currentMode) => {
-        DateTimePickerAndroid.open({
-          value: endDateValue,
-          onChange: onEndChange,
-          mode: currentMode,
-          is24Hour: false,
-        });
-      };
-    
-      //sets start date hours and minutes
-      function setStartDateHourMinutes (pickedDuration) {
-        const tempDate = startDateValue;
-        tempDate.setHours(pickedDuration.hours)
-        tempDate.setMinutes(pickedDuration.minutes)
-        setStartDateValue(tempDate);
-      };
-
-      //sets end date hours and minutes
-      function setEndDateHourMinutes (pickedDuration) {
-        const tempDate = endDateValue;
-        tempDate.setHours(pickedDuration.hours)
-        tempDate.setMinutes(pickedDuration.minutes)
-        setEndDateValue(tempDate);
-      };
+  //changes end date
+  const onEndChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setEndDateValue(currentDate);
+  };
 
   const route = useRoute<routeProp>();
   let site = route.params?.site ?? "";
   let instrumentName = site.slice(site.lastIndexOf("/") + 1);
   let needsLocation = site.includes("LGR");
   const themeContext = React.useContext(ThemeContext);
-  const isDarkMode = themeContext.theme === 'dark';
+  const isDarkMode = themeContext.theme === "dark";
 
   // used for setting and remembering the input values
   const [nameValue, setNameValue] = useState("");
@@ -101,7 +64,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   const visibleRef = useRef(false);
 
   // used for loading screen
-    const [loadingValue, setLoadingValue] = useState(false);
+  const [loadingValue, setLoadingValue] = useState(false);
   //used for date/time pickers
   const [showPicker, setShowPicker] = useState(false);
   const [showPicker2, setShowPicker2] = useState(false);
@@ -131,11 +94,23 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     // display loading screen while while awaiting for results
     setLoadingValue(true);
 
-    const instrumentNotes = buildInstrumentNotes(startDateValue, nameValue, notesValue);
+    const instrumentNotes = buildInstrumentNotes(
+      startDateValue,
+      nameValue,
+      notesValue
+    );
 
     let badResult;
     if (addToBadData) {
-      const badDataString = buildBadDataString(startDateValue, endDateValue, "all", "NA", nameValue, badDataReason, true);
+      const badDataString = buildBadDataString(
+        startDateValue,
+        endDateValue,
+        "all",
+        "NA",
+        nameValue,
+        badDataReason,
+        true
+      );
       let location;
       let instrument;
       if (needsLocation) {
@@ -173,7 +148,9 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
         setMessage(`Error: ${result.error}`);
         setMessageStatus("danger");
       } else if (badResult.error) {
-        setMessage(`Instrument maintenance notes updated successfully.\nUnable to update Bad Data. Please update Bad Data manually.`);
+        setMessage(
+          `Instrument maintenance notes updated successfully.\nUnable to update Bad Data. Please update Bad Data manually.`
+        );
         setMessageStatus("danger");
         retHome(true);
       }
@@ -181,7 +158,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     setTimeout(() => {
       setVisible(true);
       visibleRef.current = true;
-  }, 100);
+    }, 100);
   };
 
   const handleChecked = (checked: boolean) => {
@@ -192,18 +169,18 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   };
 
   //method to navigate home to send to popup so it can happen after dismiss button is clicked
-  function navigateHome(nav:boolean){
-    if(nav){
-      navigation.navigate("Home")
+  function navigateHome(nav: boolean) {
+    if (nav) {
+      navigation.navigate("Home");
     }
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior = "padding"
-      style={styles.container}
-    >
-      <ScrollView automaticallyAdjustKeyboardInsets={true} keyboardShouldPersistTaps='handled'>
+    <KeyboardAvoidingView behavior="padding" style={styles.container}>
+      <ScrollView
+        automaticallyAdjustKeyboardInsets={true}
+        keyboardShouldPersistTaps="handled"
+      >
         <Layout style={styles.container} level="1">
           {/* header */}
           <Text category="h1" style={{ textAlign: "center" }}>
@@ -212,16 +189,18 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
 
           {/* text inputs */}
           {/* success/failure popup */}
-          <SuccessFailurePopup popupText={message} 
-            popupStatus={messageStatus} 
-            onPress={() => setVisible(false)} 
-            navigateHome={navigateHome} 
+          <SuccessFailurePopup
+            popupText={message}
+            popupStatus={messageStatus}
+            onPress={() => setVisible(false)}
+            navigateHome={navigateHome}
             visible={visible}
-            returnHome={returnHome}/>
+            returnHome={returnHome}
+          />
 
           {/* loading screen */}
-          <LoadingScreen visible={loadingValue}/>
-            
+          <LoadingScreen visible={loadingValue} />
+
           {/* Time input */}
           {needsLocation && (
             <TextInput
@@ -233,32 +212,66 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
             />
           )}
 
-          <Text category="p2" style={{ marginTop: 15, marginLeft: 15 }}>Start Time (MT):</Text>
-          <TouchableOpacity onPress={() => setShowStartPicker(true)} style={[styles.datePicker, {borderColor: isDarkMode ? "#101426" : "#E4E9F2"}, {backgroundColor: isDarkMode ? "#1A2138" : "#F7F9FC"}]}>
-            <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
-            <Text>{startDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {startDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+          <Text category="p2" style={{ marginTop: 15, marginLeft: 15 }}>
+            Start Time (MT):
+          </Text>
+          <TouchableOpacity
+            onPress={() => setShowStartPicker(true)}
+            style={[
+              styles.datePicker,
+              { borderColor: isDarkMode ? "#101426" : "#E4E9F2" },
+              { backgroundColor: isDarkMode ? "#1A2138" : "#F7F9FC" },
+            ]}
+          >
+            <Icon
+              name="calendar-outline"
+              style={{ width: 20, height: 20, marginRight: 10 }}
+              fill="gray"
+            />
+            <Text>
+              {startDateValue.toLocaleDateString([], {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+              })}{" "}
+              {startDateValue.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </Text>
           </TouchableOpacity>
 
-          {(showStartPicker && Platform.OS === "ios") && (
+          {showStartPicker && Platform.OS === "ios" && (
             <View>
-            <DateTimePicker
-              value={startDateValue}
-              mode="datetime"
-              display="spinner"
-              onChange={(event, selectedDate) => {
-              if (selectedDate) setStartDateValue(selectedDate);
-            }}
-            />
-            <Button style={styles.submitButton} onPress={() => setShowStartPicker(false)}> 
-            {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Confirm Date/Time</Text>}
-            </Button>
+              <DateTimePicker
+                value={startDateValue}
+                mode="datetime"
+                display="spinner"
+                onChange={(event, selectedDate) => {
+                  if (selectedDate) setStartDateValue(selectedDate);
+                }}
+              />
+              <Button
+                style={styles.submitButton}
+                onPress={() => setShowStartPicker(false)}
+              >
+                {(evaProps) => (
+                  <Text {...evaProps} category="h6" style={{ color: "black" }}>
+                    Confirm Date/Time
+                  </Text>
+                )}
+              </Button>
             </View>
-         )}
+          )}
 
-          {(showStartPicker && Platform.OS === "android") && (
-          (
+          {showStartPicker && Platform.OS === "android" && (
             <View style={styles.androidDateTime}>
-              <Pressable onPress={() => {showStartMode("date"); setStartDateValue(startDateValue)}}>
+              <Pressable
+                onPress={() => {
+                  showStartMode("date", startDateValue, onStartChange);
+                  setStartDateValue(startDateValue);
+                }}
+              >
                 <Text>
                   {startDateValue.toLocaleDateString([], {
                     weekday: "short",
@@ -268,7 +281,12 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
                   })}
                 </Text>
               </Pressable>
-              <Pressable onPress={() => {setShowPicker(true); setStartDateValue(startDateValue)}}>
+              <Pressable
+                onPress={() => {
+                  setShowPicker(true);
+                  setStartDateValue(startDateValue);
+                }}
+              >
                 <Text>
                   {startDateValue.toLocaleTimeString([], {
                     hour: "2-digit",
@@ -277,71 +295,110 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
                 </Text>
               </Pressable>
               <TimerPickerModal
-                  visible={showPicker}
-                  setIsVisible={setShowPicker}
-                  //makes it am/pm
-                  use12HourPicker={true}
-                  //since we don't need seconds it is hidden
-                  hideSeconds={true}
-                  minuteLabel={"<"}
-                  onConfirm={(pickedDuration) => {
-                    //set time
-                    setStartDateHourMinutes(pickedDuration);                    
-                    //set time picker to false to close it
-                    setShowPicker(false);
-                  }}
-                  modalTitle="Set Time"
-                  onCancel={() => setShowPicker(false)}
-                  closeOnOverlayPress
-                  styles={{
-                      theme: isDarkMode ? "dark" : "light"
-                  }}
-                  modalProps={{
-                      overlayOpacity: 0.2,
-                  }}
+                visible={showPicker}
+                setIsVisible={setShowPicker}
+                //makes it am/pm
+                use12HourPicker={true}
+                //since we don't need seconds it is hidden
+                hideSeconds={true}
+                minuteLabel={"<"}
+                onConfirm={(pickedDuration) => {
+                  //set time
+                  setStartDateHourMinutes(pickedDuration, startDateValue, setStartDateValue);
+                  //set time picker to false to close it
+                  setShowPicker(false);
+                }}
+                modalTitle="Set Time"
+                onCancel={() => setShowPicker(false)}
+                closeOnOverlayPress
+                styles={{
+                  theme: isDarkMode ? "dark" : "light",
+                }}
+                modalProps={{
+                  overlayOpacity: 0.2,
+                }}
               />
             </View>
-          )
-        )}
-
-        <CheckBox
-          checked={addToBadData}
-          onChange={(checked) => {handleChecked(checked)}}
-          style={{ margin: 15 }}
-        >
-        {evaProps => <Text {...evaProps} category="p2">Add this time period to Bad Data?</Text>}
-        </CheckBox>
-
-        {addToBadData && (
-          <View>
-          <Text category="p2" style={{ marginTop: 15, marginLeft: 15 }}>End Time (MT):</Text>
-          <TouchableOpacity onPress={() => setShowEndPicker(true)} style={[styles.datePicker, {borderColor: isDarkMode ? "#101426" : "#E4E9F2"}, {backgroundColor: isDarkMode ? "#1A2138" : "#F7F9FC"}]}>
-            <Icon name="calendar-outline" style={{ width: 20, height: 20, marginRight: 10 }} fill="gray" />
-            <Text>{endDateValue.toLocaleDateString([], {year: 'numeric', month: '2-digit', day: '2-digit'})} {endDateValue.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-          </TouchableOpacity>
-          </View>
           )}
 
-          {(showEndPicker && addToBadData && Platform.OS === "ios")  && (
-            <View>
-            <DateTimePicker
-              value={endDateValue}
-              mode="datetime"
-              display="spinner"
-              onChange={(event, selectedDate) => {
-              if (selectedDate) setEndDateValue(selectedDate);
+          <CheckBox
+            checked={addToBadData}
+            onChange={(checked) => {
+              handleChecked(checked);
             }}
-            />
-            <Button style={styles.submitButton} onPress={() => setShowEndPicker(false)}> 
-            {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Confirm Date/Time</Text>}
-            </Button>
+            style={{ margin: 15 }}
+          >
+            {(evaProps) => (
+              <Text {...evaProps} category="p2">
+                Add this time period to Bad Data?
+              </Text>
+            )}
+          </CheckBox>
+
+          {addToBadData && (
+            <View>
+              <Text category="p2" style={{ marginTop: 15, marginLeft: 15 }}>
+                End Time (MT):
+              </Text>
+              <TouchableOpacity
+                onPress={() => setShowEndPicker(true)}
+                style={[
+                  styles.datePicker,
+                  { borderColor: isDarkMode ? "#101426" : "#E4E9F2" },
+                  { backgroundColor: isDarkMode ? "#1A2138" : "#F7F9FC" },
+                ]}
+              >
+                <Icon
+                  name="calendar-outline"
+                  style={{ width: 20, height: 20, marginRight: 10 }}
+                  fill="gray"
+                />
+                <Text>
+                  {endDateValue.toLocaleDateString([], {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  })}{" "}
+                  {endDateValue.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </TouchableOpacity>
             </View>
           )}
 
-          {(showEndPicker && Platform.OS === "android" && addToBadData) && (
-          (
+          {showEndPicker && addToBadData && Platform.OS === "ios" && (
+            <View>
+              <DateTimePicker
+                value={endDateValue}
+                mode="datetime"
+                display="spinner"
+                onChange={(event, selectedDate) => {
+                  if (selectedDate) setEndDateValue(selectedDate);
+                }}
+              />
+              <Button
+                style={styles.submitButton}
+                onPress={() => setShowEndPicker(false)}
+              >
+                {(evaProps) => (
+                  <Text {...evaProps} category="h6" style={{ color: "black" }}>
+                    Confirm Date/Time
+                  </Text>
+                )}
+              </Button>
+            </View>
+          )}
+
+          {showEndPicker && Platform.OS === "android" && addToBadData && (
             <View style={styles.androidDateTime}>
-              <Pressable onPress={() => {showEndMode("date"); setEndDateValue(endDateValue)}}>
+              <Pressable
+                onPress={() => {
+                  showEndMode("date", endDateValue, onEndChange);
+                  setEndDateValue(endDateValue);
+                }}
+              >
                 <Text>
                   {endDateValue.toLocaleDateString([], {
                     weekday: "short",
@@ -351,7 +408,12 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
                   })}
                 </Text>
               </Pressable>
-              <Pressable onPress={() => {setShowPicker2(true); setEndDateValue(endDateValue)}}>
+              <Pressable
+                onPress={() => {
+                  setShowPicker2(true);
+                  setEndDateValue(endDateValue);
+                }}
+              >
                 <Text>
                   {endDateValue.toLocaleTimeString([], {
                     hour: "2-digit",
@@ -360,41 +422,40 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
                 </Text>
               </Pressable>
               <TimerPickerModal
-                  visible={showPicker2}
-                  setIsVisible={setShowPicker2}
-                  use12HourPicker={true}
-                  hideSeconds={true}
-                  minuteLabel={"<"}
-                  onConfirm={(pickedDuration) => {
-                    //set time
-                    setEndDateHourMinutes(pickedDuration);                    
-                    //set time picker to false to close it
-                    setShowPicker2(false);
-                  }}
-                  modalTitle="Set Time"
-                  onCancel={() => setShowPicker2(false)}
-                  closeOnOverlayPress
-                  styles={{
-                      theme: isDarkMode ? "dark" : "light"
-                  }}
-                  modalProps={{
-                      overlayOpacity: 0.2,
-                  }}
+                visible={showPicker2}
+                setIsVisible={setShowPicker2}
+                use12HourPicker={true}
+                hideSeconds={true}
+                minuteLabel={"<"}
+                onConfirm={(pickedDuration) => {
+                  //set time
+                  setEndDateHourMinutes(pickedDuration, endDateValue, setEndDateValue);
+                  //set time picker to false to close it
+                  setShowPicker2(false);
+                }}
+                modalTitle="Set Time"
+                onCancel={() => setShowPicker2(false)}
+                closeOnOverlayPress
+                styles={{
+                  theme: isDarkMode ? "dark" : "light",
+                }}
+                modalProps={{
+                  overlayOpacity: 0.2,
+                }}
               />
             </View>
-          )
-          )}  
+          )}
 
-        {/* Conditionally render reason input if checkbox is checked */}
-        {addToBadData && (
-        <TextInput
-          labelText="Reason for Bad Data"
-          labelValue={badDataReason}
-          onTextChange={setBadDataReason}
-          placeholder="Describe why this data is invalid"
-          style={styles.textInput}
-        />
-      )}
+          {/* Conditionally render reason input if checkbox is checked */}
+          {addToBadData && (
+            <TextInput
+              labelText="Reason for Bad Data"
+              labelValue={badDataReason}
+              onTextChange={setBadDataReason}
+              placeholder="Describe why this data is invalid"
+              style={styles.textInput}
+            />
+          )}
 
           {/* Name input */}
           <TextInput
@@ -422,7 +483,11 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
             status="primary"
             style={styles.submitButton}
           >
-          {evaProps => <Text {...evaProps} category="h6" style={{color: "black"}}>Submit</Text>}
+            {(evaProps) => (
+              <Text {...evaProps} category="h6" style={{ color: "black" }}>
+                Submit
+              </Text>
+            )}
           </Button>
         </Layout>
       </ScrollView>

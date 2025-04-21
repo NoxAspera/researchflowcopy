@@ -24,7 +24,7 @@ function retrieveHeader(site: string)
  * @author Blake Stambaugh, August O'Rourke
  * @returns The view notes page in our app
  */
-export default function ViewNotes({navigation }: NavigationType) {
+export default function ViewNotes({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   let site = route.params?.site;
   let from = route.params?.from;

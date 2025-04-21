@@ -15,11 +15,11 @@ import NoteInput from "../components/NoteInput";
 import { Button, Layout, Text, Datepicker, Select, SelectItem, IndexPath,} from "@ui-kitten/components";
 import { NavigationType, routeProp } from "../components/types";
 import { ScrollView } from "react-native-gesture-handler";
-import { setBadData, getBadDataFiles } from "../scripts/APIRequests";
+import { setBadData } from "../scripts/APIRequests";
 import SuccessFailurePopup from "../components/SuccessFailurePopup"
 import { ThemeContext } from '../components/ThemeContext';
 import LoadingScreen from "../components/LoadingScreen";
-import { buildBadDataString, sanitize } from "../scripts/Parsers";
+import { buildBadDataString } from "../scripts/Parsers";
 import { fetchBadDataFiles } from "../scripts/DataFetching";
 
 export default function BadData({ navigation }: NavigationType) {

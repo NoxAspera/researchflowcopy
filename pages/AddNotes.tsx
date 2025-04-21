@@ -7,24 +7,25 @@
  */
 import { StyleSheet, KeyboardAvoidingView, Modal, View, TouchableOpacity, Platform  } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 import { ScrollView, Pressable } from 'react-native-gesture-handler';
 import { buildBadDataString, buildNotes, copyTankRecord, Entry, installedInstrumentNotes, removedInstrumentNotes } from '../scripts/Parsers';
 import TextInput from '../components/TextInput'
 import NoteInput from '../components/NoteInput'
 import { IndexPath, Layout, Select, SelectItem, Button, Text, Icon, CheckBox } from '@ui-kitten/components';
-import { setSiteFile, getFileContents, getLatestTankEntry, offlineTankEntry, TankRecord, setTankTracker, addEntrytoTankDictionary, getDirectory, setInstrumentFile, setBadData, buildTankRecordString } from '../scripts/APIRequests';
-import { parseNotes, ParsedData, sanitize } from '../scripts/Parsers'
+import { setSiteFile, getLatestTankEntry, offlineTankEntry, TankRecord, setTankTracker, addEntrytoTankDictionary, setInstrumentFile, setBadData, buildTankRecordString } from '../scripts/APIRequests';
+import { ParsedData, sanitize } from '../scripts/Parsers'
 import SuccessFailurePopup from '../components/SuccessFailurePopup';
 import MissingInputPopup from '../components/MissingInputPopup';
 import { NavigationType, routeProp } from '../components/types'
 import { ThemeContext } from '../components/ThemeContext';
 import LoadingScreen from '../components/LoadingScreen';
-import DateTimePicker, {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { TimerPickerModal } from "react-native-timer-picker";
 import VisitPopupProp from '../components/VisitPopup';
 import { checkIfRefillIsNeeded } from '../scripts/TankPredictor';
 import { fetchData, fetchInstrumentNames } from '../scripts/DataFetching';
+import { setEndDateHourMinutes, setStartDateHourMinutes, showEndMode, showStartMode } from '../scripts/Dates';
 
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
@@ -34,58 +35,21 @@ import { fetchData, fetchInstrumentNames } from '../scripts/DataFetching';
  * 
  */
 export default function AddNotes({ navigation }: NavigationType) {
-    
-    const route = useRoute<routeProp>();
-    const { site } = route.params || {}
-    const themeContext = React.useContext(ThemeContext);
-    const isDarkMode = themeContext.theme === 'dark';
+  const route = useRoute<routeProp>();
+  const { site } = route.params || {}
+  const themeContext = React.useContext(ThemeContext);
+  const isDarkMode = themeContext.theme === 'dark';
 
   //changes start date
-  const onStartChange = (event, selectedDate) => {
+  function onStartChange(event, selectedDate) {
     const currentDate = selectedDate;
     setStartDateValue(currentDate);
   };
 
   //changes end date
-  const onEndChange = (event, selectedDate) => {
+  function onEndChange(event, selectedDate) {
     const currentDate = selectedDate;
     setEndDateValue(currentDate);
-  };
-
-  //pops up date picker for start date
-  const showStartMode = (currentMode) => {
-    DateTimePickerAndroid.open({
-      value: startDateValue,
-      onChange: onStartChange,
-      mode: currentMode,
-      is24Hour: false,
-    });
-  };
-
-  //pops up date picker for end date
-  const showEndMode = (currentMode) => {
-    DateTimePickerAndroid.open({
-      value: endDateValue,
-      onChange: onEndChange,
-      mode: currentMode,
-      is24Hour: false,
-    });
-  };
-
-  //sets start date hours and minutes
-  function setStartDateHourMinutes (pickedDuration) {
-    const tempDate = startDateValue;
-    tempDate.setHours(pickedDuration.hours)
-    tempDate.setMinutes(pickedDuration.minutes)
-    setStartDateValue(tempDate);
-  };
-
-  //sets end date hours and minutes
-  function setEndDateHourMinutes (pickedDuration) {
-    const tempDate = endDateValue;
-    tempDate.setHours(pickedDuration.hours)
-    tempDate.setMinutes(pickedDuration.minutes)
-    setEndDateValue(tempDate);
   };
 
   // State to hold parsed data
@@ -757,7 +721,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         {(showStartPicker && Platform.OS === "android") && (
           (
             <View style={styles.androidDateTime}>
-              <Pressable onPress={() => {showStartMode("date"); setStartDateValue(startDateValue)}}>
+              <Pressable onPress={() => {showStartMode("date", startDateValue, onStartChange); setStartDateValue(startDateValue)}}>
                 <Text>
                   {startDateValue.toLocaleDateString([], {
                     weekday: "short",
@@ -787,7 +751,7 @@ export default function AddNotes({ navigation }: NavigationType) {
                   minuteLabel={"<"}
                   onConfirm={(pickedDuration) => {
                     //set time
-                    setStartDateHourMinutes(pickedDuration);                    
+                    setStartDateHourMinutes(pickedDuration, startDateValue, setStartDateValue);                    
                     //set time picker to false to close it
                     setShowPicker(false);
                   }}
@@ -835,7 +799,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           {(showEndPicker && Platform.OS === "android") && (
           (
             <View style={styles.androidDateTime}>
-              <Pressable onPress={() => {showEndMode("date"); setEndDateValue(endDateValue)}}>
+              <Pressable onPress={() => {showEndMode("date", endDateValue, onEndChange); setEndDateValue(endDateValue)}}>
                 <Text>
                   {endDateValue.toLocaleDateString([], {
                     weekday: "short",
@@ -861,7 +825,7 @@ export default function AddNotes({ navigation }: NavigationType) {
                   minuteLabel={"<"}
                   onConfirm={(pickedDuration) => {
                     //set time
-                    setEndDateHourMinutes(pickedDuration);                    
+                    setEndDateHourMinutes(pickedDuration, endDateValue, setEndDateValue);                    
                     //set time picker to false to close it
                     setShowPicker2(false);
                   }}

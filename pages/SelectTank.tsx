@@ -11,7 +11,6 @@ import React, { useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { Button, Text } from '@ui-kitten/components';
 import { NavigationType, routeProp } from '../components/types'
-import { getTankList } from '../scripts/APIRequests';
 import { ScrollView, TextInput} from 'react-native-gesture-handler';
 import { fetchTankNames } from '../scripts/DataFetching';
 

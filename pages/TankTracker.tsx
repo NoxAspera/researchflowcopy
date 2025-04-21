@@ -15,7 +15,6 @@ import { NavigationType, routeProp } from "../components/types";
 import { ScrollView } from "react-native-gesture-handler";
 import SuccessFailurePopup from "../components/SuccessFailurePopup";
 import {
-  getLatestTankEntry,
   setTankTracker,
   TankRecord,
   addEntrytoTankDictionary,
@@ -23,14 +22,9 @@ import {
   offlineTankEntry,
 } from "../scripts/APIRequests";
 import LoadingScreen from "../components/LoadingScreen";
-import * as Network from "expo-network";
 import { sanitize } from "../scripts/Parsers";
 import { fetchTank } from "../scripts/DataFetching";
-
-async function isConnected() {
-  let check = (await Network.getNetworkStateAsync()).isConnected;
-  return check;
-}
+import { getCurrentUtcDateTime } from "../scripts/Dates";
 
 export default function TankTracker({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -61,20 +55,6 @@ export default function TankTracker({ navigation }: NavigationType) {
   useEffect(() => {
     fetchTank(tank, setNetworkStatus, setLatestEntry, setCO2Value, setCH4Value, setFillIDValue, setPSIValue, setLatestEntry);
   }, [tank]);
-
-  const getCurrentUtcDateTime = () => {
-    const now = new Date();
-    const year = now.getUTCFullYear();
-    const month = String(now.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(now.getUTCDate()).padStart(2, "0");
-    const hours = String(now.getUTCHours()).padStart(2, "0");
-    const minutes = String(now.getUTCMinutes()).padStart(2, "0");
-    const seconds = String(now.getUTCSeconds()).padStart(2, "0");
-
-    // Format as "YYYY-MM-DDTHH:MM:SSZ"
-    const utcDateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
-    return utcDateTime;
-  };
 
   const buildTankEntry = (): TankRecord => {
     const currentTime = getCurrentUtcDateTime();

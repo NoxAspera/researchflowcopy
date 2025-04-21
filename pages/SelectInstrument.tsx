@@ -14,7 +14,7 @@ import { useRoute } from '@react-navigation/native';
 import { Layout, Button, Text } from '@ui-kitten/components';
 import { NavigationType, routeProp } from '../components/types'
 import { ScrollView } from 'react-native-gesture-handler';
-import { fetchInstrumentNames, fetchSiteNames } from '../scripts/DataFetching';
+import { fetchInstrumentNames } from '../scripts/DataFetching';
 
 
 export default function SelectInstrument({navigation}: NavigationType) {

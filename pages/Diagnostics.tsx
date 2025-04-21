@@ -11,12 +11,13 @@ import { useRoute } from "@react-navigation/native";
 import { Button, Text } from "@ui-kitten/components";
 import { NavigationType, routeProp } from "../components/types";
 import { ScrollView } from "react-native-gesture-handler";
-import { processNotes, ParsedData, Entry, TankInfo } from "../scripts/Parsers";
+import { ParsedData, Entry, TankInfo } from "../scripts/Parsers";
 import { LineChart, XAxis, YAxis } from 'react-native-svg-charts';
 import { Svg, Line, Rect } from 'react-native-svg';
 import * as scale from 'd3-scale';
 import { daysUntilEmpty } from "../scripts/TankPredictor";
 import { fetchDiagnosticData } from "../scripts/DataFetching";
+import { formatDate } from "../scripts/Dates";
 
 const extractNumericValue = (pressure: string | null): number | null => {
   if (!pressure) return null; // Handle null or undefined
@@ -129,11 +130,6 @@ export default function Diagnostics({ navigation }: NavigationType) {
       setTankData(groupTankData(data.entries));
     }
   }, [data]);
-
-  const formatDate = (timestamp: string): string => {
-    const date = new Date(timestamp);
-    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear().toString().substring(2,4)}`;
-  };
 
   const screenWidth = Dimensions.get("window").width;
 
