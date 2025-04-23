@@ -16,7 +16,6 @@ import { NavigationType, routeProp } from '../components/types'
 import { ScrollView } from 'react-native-gesture-handler';
 import { fetchInstrumentNames } from '../scripts/DataFetching';
 
-
 export default function SelectInstrument({navigation}: NavigationType) {
   const route = useRoute<routeProp>();
 
@@ -32,14 +31,14 @@ export default function SelectInstrument({navigation}: NavigationType) {
   // data for buttons
   let buttonData = [];
 
+  // Creates buttons for each instrument
   if (instrumentNames) {
     for (let i = 0; i < instrumentNames.length; i++) {
       buttonData.push({ id: i+1, label: instrumentNames[i], onPress: () => handleConfirm(instrumentNames[i])});
     }
-  } else {
-    //alert("No instruments could be parsed.");
   }
 
+  // Determines what screen to navigate to based on if user is viewing notes or updating maintenance
   const handleConfirm = (selectedInstrument: string) => {
     if (notes) {
       navigation.navigate('ViewNotes', {site: `instrument_maint/${from}/${selectedInstrument}`});

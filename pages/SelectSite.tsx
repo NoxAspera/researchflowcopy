@@ -34,6 +34,7 @@ export default function SelectSite({navigation}: NavigationType) {
   // data for buttons
   let buttonData = [];
 
+  // Creates buttons for each site
   if (siteNames) {
     for (let i = 0; i < siteNames.length; i++) {
       if (siteNames[i]) {
@@ -48,6 +49,7 @@ export default function SelectSite({navigation}: NavigationType) {
 
   }
 
+  // Determines which screen to navigate to next
   const handleConfirm = (selectedSite: string) => {
     if(from === 'AddNotes')
     {
@@ -108,6 +110,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     padding: 20,
+    paddingVertical: 20,
   },
   button: {
     paddingVertical: 15,
@@ -117,4 +120,5 @@ const styles = StyleSheet.create({
     backgroundColor: "#06b4e0",
     margin: 8
   },
+  
 });

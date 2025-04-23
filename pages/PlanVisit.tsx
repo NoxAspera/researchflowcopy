@@ -94,11 +94,11 @@ export default function PlanVisit({ navigation }: NavigationType) {
     if (result.success) {
         setMessage("Visit planned successfully!");
         setMessageStatus("success");
-        retHome(true);
       } else {
         setMessage(`Error: ${result.error}`);
         setMessageStatus("danger");
       }
+      retHome(true);
       setTimeout(() => {
         setVisible(true);
         visibleRef.current = true;
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
     alignItems: "stretch", // has button fill space horizontally
-    justifyContent: "space-evenly",
+    justifyContent: "flex-start",
   },
   reasonText: {
     margin: 8,

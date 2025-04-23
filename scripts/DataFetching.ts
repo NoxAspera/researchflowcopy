@@ -209,7 +209,7 @@ export async function fetchTankNames(setTankNames: { (value: SetStateAction<stri
 export async function fetchTank(
   tank: string,
   setNetworkStatus: { (value: SetStateAction<boolean>): void; (arg0: boolean): void; },
-  setLocationValue: { (value: SetStateAction<TankRecord>): void; (arg0: string): void; },
+  setLocationValue: { (value: SetStateAction<string>): void; (arg0: string): void; },
   setCO2Value: { (value: SetStateAction<string>): void; (arg0: string): void; },
   setCH4Value: { (value: SetStateAction<string>): void; (arg0: string): void; },
   setFillIDValue: { (value: SetStateAction<string>): void; (arg0: string): void; },

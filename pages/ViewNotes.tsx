@@ -1,7 +1,7 @@
 /**
  * View Notes
  * @author Blake Stambaugh, August O'Rourke, Megan Ostlie
- * Updated: 2/4/25 - MO
+ * Updated: 4/21/25 - MO
  * 
  * View notes page. Will pull in data from the github repo and display it for the user in cards.
  */
@@ -9,6 +9,9 @@ import { useRoute } from '@react-navigation/native';
 import { Card, Layout, Text } from '@ui-kitten/components';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
+import { getFileContents } from '../scripts/APIRequests';
+import { Entry } from '../scripts/Parsers';
+import { customTheme } from '../components/CustomTheme';
 import { ScrollView } from 'react-native-gesture-handler';
 import { NavigationType, routeProp } from '../components/types'
 import { fetchNotes } from '../scripts/DataFetching';
@@ -20,10 +23,6 @@ function retrieveHeader(site: string)
 }
 
 
-/**
- * @author Blake Stambaugh, August O'Rourke
- * @returns The view notes page in our app
- */
 export default function ViewNotes({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   let site = route.params?.site;

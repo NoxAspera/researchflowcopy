@@ -1,156 +1,108 @@
-/**
- * Login Page
- * @author Blake Stambaugh
- * 12/2/2024
- * 
- * This is the login page for the app. As of 12/2, it just has a text input
- * and does not check if the credentials are valid. This will be fixed in
- * a later update.
- */
-import { StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import React, { useState } from 'react';
-import { useRoute } from '@react-navigation/native';
-import { Button, Layout, Text } from '@ui-kitten/components';
-import TextInput from '../components/TextInput'
-import { customTheme } from '../components/CustomTheme'
-import SuccessFailurePopup from '../components/SuccessFailurePopup';
-import { setGithubToken,  tankTrackerSpinUp, readUpdates, updateDirectories, tankTrackerOffline} from '../scripts/APIRequests';
-import * as Network from 'expo-network'
-import { NavigationType } from '../components/types'
+import { useEffect, useState } from 'react';
+import * as WebBrowser from 'expo-web-browser';
+import { makeRedirectUri, useAuthRequest, AuthSessionResult} from 'expo-auth-session';
+import { generateGithubToken, readUpdates, setGithubToken, tankTrackerOffline, tankTrackerSpinUp, updateDirectories } from '../scripts/APIRequests';
+import { StyleSheet, ScrollView} from 'react-native';
+import { NavigationType} from '../components/types'
+import React from 'react';
+import {Layout} from '@ui-kitten/components'
+import HomeButtonProp from '../components/HomeButtonProp';
 import { ThemeContext } from '../components/ThemeContext';
+import { isConnected } from '../scripts/Helpers';
 import LoadingScreen from '../components/LoadingScreen';
-import { sendEmailNotification } from "../scripts/EmailNotifications";
 
-export default function Login({ navigation }: NavigationType) {
-     
-    const route = useRoute();
+WebBrowser.maybeCompleteAuthSession();
+
+// Endpoint
+const discovery = {
+  authorizationEndpoint: 'https://github.com/login/oauth/authorize',
+  tokenEndpoint: 'https://github.com/login/oauth/access_token',
+  revocationEndpoint: `https://github.com/settings/connections/applications/${process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID}`,
+};
+
+export default function Auth({navigation}: NavigationType) {
     
-    const themeContext = React.useContext(ThemeContext);
-    const isDarkMode = themeContext.theme === 'dark';
-    const [loadingValue, setLoadingValue] = useState(false);
+  const themeContext = React.useContext(ThemeContext);
+  const isDarkMode = themeContext.theme === 'dark';
+  const [networkStatus, setNetworkStatus] = useState(true)
+  const [loadingValue, setLoadingValue] = useState(false);
 
-    async function startup()
+  const [request, response, promptAsync] = useAuthRequest(
     {
+      clientId: process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID,
+      scopes: ['repo'],
+      redirectUri: makeRedirectUri({
+        scheme: 'researchflowuofu'
+      }),
+    },
+    discovery
+  );
+
+  async function handleResponse(response: AuthSessionResult | null)
+  {
+    if (response?.type === 'success') {
       setLoadingValue(true)
-      let check = (await Network.getNetworkStateAsync()).isConnected
-      if(check)
-        {
-          setLoadingText("Registering Tanks")
-          await tankTrackerSpinUp()
-          setLoadingText("Updating from Offline")
-          await readUpdates();
-          setLoadingText("Preparing Offline Mode")
-          await updateDirectories();
-        }
-      else
-      {
-        tankTrackerOffline();
-      } 
-      setLoadingValue(false)
+        const { code } = response.params;
+        const {token_type, scopes, access_token} = (await generateGithubToken(code)).data
+        setGithubToken(access_token);
+        setLoadingText("Registering Tanks")
+        await tankTrackerSpinUp();
+        setLoadingText("Updating from Offline")
+        await readUpdates()
+        setLoadingText("Preparing Offline Mode")
+        await updateDirectories()
+        setLoadingValue(false)
+        navigation.navigate("Home")
     }
-
-    // will set the no email/password notification to visible
-    const [visible, setVisible] = useState(false);
-    
-    // helper method that will make sure the user has entered credentials
-    async function checkTextEntry() {
-        // used for testing purposes only
-        if (emailValue == "admin" && passwordValue == "1234"){ 
-            navigation.navigate('Home')
-        }
-        else if (emailValue != "" && passwordValue != "") {
-            setGithubToken(passwordValue)
-            //send email notifications
-            await sendEmailNotification("Auth","Load")                       
-            await startup()
-            navigation.navigate('Home')
-        }
-        else {
-          setVisible(true);
-        }
-    }
-
-    // used for setting and remembering the input values
-    const [emailValue, setEmailValue] = useState("");
-    const [passwordValue, setPasswordValue] = useState("");
-    const [loadingText, setLoadingText] = useState("")
-
-    return (
-      <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}>
-        <Layout style={styles.container} level='1'>
-        <LoadingScreen visible={loadingValue} loadingText={loadingText} />
-          {/* header */}
-          <Layout style={isDarkMode ? styles.loginTextDark : styles.loginTextLight}>
-            <Text category='h1' style={{textAlign: 'center'}}>Hello</Text>
-            <Text category='h6' style={{textAlign: 'center'}}>Sign in using your GitHub credentials</Text>
-          </Layout>
-
-          {/* popup if user has missing credentials */}
-          <SuccessFailurePopup popupText='Missing Login Credentials' 
-            popupStatus={customTheme['color-danger-700']} 
-            onPress={setVisible} 
-            visible={visible}
-            navigateHome={null} 
-            returnHome={false}/>
-
-          {/* text inputs */}
-          <Layout style={styles.textInputContainer}>
-            
-            {/* Email input */}
-            <TextInput 
-                labelValue={emailValue} 
-                onTextChange={setEmailValue} 
-                placeholder='Email' 
-                style={styles.textInput}/>
-
-            {/* Password input */}
-            <TextInput 
-                labelValue={passwordValue} 
-                onTextChange={setPasswordValue} 
-                placeholder='Password' 
-                style={styles.textInput} 
-                secureEntry={true}/>
-            
-            {/* Sign in button */}
-            <Button
-                testID='AuthButton'
-                onPress={checkTextEntry}
-                appearance='filled'
-                status='primary'
-                style={{margin: 15, backgroundColor: "#06b4e0"}}>
-                {evaProps => <Text {...evaProps} category="h5" style={{color: "black"}}>SIGN IN</Text>}
-            </Button>
-          </Layout>
-        </Layout>
-      </KeyboardAvoidingView>
-    );
   }
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      alignItems: 'stretch',        // has button fill space horizontally
-      justifyContent: 'space-evenly',
-    },
-    loginTextDark: {
-        flex: 1,
-        alignItems: 'stretch',        // has button fill space horizontally
-        justifyContent: 'center',
-        backgroundColor: customTheme['color-primary-700']
-    },
-    loginTextLight: {
-      flex: 1,
-      alignItems: 'stretch',        // has button fill space horizontally
-      justifyContent: 'center',
-      backgroundColor: customTheme['color-primary-200']
+  useEffect(() => {
+    handleResponse(response)
+  }, [response]);
+
+async function handlePress()
+{
+  setNetworkStatus(await isConnected())
+  if(networkStatus)
+  {
+    await promptAsync();
+  }
+  else
+  {
+    setLoadingValue(true)
+    setLoadingText("Registering Tanks")
+    await tankTrackerOffline()
+    setLoadingValue(false)
+    navigation.navigate("Home")
+  }
+  
+}
+const [loadingText, setLoadingText] = useState("")
+  return (
+    <Layout style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <LoadingScreen visible={loadingValue} loadingText={loadingText}/>
+        <HomeButtonProp
+          text="Login With Github"
+          color= "#FFFFFF"
+          onPress={() => {
+            handlePress()
+          }}
+        />
+        </ScrollView>
+    </Layout>
+      
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',        // has button fill space horizontally
+    justifyContent: 'space-evenly',
   },
-    textInputContainer: {
-        flex: 3,
-        justifyContent: 'flex-end'
-    },
-    textInput: {
-      margin: 15
-    },
+  scrollContainer: {
+    paddingVertical: 16,
+    alignItems: 'center', // Center cards horizontally
+  },
 });

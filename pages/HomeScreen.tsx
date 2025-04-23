@@ -1,7 +1,7 @@
 /**
  * Home Screen
- * @author Blake Stambaugh
- * 11/26/2024
+ * @author Blake Stambaugh, August O'Rourke, Megan Ostlie
+ * 4/21/2025
  *
  * The follow code represents the home page the user sees when they first launch our app.
  * It has a button for each section of the app that will take them to the next page.
@@ -9,12 +9,19 @@
 import { StyleSheet, ScrollView } from "react-native";
 import HomeButtonProp from "../components/HomeButtonProp";
 import { Layout } from "@ui-kitten/components";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationType } from "../components/types";
-import { tankTrackerSpinUp } from '../scripts/APIRequests';
+import { isConnected } from "../scripts/Helpers";
 
 export default function HomeScreen({ navigation }: NavigationType) {
-  tankTrackerSpinUp()
+  const [networkStatus, setNetworkStatus] = useState(true)
+
+  useEffect(() => {
+    async function fetchData() {
+      setNetworkStatus(await isConnected());
+    }
+    fetchData();
+  }, []);
 
   return (
     <Layout style={styles.container}>
@@ -75,6 +82,7 @@ export default function HomeScreen({ navigation }: NavigationType) {
         />
 
         {/* DIAGNOSTICS */}
+        {networkStatus && (
         <HomeButtonProp
           text="DIAGNOSTICS"
           color="#C3A2E4"
@@ -82,6 +90,7 @@ export default function HomeScreen({ navigation }: NavigationType) {
             navigation.navigate("SelectSite", { from: "Diagnostics" })
           }
         />
+        )}
       </ScrollView>
     </Layout>
   );

@@ -53,7 +53,7 @@ export default function TankTracker({ navigation }: NavigationType) {
   const [loadingValue, setLoadingValue] = useState(false);
 
   useEffect(() => {
-    fetchTank(tank, setNetworkStatus, setLatestEntry, setCO2Value, setCH4Value, setFillIDValue, setPSIValue, setLatestEntry);
+    fetchTank(tank, setNetworkStatus, setLocationValue, setCO2Value, setCH4Value, setFillIDValue, setPSIValue, setLatestEntry);
   }, [tank]);
 
   const buildTankEntry = (): TankRecord => {

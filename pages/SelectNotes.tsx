@@ -12,7 +12,6 @@ import { Layout, Button, Text } from '@ui-kitten/components';
 import { NavigationType } from '../components/types'
 import { ScrollView } from 'react-native-gesture-handler';
 
-
 export default function SelectSite({navigation}: NavigationType) {
   // data for buttons
   let buttonData = [

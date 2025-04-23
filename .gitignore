@@ -8,6 +8,7 @@ node_modules/
 dist/
 web-build/
 ios/
+android/
 
 # Native
 *.orig.*
@@ -34,11 +35,11 @@ yarn-error.*
 *.pem
 
 # local env files
-.env*.local
+.env 
+*.local
 
 # typescript
 *.tsbuildinfo
 
-# android
-android
+#custom
 config.tsx

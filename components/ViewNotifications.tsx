@@ -8,6 +8,8 @@
 import { Card, Layout, Text } from '@ui-kitten/components';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
+import { getFileContents} from '../scripts/APIRequests';
+import { Entry } from '../scripts/Parsers';
 import { ScrollView } from 'react-native-gesture-handler';
 import { NavigationType, routeProp } from './types'
 import { parseVisits, VisitList } from '../scripts/Parsers'
@@ -27,7 +29,6 @@ export default function ViewNotifications({ navigation }: NavigationType) {
   useEffect(() => {
       fetchUpcomingVisits(data, setData);
   },[]);
-
 
   // checks if visit is today or later and adds it to list to display if so
   let visitData = [];
@@ -88,7 +89,6 @@ export default function ViewNotifications({ navigation }: NavigationType) {
       </Layout>
     </ScrollView>
   );
-}
   const styles = StyleSheet.create({
     container: {
       flex: 1,
