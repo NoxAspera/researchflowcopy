@@ -89,6 +89,7 @@ export default function ViewNotifications({ navigation }: NavigationType) {
       </Layout>
     </ScrollView>
   );
+}
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -157,4 +158,4 @@ export default function ViewNotifications({ navigation }: NavigationType) {
       fontSize: 48,
       marginTop: 30,
     }
-});
+})

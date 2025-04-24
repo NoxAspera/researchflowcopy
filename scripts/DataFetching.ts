@@ -71,12 +71,13 @@ export async function fetchBadDataFiles(setFileOptions: { (value: SetStateAction
   }
 };
 
-export async function fetchCalendarData(setOnline: any, setMarkedDates: { (value: SetStateAction<{}>): void; (arg0: (prevmarkedDates: any) => any): void; }, markedDates: {}, visitDict: Map<any, any>) {
+export async function fetchCalendarData(setOnline: any, setMarkedDates: { (value: SetStateAction<{}>): void; (arg0: (prevmarkedDates: any) => any): void; }, markedDates: {}) {
   try {
     let online = isConnected();
     setOnline(online);
     if (online) {
       let response = await getFileContents("researchflow_data/visits");
+      let visitDict: Map<string, visit[]>
       if (response.success) {
         visitDict = new Map();
         let visits: visit[] = processVisits(response.data);
@@ -96,10 +97,13 @@ export async function fetchCalendarData(setOnline: any, setMarkedDates: { (value
             }));
           }
         });
+        return visitDict
       } else {
         console.error(response.error);
+        return new Map<string, visit[]>();
       }
     }
+
   } catch (error) {
     console.error(error);
   }

@@ -14,7 +14,10 @@ export default function CalendarScreen({ navigation }: NavigationType) {
   const [online, setOnline] = useState(false);
 
   useEffect(() => {
-    fetchCalendarData(setOnline, setMarkedDates, markedDates, visitDict);
+    async function fetchData() {
+      visitDict = await fetchCalendarData(setOnline, setMarkedDates, markedDates);
+    }
+    fetchData()
   }, []);
 
   return (
