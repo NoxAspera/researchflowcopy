@@ -5,7 +5,6 @@
  * 
  * View notifications page. Will pull in data from the github repo and display it for the user in cards.
  */
-import { useRoute } from '@react-navigation/native';
 import { Card, Layout, Text } from '@ui-kitten/components';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
@@ -14,31 +13,21 @@ import { Entry } from '../scripts/Parsers';
 import { ScrollView } from 'react-native-gesture-handler';
 import { NavigationType, routeProp } from './types'
 import { parseVisits, VisitList } from '../scripts/Parsers'
+import { fetchUpcomingVisits } from '../scripts/DataFetching';
+
+
 
 /**
  * @author David Schiwal
  * @returns The view notifications page in our app
  */
 export default function ViewNotifications({ navigation }: NavigationType) {
-  const route = useRoute<routeProp>();
-  let site = route.params?.site;
-  let notes: Entry[] = [];
-
   // State to hold parsed data
   const [data, setData] = useState<VisitList>(null);
+
   // Get current visits
   useEffect(() => {
-      async function fetchData() {
-          if (data == null) {
-              try {
-                  const parsedData = await processVisits();
-                  setData(parsedData); // Update state with the latest entry
-              } catch (error) {
-                  console.error("Error processing notes:", error);
-              }
-          }
-      }
-      fetchData();
+      fetchUpcomingVisits(data, setData);
   },[]);
 
   // checks if visit is today or later and adds it to list to display if so
@@ -101,24 +90,6 @@ export default function ViewNotifications({ navigation }: NavigationType) {
     </ScrollView>
   );
 }
-
-/**
- * @author Megan Ostlie
- *  a function that pulls the current note document for the specified site from GitHub
- *  @param siteName the name of the site
- * 
- * @returns a VisitsList object that contains the information of the given document
- */
-async function processVisits() {
-    const fileContents = await getFileContents(`researchflow_data/visits`);
-    if(fileContents.data){
-      return parseVisits(fileContents.data)
-    }
-    else
-    {
-      return null
-    }
-  }
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -187,4 +158,4 @@ async function processVisits() {
       fontSize: 48,
       marginTop: 30,
     }
-});
+})

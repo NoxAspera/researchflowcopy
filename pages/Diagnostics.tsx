@@ -1,28 +1,23 @@
 /**
  * Diagnostics
- * @author Megan Ostlie
- * 3/30/25
+ * @author Megan Ostlie, Blake Stambaugh
+ * 4/21/25
  *
  * This page is used for plotting up tank values and connecting to air.utah.edu diagnostics
  */
-import {
-  StyleSheet,
-  KeyboardAvoidingView,
-  Linking,
-  Dimensions,
-  View,
-} from "react-native";
-import React, { useState, useEffect, useRef } from "react";
+import { StyleSheet, KeyboardAvoidingView, Linking, Dimensions, View} from "react-native";
+import React, { useState, useEffect } from "react";
 import { useRoute } from "@react-navigation/native";
 import { Button, Text } from "@ui-kitten/components";
-import { NavigationType, routeProp } from "./types";
-import { ScrollView } from "react-native-gesture-handler";
-import { ThemeContext } from "./ThemeContext";
+import { NavigationType, routeProp } from "../components/types";
+import { ScrollView } from "react-native-gesture-handler"
 import { processNotes, ParsedData, Entry, TankInfo } from "../scripts/Parsers";
-import { LineChart, XAxis, YAxis } from "react-native-svg-charts";
-import { Svg, Line, Rect } from "react-native-svg";
-import * as scale from "d3-scale";
-import { daysUntilEmpty } from "../scripts/Helpers";
+import { LineChart, XAxis, YAxis } from 'react-native-svg-charts';
+import { Svg, Line, Rect } from 'react-native-svg';
+import { daysUntilEmpty } from "../scripts/TankPredictor";
+import { formatDate } from "../scripts/Dates"
+import { fetchDiagnosticData } from "../scripts/DataFetching";
+import * as scale from 'd3-scale';
 
 // Returns the numeric value of the pressure that is inputted as a string
 const extractNumericValue = (pressure: string | null): number | null => {
@@ -142,17 +137,7 @@ export default function Diagnostics({ navigation }: NavigationType) {
 
   // Get current notes for the site
   useEffect(() => {
-    async function fetchData() {
-      if (site && !data) {
-        try {
-          const parsedData = await processNotes(site);
-          setData(parsedData); // Update state with the latest entry
-        } catch (error) {
-          console.error("Error processing notes:", error);
-        }
-      }
-    }
-    fetchData();
+    fetchDiagnosticData(site, data, setData);
   }, [site]); // Re-run if `site` changes
 
   const [tankData, setTankData] = useState<
@@ -165,16 +150,6 @@ export default function Diagnostics({ navigation }: NavigationType) {
       setTankData(groupTankData(data.entries));
     }
   }, [data]);
-
-  // Format date for x-axis
-  const formatDate = (timestamp: string): string => {
-    const date = new Date(timestamp);
-    return `${date.getMonth() + 1}/${date.getDate()}/${date
-      .getFullYear()
-      .toString()
-      .substring(2, 4)}`;
-  };
-
   const screenWidth = Dimensions.get("window").width;
 
   return (
@@ -235,9 +210,9 @@ export default function Diagnostics({ navigation }: NavigationType) {
           if (validData.length >= 2) {
             daysUntilZero = daysUntilEmpty(
               pressures[pressures.length - 2],
-              timestamps[timestamps.length - 2],
+              new Date(timestamps[timestamps.length - 2]),
               pressures[pressures.length - 1],
-              timestamps[timestamps.length - 1]
+              new Date(timestamps[timestamps.length - 1])
             );
           } else {
             daysUntilZero = 365;

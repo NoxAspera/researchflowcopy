@@ -1,42 +1,42 @@
 /**
  * Instrument Maintenance Page
- * @author David Schiwal, Blake Stambaugh, Megan Ostlie, August O'Rourke
+ * @author David Schiwal, Blake Stambaugh, Megan Ostlie
  * Updated: 3/29/25 - DS
  *
  * This is the page for instrument maintenance. It will take in the user input, format
  * it, and send it to the github repo.
  */
-import {
-  StyleSheet,
-  KeyboardAvoidingView,
-  TouchableOpacity,
-  View,
-  Platform,
-  Pressable,
-} from "react-native";
+import { StyleSheet, KeyboardAvoidingView, TouchableOpacity, View, Platform, Pressable } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import { useRoute } from "@react-navigation/native";
 import { Button, Layout, Text, CheckBox, Icon } from "@ui-kitten/components";
-import TextInput from "./TextInput";
-import NoteInput from "./NoteInput";
-import { NavigationType, routeProp } from "./types";
-import {
-  setInstrumentFile,
-  getInstrumentSite,
-  setBadData,
-} from "../scripts/APIRequests";
+import TextInput from "../components/TextInput";
+import NoteInput from "../components/NoteInput";
+import { NavigationType, routeProp } from "../components/types";
+import {setInstrumentFile, setBadData} from "../scripts/APIRequests";
 import { ScrollView } from "react-native-gesture-handler";
-import { ThemeContext } from "./ThemeContext";
-import SuccessFailurePopup from "./SuccessFailurePopup";
-import LoadingScreen from "./LoadingScreen";
-import DateTimePicker, {
-  DateTimePickerAndroid,
-} from "@react-native-community/datetimepicker";
+import { ThemeContext } from '../components/ThemeContext';
+import SuccessFailurePopup from '../components/SuccessFailurePopup';
+import LoadingScreen from "../components/LoadingScreen";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { TimerPickerModal } from "react-native-timer-picker";
-import { isConnected } from "../scripts/Helpers";
-import { sanitize } from "../scripts/Parsers";
+import { buildBadDataString, buildInstrumentNotes, sanitize } from "../scripts/Parsers";
+import { fetchSite } from "../scripts/DataFetching";
+import { setEndDateHourMinutes, setStartDateHourMinutes, showEndMode, showStartMode } from "../scripts/Dates";
 
 export default function InstrumentMaintenance({ navigation }: NavigationType) {
+  //changes start date
+  const onStartChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setStartDateValue(currentDate);
+  };
+
+  //changes end date
+  const onEndChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setEndDateValue(currentDate);
+  };
+
   const route = useRoute<routeProp>();
   let site = route.params?.site ?? "";
   let instrumentName = site.slice(site.lastIndexOf("/") + 1);
@@ -69,54 +69,10 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
   const [showPicker, setShowPicker] = useState(false);
   const [showPicker2, setShowPicker2] = useState(false);
 
-  // Get site location if the instrument is a LGR
   useEffect(() => {
-    const fetchSite = async () => {
-      if (site.includes("LGR") && await isConnected()) {
-        try {
-          const response = await getInstrumentSite(site);
-          if (response.success) {
-            setSiteValue(response.data || ""); // Set the file names as options
-          } else {
-            alert(`Error fetching site: ${response.error}`);
-          }
-        } catch (error) {
-          console.error("Error fetching instrument site:", error);
-        }
-      }
-    };
-    fetchSite();
+    fetchSite(site, setSiteValue);
   }, [site]);
 
-  // Builds string for instrument
-  const buildInstrumentNotes = (): string => {
-    const time = new Date(startDateValue);
-    const year = time.getFullYear().toString();
-    const month = (time.getMonth() + 1).toString(); // now.getMonth() is zero-base (i.e. January is 0), likely due to something with Oracle's implementation - August
-    const day = time.getDate().toString();
-    const hours = time.getHours().toString();
-    const minutes = time.getMinutes().toString();
-
-    let result: string = `- Time in: ${year}-${month}-${day} ${hours}:${minutes}Z\n`;
-
-    result += `- Name: ${sanitize(nameValue)}\n`;
-    result += `- Notes: ${sanitize(notesValue)}\n`;
-    result += "---\n";
-
-    return result;
-  };
-
-  // Builds entry for bad data
-  const buildBadDataString = (): string => {
-    const startTime = startDateValue.toISOString().split(".")[0] + "Z";
-    const endTime = endDateValue.toISOString().split(".")[0] + "Z";
-    const currentTime = (new Date()).toISOString().split(".")[0] + "Z";
-    let result: string = `${startTime},${endTime},all,NA,${currentTime},${sanitize(nameValue)},${sanitize(badDataReason)}`;
-
-    return result;
-  };
-
-  // Checks if any fields are missing
   const handleSubmit = () => {
     if (
       !nameValue ||
@@ -134,16 +90,27 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     handleUpdate();
   };
 
-  // Sends PUT request to GitHub
   const handleUpdate = async () => {
     // display loading screen while while awaiting for results
     setLoadingValue(true);
 
-    const instrumentNotes = buildInstrumentNotes();
+    const instrumentNotes = buildInstrumentNotes(
+      startDateValue,
+      nameValue,
+      notesValue
+    );
 
     let badResult;
     if (addToBadData) {
-      const badDataString = buildBadDataString();
+      const badDataString = buildBadDataString(
+        startDateValue,
+        endDateValue,
+        "all",
+        "NA",
+        nameValue,
+        badDataReason,
+        true
+      );
       let location;
       let instrument;
       if (needsLocation) {
@@ -173,20 +140,20 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     setLoadingValue(false);
 
     if (result.success && (!badResult || badResult.success)) {
-      setMessage("File(s) updated successfully!");
+      setMessage("File updated successfully!");
       setMessageStatus("success");
       retHome(true);
     } else {
-      let errorMessage = "There was an error updating the following files: ";
       if (result.error) {
-        errorMessage += "\nSite notes";
-      } if (badResult.error) {
-        errorMessage += "\nBad Data";
+        setMessage(`Error: ${result.error}`);
+        setMessageStatus("danger");
+      } else if (badResult.error) {
+        setMessage(
+          `Instrument maintenance notes updated successfully.\nUnable to update Bad Data. Please update Bad Data manually.`
+        );
+        setMessageStatus("danger");
+        retHome(true);
       }
-      errorMessage += "\nPlease update the listed file(s) manually";
-      setMessage(errorMessage);
-      setMessageStatus("danger");
-      retHome(true);
     }
     setTimeout(() => {
       setVisible(true);
@@ -194,7 +161,6 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     }, 100);
   };
 
-  // If user selects checkbox to add bad data, we display an input field for the end time
   const handleChecked = (checked: boolean) => {
     setAddToBadData(checked);
     if (showEndPicker) {
@@ -209,58 +175,8 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
     }
   }
 
-  //changes start date
-  const onStartChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setStartDateValue(currentDate);
-  };
-
-  //changes end date
-  const onEndChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setEndDateValue(currentDate);
-  };
-
-  //pops up date picker for start date
-  const showStartMode = (currentMode) => {
-    DateTimePickerAndroid.open({
-      value: startDateValue,
-      onChange: onStartChange,
-      mode: currentMode,
-      is24Hour: false,
-    });
-  };
-
-  //pops up date picker for end date
-  const showEndMode = (currentMode) => {
-    DateTimePickerAndroid.open({
-      value: endDateValue,
-      onChange: onEndChange,
-      mode: currentMode,
-      is24Hour: false,
-    });
-  };
-
-  //sets start date hours and minutes
-  function setStartDateHourMinutes(pickedDuration) {
-    const tempDate = startDateValue;
-    tempDate.setHours(pickedDuration.hours);
-    tempDate.setMinutes(pickedDuration.minutes);
-    setStartDateValue(tempDate);
-  }
-
-  //sets end date hours and minutes
-  function setEndDateHourMinutes(pickedDuration) {
-    const tempDate = endDateValue;
-    tempDate.setHours(pickedDuration.hours);
-    tempDate.setMinutes(pickedDuration.minutes);
-    setEndDateValue(tempDate);
-  }
-
   return (
-    <KeyboardAvoidingView 
-      behavior="padding" 
-      style={styles.container}>
+    <KeyboardAvoidingView behavior="padding" style={styles.container}>
       <ScrollView
         automaticallyAdjustKeyboardInsets={true}
         keyboardShouldPersistTaps="handled"
@@ -285,7 +201,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
           {/* loading screen */}
           <LoadingScreen visible={loadingValue} />
 
-          {/* Location input */}
+          {/* Time input */}
           {needsLocation && (
             <TextInput
               labelText="Location"
@@ -352,7 +268,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
             <View style={styles.androidDateTime}>
               <Pressable
                 onPress={() => {
-                  showStartMode("date");
+                  showStartMode("date", startDateValue, onStartChange);
                   setStartDateValue(startDateValue);
                 }}
               >
@@ -388,7 +304,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
                 minuteLabel={"<"}
                 onConfirm={(pickedDuration) => {
                   //set time
-                  setStartDateHourMinutes(pickedDuration);
+                  setStartDateHourMinutes(pickedDuration, startDateValue, setStartDateValue);
                   //set time picker to false to close it
                   setShowPicker(false);
                 }}
@@ -479,7 +395,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
             <View style={styles.androidDateTime}>
               <Pressable
                 onPress={() => {
-                  showEndMode("date");
+                  showEndMode("date", endDateValue, onEndChange);
                   setEndDateValue(endDateValue);
                 }}
               >
@@ -513,7 +429,7 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
                 minuteLabel={"<"}
                 onConfirm={(pickedDuration) => {
                   //set time
-                  setEndDateHourMinutes(pickedDuration);
+                  setEndDateHourMinutes(pickedDuration, endDateValue, setEndDateValue);
                   //set time picker to false to close it
                   setShowPicker2(false);
                 }}
@@ -582,25 +498,24 @@ export default function InstrumentMaintenance({ navigation }: NavigationType) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "column",
     alignItems: "stretch", // has button fill space horizontally
     justifyContent: "flex-start",
   },
   requestText: {
-    // flex: 1,
+    flex: 1,
     margin: 15,
   },
   textInput: {
-    // flex: 1,
+    flex: 1,
     margin: 15,
   },
-  submitButton: {
-    margin: 20,
+  submitButton:{
+    margin: 20, 
     backgroundColor: "#06b4e0",
   },
   datePicker: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 0,
     marginBottom: 15,
     marginRight: 15,
@@ -608,12 +523,11 @@ const styles = StyleSheet.create({
     padding: 10,
     borderWidth: 1,
     borderRadius: 5,
-    borderColor: "#d3d3d3",
-    backgroundColor: "#f9f9f9",
+    borderColor: '#d3d3d3',
+    backgroundColor: '#f9f9f9',
   },
   androidDateTime: {
-    // flex: 1,
     flexDirection: "row",
-    justifyContent: "flex-end",
+    justifyContent: "space-around",
   },
 });

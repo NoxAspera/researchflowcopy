@@ -1,7 +1,7 @@
 /**
  * View Notes
  * @author Blake Stambaugh, August O'Rourke, Megan Ostlie
- * Updated: 2/4/25 - MO
+ * Updated: 4/21/25 - MO
  * 
  * View notes page. Will pull in data from the github repo and display it for the user in cards.
  */
@@ -10,15 +10,20 @@ import { Card, Layout, Text } from '@ui-kitten/components';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { getFileContents } from '../scripts/APIRequests';
+import { Entry } from '../scripts/Parsers';
+import { customTheme } from '../components/CustomTheme';
 import { ScrollView } from 'react-native-gesture-handler';
-import { NavigationType, routeProp } from './types'
+import { NavigationType, routeProp } from '../components/types'
+import { fetchNotes } from '../scripts/DataFetching';
+
 
 function retrieveHeader(site: string)
 {
   return site.split('/').pop()
 }
 
-export default function ViewNotes({navigation }: NavigationType) {
+
+export default function ViewNotes({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   let site = route.params?.site;
   let from = route.params?.from;
@@ -28,41 +33,8 @@ export default function ViewNotes({navigation }: NavigationType) {
 
   // Get current notes for the site
   useEffect(() => {
-    async function fetchData() {
-      if (site && !data && route) {
-        try {
-          const parsedData = await getFileContents(site);
-          if (parsedData.success) {
-            let fileContent = parsedData.data;
-
-            if (site.includes("Teledyne")) {
-              // Find the start of "Maintenance Log"
-              const maintenanceIndex = fileContent.indexOf("Maintenance Log");
-              if (maintenanceIndex !== -1) {
-                // Find the end of the "Maintenance Log" line
-                const startOfLogContent = fileContent.indexOf("\n", maintenanceIndex) + 1;
-  
-                // Keep the first line + everything after the "Maintenance Log" line
-                const firstLineEnd = fileContent.indexOf("\n");
-                fileContent =
-                  fileContent.substring(0, firstLineEnd + 1) + // Keep the first line
-                  fileContent.substring(startOfLogContent); // Skip "Maintenance Log" line
-              }
-            }
-
-            setData(
-              fileContent
-                .substring(parsedData.data.indexOf("\n"))
-                .split(new RegExp("(___|---)"))
-            );
-          } 
-        } catch (error) {
-          console.error("Error retreiveing  notes:", error);
-        }
-      }
-    }
     if(!from){
-      fetchData();
+      fetchNotes(site, data, route, setData);
     }
   }, [site]);
   if(!from){

@@ -3,13 +3,13 @@ import * as WebBrowser from 'expo-web-browser';
 import { makeRedirectUri, useAuthRequest, AuthSessionResult} from 'expo-auth-session';
 import { generateGithubToken, readUpdates, setGithubToken, tankTrackerOffline, tankTrackerSpinUp, updateDirectories } from '../scripts/APIRequests';
 import { StyleSheet, ScrollView} from 'react-native';
-import { NavigationType} from './types'
+import { NavigationType} from '../components/types'
 import React from 'react';
 import {Layout} from '@ui-kitten/components'
-import HomeButtonProp from './HomeButtonProp';
-import { ThemeContext } from './ThemeContext';
+import HomeButtonProp from '../components/HomeButtonProp';
+import { ThemeContext } from '../components/ThemeContext';
 import { isConnected } from '../scripts/Helpers';
-import LoadingScreen from './LoadingScreen';
+import LoadingScreen from '../components/LoadingScreen';
 
 WebBrowser.maybeCompleteAuthSession();
 

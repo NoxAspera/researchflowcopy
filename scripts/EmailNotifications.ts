@@ -8,12 +8,12 @@
  * 
  * Note: CANT CALL ANYTHING WITH "use" in the name in this file or throws hook error
  **/
-import { parseVisits } from '../scripts/Parsers';
-import { getFileContents } from '../scripts/APIRequests';
+import { parseVisits } from './Parsers';
+import { getFileContents } from './APIRequests';
 import { send, EmailJSResponseStatus } from '@emailjs/react-native' //imports for sending email don't delete
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getDirectory } from '../scripts/APIRequests';
-import { loadStoredValues } from '../scripts/LoadStoredValues';
+import {getDirectory } from './APIRequests';
+import { loadStoredValues } from './LoadStoredValues';
 
 /**
  * @author David Schiwal
@@ -124,9 +124,9 @@ export async function sendEmailNotification(emailAddress: string, name: string){
                   );
                 } catch (err) {
                   if (err instanceof EmailJSResponseStatus) {
-                    console.log('EmailJS Request Failed...', err);
+                    console.error('EmailJS Request Failed...', err);
                   }
-                  console.log('ERROR', err);
+                  console.error('ERROR', err);
                 }
               }
               

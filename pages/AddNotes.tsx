@@ -1,7 +1,7 @@
 /**
  * Add Notes Page
  * @author Blake Stambaugh, Megan Ostlie, August O'Rourke, and David Schiwal
- * Updated: 4/7/25
+ * Updated: 4/21/25
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
  */
@@ -16,9 +16,16 @@ import {
 import React, { useState, useEffect, useRef } from "react";
 import { useRoute } from "@react-navigation/native";
 import { ScrollView, Pressable } from "react-native-gesture-handler";
-import { buildNotes, copyTankRecord, Entry } from "../scripts/Parsers";
-import TextInput from "./TextInput";
-import NoteInput from "./NoteInput";
+import {
+  buildBadDataString,
+  buildNotes,
+  copyTankRecord,
+  Entry,
+  installedInstrumentNotes,
+  removedInstrumentNotes,
+} from "../scripts/Parsers";
+import TextInput from "../components/TextInput";
+import NoteInput from "../components/NoteInput";
 import {
   IndexPath,
   Layout,
@@ -36,35 +43,72 @@ import {
   TankRecord,
   setTankTracker,
   addEntrytoTankDictionary,
-  getDirectory,
   setInstrumentFile,
   setBadData,
   buildTankRecordString,
 } from "../scripts/APIRequests";
-import { ParsedData } from "../scripts/Parsers";
-import SuccessFailurePopup from './SuccessFailurePopup';
-import MissingInputPopup from './MissingInputPopup';
-import PopupProp2Button from "./Popup2Button";
-import { NavigationType, routeProp } from "./types";
-import { ThemeContext } from "./ThemeContext";
-import LoadingScreen from "./LoadingScreen";
-import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import { ParsedData, sanitize } from "../scripts/Parsers";
+import SuccessFailurePopup from "../components/SuccessFailurePopup";
+import MissingInputPopup from "../components/MissingInputPopup";
+import { NavigationType, routeProp } from "../components/types";
+import { ThemeContext } from "../components/ThemeContext";
+import LoadingScreen from "../components/LoadingScreen";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { TimerPickerModal } from "react-native-timer-picker";
-import { isConnected, daysUntilEmpty } from "../scripts/Helpers";
-import VisitPopupProp from "./VisitPopup";
-import { processNotes, sanitize } from "../scripts/Parsers";
+import VisitPopupProp from "../components/VisitPopup";
+import { checkIfRefillIsNeeded } from "../scripts/TankPredictor";
+import { fetchData, fetchInstrumentNames } from "../scripts/DataFetching";
+import {
+  setEndDateHourMinutes,
+  setStartDateHourMinutes,
+  showEndMode,
+  showStartMode,
+} from "../scripts/Dates";
 
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
  *  Creates the input elements for the user to input site note information.
  *  Pulls the current notes for the selected site from GitHub and autofills certain fields.
  *  Takes the inputted information from the user to build a new string that is added to that site's note document.
+ *
  */
 export default function AddNotes({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
-  const { site, info } = route.params || {};
+  const { site } = route.params || {};
   const themeContext = React.useContext(ThemeContext);
   const isDarkMode = themeContext.theme === "dark";
+
+  //changes start date
+  function onStartChange(event, selectedDate) {
+    const currentDate = selectedDate;
+    setStartDateValue(currentDate);
+  }
+
+  //changes end date
+  function onEndChange(event, selectedDate) {
+    const currentDate = selectedDate;
+    setEndDateValue(currentDate);
+  }
+
+  // State to hold parsed data
+  const [data, setData] = useState<ParsedData | null>(null);
+  const [networkStatus, setNetworkStatus] = useState(true);
+
+  // Get current notes for the site
+  useEffect(() => {
+    fetchData(setNetworkStatus, setData, site, data, networkStatus);
+  }, [site]); // Re-run if `site` changes
+
+  // Get list of possible instruments
+  useEffect(() => {
+    fetchInstrumentNames(setInstrumentNames, null);
+  }, [site]);
+
+  //Get latest notes entry from site
+  let latestEntry = null;
+  if (data) {
+    latestEntry = data.entries[0];
+  }
 
   // these use states to set and store values in the text inputs
   const [startDateValue, setStartDateValue] = useState(new Date());
@@ -134,124 +178,403 @@ export default function AddNotes({ navigation }: NavigationType) {
   const [n2DaysRemaining, setN2DaysRemaining] = useState(-1);
   const [n2TankName, setN2TankName] = useState("");
 
-  const [data, setData] = useState<ParsedData | null>(null); // State to hold parsed data
-  const [networkStatus, setNetworkStatus] = useState(true);
-
-  // Get current notes for the site
-  useEffect(() => {
-    async function fetchData() {
-      setNetworkStatus(await isConnected());
-
-      if (site && !data && networkStatus) {
-        try {
-          const parsedData = await processNotes(site);
-          setData(parsedData); // Update state with the latest entry
-        } catch (error) {
-          console.error("Error processing notes:", error);
-        }
-      }
+  //method will warn user if fields haven't been input
+  function checkTextEntries() {
+    if (
+      nameValue == "" ||
+      ltsId == "" ||
+      ltsValue == "" ||
+      ltsPressure == "" ||
+      lowId == "" ||
+      lowValue == "" ||
+      lowPressure == "" ||
+      midId == "" ||
+      midValue == "" ||
+      midPressure == "" ||
+      highId == "" ||
+      highValue == "" ||
+      highPressure == "" ||
+      n2Value == "" ||
+      notesValue == ""
+    ) {
+      setVisible2(true);
+    } else {
+      handleUpdate();
     }
-    fetchData();
-  }, [site]); // Re-run if `site` changes
-
-  //Get latest notes entry from site
-  let latestEntry = null;
-  if (data) {
-    latestEntry = data.entries[0];
   }
 
-  // Get list of possible instruments
-  useEffect(() => {
-    const fetchInstrumentNames = async () => {
-      try {
-        let names = await getDirectory(`instrument_maint/LGR_UGGA`);
+  // will call setFile to send the PUT request.
+  // If it is successful it will display a success message
+  // if it fails then it will display a failure message
+  const handleUpdate = async () => {
+    // show spinner while submitting
+    setLoadingValue(true);
 
-        if (names?.success) {
-          setInstrumentNames(names.data);
-        }
-      } catch (error) {
-        console.error("Error processing instrument names:", error);
-      }
+    const LTSignored: boolean =
+      ltsId == "" && ltsValue == "" && ltsPressure == "";
+
+    const start = new Date(startDateValue);
+    const startYear = start.getUTCFullYear();
+    const startMonth = String(start.getUTCMonth() + 1).padStart(2, "0");
+    const startDay = String(start.getUTCDate()).padStart(2, "0");
+    const startHours = String(start.getUTCHours()).padStart(2, "0");
+    const startMinutes = String(start.getUTCMinutes()).padStart(2, "0");
+
+    const end = new Date(endDateValue);
+    const endYear = end.getUTCFullYear();
+    const endMonth = String(end.getUTCMonth() + 1).padStart(2, "0");
+    const endDay = String(end.getUTCDate()).padStart(2, "0");
+    const endHours = String(end.getUTCHours()).padStart(2, "0");
+    const endMinutes = String(end.getUTCMinutes()).padStart(2, "0");
+    const endSeconds = String(end.getUTCSeconds()).padStart(2, "0");
+
+    let tankRecordString = "";
+    // create an entry object data that will be sent off to the repo
+    let data: Entry = {
+      time_in: `${startYear}-${startMonth}-${startDay} ${startHours}:${startMinutes}`,
+      time_out: `${endYear}-${endMonth}-${endDay} ${endHours}:${endMinutes}`,
+      names: sanitize(nameValue),
+      instrument: instrumentInput ? instrumentInput : null,
+      n2_pressure: n2Value ? n2Value : null,
+      lts: LTSignored
+        ? null
+        : {
+            id: ltsId,
+            value: ltsValue,
+            unit: "ppm",
+            pressure: ltsPressure,
+          },
+      low_cal: {
+        id: lowId,
+        value: lowValue,
+        unit: "ppm",
+        pressure: lowPressure,
+      },
+      mid_cal: {
+        id: midId,
+        value: midValue,
+        unit: "ppm",
+        pressure: midPressure,
+      },
+      high_cal: {
+        id: highId,
+        value: highValue,
+        unit: "ppm",
+        pressure: highPressure,
+      },
+      additional_notes: sanitize(notesValue),
     };
+    const utcTime = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:${endSeconds}Z`;
+    if (networkStatus) {
+      if (
+        originalLts &&
+        (!ltsTankRecord || originalLts.tankId != ltsTankRecord.tankId)
+      ) {
+        tankRecordString += removeTankFromSite(originalLts, utcTime);
+      }
+      if (ltsTankRecord) {
+        let ltsTank = copyTankRecord(ltsTankRecord);
+        ltsTank.location = site;
+        ltsTank.updatedAt = utcTime;
+        ltsTank.pressure = parseInt(ltsPressure);
+        ltsTank.userId = sanitize(nameValue);
+        addEntrytoTankDictionary(ltsTank);
+        tankRecordString += buildTankRecordString(ltsTank);
+      }
 
-    fetchInstrumentNames();
-  }, [site]);
+      if (
+        originalLow &&
+        (!lowTankRecord || originalLow.tankId != lowTankRecord.tankId)
+      ) {
+        tankRecordString += removeTankFromSite(originalLow, utcTime);
+      }
+      if (lowTankRecord) {
+        let lowTank = copyTankRecord(lowTankRecord);
+        lowTank.location = site;
+        lowTank.updatedAt = utcTime;
+        lowTank.pressure = parseInt(lowPressure);
+        lowTank.userId = sanitize(nameValue);
+        addEntrytoTankDictionary(lowTank);
+        tankRecordString += buildTankRecordString(lowTank);
+      }
 
-  //Set tank ids, values, and instruments if available in parsed data
-  useEffect(() => {
-    if (latestEntry) {
-      if (latestEntry.lts) {
-        const ltsID = latestEntry.lts.id.split("_").pop();
-        if (ltsID) {
-          const ltsEntry =
-            getLatestTankEntry(ltsID) ||
-            getLatestTankEntry(ltsID.toLowerCase());
-          if (ltsEntry) {
-            setLtsTankRecord(ltsEntry);
-            setOriginalLts(ltsEntry);
-            setLTSId(ltsEntry.tankId);
-            setLTSValue(
-              ltsEntry.co2.toString() + " ~ " + ltsEntry.ch4.toString()
-            );
-          }
-        }
+      if (
+        originalMid &&
+        (!midTankRecord || originalMid.tankId != midTankRecord.tankId)
+      ) {
+        tankRecordString += removeTankFromSite(originalMid, utcTime);
       }
-      if (latestEntry.low_cal) {
-        const lowID = latestEntry.low_cal.id.split("_").pop();
-        if (lowID) {
-          const lowEntry =
-            getLatestTankEntry(lowID) ||
-            getLatestTankEntry(lowID.toLowerCase());
-          if (lowEntry) {
-            setLowTankRecord(lowEntry);
-            setOriginalLow(lowEntry);
-            setLowId(lowEntry.tankId);
-            setLowValue(
-              lowEntry.co2.toString() + " ~ " + lowEntry.ch4.toString()
-            );
-          }
-        }
+      if (midTankRecord) {
+        let midTank = copyTankRecord(midTankRecord);
+        midTank.location = site;
+        midTank.updatedAt = utcTime;
+        midTank.pressure = parseInt(midPressure);
+        midTank.userId = sanitize(nameValue);
+        addEntrytoTankDictionary(midTank);
+        tankRecordString += buildTankRecordString(midTank);
       }
-      if (latestEntry.mid_cal) {
-        const midID = latestEntry.mid_cal.id.split("_").pop();
-        if (midID) {
-          const midEntry =
-            getLatestTankEntry(midID) ||
-            getLatestTankEntry(midID.toLowerCase());
-          if (midEntry) {
-            setMidTankRecord(midEntry);
-            setOriginalMid(midEntry);
-            setMidId(midEntry.tankId);
-            setMidValue(
-              midEntry.co2.toString() + " ~ " + midEntry.ch4.toString()
-            );
-          }
-        }
+
+      if (
+        originalHigh &&
+        (!highTankRecord || originalHigh.tankId != highTankRecord.tankId)
+      ) {
+        tankRecordString += removeTankFromSite(originalHigh, utcTime);
       }
-      if (latestEntry.high_cal) {
-        const highID = latestEntry.high_cal.id.split("_").pop();
-        if (highID) {
-          const highEntry =
-            getLatestTankEntry(highID) ||
-            getLatestTankEntry(highID.toLowerCase());
-          if (highEntry) {
-            setHighTankRecord(highEntry);
-            setOriginalHigh(highEntry);
-            setHighId(highEntry.tankId);
-            setHighValue(
-              highEntry.co2.toString() + " ~ " + highEntry.ch4.toString()
-            );
-          }
-        }
+      if (highTankRecord) {
+        let highTank = copyTankRecord(highTankRecord);
+        highTank.location = site;
+        highTank.updatedAt = utcTime;
+        highTank.pressure = parseInt(highPressure);
+        highTank.userId = sanitize(nameValue);
+        addEntrytoTankDictionary(highTank);
+        tankRecordString += buildTankRecordString(highTank);
       }
-      if (latestEntry.instrument) {
-        setInstrumentInput(latestEntry.instrument);
-        setOriginalInstrument(latestEntry.instrument);
+    } else {
+      if (ltsId && ltsPressure) {
+        await offlineTankEntry(
+          ltsId,
+          parseInt(ltsPressure),
+          site,
+          utcTime,
+          sanitize(nameValue)
+        );
+      }
+      if (lowId && lowPressure) {
+        await offlineTankEntry(
+          lowId,
+          parseInt(lowPressure),
+          site,
+          utcTime,
+          sanitize(nameValue)
+        );
+      }
+      if (midId && midPressure) {
+        await offlineTankEntry(
+          midId,
+          parseInt(midPressure),
+          site,
+          utcTime,
+          sanitize(nameValue)
+        );
+      }
+      if (highId && highPressure) {
+        await offlineTankEntry(
+          highId,
+          parseInt(highPressure),
+          site,
+          utcTime,
+          sanitize(nameValue)
+        );
       }
     }
-  }, [latestEntry]);
 
-  // Change tank
+    // send the request
+    const result = await setSiteFile(
+      site,
+      buildNotes(data),
+      "updating notes from researchFlow"
+    );
+    const tankResult = await setTankTracker(tankRecordString);
+
+    let instMaintResult;
+    let instMaintResult2;
+    let badDataResult;
+
+    // If a new instrument was added
+    if (
+      instrumentInput &&
+      (!originalInstrument || originalInstrument != instrumentInput)
+    ) {
+      if (instrumentNames.includes(instrumentInput)) {
+        const notes = installedInstrumentNotes(utcTime, nameValue, site);
+        instMaintResult = await setInstrumentFile(
+          `instrument_maint/LGR_UGGA/${instrumentInput}`,
+          notes,
+          `Updated ${instrumentInput}.md`,
+          true,
+          site
+        );
+      }
+    }
+
+    // If instrument was removed
+    if (
+      originalInstrument &&
+      (!instrumentInput || originalInstrument != instrumentInput)
+    ) {
+      if (instrumentNames.includes(originalInstrument)) {
+        const notes = removedInstrumentNotes(utcTime, nameValue, site);
+        instMaintResult2 = await setInstrumentFile(
+          `instrument_maint/LGR_UGGA/${originalInstrument}`,
+          notes,
+          `Updated ${originalInstrument}.md`,
+          true,
+          "WBB - Spare"
+        );
+      }
+    }
+
+    if (addToBadData) {
+      let instrument = "";
+      const badDataString = buildBadDataString(
+        startDateValue,
+        endDateValue,
+        "all",
+        "NA",
+        nameValue,
+        badDataReason,
+        true
+      );
+      if (instrumentInput.includes("LGR")) {
+        instrument = "lgr_ugga";
+      } else if (instrumentInput.includes("7000")) {
+        instrument = "licor_7000";
+      } else if (instrumentInput.includes("6262")) {
+        instrument = "licor_6262";
+      }
+      badDataResult = await setBadData(
+        site,
+        instrument,
+        badDataString,
+        `Update ${instrument}.csv`
+      );
+    }
+
+    // remove spinner once we have results back
+    setLoadingValue(false);
+
+    // check to see if the request was ok, give a message based on that
+    if (
+      result.success &&
+      tankResult.success &&
+      (!instMaintResult || instMaintResult.success) &&
+      (!instMaintResult2 || instMaintResult2.success) &&
+      (!badDataResult || badDataResult.success)
+    ) {
+      if (networkStatus) {
+        setMessage("File updated successfully!");
+      } else {
+        setMessage(
+          "File updated successfully! Login when in service to upload changes"
+        );
+      }
+      setMessageStatus("success");
+      retHome(true);
+    } else {
+      if (result.error) {
+        setMessage(`Error: ${result?.error}`);
+      } else if (tankResult.error) {
+        setMessage(`Error: ${tankResult.error}`);
+      } else if (instMaintResult && instMaintResult.error) {
+        setMessage(`Error: ${instMaintResult.error}`);
+      } else if (instMaintResult2 && instMaintResult2.error) {
+        setMessage(`Error: ${instMaintResult2.error}`);
+      } else if (badDataResult && badDataResult.error) {
+        setMessage(`Error: ${badDataResult.error}`);
+      }
+      setMessageStatus("danger");
+    }
+    setTimeout(() => {
+      setVisible(true);
+      visibleRef.current = true;
+    }, 100);
+  };
+
+  //method to navigate home to send to popup so it can happen after dismiss button is clicked
+  function navigateHome(nav: boolean) {
+    if (nav) {
+      navigation.navigate("Home");
+    }
+    if (networkStatus) {
+      setTimeout(() => {
+        checkIfRefillIsNeeded(
+          data,
+          lowPressure,
+          midPressure,
+          highPressure,
+          ltsPressure,
+          n2Value,
+          endDateValue,
+          setLowDaysRemaining,
+          setMidDaysRemaining,
+          setHighDaysRemaining,
+          setLtsDaysRemaining,
+          setN2DaysRemaining,
+          setLowTankName,
+          setMidTankName,
+          setHighTankName,
+          setLtsTankName,
+          setN2TankName,
+          setTankPredictorVisibility,
+          lowId,
+          midId,
+          highId,
+          ltsId
+        );
+      }, 100);
+    }
+  }
+
+  function navigatePlanVisit(nav: boolean) {
+    if (nav) {
+      navigation.navigate("PlanVisit", { site: site });
+    }
+  }
+
+  const removeTankFromSite = (tank: TankRecord, time: string): string => {
+    let newTankEntry = copyTankRecord(tank);
+    newTankEntry.location = "ASB279";
+    newTankEntry.pressure = 500;
+    newTankEntry.userId = sanitize(nameValue);
+    newTankEntry.updatedAt = time;
+    addEntrytoTankDictionary(newTankEntry);
+    return buildTankRecordString(newTankEntry);
+  };
+
+  const clearTankEntry = (tank: string) => {
+    if (tank == "lts") {
+      setLTSId("");
+      setLTSValue("");
+      setLtsTankRecord(undefined);
+    } else if (tank == "low") {
+      setLowId("");
+      setLowValue("");
+      setLowTankRecord(undefined);
+    } else if (tank == "mid") {
+      setMidId("");
+      setMidValue("");
+      setMidTankRecord(undefined);
+    } else if (tank == "high") {
+      setHighId("");
+      setHighValue("");
+      setHighTankRecord(undefined);
+    }
+  };
+
+  const handleTankChange = (tank: string) => {
+    setSelectedTank(tank);
+  };
+
+  const handleInstrumentUpdate = (index: IndexPath | IndexPath[]) => {
+    const selectedRow = (index as IndexPath).row;
+    if (selectedRow === instrumentNames?.length) {
+      setInstrumentInput("");
+    } else if (selectedRow === instrumentNames.length + 1) {
+      setModalVisible(true);
+    } else {
+      const selectedInstrument = instrumentNames?.[selectedRow] ?? "";
+      setInstrumentInput(selectedInstrument);
+    }
+  };
+
+  const addCustomInstrument = () => {
+    if (customInstrument.trim() !== "") {
+      setInstrumentInput(customInstrument);
+      setCustomInstrument("");
+    }
+    setModalVisible(false);
+  };
+
   useEffect(() => {
     if (selectedTank) {
       if (selectedTank == "lts") {
@@ -347,524 +670,79 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
   }, [selectedTank]);
 
-  // function that checks if any of the tanks will need to be changed in the next 90 days
-  function checkIfRefillIsNeeded() {
-    // get tank values from previous entries
-    let prevEntry = data.entries[0];
-
-    // compare pressure from prev entry to current entry to see if tank will be empty soon
-    let lowDays;
-    if (prevEntry.low_cal) {
-      lowDays = daysUntilEmpty(
-        parseInt(prevEntry.low_cal.pressure),
-        prevEntry.time_out,
-        parseInt(lowPressure),
-        endDateValue
-      );
-    }
-    let midDays;
-    if (prevEntry.mid_cal) {
-      midDays = daysUntilEmpty(
-        parseInt(prevEntry.mid_cal.pressure),
-        prevEntry.time_out,
-        parseInt(midPressure),
-        endDateValue
-      );
-    }
-    let highDays;
-    if (prevEntry.high_cal) {
-      highDays = daysUntilEmpty(
-        parseInt(prevEntry.high_cal.pressure),
-        prevEntry.time_out,
-        parseInt(highPressure),
-        endDateValue
-      );
-    }
-    let ltsDays;
-    if (prevEntry.lts) {
-      ltsDays = daysUntilEmpty(
-        parseInt(prevEntry.lts.pressure),
-        prevEntry.time_out,
-        parseInt(ltsPressure),
-        endDateValue
-      );
-    }
-    let n2Days;
-    if (prevEntry.n2_pressure) {
-      n2Days = daysUntilEmpty(
-        parseInt(prevEntry.n2_pressure),
-        prevEntry.time_out,
-        parseInt(n2Value),
-        endDateValue
-      );
-    }
-
-    // if any of the tanks are predicted to be empty in 90 days or less, send a warning
-    if (lowDays && lowDays <= 90) {
-      setLowDaysRemaining(lowDays);
-      setLowTankName(lowId);
-      setTankPredictorVisibility(true);
-    }
-    if (midDays && midDays <= 90) {
-      setMidDaysRemaining(midDays);
-      setMidTankName(midId);
-      setTankPredictorVisibility(true);
-    }
-    if (highDays && highDays <= 90) {
-      setHighDaysRemaining(highDays);
-      setHighTankName(highId);
-      setTankPredictorVisibility(true);
-    }
-    if (ltsDays && ltsDays <= 90) {
-      setLtsDaysRemaining(ltsDays);
-      setLtsTankName(ltsId);
-      setTankPredictorVisibility(true);
-    }
-    if (n2Days && n2Days <= 90) {
-      setN2DaysRemaining(n2Days);
-      setN2TankName("N2");
-      setTankPredictorVisibility(true);
-    }
-  }
-
-  //method will warn user if fields haven't been inputted
-  function checkTextEntries() {
-    if (
-      nameValue == "" ||
-      ltsId == "" ||
-      ltsValue == "" ||
-      ltsPressure == "" ||
-      lowId == "" ||
-      lowValue == "" ||
-      lowPressure == "" ||
-      midId == "" ||
-      midValue == "" ||
-      midPressure == "" ||
-      highId == "" ||
-      highValue == "" ||
-      highPressure == "" ||
-      n2Value == "" ||
-      notesValue == ""
-    ) {
-      setVisible2(true);
-    } else {
-      handleUpdate();
-    }
-  }
-
-  // Builds note string for instrument that is newly installed at site
-  const installedInstrumentNotes = (time: string): string => {
-    let result: string = `- Time in: ${time}\n`;
-
-    result += `- Name: ${sanitize(nameValue)}\n`;
-    result += `- Notes: Installed at ${site}\n`;
-    result += "---\n";
-
-    return result;
-  };
-
-  // Builds note string for instrument that is removed from site
-  const removedInstrumentNotes = (time: string): string => {
-    let result: string = `- Time in: ${time}\n`;
-
-    result += `- Name: ${sanitize(nameValue)}\n`;
-    result += `- Notes: Removed from ${site}\n`;
-    result += "---\n";
-
-    return result;
-  };
-
-  // Builds string for bad data input
-  const buildBadDataString = (): string => {
-    const startTime = startDateValue.toISOString().split(".")[0] + "Z";
-    const endTime = endDateValue.toISOString().split(".")[0] + "Z";
-    const currentTime = new Date().toISOString().split(".")[0] + "Z";
-    let result: string = `${startTime},${endTime},all,NA,${currentTime},${sanitize(nameValue)},${sanitize(badDataReason)}`;
-
-    return result;
-  };
-
-  // Adds entry to tank tracker for a tank that is removed from the site
-  const removeTankFromSite = (tank: TankRecord, time: string): string => {
-    let newTankEntry = copyTankRecord(tank);
-    newTankEntry.location = "ASB279";
-    newTankEntry.pressure = 500;
-    newTankEntry.userId = sanitize(nameValue);
-    newTankEntry.updatedAt = time;
-    addEntrytoTankDictionary(newTankEntry);
-    return buildTankRecordString(newTankEntry);
-  };
-
-  // Adds entry to tank tracker with new tank pressure
-  const updateTank = (
-    tank: TankRecord,
-    time: string,
-    pressure: string
-  ): string => {
-    let updatedTank = copyTankRecord(tank);
-    updatedTank.location = site;
-    updatedTank.updatedAt = time;
-    updatedTank.pressure = parseInt(pressure);
-    updatedTank.userId = sanitize(nameValue);
-    addEntrytoTankDictionary(updatedTank);
-    return buildTankRecordString(updatedTank);
-  };
-
-  // will call setFile to send the PUT request.
-  // If it is successful it will display a success message
-  // if it fails then it will display a failure message
-  const handleUpdate = async () => {
-    // show spinner while submitting
-    setLoadingValue(true);
-
-    const LTSignored: boolean =
-      ltsId == "" && ltsValue == "" && ltsPressure == "";
-
-    const start = new Date(startDateValue);
-    const startYear = start.getUTCFullYear();
-    const startMonth = String(start.getUTCMonth() + 1).padStart(2, "0");
-    const startDay = String(start.getUTCDate()).padStart(2, "0");
-    const startHours = String(start.getUTCHours()).padStart(2, "0");
-    const startMinutes = String(start.getUTCMinutes()).padStart(2, "0");
-
-    const end = new Date(endDateValue);
-    const endYear = end.getUTCFullYear();
-    const endMonth = String(end.getUTCMonth() + 1).padStart(2, "0");
-    const endDay = String(end.getUTCDate()).padStart(2, "0");
-    const endHours = String(end.getUTCHours()).padStart(2, "0");
-    const endMinutes = String(end.getUTCMinutes()).padStart(2, "0");
-    const endSeconds = String(end.getUTCSeconds()).padStart(2, "0");
-
-    let tankRecordString = "";
-    // create an entry object data that will be sent off to the repo
-    let data: Entry = {
-      time_in: `${startYear}-${startMonth}-${startDay} ${startHours}:${startMinutes}`,
-      time_out: `${endYear}-${endMonth}-${endDay} ${endHours}:${endMinutes}`,
-      names: sanitize(nameValue),
-      instrument: instrumentInput ? instrumentInput : null,
-      n2_pressure: n2Value ? n2Value : null,
-      lts: LTSignored
-        ? null
-        : {
-            id: ltsId,
-            value: ltsValue,
-            unit: "ppm",
-            pressure: ltsPressure,
-          },
-      low_cal: {
-        id: lowId,
-        value: lowValue,
-        unit: "ppm",
-        pressure: lowPressure,
-      },
-      mid_cal: {
-        id: midId,
-        value: midValue,
-        unit: "ppm",
-        pressure: midPressure,
-      },
-      high_cal: {
-        id: highId,
-        value: highValue,
-        unit: "ppm",
-        pressure: highPressure,
-      },
-      additional_notes: sanitize(notesValue),
-    };
-    const utcTime = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}:${endSeconds}Z`;
-    if (networkStatus) {
-      if (
-        originalLts &&
-        (!ltsTankRecord || originalLts.tankId != ltsTankRecord.tankId)
-      ) {
-        tankRecordString += removeTankFromSite(originalLts, utcTime);
+  //Set tank ids, values, and instruments if available in parsed data
+  useEffect(() => {
+    if (latestEntry) {
+      if (latestEntry.lts) {
+        const ltsID = latestEntry.lts.id.split("_").pop();
+        if (ltsID) {
+          const ltsEntry =
+            getLatestTankEntry(ltsID) ||
+            getLatestTankEntry(ltsID.toLowerCase());
+          if (ltsEntry) {
+            setLtsTankRecord(ltsEntry);
+            setOriginalLts(ltsEntry);
+            setLTSId(ltsEntry.tankId);
+            setLTSValue(
+              ltsEntry.co2.toString() + " ~ " + ltsEntry.ch4.toString()
+            );
+          }
+        }
       }
-      if (ltsTankRecord) {
-        tankRecordString += updateTank(ltsTankRecord, utcTime, ltsPressure);
+      if (latestEntry.low_cal) {
+        const lowID = latestEntry.low_cal.id.split("_").pop();
+        if (lowID) {
+          const lowEntry =
+            getLatestTankEntry(lowID) ||
+            getLatestTankEntry(lowID.toLowerCase());
+          if (lowEntry) {
+            setLowTankRecord(lowEntry);
+            setOriginalLow(lowEntry);
+            setLowId(lowEntry.tankId);
+            setLowValue(
+              lowEntry.co2.toString() + " ~ " + lowEntry.ch4.toString()
+            );
+          }
+        }
       }
-      if (
-        originalLow &&
-        (!lowTankRecord || originalLow.tankId != lowTankRecord.tankId)
-      ) {
-        tankRecordString += removeTankFromSite(originalLow, utcTime);
+      if (latestEntry.mid_cal) {
+        const midID = latestEntry.mid_cal.id.split("_").pop();
+        if (midID) {
+          const midEntry =
+            getLatestTankEntry(midID) ||
+            getLatestTankEntry(midID.toLowerCase());
+          if (midEntry) {
+            setMidTankRecord(midEntry);
+            setOriginalMid(midEntry);
+            setMidId(midEntry.tankId);
+            setMidValue(
+              midEntry.co2.toString() + " ~ " + midEntry.ch4.toString()
+            );
+          }
+        }
       }
-      if (lowTankRecord) {
-        tankRecordString += updateTank(lowTankRecord, utcTime, lowPressure);
+      if (latestEntry.high_cal) {
+        const highID = latestEntry.high_cal.id.split("_").pop();
+        if (highID) {
+          const highEntry =
+            getLatestTankEntry(highID) ||
+            getLatestTankEntry(highID.toLowerCase());
+          if (highEntry) {
+            setHighTankRecord(highEntry);
+            setOriginalHigh(highEntry);
+            setHighId(highEntry.tankId);
+            setHighValue(
+              highEntry.co2.toString() + " ~ " + highEntry.ch4.toString()
+            );
+          }
+        }
       }
-      if (
-        originalMid &&
-        (!midTankRecord || originalMid.tankId != midTankRecord.tankId)
-      ) {
-        tankRecordString += removeTankFromSite(originalMid, utcTime);
-      }
-      if (midTankRecord) {
-        tankRecordString += updateTank(midTankRecord, utcTime, midPressure);
-      }
-      if (
-        originalHigh &&
-        (!highTankRecord || originalHigh.tankId != highTankRecord.tankId)
-      ) {
-        tankRecordString += removeTankFromSite(originalHigh, utcTime);
-      }
-      if (highTankRecord) {
-        tankRecordString += updateTank(highTankRecord, utcTime, highPressure);
-      }
-    } else {
-      if (ltsId && ltsPressure) {
-        await offlineTankEntry(
-          ltsId,
-          parseInt(ltsPressure),
-          site,
-          utcTime,
-          sanitize(nameValue)
-        );
-      }
-      if (lowId && lowPressure) {
-        await offlineTankEntry(
-          lowId,
-          parseInt(lowPressure),
-          site,
-          utcTime,
-          sanitize(nameValue)
-        );
-      }
-      if (midId && midPressure) {
-        await offlineTankEntry(
-          midId,
-          parseInt(midPressure),
-          site,
-          utcTime,
-          sanitize(nameValue)
-        );
-      }
-      if (highId && highPressure) {
-        await offlineTankEntry(
-          highId,
-          parseInt(highPressure),
-          site,
-          utcTime,
-          sanitize(nameValue)
-        );
+      if (latestEntry.instrument) {
+        setInstrumentInput(latestEntry.instrument);
+        setOriginalInstrument(latestEntry.instrument);
       }
     }
-    // send the request
-    const result = await setSiteFile(
-      site,
-      buildNotes(data),
-      "updating notes from researchFlow"
-    );
-    const tankResult = await setTankTracker(tankRecordString);
-
-    let instMaintResult;
-    let instMaintResult2;
-    let badDataResult;
-
-    // If a new instrument was added
-    if (
-      instrumentInput &&
-      (!originalInstrument || originalInstrument != instrumentInput)
-    ) {
-      if (instrumentNames.includes(instrumentInput)) {
-        const notes = installedInstrumentNotes(utcTime);
-        instMaintResult = await setInstrumentFile(
-          `instrument_maint/LGR_UGGA/${instrumentInput}`,
-          notes,
-          `Updated ${instrumentInput}.md`,
-          true,
-          site
-        );
-      }
-    }
-    // If instrument was removed
-    if (
-      originalInstrument &&
-      (!instrumentInput || originalInstrument != instrumentInput)
-    ) {
-      if (instrumentNames.includes(originalInstrument)) {
-        const notes = removedInstrumentNotes(utcTime);
-        instMaintResult2 = await setInstrumentFile(
-          `instrument_maint/LGR_UGGA/${originalInstrument}`,
-          notes,
-          `Updated ${originalInstrument}.md`,
-          true,
-          "WBB - Spare"
-        );
-      }
-    }
-    // If user wants to add time period to bad data
-    if (addToBadData) {
-      let instrument = "";
-      const badDataString = buildBadDataString();
-      if (instrumentInput.includes("LGR")) {
-        instrument = "lgr_ugga";
-      } else if (instrumentInput.includes("7000")) {
-        instrument = "licor_7000";
-      } else if (instrumentInput.includes("6262")) {
-        instrument = "licor_6262";
-      }
-      badDataResult = await setBadData(
-        site,
-        instrument,
-        badDataString,
-        `Update ${instrument}.csv`
-      );
-    }
-
-    // remove spinner once we have results back
-    setLoadingValue(false);
-
-    // check to see if the request was ok, give a message based on that
-    if (
-      result.success &&
-      tankResult.success &&
-      (!instMaintResult || instMaintResult.success) &&
-      (!instMaintResult2 || instMaintResult2.success) &&
-      (!badDataResult || badDataResult.success)
-    ) {
-      if (networkStatus) {
-        setMessage("All files updated successfully!");
-      } else {
-        setMessage(
-          "File updated successfully! Login when in service to upload changes."
-        );
-      }
-      setMessageStatus("success");
-      retHome(true);
-    } else {
-      let errorMessage = "There was an error updating the following files: ";
-      if (result.error) {
-        errorMessage += "\nSite notes";
-      } else if (tankResult.error) {
-        errorMessage += "\nTank Tracker";
-      } else if (instMaintResult && instMaintResult.error) {
-        errorMessage += `\nInstrument Maintenance for ${instrumentInput}`;
-      } else if (instMaintResult2 && instMaintResult2.error) {
-        errorMessage += `\nInstrument Maintenance for ${originalInstrument}`;
-      } else if (badDataResult && badDataResult.error) {
-        errorMessage += "\nBad Data";
-      }
-      errorMessage += "\nPlease update the listed file(s) manually";
-      setMessage(errorMessage);
-      setMessageStatus("danger");
-    }
-    setTimeout(() => {
-      setVisible(true);
-      visibleRef.current = true;
-    }, 100);
-  };
-
-  //method to navigate home to send to popup so it can happen after dismiss button is clicked
-  function navigateHome(nav: boolean) {
-    if (nav) {
-      navigation.navigate("Home");
-    }
-    if (networkStatus) {
-      setTimeout(checkIfRefillIsNeeded, 100);
-    }
-  }
-
-  //method that will navigate to Plan Visit screen if user chooses this option in the popup warning about tanks being empty soon
-  function navigatePlanVisit(nav: boolean) {
-    if (nav) {
-      navigation.navigate("PlanVisit", { site: site });
-    }
-  }
-
-  // Will clear the id, value, and tank record state when user selects "clear tank" option
-  const clearTankEntry = (tank: string) => {
-    if (tank == "lts") {
-      setLTSId("");
-      setLTSValue("");
-      setLtsTankRecord(undefined);
-    } else if (tank == "low") {
-      setLowId("");
-      setLowValue("");
-      setLowTankRecord(undefined);
-    } else if (tank == "mid") {
-      setMidId("");
-      setMidValue("");
-      setMidTankRecord(undefined);
-    } else if (tank == "high") {
-      setHighId("");
-      setHighValue("");
-      setHighTankRecord(undefined);
-    }
-  };
-
-  // Handles tank change updates
-  const handleTankChange = (tank: string) => {
-    setSelectedTank(tank);
-  };
-
-  // Determines new instrument based on option that user selects from instrument dropdown
-  const handleInstrumentUpdate = (index: IndexPath | IndexPath[]) => {
-    const selectedRow = (index as IndexPath).row;
-    if (selectedRow === instrumentNames?.length) {
-      setInstrumentInput("");
-    } else if (selectedRow === instrumentNames.length + 1) {
-      setModalVisible(true);
-    } else {
-      const selectedInstrument = instrumentNames?.[selectedRow] ?? "";
-      setInstrumentInput(selectedInstrument);
-    }
-  };
-
-  // Sets modal to visible if user wants to input a custom instrument
-  const addCustomInstrument = () => {
-    if (customInstrument.trim() !== "") {
-      setInstrumentInput(customInstrument);
-      setCustomInstrument("");
-    }
-    setModalVisible(false);
-  };
-
-  //changes start date
-  const onStartChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setStartDateValue(currentDate);
-  };
-
-  //changes end date
-  const onEndChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setEndDateValue(currentDate);
-  };
-
-  //pops up date picker for start date
-  const showStartMode = (currentMode) => {
-    DateTimePickerAndroid.open({
-      value: startDateValue,
-      onChange: onStartChange,
-      mode: currentMode,
-      is24Hour: false,
-    });
-  };
-
-  //pops up date picker for end date
-  const showEndMode = (currentMode) => {
-    DateTimePickerAndroid.open({
-      value: endDateValue,
-      onChange: onEndChange,
-      mode: currentMode,
-      is24Hour: false,
-    });
-  };
-
-  //sets start date hours and minutes
-  function setStartDateHourMinutes(pickedDuration) {
-    const tempDate = startDateValue;
-    tempDate.setHours(pickedDuration.hours);
-    tempDate.setMinutes(pickedDuration.minutes);
-    setStartDateValue(tempDate);
-  }
-
-  //sets end date hours and minutes
-  function setEndDateHourMinutes(pickedDuration) {
-    const tempDate = endDateValue;
-    tempDate.setHours(pickedDuration.hours);
-    tempDate.setMinutes(pickedDuration.minutes);
-    setEndDateValue(tempDate);
-  }
+  }, [latestEntry]);
 
   return (
     <KeyboardAvoidingView behavior="padding" style={styles.container}>
@@ -878,17 +756,18 @@ export default function AddNotes({ navigation }: NavigationType) {
             {site}
           </Text>
 
-            {/* success/failure popup */}
-            <SuccessFailurePopup popupText={message}
-            popupStatus={messageStatus} 
+          {/* success/failure popup */}
+          <SuccessFailurePopup
+            popupText={message}
+            popupStatus={messageStatus}
             onPress={setVisible}
             navigateHome={navigateHome}
             visible={visible}
             returnHome={returnHome}
           />
 
-            {/* popup if user has missing input */}
-            <MissingInputPopup
+          {/* popup if user has missing input */}
+          <MissingInputPopup
             sendData={handleUpdate}
             removePopup={setVisible2}
             visible={visible2}
@@ -1012,7 +891,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             <View style={styles.androidDateTime}>
               <Pressable
                 onPress={() => {
-                  showStartMode("date");
+                  showStartMode("date", startDateValue, onStartChange);
                   setStartDateValue(startDateValue);
                 }}
               >
@@ -1050,7 +929,11 @@ export default function AddNotes({ navigation }: NavigationType) {
                 minuteLabel={"<"}
                 onConfirm={(pickedDuration) => {
                   //set time
-                  setStartDateHourMinutes(pickedDuration);
+                  setStartDateHourMinutes(
+                    pickedDuration,
+                    startDateValue,
+                    setStartDateValue
+                  );
                   //set time picker to false to close it
                   setShowPicker(false);
                 }}
@@ -1126,7 +1009,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             <View style={styles.androidDateTime}>
               <Pressable
                 onPress={() => {
-                  showEndMode("date");
+                  showEndMode("date", endDateValue, onEndChange);
                   setEndDateValue(endDateValue);
                 }}
               >
@@ -1160,7 +1043,11 @@ export default function AddNotes({ navigation }: NavigationType) {
                 minuteLabel={"<"}
                 onConfirm={(pickedDuration) => {
                   //set time
-                  setEndDateHourMinutes(pickedDuration);
+                  setEndDateHourMinutes(
+                    pickedDuration,
+                    endDateValue,
+                    setEndDateValue
+                  );
                   //set time picker to false to close it
                   setShowPicker2(false);
                 }}

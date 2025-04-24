@@ -14,7 +14,6 @@ import { StyleSheet} from "react-native";
 interface LoadingScreenProp {
     visible: boolean;
     loadingText?: string
-    // onPress: (arg0: boolean) => void;
 }
 
 const LoadingScreen: React.FC<LoadingScreenProp> = ({ visible, loadingText }) => {
