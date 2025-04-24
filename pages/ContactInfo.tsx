@@ -2,20 +2,12 @@
  * View Contact Info
  * @author Megan Ostlie
  */
-import { useRoute } from "@react-navigation/native";
-import { Layout, Text } from "@ui-kitten/components";
-import React from "react";
-import {
-  StyleSheet,
-  View,
-  Linking,
-  TouchableOpacity,
-  Platform,
-} from "react-native";
-import { FlatList } from "react-native-gesture-handler";
-import { NavigationType, routeProp } from "./types";
+import { Layout, Text } from '@ui-kitten/components';
+import React from 'react';
+import { StyleSheet, View, Linking, TouchableOpacity, Platform } from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
+import { NavigationType, routeProp } from '../components/types'
 
-// Array to hold contact information
 const contacts = [
   { id: "1", name: "Maria Garcia", phone: "+18017923277" },
   { id: "2", name: "Megan Ostlie", phone: "+18015890602" },

@@ -6,20 +6,18 @@
  * This page is the lets the user select the tank they want to update. Once
  * a tank is selected, the page will navigate to the TankTracker.
  */
-import { StyleSheet, KeyboardAvoidingView, Platform, View } from "react-native";
-import React, { useEffect, useState } from "react";
-import { useRoute } from "@react-navigation/native";
-import { Button, Text } from "@ui-kitten/components";
-import { NavigationType, routeProp } from "./types";
-import { getTankList } from "../scripts/APIRequests";
-import { ScrollView, TextInput } from "react-native-gesture-handler";
+import { StyleSheet, KeyboardAvoidingView, Platform, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { useRoute } from '@react-navigation/native';
+import { Button, Text } from '@ui-kitten/components';
+import { NavigationType, routeProp } from '../components/types'
+import { ScrollView, TextInput} from 'react-native-gesture-handler';
+import { fetchTankNames } from '../scripts/DataFetching';
 
 export default function SelectTank({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
   const onSelect = route.params?.onSelect; // Get the onSelect function if passed
 
-  // previous buttons hit, used to know where to go next
-  let from = route.params?.from;
   // State to hold the list of site names
   const [tankNames, setTankNames] = useState<string[]>();
   const [searchQuery, setSearchQuery] = useState<string>(""); // Search input state
@@ -27,18 +25,7 @@ export default function SelectTank({ navigation }: NavigationType) {
 
   // Gets list of tank ids
   useEffect(() => {
-    const fetchTankNames = async () => {
-      try {
-        const tanks = getTankList(); // Ensure getTankList is returning a valid list
-        const validTanks = tanks.filter((tank) => tank && tank.trim() !== "");
-        setTankNames(validTanks);
-        setFilteredTanks(validTanks); // Initialize filtered list
-      } catch (error) {
-        console.error("Error fetching tank names:", error);
-      }
-    };
-
-    fetchTankNames();
+    fetchTankNames(setTankNames, setFilteredTanks);
   }, []);
 
   // Handle search input change

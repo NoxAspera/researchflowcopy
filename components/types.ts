@@ -8,7 +8,7 @@
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { visit } from '../scripts/APIRequests';
-import EmailSetup from './EmailSetup';
+import EmailSetup from '../pages/EmailSetup';
 
 // Define the type for the stack's navigation parameters
 export type RootStackParamList = {

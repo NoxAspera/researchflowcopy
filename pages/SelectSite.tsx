@@ -12,9 +12,10 @@ import { StyleSheet } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { Layout, Button, Text } from '@ui-kitten/components';
-import { NavigationType, routeProp } from './types'
-import { getBadDataSites, getDirectory, getTankList, tankTrackerSpinUp } from '../scripts/APIRequests';
+import { NavigationType, routeProp } from '../components/types'
 import { ScrollView } from 'react-native-gesture-handler';
+import { fetchSiteNames } from '../scripts/DataFetching';
+
 
 export default function SelectSite({navigation}: NavigationType) {
   // type routeProp = RouteProp<{params: RouteParams}, 'params'>;
@@ -27,37 +28,7 @@ export default function SelectSite({navigation}: NavigationType) {
 
   // Fetch site names from GitHub Repo
   useEffect(() => {
-    const fetchSiteNames = async () => {
-      try {
-        let names;
-        let mobile_names;
-        if (from === 'AddNotes' || from === 'ViewNotes' || from === 'PlanVisit' || from === 'Diagnostics') {
-          names = await getDirectory("site_notes");
-          mobile_names = await getDirectory("site_notes/mobile");
-        } else if (from === 'BadData') {
-          names = await getBadDataSites();
-        } else if (from === 'InstrumentMaintenance' || from === 'InstrumentMaintenanceNotes') {
-          names = await getDirectory("instrument_maint");
-        } else if (from === 'TankTracker') {
-          //names = getTankList();
-          await tankTrackerSpinUp()
-          setSiteNames(getTankList());
-        }
-        if(names?.success)
-        {
-          if (mobile_names?.success) {
-            names.data.push(...mobile_names.data.map(item => "mobile/" + item));
-          }
-          setSiteNames(names.data);
-        } // Set the fetched site names
-    }
-      catch (error)
-      {
-        console.error("Error processing site names:", error);
-      }
-    };
-
-    fetchSiteNames();
+    fetchSiteNames(from, setSiteNames);
   }, [from]);
 
   // data for buttons
@@ -107,10 +78,10 @@ export default function SelectSite({navigation}: NavigationType) {
     {
       navigation.navigate('TankTracker', {site: selectedSite});
     }
-    else if (from == 'PlanVisit'){
+    else if (from === 'PlanVisit'){
       navigation.navigate('PlanVisit', {site: selectedSite});
     }
-    else if (from == 'Diagnostics') {
+    else if (from === 'Diagnostics') {
       navigation.navigate('Diagnostics', {site: selectedSite});
     }
   };

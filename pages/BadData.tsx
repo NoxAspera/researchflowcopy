@@ -10,25 +10,17 @@
 import { StyleSheet, KeyboardAvoidingView } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import { useRoute } from "@react-navigation/native";
-import TextInput from "./TextInput";
-import NoteInput from "./NoteInput";
-import {
-  Button,
-  Layout,
-  Text,
-  Datepicker,
-  Select,
-  SelectItem,
-  IndexPath,
-} from "@ui-kitten/components";
-import { NavigationType, routeProp } from "./types";
+import TextInput from "../components/TextInput";
+import NoteInput from "../components/NoteInput";
+import { Button, Layout, Text, Datepicker, Select, SelectItem, IndexPath,} from "@ui-kitten/components";
+import { NavigationType, routeProp } from "../components/types";
 import { ScrollView } from "react-native-gesture-handler";
-import { setBadData, getBadDataFiles } from "../scripts/APIRequests";
-import SuccessFailurePopup from "./SuccessFailurePopup"
-import { ThemeContext } from './ThemeContext';
-import LoadingScreen from "./LoadingScreen";
-import { isConnected } from "../scripts/Helpers";
-import { sanitize } from "../scripts/Parsers";
+import { setBadData } from "../scripts/APIRequests";
+import SuccessFailurePopup from "../components/SuccessFailurePopup"
+import { ThemeContext } from '../components/ThemeContext';
+import LoadingScreen from "../components/LoadingScreen";
+import { buildBadDataString } from "../scripts/Parsers";
+import { fetchBadDataFiles } from "../scripts/DataFetching";
 
 export default function BadData({ navigation }: NavigationType) {
   const route = useRoute<routeProp>();
@@ -65,56 +57,14 @@ export default function BadData({ navigation }: NavigationType) {
 
   // Get list of instrument installed at that site
   useEffect(() => {
-    const fetchBadDataFiles = async () => {
-        try {
-          const response = await getBadDataFiles(site);
-          if (response.success) {
-            setFileOptions(response.data || []); // Set the file names as options
-          } else {
-            alert(`Error fetching files: ${response.error}`);
-          }
-        } catch (error) {
-          console.error("Error fetching bad data files:", error);
-        }
-      };
-
-    fetchBadDataFiles();
+    fetchBadDataFiles(setFileOptions,site);
   }, [site]);
-
-  // Function to format the date
-  const formatDate = (date: Date | null): string => {
-    return date ? date.toISOString().split("T")[0] : "";
-  };
 
   // Function that validates that the time input is in HH:MM:SS format
   const validateTime = (time: string) => {
     const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
     return timeRegex.test(time); // Returns true if the time matches HH:MM:SS format
   };
-
-  // Returns the current time in utc
-  const getCurrentUtcDateTime = () => {
-    const now = new Date();
-    const year = now.getUTCFullYear();
-    const month = String(now.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(now.getUTCDate()).padStart(2, "0");
-    const hours = String(now.getUTCHours()).padStart(2, "0");
-    const minutes = String(now.getUTCMinutes()).padStart(2, "0");
-    const seconds = String(now.getUTCSeconds()).padStart(2, "0");
-
-    // Format as "YYYY-MM-DDTHH:MM:SSZ"
-    const utcDateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
-    return utcDateTime;
-  };
-
-  // Builds string for bad data input
-  const buildBadDataString = (): string => {
-    const currentTime = getCurrentUtcDateTime();
-    return `${formatDate(startDateValue)}T${startTimeValue}Z,${formatDate(
-      endDateValue
-    )}T${endTimeValue}Z,${sanitize(oldIDValue)},${sanitize(newIDValue)},${currentTime},${sanitize(nameValue)},${sanitize(reasonValue)}`;
-  };
-
   // Handles when user selects instrument from dropdown
   const handleFileSelection = (index: IndexPath) => {
     setSelectedFileIndex(index);
@@ -123,7 +73,7 @@ export default function BadData({ navigation }: NavigationType) {
 
   // used for determining if PUT request was successful
   // will set the success/fail notification to visible, aswell as the color and text
-  const [visible, setVisible] = useState(false);
+  const [successFailureVisible, setSuccessFailureVisible] = useState(false);
   const [messageStatus, setMessageStatus] = useState("");
   const [message, setMessage] = useState("");
   const [returnHome, retHome] = useState(false);
@@ -143,13 +93,13 @@ export default function BadData({ navigation }: NavigationType) {
     ) {
       setMessage("Please fill out all fields before submitting.");
       setMessageStatus("danger");
-      setVisible(true);
+      setSuccessFailureVisible(true);
       return;
     }
     if (!validateTime(startTimeValue) || !validateTime(endTimeValue)) {
       setMessage("Please make sure time entries follow the HH:MM:SS format.");
       setMessageStatus("danger");
-      setVisible(true);
+      setSuccessFailureVisible(true);
       return;
     }
     handleUpdate();
@@ -160,7 +110,7 @@ export default function BadData({ navigation }: NavigationType) {
     // show loading screen
     setLoadingValue(true);
 
-    const badDataString = buildBadDataString();
+    const badDataString = buildBadDataString(startDateValue, endDateValue, oldIDValue, newIDValue, nameValue, reasonValue, false);
     const result = await setBadData(
       site,
       instrument,
@@ -182,7 +132,7 @@ export default function BadData({ navigation }: NavigationType) {
     }
     retHome(true);
     setTimeout(() => {
-      setVisible(true);
+      setSuccessFailureVisible(true);
       visibleRef.current = true;
     }, 100);
   };
@@ -206,9 +156,9 @@ export default function BadData({ navigation }: NavigationType) {
           <SuccessFailurePopup
             popupText={message}
             popupStatus={messageStatus}
-            onPress={setVisible}
-            navigateHome={navigateHome}
-            visible={visible}
+            onPress={setSuccessFailureVisible}
+            navigateHome={navigateHome} 
+            visible={successFailureVisible}
             returnHome={returnHome}
           />
 

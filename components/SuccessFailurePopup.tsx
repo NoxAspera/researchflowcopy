@@ -1,5 +1,5 @@
 /**
- * Success / Failure Popup
+ * Popup Property
  * @author Blake Stambaugh
  * 12/5/24
  *
@@ -11,7 +11,7 @@ import { StyleSheet } from "react-native";
 import { customTheme } from "./CustomTheme";
 import { ThemeContext } from "./ThemeContext";
 
-interface SFProp {
+interface PUProp {
   popupText: string;
   popupStatus: string;
   visible: boolean;
@@ -20,50 +20,30 @@ interface SFProp {
   navigateHome: (arg0: boolean) => void;
 }
 
-const SuccessFailurePopup: React.FC<SFProp> = ({ popupText, popupStatus,  visible, returnHome, onPress, navigateHome }) => {
-  // used to change background of popup depending on light / dark mode
+const SuccessFailurePopup: React.FC<PUProp> = ({ popupText, popupStatus, visible, returnHome, onPress, navigateHome }) => {
   const { theme } = useContext(ThemeContext);
-  const isDark = theme === "dark";
-
+  const isDark = theme === 'dark';
   return (
     <Layout>
       <Modal
         visible={visible}
         backdropStyle={styles.backdrop}
+        onBackdropPress={() => onPress(false)}
       >
-        <Card
-          disabled={true}
-          style={isDark ? styles.cardDark : styles.cardLight}
-          status={popupStatus}
-        >
+        <Card disabled={true} style={isDark ? styles.cardDark : styles.cardLight} status={popupStatus}>
           <Layout style={isDark ? styles.containerDark : styles.containerLight}>
-
-            {/* positive icon if there is a success, negative icon if there is an error */}
             {popupStatus === "success" ? (
-              <Icon
-                name="checkmark-circle-outline"
-                style={styles.icon}
-                fill={customTheme["color-success-500"]}
-              />
+              <Icon name="checkmark-circle-outline" style={styles.icon} fill={customTheme["color-success-500"]} />
             ) : (
-              <Icon
-                name="close-circle-outline"
-                style={styles.icon}
-                fill={customTheme["color-danger-500"]}
-              />
+              <Icon name="close-circle-outline" style={styles.icon} fill={customTheme["color-danger-500"]} />
             )}
-
-            {/* popup message */}
             <Text>{popupText}</Text>
-            <Button
-              testID="PopupButton"
-              onPress={() => {
-                onPress(false), navigateHome(returnHome);
-              }}
+            <Button 
+              testID="PopupButton" 
+              onPress={() => {onPress(false), navigateHome(returnHome)}}
               status={popupStatus}
-              style={{ margin: 15 }}
-            >
-              DISMISS
+              style={{ margin: 15 }}>
+                DISMISS
             </Button>
           </Layout>
         </Card>
@@ -85,12 +65,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#1C2760",
   },
   containerLight: {
-    alignItems: "center",
+    alignItems: "center", 
     justifyContent: "center",
     backgroundColor: "#e3e3e3",
   },
   containerDark: {
-    alignItems: "center",
+    alignItems: "center", 
     justifyContent: "center",
     backgroundColor: "#1C2760",
   },
@@ -99,10 +79,10 @@ const styles = StyleSheet.create({
     width: 128,
   },
   container: {
-    alignItems: "center",
+    alignItems: "center", 
     justifyContent: "center",
     backgroundColor: "#e3e3e3",
-  },
+  }
 });
 
 export default SuccessFailurePopup;

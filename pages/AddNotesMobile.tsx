@@ -17,9 +17,15 @@ import {
 import React, { useState, useEffect, useRef } from "react";
 import { useRoute } from "@react-navigation/native";
 import { ScrollView, Pressable } from "react-native-gesture-handler";
-import { buildMobileNotes, MobileEntry } from "../scripts/Parsers";
-import TextInput from "./TextInput";
-import NoteInput from "./NoteInput";
+import {
+  buildBadDataString,
+  buildMobileNotes,
+  installedInstrumentNotes,
+  MobileEntry,
+  removedInstrumentNotes,
+} from "../scripts/Parsers";
+import TextInput from "../components/TextInput";
+import NoteInput from "../components/NoteInput";
 import {
   Layout,
   Button,
@@ -32,6 +38,7 @@ import {
 } from "@ui-kitten/components";
 import {
   setSiteFile,
+  getFileContents,
   TankRecord,
   getLatestTankEntry,
   addEntrytoTankDictionary,
@@ -42,17 +49,19 @@ import {
   offlineTankEntry,
   buildTankRecordString,
 } from "../scripts/APIRequests";
-import { processNotes, ParsedData, copyTankRecord, sanitize } from "../scripts/Parsers";
-import SuccessFailurePopup from './SuccessFailurePopup';
-import MissingInputPopup from './MissingInputPopup';
-import { NavigationType, routeProp } from "./types";
-import { ThemeContext } from "./ThemeContext";
-import LoadingScreen from "./LoadingScreen";
+import { parseNotes, ParsedData, copyTankRecord } from "../scripts/Parsers";
+import SuccessFailurePopup from "../components/SuccessFailurePopup";
+import MissingInputPopup from "../components/MissingInputPopup";
+import { NavigationType, routeProp } from "../components/types";
+import { ThemeContext } from "../components/ThemeContext";
+import * as Network from "expo-network";
+import LoadingScreen from "../components/LoadingScreen";
 import DateTimePicker, {
   DateTimePickerAndroid,
 } from "@react-native-community/datetimepicker";
 import { TimerPickerModal } from "react-native-timer-picker";
-import { isConnected } from "../scripts/Helpers";
+import { fetchData, fetchInstrumentNames } from "../scripts/DataFetching";
+import { setEndDateHourMinutes, setStartDateHourMinutes, showEndMode, showStartMode } from "../scripts/Dates";
 
 /**
  * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
@@ -62,8 +71,20 @@ import { isConnected } from "../scripts/Helpers";
  *
  */
 export default function AddNotes({ navigation }: NavigationType) {
+  //changes start date
+  const onStartChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setStartDateValue(currentDate);
+  };
+
+  //changes end date
+  const onEndChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setEndDateValue(currentDate);
+  };
+
   const route = useRoute<routeProp>();
-  const { site, info } = route.params || {};
+  const { site } = route.params || {};
   const themeContext = React.useContext(ThemeContext);
   const isDarkMode = themeContext.theme === "dark";
 
@@ -73,6 +94,21 @@ export default function AddNotes({ navigation }: NavigationType) {
 
   // used for loading screen
   const [loadingValue, setLoadingValue] = useState(false);
+
+  useEffect(() => {
+    fetchData(setNetworkStatus, setData, site, data, networkStatus);
+  }, [site]); // Re-run if `site` changes
+
+  // Get list of possible instruments
+  useEffect(() => {
+    fetchInstrumentNames(setInstrumentNames, null);
+  }, [site]);
+
+  //Get latest notes entry from site
+  let latestEntry = null;
+  if (data) {
+    latestEntry = data.entries[0];
+  }
 
   // these use states to set and store values in the text inputs
   const [networkStatus, setNetworkStatus] = useState(false);
@@ -108,38 +144,25 @@ export default function AddNotes({ navigation }: NavigationType) {
   const [showPicker, setShowPicker] = useState(false);
   const [showPicker2, setShowPicker2] = useState(false);
 
-  useEffect(() => {
-    async function fetchData() {
-      setNetworkStatus(await isConnected());
-
-      if (site && !data && networkStatus) {
-        try {
-          const parsedData = await processNotes(site);
-          setData(parsedData); // Update state with the latest entry
-        } catch (error) {
-          console.error("Error processing notes:", error);
-        }
-      }
+  //method will warn user if fields haven't been input
+  function checkTextEntries() {
+    if (
+      nameValue == "" ||
+      tankId == "" ||
+      tankValue == "" ||
+      tankPressure == "" ||
+      notesValue == ""
+    ) {
+      setVisible2(true);
+    } else {
+      handleUpdate();
     }
-    fetchData();
-  }, [site]); // Re-run if `site` changes
+  }
 
-  // Get list of possible instruments
-  useEffect(() => {
-    const fetchInstrumentNames = async () => {
-      try {
-        let names = await getDirectory(`instrument_maint/LGR_UGGA`);
-        if (names?.success) {
-          setInstrumentNames(names.data);
-        }
-      } catch (error) {
-        console.error("Error processing instrument names:", error);
-      }
-    };
-    fetchInstrumentNames();
-  }, [site]);
+  const handleTankChange = () => {
+    setSelectedTank("tank");
+  };
 
-  // Change tank
   useEffect(() => {
     if (selectedTank) {
       setTimeout(() => {
@@ -165,66 +188,12 @@ export default function AddNotes({ navigation }: NavigationType) {
     setSelectedTank("");
   }, [selectedTank]);
 
-  //Get latest notes entry from site
-  let latestEntry = null;
-  if (data) {
-    latestEntry = data.entries[0];
-  }
-
-  //Set tank ids, values, and instruments if available in parsed data
-  useEffect(() => {
-    if (latestEntry) {
-      if (latestEntry.tank) {
-        const tankID = latestEntry.tank.id.split("_").pop();
-        if (tankID) {
-          const tankEntry =
-            getLatestTankEntry(tankID) ||
-            getLatestTankEntry(tankID.toLowerCase());
-          if (tankEntry) {
-            setTankRecord(tankEntry);
-            setOriginalTank(tankEntry);
-            setTankId(tankEntry.tankId);
-            setTankValue(
-              tankEntry.co2.toString() + " ~ " + tankEntry.ch4.toString()
-            );
-          }
-        }
-      }
-      if (latestEntry.instrument) {
-        setOriginalInstrument(latestEntry.instrument);
-        setInstrumentInput(latestEntry.instrument);
-      }
-    }
-  }, [latestEntry]);
-
-  //method will warn user if fields haven't been input
-  function checkTextEntries() {
-    if (
-      nameValue == "" ||
-      tankId == "" ||
-      tankValue == "" ||
-      tankPressure == "" ||
-      notesValue == ""
-    ) {
-      setVisible2(true);
-    } else {
-      handleUpdate();
-    }
-  }
-
-  // Sets tank type to selected tank from select tank screen
-  const handleTankChange = () => {
-    setSelectedTank("tank");
-  };
-
-  // Clears the tank id, value, and tank record for the tank
   const clearTankEntry = () => {
     setTankId("");
     setTankValue("");
     setTankRecord(undefined);
   };
 
-  // Determines new instrument based on option that user selects from instrument dropdown
   const handleInstrumentUpdate = (index: IndexPath | IndexPath[]) => {
     const selectedRow = (index as IndexPath).row;
     if (selectedRow === instrumentNames?.length) {
@@ -237,31 +206,6 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
   };
 
-  // Builds note string for instrument that is newly installed at site
-  const installedInstrumentNotes = (time: string): string => {
-    let siteName = site.replace("mobile/", "");
-    let result: string = `- Time in: ${time}\n`;
-
-    result += `- Name: ${sanitize(nameValue)}\n`;
-    result += `- Notes: Installed at ${siteName}\n`;
-    result += "---\n";
-
-    return result;
-  };
-
-  // Builds note string for instrument that is removed from site
-  const removedInstrumentNotes = (time: string): string => {
-    let siteName = site.replace("mobile/", "");
-    let result: string = `- Time in: ${time}\n`;
-
-    result += `- Name: ${sanitize(nameValue)}\n`;
-    result += `- Notes: Removed from ${siteName}\n`;
-    result += "---\n";
-
-    return result;
-  };
-
-  // Sets modal to visible if user wants to input a custom instrument
   const addCustomInstrument = () => {
     if (customInstrument.trim() !== "") {
       setInstrumentInput(customInstrument);
@@ -269,64 +213,6 @@ export default function AddNotes({ navigation }: NavigationType) {
     }
     setModalVisible(false);
   };
-
-  // Builds string for bad data input
-  const buildBadDataString = (): string => {
-    const startTime = startDateValue.toISOString().split(".")[0] + "Z";
-    const endTime = endDateValue.toISOString().split(".")[0] + "Z";
-    const currentTime = new Date().toISOString().split(".")[0] + "Z";
-    let result: string = `${startTime},${endTime},all,NA,${currentTime},${sanitize(nameValue)},${sanitize(badDataReason)}`;
-
-    return result;
-  };
-
-  //changes start date
-  const onStartChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setStartDateValue(currentDate);
-  };
-
-  //changes end date
-  const onEndChange = (event, selectedDate) => {
-    const currentDate = selectedDate;
-    setEndDateValue(currentDate);
-  };
-
-  //pops up date picker for start date
-  const showStartMode = (currentMode) => {
-    DateTimePickerAndroid.open({
-      value: startDateValue,
-      onChange: onStartChange,
-      mode: currentMode,
-      is24Hour: false,
-    });
-  };
-
-  //pops up date picker for end date
-  const showEndMode = (currentMode) => {
-    DateTimePickerAndroid.open({
-      value: endDateValue,
-      onChange: onEndChange,
-      mode: currentMode,
-      is24Hour: false,
-    });
-  };
-
-  //sets start date hours and minutes
-  function setStartDateHourMinutes(pickedDuration) {
-    const tempDate = startDateValue;
-    tempDate.setHours(pickedDuration.hours);
-    tempDate.setMinutes(pickedDuration.minutes);
-    setStartDateValue(tempDate);
-  }
-
-  //sets end date hours and minutes
-  function setEndDateHourMinutes(pickedDuration) {
-    const tempDate = endDateValue;
-    tempDate.setHours(pickedDuration.hours);
-    tempDate.setMinutes(pickedDuration.minutes);
-    setEndDateValue(tempDate);
-  }
 
   // will call setFile to send the PUT request.
   // If it is successful it will display a success message
@@ -358,7 +244,7 @@ export default function AddNotes({ navigation }: NavigationType) {
     let data: MobileEntry = {
       time_in: `${startYear}-${startMonth}-${startDay} ${startHours}:${startMinutes}`,
       time_out: `${endYear}-${endMonth}-${endDay} ${endHours}:${endMinutes}`,
-      names: sanitize(nameValue),
+      names: nameValue,
       instrument: instrumentInput.trim() ? instrumentInput : null,
       tank: Tankignored
         ? null
@@ -381,7 +267,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         let newTankEntry = copyTankRecord(originalTank);
         newTankEntry.location = "ASB279";
         newTankEntry.pressure = 500;
-        newTankEntry.userId = sanitize(nameValue);
+        newTankEntry.userId = nameValue;
         newTankEntry.updatedAt = utcTime;
         addEntrytoTankDictionary(newTankEntry);
         tankRecordString += buildTankRecordString(newTankEntry);
@@ -391,7 +277,7 @@ export default function AddNotes({ navigation }: NavigationType) {
         tank.location = siteName;
         tank.updatedAt = utcTime;
         tank.pressure = parseInt(tankPressure);
-        tank.userId = sanitize(nameValue);
+        tank.userId = nameValue;
         addEntrytoTankDictionary(tank);
         tankRecordString += buildTankRecordString(tank);
       }
@@ -402,7 +288,7 @@ export default function AddNotes({ navigation }: NavigationType) {
           parseInt(tankPressure),
           site,
           utcTime,
-          sanitize(nameValue)
+          nameValue
         );
       }
     }
@@ -425,7 +311,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       (!originalInstrument || originalInstrument != instrumentInput)
     ) {
       if (instrumentNames.includes(instrumentInput)) {
-        const notes = installedInstrumentNotes(utcTime);
+        const notes = installedInstrumentNotes(utcTime, nameValue, site);
         instMaintResult = await setInstrumentFile(
           `instrument_maint/LGR_UGGA/${instrumentInput}`,
           notes,
@@ -442,7 +328,7 @@ export default function AddNotes({ navigation }: NavigationType) {
       (!instrumentInput || originalInstrument != instrumentInput)
     ) {
       if (instrumentNames.includes(originalInstrument)) {
-        const notes = removedInstrumentNotes(utcTime);
+        const notes = removedInstrumentNotes(utcTime, nameValue, site);
         instMaintResult2 = await setInstrumentFile(
           `instrument_maint/LGR_UGGA/${originalInstrument}`,
           notes,
@@ -452,10 +338,18 @@ export default function AddNotes({ navigation }: NavigationType) {
         );
       }
     }
-    // If user wants to add time period to bad data
+
     if (addToBadData) {
       let instrument = "";
-      const badDataString = buildBadDataString();
+      const badDataString = buildBadDataString(
+        startDateValue,
+        endDateValue,
+        "all",
+        "NA",
+        nameValue,
+        badDataReason,
+        true
+      );
       if (instrumentInput.includes("LGR")) {
         instrument = "lgr_ugga";
       }
@@ -487,20 +381,17 @@ export default function AddNotes({ navigation }: NavigationType) {
       setMessageStatus("success");
       retHome(true);
     } else {
-      let errorMessage = "There was an error updating the following files: ";
       if (result.error) {
-        errorMessage += "\nSite notes";
+        setMessage(`Error: ${result.error}`);
       } else if (tankResult.error) {
-        errorMessage += "\nTank Tracker";
+        setMessage(`Error: ${tankResult.error}`);
       } else if (instMaintResult && instMaintResult.error) {
-        errorMessage += `\nInstrument Maintenance for ${instrumentInput}`;
+        setMessage(`Error: ${instMaintResult.error}`);
       } else if (instMaintResult2 && instMaintResult2.error) {
-        errorMessage += `\nInstrument Maintenance for ${originalInstrument}`;
+        setMessage(`Error: ${instMaintResult2.error}`);
       } else if (badDataResult && badDataResult.error) {
-        errorMessage += "\nBad Data";
+        setMessage(`Error: ${badDataResult.error}`);
       }
-      errorMessage += "\nPlease update the listed file(s) manually";
-      setMessage(errorMessage);
       setMessageStatus("danger");
     }
     setTimeout(() => {
@@ -515,6 +406,32 @@ export default function AddNotes({ navigation }: NavigationType) {
       navigation.navigate("Home");
     }
   }
+
+  //Set tank ids, values, and instruments if available in parsed data
+  useEffect(() => {
+    if (latestEntry) {
+      if (latestEntry.tank) {
+        const tankID = latestEntry.tank.id.split("_").pop();
+        if (tankID) {
+          const tankEntry =
+            getLatestTankEntry(tankID) ||
+            getLatestTankEntry(tankID.toLowerCase());
+          if (tankEntry) {
+            setTankRecord(tankEntry);
+            setOriginalTank(tankEntry);
+            setTankId(tankEntry.tankId);
+            setTankValue(
+              tankEntry.co2.toString() + " ~ " + tankEntry.ch4.toString()
+            );
+          }
+        }
+      }
+      if (latestEntry.instrument) {
+        setOriginalInstrument(latestEntry.instrument);
+        setInstrumentInput(latestEntry.instrument);
+      }
+    }
+  }, [latestEntry]);
 
   return (
     <KeyboardAvoidingView
@@ -534,17 +451,18 @@ export default function AddNotes({ navigation }: NavigationType) {
           {/* loading screen */}
           <LoadingScreen visible={loadingValue} />
 
-            {/* success/failure popup */}
-            <SuccessFailurePopup popupText={message} 
-            popupStatus={messageStatus} 
-            onPress={setVisible} 
-            navigateHome={navigateHome} 
+          {/* success/failure popup */}
+          <SuccessFailurePopup
+            popupText={message}
+            popupStatus={messageStatus}
+            onPress={setVisible}
+            navigateHome={navigateHome}
             visible={visible}
             returnHome={returnHome}
           />
 
-            {/* popup if user has missing input */}
-            <MissingInputPopup 
+          {/* popup if user has missing input */}
+          <MissingInputPopup
             sendData={handleUpdate}
             removePopup={setVisible2}
             visible={visible2}
@@ -645,7 +563,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             <View style={styles.androidDateTime}>
               <Pressable
                 onPress={() => {
-                  showStartMode("date");
+                  showStartMode("date", startDateValue, onStartChange);
                   setStartDateValue(startDateValue);
                 }}
               >
@@ -681,7 +599,7 @@ export default function AddNotes({ navigation }: NavigationType) {
                 minuteLabel={"<"}
                 onConfirm={(pickedDuration) => {
                   //set time
-                  setStartDateHourMinutes(pickedDuration);
+                  setStartDateHourMinutes(pickedDuration, startDateValue, setStartDateValue);
                   //set time picker to false to close it
                   setShowPicker(false);
                 }}
@@ -755,7 +673,7 @@ export default function AddNotes({ navigation }: NavigationType) {
             <View style={styles.androidDateTime}>
               <Pressable
                 onPress={() => {
-                  showEndMode("date");
+                  showEndMode("date", endDateValue, onEndChange);
                   setEndDateValue(endDateValue);
                 }}
               >
@@ -789,7 +707,7 @@ export default function AddNotes({ navigation }: NavigationType) {
                 minuteLabel={"<"}
                 onConfirm={(pickedDuration) => {
                   //set time
-                  setEndDateHourMinutes(pickedDuration);
+                  setEndDateHourMinutes(pickedDuration, endDateValue, setEndDateValue);
                   //set time picker to false to close it
                   setShowPicker2(false);
                 }}
