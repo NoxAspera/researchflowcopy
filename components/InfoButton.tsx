@@ -1,6 +1,6 @@
 /**
  * Info Button
- * @author
+ * @author Blake Stambaugh
  * 
  * This button sits in the header of every screen and directs the user to important
  * contact info for LAIR lab employees like admin contact info and hospital locations.
