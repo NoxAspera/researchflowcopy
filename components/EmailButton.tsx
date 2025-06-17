@@ -1,6 +1,6 @@
 /**
  * Info Button
- * @author August O'Rourke
+ * @author Callum O'Rourke
  * 
  * This button is to enable email notifications, it should be at the top-right of every screen
  */
