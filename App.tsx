@@ -36,7 +36,7 @@ import NotificationsButton from './components/NotificationsButton';
 const Stack = createStackNavigator();
 type ThemeType = "light" | "dark";
 /**
- * @author Blake Stambaugh, August O'Rourke, David Schiwal, Megan Ostlie 
+ * @author Blake Stambaugh, Callum O'Rourke, David Schiwal, Megan Ostlie 
  * This is the function Expo uses to glue all the individual Screens together, any app wide changes are also made here
  * @returns void
  */

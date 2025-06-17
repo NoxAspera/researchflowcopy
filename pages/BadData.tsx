@@ -1,6 +1,6 @@
 /**
  * Bad Data Page
- * @author David Schiwal, Blake Stambaugh, Megan Ostlie, August O'Rourke
+ * @author David Schiwal, Blake Stambaugh, Megan Ostlie, Callum O'Rourke
  * Updated: 3/23/25 - DS
  *
  * This page allows the user to mark data as bad. They will enter in

@@ -51,7 +51,7 @@ export interface ParsedData {
     entries: Entry[];
 }
 /**
- * @author Megan Ostlie, August O'Rourke
+ * @author Megan Ostlie, Callum O'Rourke
  * @param text the document being parsed
  * 
  * @returns a ParsedData object that contains the information of the given document
@@ -143,7 +143,7 @@ export function parseNotes(text: string): ParsedData {
     return jsonData;
 }
 /**
- * @author August O'Rourke
+ * @author Callum O'Rourke
  * 
  * This method should build a string that makes a valid entry for a document from the repository
  * @param data - the data for the new entry in the document
@@ -178,7 +178,7 @@ export function buildNotes(data: Entry): string
 }
 
 /**
- * @author August O'Rourke
+ * @author Callum O'Rourke
  * 
  * This method should build a string that makes a valid entry for a document from the repository for mobile sites
  * @param data - the data for the new entry in the document
@@ -300,7 +300,7 @@ export interface VisitInfo {
     site: string | null;
 }
 /**
- * @author David Schiwal, Megan Ostlie, August O'Rourke
+ * @author David Schiwal, Megan Ostlie, Callum O'Rourke
  * @param text the document being parsed
  * 
  * @returns a VisitList object that contains the visits from the visit document
@@ -473,7 +473,7 @@ export function removedInstrumentNotes(time: string, name: string, site: string)
 export function buildInstrumentNotes(startDate, name, notes): string {
     const time = new Date(startDate);
     const year = time.getFullYear().toString()
-    const month = (time.getMonth() + 1).toString() // now.getMonth() is zero-base (i.e. January is 0), likely due to something with Oracle's implementation - August
+    const month = (time.getMonth() + 1).toString() // now.getMonth() is zero-base (i.e. January is 0), likely due to something with Oracle's implementation - Callum
     const day = time.getDate().toString()
     const hours= time.getHours().toString()
     const minutes = time.getMinutes().toString()

@@ -6,7 +6,7 @@ import { Buffer } from 'buffer';
 import { parseNotes, parseVisits, VisitList } from './Parsers';
 
 /**
- * @author August O'Rourke
+ * @author Callum O'Rourke
  * small interface to wrap the getSites response
  */
 export interface siteResponse
@@ -101,7 +101,7 @@ export const sleep = async (ms: number): Promise<void> => {
   };
 
 /**
- * @author August O'Rourke, Megan Ostlie
+ * @author Callum O'Rourke, Megan Ostlie
  * This function reads updates that were input during the offline mode. Every request made is followed by a 50 ms sleep, this is becaus the github
  * api can error when requests are made too frequently.
  */
@@ -305,7 +305,7 @@ export async function readUpdates()
 }
 
 /**
- * @author August O'Rourke
+ * @author Callum O'Rourke
  * This is a helper function that facilitates offline updates for the visits
  * @param visits - the visits entered from the offline mode
  * @returns 
@@ -343,7 +343,7 @@ async function setVisitFileOffline(visits: VisitList)
 }
 
 /**
- * @author August O'Rourke
+ * @author Callum O'Rourke
  * This function starts the tank Dictionary when the app is offline
  */
 export async function tankTrackerOffline()
@@ -357,7 +357,7 @@ export async function tankTrackerOffline()
 }
 
 /**
- * @author August O'Rourke
+ * @author Callum O'Rourke
  * This function starts the process of placing a file structure the offline mode can understand, uses the loop method recursively
  */
 export async function updateDirectories()
@@ -417,7 +417,7 @@ async function loop(path: string)
 
 /**
  * 
- * @author August O'Rourke
+ * @author Callum O'Rourke
  *  This is a small helper method to facilitate changing files on the git repository
  * @param bodyString - The string containing the body of the put request
  * @param url - The api enpoint's URL
@@ -524,7 +524,7 @@ export async function setVisitFile(visit: visit, commitMessage: string)
 
 /**
  * This function adds an update for the specified tank while offline
- * @author August O'Rourke
+ * @author Callum O'Rourke
  * @param tankID -the tanks id
  * @param pressure - the tanks pressure
  * @param site - the tanks site
@@ -564,7 +564,7 @@ export async function offlineTankEntry(tankID: string, pressure: number, site: s
 }
 
 /**
- * @author August O'Rourke
+ * @author Callum O'Rourke
  * generates a GithubToken using the code from the first half of the OAuth response given from the Auth Component
  * @param token The personal access token from the login screen.
  */
@@ -603,7 +603,7 @@ export function setGithubToken(token: string) {
 
 /**
  * This method adds a new entry to the tank Dictionary
- * @author August O'Rourke
+ * @author Callum O'Rourke
  * @param newEntry 
  */
 export function addEntrytoTankDictionary(newEntry: TankRecord) {
@@ -621,7 +621,7 @@ export function addEntrytoTankDictionary(newEntry: TankRecord) {
 
 /**
  * This method updates the tank tracker csv on the repo
- * @author August O'Rourke
+ * @author Callum O'Rourke
  * @param newEntry the new entry to be added to the tank tracker csv
  * @returns a resopnse containing whether or not adding was successful, and the response data
  */
@@ -677,7 +677,7 @@ export async function setTankTracker(newEntry: string)
 
 /**
  * This method returns a list of Tank Entries for a specific tank 
- * @author August O'Rourke
+ * @author Callum O'Rourke
  * @param key - the tank we are trying to get a list for
  * @returns an array of Tank Record Objects
  */
@@ -703,7 +703,7 @@ export function getLatestTankEntry(key:string): TankRecord | undefined {
     
 /**
  * This method returns a list of TankId's in the csv 
- * @author August O'Rourke
+ * @author Callum O'Rourke
  * @returns a string list of all the unique tank ID's in the csv
  */
 export function getTankList()
@@ -712,7 +712,7 @@ export function getTankList()
 }
 
 /**
- * @author August O'Rourke, Megan Ostlie
+ * @author Callum O'Rourke, Megan Ostlie
  * This method prepares the code to run other various methods relating to the tank tracker, it needs to be called during the main menu, after authorization has already occured
  * 
  * @returns a success response, it probably isn't needed though 
@@ -787,7 +787,7 @@ export async function tankTrackerSpinUp()
 }
 
 /**
- * @author August O'Rourke, Megan Ostlie
+ * @author Callum O'Rourke, Megan Ostlie
  * This method returns all the sites in the Bad Data folder
  * @returns A json object containing a success field, and the response sent back, or an error message
  */
@@ -838,7 +838,7 @@ export async function getBadDataSites()
 }
 
 /**
- * @author August O'Rourke, Megan Ostlie
+ * @author Callum O'Rourke, Megan Ostlie
  * This method gets bad data files from the bad data repository
  * @param siteName - the name of the site we are getting the data from
  * @returns A json object containing a success field, and the response sent back, or an error message
@@ -890,7 +890,7 @@ export async function getBadDataFiles(siteName: string)
 }
 
 /**
- * @author - August O'Rourke 
+ * @author - Callum O'Rourke 
  * This method sets a Bad Data file
  * @param siteName The site name the data is from 
  * @param instrument The instrument the data is collected from
@@ -996,7 +996,7 @@ export async function getInstrumentSite(path: string) {
 }
 
 /**
- * @author August O'Rourke
+ * @author Callum O'Rourke
  * This method sets an instrument file in the repository for instrument maintence
  * @param path the path of the instrument file
  * @param content the content we are going to append to the exitsting file
@@ -1067,7 +1067,7 @@ export async function setInstrumentFile(path: string, content: string, commitMes
 }
 
 /**
- * @author August O'Rourke
+ * @author Callum O'Rourke
  *  This method gets a list of items in a given Directory, it works for both the git repository as well as the phone's file system for offline mode
  * @param path, the file path to look inside
  * @returns returns a list of sites with the type of siteResponse
@@ -1117,7 +1117,7 @@ export async function getDirectory(path: string)
 }
 
 /**
- * @author August O'Rourke
+ * @author Callum O'Rourke
  * this is a small helper method to request a file from the CS_4000_mock repository, since it is something we do frequently
  * @param siteName The site notes we are trying to get
  * @returns the json response retrieved from the rest endpoint
@@ -1158,7 +1158,7 @@ async function getFile(path: string)
 }
 
 /**
- * @author August O'Rourke
+ * @author Callum O'Rourke
  * This gets the contents of a markdown file in the site notes folder from the CS_4000_mock_docs repository, if it exists
  * @param siteName the name of the site that we are trying to retrieve the notes for 
  * @returns the contents of the file as a string
@@ -1178,7 +1178,7 @@ export async function getFileContents(path: string)
 }
 
 /**
- * @author August O'Rourke
+ * @author Callum O'Rourke
  * This appends the string in the content field the contents of a markdown file in the site notes folder from the CS_4000_mock_docs repository, if it exists
  * @param siteName the name of the site that we are trying to edit the notes for 
  * @param content the content we are going to append to the exitsting file

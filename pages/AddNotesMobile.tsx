@@ -1,6 +1,6 @@
 /**
  * Add Notes Page for mobile sites
- * @author Blake Stambaugh, Megan Ostlie, August O'Rourke, and David Schiwal
+ * @author Blake Stambaugh, Megan Ostlie, Callum O'Rourke, and David Schiwal
  * Updated: 3/29/25 - DS
  * This page will take in input from the user, format it, and upload it to the
  * github repo. This page is slightly different than the main AddNotes page because
@@ -64,7 +64,7 @@ import { fetchData, fetchInstrumentNames } from "../scripts/DataFetching";
 import { setEndDateHourMinutes, setStartDateHourMinutes, showEndMode, showStartMode } from "../scripts/Dates";
 
 /**
- * @author August O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
+ * @author Callum O'Rourke, Blake Stambaugh, David Schiwal, Megan Ostlie
  *  Creates the input elements for the user to input site note information.
  *  Pulls the current notes for the selected site from GitHub and autofills certain fields.
  *  Takes the inputted information from the user to build a new string that is added to that site's note document.

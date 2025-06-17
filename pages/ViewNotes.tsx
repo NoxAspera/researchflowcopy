@@ -1,6 +1,6 @@
 /**
  * View Notes
- * @author Blake Stambaugh, August O'Rourke, Megan Ostlie
+ * @author Blake Stambaugh, Callum O'Rourke, Megan Ostlie
  * Updated: 4/21/25 - MO
  * 
  * View notes page. Will pull in data from the github repo and display it for the user in cards.

@@ -1,6 +1,6 @@
 /**
  * Home Screen
- * @author Blake Stambaugh, August O'Rourke, Megan Ostlie
+ * @author Blake Stambaugh, Callum O'Rourke, Megan Ostlie
  * 4/21/2025
  *
  * The follow code represents the home page the user sees when they first launch our app.
