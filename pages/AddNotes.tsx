@@ -1,6 +1,6 @@
 /**
  * Add Notes Page
- * @author Blake Stambaugh, Megan Ostlie, August O'Rourke, and David Schiwal
+ * @author Blake Stambaugh, Megan Ostlie, Callum O'Rourke, and David Schiwal
  * Updated: 4/21/25
  * This page will take in input from the user, format it, and upload it to the
  * github repo.
